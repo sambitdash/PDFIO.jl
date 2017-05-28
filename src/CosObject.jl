@@ -1,8 +1,8 @@
-import PDF.Common
-import PDF.Common.Parser
+import ..Common
+import ..Common.Parser
 
-using PDF.Common
-using PDF.Common.Parser
+using ..Common
+using ..Common.Parser
 
 export CosDict, CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
@@ -110,11 +110,8 @@ type CosStream <: CosObject
     CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
 end
 
-function get(o:CosStream)
+function get(o::CosStream)
 end
-
-
-
 
 """
 Given a `ParserState`, after possibly any amount of whitespace, return the next
@@ -335,7 +332,7 @@ If it's already an externalized stream then false is returned.
 The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 """
-function read_internal_stream_data(ps::ParseState, extent::CosDict)
+function read_internal_stream_data(ps::ParserState, extent::CosDict)
   len = get(obj, CosStream_Length)
 
   if get(extent, CosStream_F) != CosNull
@@ -460,8 +457,8 @@ function int_from_bytes(bytes::Vector{UInt8}, from::Int, to::Int)
     return ifelse(isnegative, -num, num)
 end
 
-function number_from_bytes(
-                           ps::ParserState, isint::Bool, bytes::Vector{UInt8}, from::Int, to::Int)
+function number_from_bytes(ps::ParserState, isint::Bool,
+                           bytes::Vector{UInt8}, from::Int, to::Int)
 
     #=
     @inbounds if hasleadingzero(bytes, from, to)

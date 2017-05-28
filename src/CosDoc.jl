@@ -1,7 +1,8 @@
-import PDF.Common.Parser
+import ..Common
+import ..Common.Parser
 
-using PDF.Common
-using PDF.Common.Parser
+using ..Common
+using ..Common.Parser
 
 export CosDoc,
        cosDocOpen

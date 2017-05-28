@@ -1,13 +1,8 @@
 module Parser
 
-import Base.read
-import Base.seekend
-import Base.position
-import Base.seek
-import Base.hash
-import Base.parse
+import Base:read,read!,seekend,position,seek,hash,parse
 
-using PDF.Common
+using ..Common
 
 using Compat
 
