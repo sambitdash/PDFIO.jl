@@ -1,0 +1,5 @@
+import PDF.Common.Parser
+
+using PDF.Common
+
+const PDF_HEADER=[PERCENT,LATIN_UPPER_P,LATIN_UPPER_D,LATIN_UPPER_F,MINUS_SIGN]

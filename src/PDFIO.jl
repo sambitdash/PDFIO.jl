@@ -1,5 +1,12 @@
+__precompile__()
+
 module PDFIO
 
-# package code goes here
+using Compat
+
+include("Common.jl")
+include("Cos.jl")
+
+include("PDDoc.jl")
 
 end # module
