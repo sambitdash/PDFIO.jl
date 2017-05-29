@@ -1,8 +1,4 @@
-import ..Common
-import ..Common.Parser
-
-using ..Common
-using ..Common.Parser
+import Base:get
 
 export CosDict, CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,

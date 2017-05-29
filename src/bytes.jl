@@ -1,3 +1,18 @@
+export BACKSPACE, NULL,TAB, LINE_FEED,NEWLINE, FORM_FEED, RETURN,
+       SPACE, STRING_DELIM, PLUS_SIGN, DELIMITER, MINUS_SIGN,
+       DECIMAL_POINT, SOLIDUS, DIGIT_ZERO, DIGIT_NINE, SEPARATOR,
+       LATIN_UPPER_A, LATIN_UPPER_F, BACKSLASH, LATIN_A, LATIN_B,
+       LATIN_F, LATIN_L, LATIN_N, LATIN_R, LATIN_S, LATIN_T, LATIN_U,
+       OBJECT_BEGIN, OBJECT_END, ESCAPES, REVERSE_ESCAPES,
+       ESCAPED_ARRAY, LEFT_PAREN, RIGHT_PAREN, LESS_THAN,
+       GREATER_THAN, LEFT_CB, RIGHT_CB, LEFT_SB, RIGHT_SB,
+       PERCENT,PERIOD, NUMBER_SIGN, LATIN_UPPER_D,STREAM,ENDSTREAM,
+       LATIN_UPPER_E,LATIN_UPPER_F, LATIN_UPPER_O, LATIN_UPPER_P,
+       LATIN_UPPER_R,XREF, TRAILER, STARTXREF, EOF, ispdfspace,
+       ispdfdelimiter,ispdfdigit, ispdfodigit, ispdfxdigit, is_crorlf
+
+
+
 # The following bytes have significant meaning in PDF
 const NULL           = UInt8('\0')
 const TAB            = UInt8('\t')
@@ -113,28 +128,13 @@ ispdfdelimiter(b::UInt8) = (b == LEFT_PAREN || b == RIGHT_PAREN || b == LESS_THA
 """
 Like `isdigit`, but for bytes.
 """
-ispdfdigit(b::UInt8) = DIGIT_ZERO ≤ b ≤ DIGIT_NINE
+ispdfdigit(b::UInt8) = (DIGIT_ZERO ≤ b ≤ DIGIT_NINE)
 
 """
 Like `isdigit`, but for bytes.
 """
-ispdfodigit(b::UInt8) = DIGIT_ZERO ≤ b ≤ DIGIT_SEVEN
+ispdfodigit(b::UInt8) = (DIGIT_ZERO ≤ b ≤ DIGIT_SEVEN)
 
-ispdfxdigit(b::UInt8) = ispdfdigit(b) || (LATIN_UPPER_A <= b <= LATIN_UPPER_F) || (LATIN_A <=b<= LATIN_F)
+ispdfxdigit(b::UInt8) = (ispdfdigit(b) || (LATIN_UPPER_A <= b <= LATIN_UPPER_F) || (LATIN_A <=b<= LATIN_F))
 
 is_crorlf(b::UInt8) = ((b == RETURN) ||(b == LINE_FEED))
-
-
-
-export BACKSPACE, NULL,TAB, LINE_FEED,NEWLINE, FORM_FEED, RETURN,
-       SPACE, STRING_DELIM, PLUS_SIGN, DELIMITER, MINUS_SIGN,
-       DECIMAL_POINT, SOLIDUS, DIGIT_ZERO, DIGIT_NINE, SEPARATOR,
-       LATIN_UPPER_A, LATIN_UPPER_F, BACKSLASH, LATIN_A, LATIN_B,
-       LATIN_F, LATIN_L, LATIN_N, LATIN_R, LATIN_S, LATIN_T, LATIN_U,
-       OBJECT_BEGIN, OBJECT_END, ESCAPES, REVERSE_ESCAPES,
-       ESCAPED_ARRAY, LEFT_PAREN, RIGHT_PAREN, LESS_THAN,
-       GREATER_THAN, LEFT_CB, RIGHT_CB, LEFT_SB, RIGHT_SB,
-       PERCENT,PERIOD, NUMBER_SIGN, LATIN_UPPER_D,STREAM,ENDSTREAM
-       LATIN_UPPER_E,LATIN_UPPER_F, LATIN_UPPER_O, LATIN_UPPER_P,
-       LATIN_UPPER_R,XREF, TRAILER, STARTXREF, EOF, ispdfspace,
-       ispdfdelimiter,ispdfdigit, ispdfodigit, ispdfxdigit, is_crorlf

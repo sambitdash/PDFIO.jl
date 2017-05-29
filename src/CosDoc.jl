@@ -1,9 +1,3 @@
-import ..Common
-import ..Common.Parser
-
-using ..Common
-using ..Common.Parser
-
 export CosDoc,
        cosDocOpen
 
@@ -70,7 +64,7 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
 
     seek(ps,-TRAILER_REWIND)
 
-    if locate_keyword!(ps,TRAILER,TRAILER_REWIND) >= 0
+    if locate_keyword!(ps,TRAILER,TRAILER_REWIND) < 0
         _error(E_UNEXPECTED_CHAR,ps)
     end
     #Check for EOL
@@ -79,10 +73,10 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
     print(Char(current(ps)))
     skip!(ps,LESS_THAN)
     doc.trailer = parse_dict(ps)
-
+    chomp_space!(ps)
 
     if (doc.isPDF)
-      if locate_keyword!(ps,STARTXREF) >= 0
+      if locate_keyword!(ps,STARTXREF) != 0
         _error(E_UNEXPECTED_CHAR,ps)
       end
       chomp_space!(ps)
@@ -91,7 +85,7 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
     end
 
     #Check for EOF
-    if locate_keyword!(ps,EOF) >= 0
+    if locate_keyword!(ps,EOF) != 0
         _error(E_UNEXPECTED_CHAR,ps)
     end
 end

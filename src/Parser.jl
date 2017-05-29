@@ -16,8 +16,9 @@ export ParserState,
        chomp_eol!,
        current,
        hasmore,
-       incr!
-       read!
+       incr!,
+       read!,
+       _error
 
 abstract ParserState
 
@@ -223,7 +224,7 @@ function locate_keyword!(ps::ParserState, keyword, maxoffset=length(keyword))
 
     q = 0
     found=false
-    offset = -1
+    offset = 0
     pos = position(ps)
 
     while(true)

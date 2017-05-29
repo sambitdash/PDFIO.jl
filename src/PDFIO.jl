@@ -1,11 +1,11 @@
-__precompile__()
+#__precompile__()
 
 module PDFIO
 
 using Compat
 
-include("Common.jl")
-include("Cos.jl")
+include("Common.jl") #Module Common
+include("Cos.jl")    #Module Cos
 
 include("PDDoc.jl")
 
