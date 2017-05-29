@@ -138,7 +138,7 @@ function parse_string(ps::ParserState)
             if (paren_cnt > 0)
                 paren_cnt-=1
             else
-                return CosString(String(b))
+                return CosLiteralString(String(b))
             end
         end
 
@@ -173,7 +173,7 @@ function parse_xstring(ps::ParserState)
 end
 
 function parse_dict(ps::ParserState)
-    skip!(ps,LESS_THAN) #Move the cursor beyond < char
+    #Move the cursor beyond < char
     chomp_space!(ps)
 
     dict=CosDict()
@@ -266,7 +266,7 @@ function parse_indirect_obj(ps::ParserState)
         # Here you can make sure file data is decoded into a file
         # later it can be made into a memory based on size etc.
         #Since, these are temporary files the spec is system file only
-        isInternal = read_stream_data(ps,obj)
+        isInternal = read_internal_stream_data(ps,obj)
 
         obj = CosStream(obj, isInternal)
 

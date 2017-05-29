@@ -39,7 +39,11 @@ function getParserState{T <: IO}(io::T)
   return StreamingParserState(io)
 end
 
-@inline position(ps::StreamingParserState)=position(ps.io)
+@inline function position(ps::StreamingParserState)
+  p=position(ps.io)
+  return ps.used?p:p-1
+end
+
 @inline position(ps::MemoryParserState)=(ps.s)
 
 """

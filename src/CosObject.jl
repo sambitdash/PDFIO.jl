@@ -10,6 +10,11 @@ function get{T<:CosObject}(o::T)
   return o.val
 end
 
+hash(o::CosObject, h::UInt=zero(UInt)) = hash(o.val, h)
+
+isequal(r1::CosObject, r2::CosObject) = isequal(r1.val, r2.val)
+
+
 abstract CosString <: CosObject
 abstract CosNumeric <: CosObject
 
@@ -32,11 +37,12 @@ immutable CosInt <: CosNumeric
     val::Int64
 end
 
+
+
 """
 A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
-the object should be searched from the CosDoc and returned. Hence, this should
-not be an exported type.
+the object should be searched from the CosDoc and returned.
 """
 immutable CosIndirectObjectRef <: CosObject
   val::Tuple{Int,Int}
@@ -49,22 +55,20 @@ type CosIndirectObject{T <: CosObject} <: CosObject
     obj::T
 end
 
-function get(o::CosIndirectObject)
-  return get(o.obj)
-end
+get(o::CosIndirectObject) = get(o.obj)
 
 immutable CosName <: CosObject
     val::String
 end
 
-hash(o::CosName, h::UInt=zero(UInt)) = hash(o.val, h)
-
-isequal(n1::CosName, n2::CosName) = isequal(n1.val, n2.val)
-
-
 immutable CosXString <: CosString
     val::String
     CosXString(str::String)=new(str)
+end
+
+immutable CosLiteralString <: CosString
+    val::String
+    CosLiteralString(str::String)=new(str)
 end
 
 type CosArray <: CosObject
@@ -108,5 +112,9 @@ type CosStream <: CosObject
     CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
 end
 
-function get(o::CosStream)
-end
+get(stm::CosStream, name::CosName) = get(stm.extent, name)
+
+"""
+Decodes the stream and provides output as an IO.
+"""
+get(stm::CosStream) = decode(stm)

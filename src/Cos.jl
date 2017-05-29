@@ -9,6 +9,7 @@ using ..Common
 using ..Common.Parser
 
 include("CosObject.jl")
+include("CosStream.jl")
 include("CosReader.jl")
 include("CosDoc.jl")
 

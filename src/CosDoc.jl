@@ -1,20 +1,31 @@
 export CosDoc,
-       cosDocOpen
+       cosDocOpen,
+       cosDocGetRoot,
+       cosDocGetObject
 
 abstract CosDoc
+
+type CosObjectLoc
+  loc::Int
+  obj::CosObject
+  CosObjectLoc(l,o=CosNull)=new(l,o)
+end
 
 type CosDocImpl <: CosDoc
   filepath::String
   io::IO
+  ps::ParserState
   header::String
   startxref::Int
   version::Tuple{Int,Int}
-  xref::Dict{Tuple{Int,Int}, Int}
+  xref::Dict{CosIndirectObjectRef, CosObjectLoc}
   trailer::Array{CosDict,1}
   isPDF::Bool
-  CosDocImpl(fp::String) = new(fp,open(fp,"r"),"",0,(0,0),
-                              Dict{Tuple{Int,Int}, Int}(),
-                              [], false)
+  function CosDocImpl(fp::String)
+    io = open(fp,"r")
+    ps = getParserState(io)
+    new(fp,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], false)
+  end
 end
 
 
@@ -23,7 +34,7 @@ const Trailer_Prev=CosName("Prev")
 
 function cosDocOpen(fp::String)
   doc = CosDocImpl(abspath(fp));
-  ps = getParserState(doc.io)
+  ps = doc.ps
   h = read_header(ps)
   doc.version = (h[1], h[2])
   doc.header = String(h[3])
@@ -33,6 +44,28 @@ function cosDocOpen(fp::String)
   doc_trailer_update(ps,doc)
 
   return doc
+end
+
+function cosDocGetRoot(doc::CosDoc)
+  if isa(doc, CosDocImpl)
+    root = get(doc.trailer[1], Trailer_Root)
+    return cosDocGetObject(doc,root)
+  else
+    return CosNull
+  end
+end
+
+function cosDocGetObject(doc::CosDoc, ref::CosObject)
+  if !isa(ref, CosIndirectObjectRef)
+    return ref
+  elseif !isa(doc, CosDocImpl)
+    return CosNull
+  else
+    locObj = doc.xref[ref]
+    seek(doc.ps,locObj.loc)
+    locObj.obj = parse_indirect_obj(doc.ps)
+    return locObj
+  end
 end
 
 function read_header(ps)
@@ -68,7 +101,8 @@ function read_trailer(ps::ParserState, lookahead::Int)
   #Check for EOL
   chomp_eol!(ps)
   skip!(ps,LESS_THAN)
-
+  skip!(ps,LESS_THAN)
+  
   dict = parse_dict(ps)
   chomp_space!(ps)
 
@@ -152,9 +186,9 @@ function read_xref_table(ps::ParserState, doc::CosDocImpl)
             end
 
             if (v[18] != LATIN_F)
-                tuple = (oid, parse(Int,String(v[12:16])))
+                ref = CosIndirectObjectRef(oid, parse(Int,String(v[12:16])))
 
-                doc.xref[tuple] = parse(Int,String(v[1:10]))
+                doc.xref[ref] = CosObjectLoc(parse(Int,String(v[1:10])))
             end
 
             oid +=1
