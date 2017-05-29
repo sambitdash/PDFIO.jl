@@ -1,4 +1,4 @@
-import Base:get
+import Base:get,hash,isequal
 
 export CosDict, CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
@@ -58,6 +58,8 @@ immutable CosName <: CosObject
 end
 
 hash(o::CosName, h::UInt=zero(UInt)) = hash(o.val, h)
+
+isequal(n1::CosName, n2::CosName) = isequal(n1.val, n2.val)
 
 
 immutable CosXString <: CosString

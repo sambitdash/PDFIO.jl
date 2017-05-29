@@ -10,12 +10,16 @@ type CosDocImpl <: CosDoc
   startxref::Int
   version::Tuple{Int,Int}
   xref::Dict{Tuple{Int,Int}, Int}
-  trailer::CosDict
+  trailer::Array{CosDict,1}
   isPDF::Bool
   CosDocImpl(fp::String) = new(fp,open(fp,"r"),"",0,(0,0),
                               Dict{Tuple{Int,Int}, Int}(),
-                              CosDict(), false)
+                              [], false)
 end
+
+
+const Trailer_Root=CosName("Root")
+const Trailer_Prev=CosName("Prev")
 
 function cosDocOpen(fp::String)
   doc = CosDocImpl(abspath(fp));
@@ -28,9 +32,6 @@ function cosDocOpen(fp::String)
 
   doc_trailer_update(ps,doc)
 
-  if doc.isPDF
-    read_xref_table(ps,doc)
-  end
   return doc
 end
 
@@ -59,41 +60,77 @@ function read_header(ps)
   return [major,minor,b]
 end
 
+
+function read_trailer(ps::ParserState, lookahead::Int)
+  if locate_keyword!(ps,TRAILER,lookahead) < 0
+      _error(E_UNEXPECTED_CHAR,ps)
+  end
+  #Check for EOL
+  chomp_eol!(ps)
+  skip!(ps,LESS_THAN)
+
+  dict = parse_dict(ps)
+  chomp_space!(ps)
+
+  return dict
+end
+
 function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
-    const TRAILER_REWIND=200
+  const TRAILER_REWIND=200
 
-    seek(ps,-TRAILER_REWIND)
+  seek(ps,-TRAILER_REWIND)
 
-    if locate_keyword!(ps,TRAILER,TRAILER_REWIND) < 0
-        _error(E_UNEXPECTED_CHAR,ps)
+  trailer = read_trailer(ps, TRAILER_REWIND)
+
+  if (get(trailer, Trailer_Root) != CosNull)
+    # doc trailer must contain the root, the trailer following the
+    # xref following startxref will have it.
+    doc.trailer = trailer
+  end
+
+  if (doc.isPDF)
+    if locate_keyword!(ps,STARTXREF) != 0
+      _error(E_UNEXPECTED_CHAR,ps)
     end
-    #Check for EOL
-    chomp_eol!(ps)
-
-    print(Char(current(ps)))
-    skip!(ps,LESS_THAN)
-    doc.trailer = parse_dict(ps)
     chomp_space!(ps)
+    doc.startxref = parse_number(ps).val
+    chomp_space!(ps)
+  end
 
-    if (doc.isPDF)
-      if locate_keyword!(ps,STARTXREF) != 0
-        _error(E_UNEXPECTED_CHAR,ps)
+  #Check for EOF
+  if locate_keyword!(ps,EOF) != 0
+      _error(E_UNEXPECTED_CHAR,ps)
+  end
+
+  if doc.isPDF
+    seek(ps, doc.startxref)
+    found = false
+    while(true)
+      read_xref_table(ps,doc)
+      trailer = read_trailer(ps, length(TRAILER))
+
+      if (!found)
+        if (get(trailer, Trailer_Root) == CosNull)
+          _error(E_BAD_TRAILER,ps)
+        else
+          push!(doc.trailer, trailer)
+        end
+        found = true
+      else
+        push!(doc.trailer, trailer)
       end
-      chomp_space!(ps)
-      doc.startxref = parse_number(ps).val
-      chomp_space!(ps)
+      prev = get(trailer, Trailer_Prev)
+      if (prev == CosNull)
+        break
+      end
+      seek(ps, prev.val)
     end
+  end
 
-    #Check for EOF
-    if locate_keyword!(ps,EOF) != 0
-        _error(E_UNEXPECTED_CHAR,ps)
-    end
 end
 
 
 function read_xref_table(ps::ParserState, doc::CosDocImpl)
-    seek(ps, doc.startxref)
-
     skip!(ps, XREF)
     chomp_eol!(ps)
 
@@ -106,8 +143,7 @@ function read_xref_table(ps::ParserState, doc::CosDocImpl)
         skip!(ps, SPACE)
         n_entry = parse_unsignednumber(ps).val
         chomp_space!(ps)
-        print(n_entry)
-        print("\n")
+
         for i=1:n_entry
             v = UInt8[]
 
