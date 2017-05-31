@@ -62,9 +62,11 @@ function cosDocGetObject(doc::CosDoc, ref::CosObject)
     return CosNull
   else
     locObj = doc.xref[ref]
-    seek(doc.ps,locObj.loc)
-    locObj.obj = parse_indirect_obj(doc.ps)
-    return locObj
+    if (locObj.obj == CosNull)
+      seek(doc.ps,locObj.loc)
+      locObj.obj = parse_indirect_obj(doc.ps)
+    end
+    return locObj.obj
   end
 end
 
@@ -102,7 +104,7 @@ function read_trailer(ps::ParserState, lookahead::Int)
   chomp_eol!(ps)
   skip!(ps,LESS_THAN)
   skip!(ps,LESS_THAN)
-  
+
   dict = parse_dict(ps)
   chomp_space!(ps)
 

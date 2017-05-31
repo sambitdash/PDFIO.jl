@@ -1,19 +1,14 @@
-import Base:get,hash,isequal
+import Base:get,hash,isequal, convert
 
-export CosDict, CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
+export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
-       CosIndirectObject, CosStream, get, set!
+       CosIndirectObjectRef, CosStream, get, set!, convert
 
 abstract CosObject
 
 function get{T<:CosObject}(o::T)
   return o.val
 end
-
-hash(o::CosObject, h::UInt=zero(UInt)) = hash(o.val, h)
-
-isequal(r1::CosObject, r2::CosObject) = isequal(r1.val, r2.val)
-
 
 abstract CosString <: CosObject
 abstract CosNumeric <: CosObject
@@ -49,6 +44,9 @@ immutable CosIndirectObjectRef <: CosObject
   CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
 
+hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
+isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
+
 type CosIndirectObject{T <: CosObject} <: CosObject
     num::Int
     gen::Int
@@ -60,6 +58,9 @@ get(o::CosIndirectObject) = get(o.obj)
 immutable CosName <: CosObject
     val::String
 end
+
+hash(o::CosName, h::UInt=zero(UInt)) = hash(o.val, h)
+isequal(r1::CosName, r2::CosName) = isequal(r1.val,r2.val)
 
 immutable CosXString <: CosString
     val::String
@@ -85,6 +86,8 @@ function get(dict::CosDict, name::CosName)
   return get(dict.val,name,CosNull)
 end
 
+get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
+
 """
 Set the value to object. If the object is CosNull the key is deleted.
 """
@@ -92,10 +95,13 @@ function set!(dict::CosDict, name::CosName, obj::CosObject)
   if (obj === CosNull)
     return delete!(dict,name)
   else
-    dict[name] = obj
+    dict.val[name] = obj
     return dict
   end
 end
+
+set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
+            set!(o.obj, name, obj)
 
 const CosStream_Length=CosName("Length")
 const CosStream_Filter= CosName("Filter")
@@ -113,6 +119,8 @@ type CosStream <: CosObject
 end
 
 get(stm::CosStream, name::CosName) = get(stm.extent, name)
+
+get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj,name)
 
 """
 Decodes the stream and provides output as an IO.

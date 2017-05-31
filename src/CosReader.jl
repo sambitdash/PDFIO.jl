@@ -294,12 +294,17 @@ function try_parse_indirect_reference(ps::ParserState)
         return nobj
     end
     chomp_space!(ps)
+    pos = position(ps)
     if ispdfdigit(byteat(ps))
         objn = nobj.val
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
-        skip!(ps, LATIN_UPPER_R)
-        return CosIndirectObjectRef(objn, genn)
+        if locate_keyword!(ps,LATIN_UPPER_R)==0 #This can happen in consecutive numbers in an array
+          return CosIndirectObjectRef(objn, genn)
+        else
+          seek(ps, pos)
+          return nobj
+        end
     else
         return nobj
     end

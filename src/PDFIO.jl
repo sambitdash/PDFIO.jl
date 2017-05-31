@@ -7,6 +7,6 @@ using Compat
 include("Common.jl") #Module Common
 include("Cos.jl")    #Module Cos
 
-include("PDDoc.jl")
+include("PD.jl")     #Module PD
 
 end # module
