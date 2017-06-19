@@ -13,3 +13,5 @@ const E_BAD_NUMBER      = "Invalid number"
 const E_BAD_HEADER      = "Invalid file header"
 const E_BAD_TRAILER     = "Invalid file trailer"
 const E_NOT_IMPLEMENTED = "Not Implemented"
+
+const E_INVALID_OBJECT  = "Invalid Object Found"

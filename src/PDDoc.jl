@@ -1,6 +1,7 @@
 export PDDoc,
        pdDocOpen,
-       pdDocGetPageCount
+       pdDocGetPageCount,
+       pdDocGetPage
 
 abstract PDDoc
 
@@ -15,15 +16,25 @@ const PageTreeNode_Type =CosName("Type")
 const PageTreeNode_Kids =CosName("Kids")
 const PageTreeNode_Parent=CosName("Parent")
 
+const PageTreeNode_Page=CosName("Page")
+
+
 const Catlog_PageTree_Root = CosName("Pages")
 
 
 function pdDocGetPageCount(doc::PDDoc)
-  return get(pages, PageTreeNode_Count)
+  return get_internal_pagecount(doc.pages)
 end
 
 function pdDocGetCatalog(doc::PDDoc)
   return doc.catalog
+end
+
+function pdDocGetPage(doc::PDDoc, num::Int)
+  return find_page_from_treenode(doc.pages, num)
+end
+
+function pdDocGetPage(doc::PDDoc, name::String)
 end
 
 type PDDocImpl <: PDDoc
@@ -35,13 +46,6 @@ type PDDocImpl <: PDDoc
     catalog = cosDocGetRoot(cosDoc)
     new(cosDoc,catalog,CosNull)
   end
-end
-
-type PageTreeNode
-  parent::CosObject
-  kids::CosArray
-  count::Int
-  PageTreeNode()=new(CosNull, [], 0)
 end
 
 """
@@ -73,7 +77,48 @@ end
 
 function update_page_tree(doc::PDDocImpl)
   pagesref = get(doc.catalog, Catlog_PageTree_Root)
-  print(pagesref)
   doc.pages = cosDocGetObject(doc.cosDoc, pagesref)
   populate_doc_pages(doc, doc.pages)
+end
+
+function get_internal_pagecount(dict::CosObject)
+  mytype = get(dict, PageTreeNode_Type)
+  if (isequal(mytype, Catlog_PageTree_Root))
+    return get(get(dict, PageTreeNode_Count))
+  elseif (isequal(mytype, PageTreeNode_Page))
+    return 1
+  else
+    error(E_INVALID_OBJECT)
+  end
+end
+
+"""
+This implementation may seem non-intuitive to some due to recursion and also
+seemingly non-standard way of computing page count. However, PDF spec does not
+discount the possibility of an intermediate node having page and pages nodes
+in the kids array. Hence, this implementation.
+"""
+function find_page_from_treenode(node::CosObject, pageno::Int)
+  mytype = get(node, PageTreeNode_Type)
+  #If this is a page object the pageno has to be 1
+  if isequal(mytype, PageTreeNode_Page)
+    if pageno == 1
+      return node
+    else
+      error(E_INVALID_OBJECT)
+    end
+  end
+
+  kids = get(node, PageTreeNode_Kids)
+  kidsarr = get(kids)
+
+  sum = 0
+  for kid in kidsarr
+    cnt = get_internal_pagecount(kid)
+    if ((sum + cnt) >= pageno)
+      return find_page_from_treenode(kid, pageno-sum)
+    else
+      sum += cnt
+    end
+  end
 end
