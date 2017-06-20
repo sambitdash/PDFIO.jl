@@ -217,9 +217,7 @@ If it's already an externalized stream then false is returned.
 The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 """
-function read_internal_stream_data(ps::ParserState, extent::CosDict)
-  len = get(obj, CosStream_Length)
-
+function read_internal_stream_data(ps::ParserState, extent::CosDict, len::Int)
   if get(extent, CosStream_F) != CosNull
     return false
   end
@@ -230,29 +228,83 @@ function read_internal_stream_data(ps::ParserState, extent::CosDict)
   close(io)
 
   #Ensuring all the data is written to a file
-  set!(extent, CosStream_F, CosString(path))
+  set!(extent, CosStream_F, CosLiteralString(path))
 
-  filter = get(object, CosStream_Filter)
+  filter = get(extent, CosStream_Filter)
   if (filter != CosNull)
     set!(extent, CosStream_FFilter, filter)
     set!(extent, CosStream_Filter, CosNull)
   end
 
-  parms = get(object, CosStream_DecodeParms)
+  parms = get(extent, CosStream_DecodeParms)
   if (parms != CosNull)
     set!(extent, CosStream_FDecodeParms, filter)
     set!(extent, CosStream_DecodeParms,CosNull)
   end
 
-  parms = get(object, CosStream_DecodeParms)
-  if (parms != CosNull)
-    set!(extent, CosStream_FDecodeParms, filter)
-    set!(extent, CosStream_Filter, CosNull)
-  end
   return true
 end
 
-function parse_indirect_obj(ps::ParserState)
+
+type CosObjectLoc
+  loc::Int
+  obj::CosObject
+  CosObjectLoc(l,o=CosNull)=new(l,o)
+end
+
+function process_stream_length(stmlen::CosInt, ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+  return stmlen
+end
+
+function process_stream_length(stmlen::CosIndirectObjectRef, ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+  cosObjectLoc = xref[stmlen]
+  if (cosObjectLoc.obj === CosNull)
+    seek(ps,cosObjectLoc.loc)
+    lenobj = parse_indirect_obj(ps,xref)
+    if (lenobj != CosNull)
+      cosObjectLoc.obj = lenobj
+    end
+  end
+  return cosObjectLoc.obj
+end
+
+function postprocess_indirect_object(ps::ParserState, obj::CosDict, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+  if locate_keyword!(ps,STREAM) == 0
+    ensure_line_feed_eol(ps)
+    pos = position(ps)
+
+    stmlen = get(obj, CosStream_Length)
+
+    lenobj = process_stream_length(stmlen, ps, xref)
+
+    len = get(lenobj)
+
+    if (lenobj != stmlen)
+      set!(obj, CosStream_Length, lenobj)
+    end
+
+    seek(ps,pos)
+
+    # Here you can make sure file data is decoded into a file
+    # later it can be made into a memory based on size etc.
+    #Since, these are temporary files the spec is system file only
+    isInternal = read_internal_stream_data(ps,obj,len)
+
+    obj = CosStream(obj, isInternal)
+
+    #Now eat away the ENDSTREAM token
+    chomp_space!(ps)
+    skip!(ps,ENDSTREAM)
+  end
+  return obj
+end
+
+function postprocess_indirect_object(ps::ParserState, obj::CosObject, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+  return obj
+end
+
+
+function parse_indirect_obj(ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
@@ -260,20 +312,7 @@ function parse_indirect_obj(ps::ParserState)
     skip!(ps, OBJ)
     obj = parse_value(ps)
     chomp_space!(ps)
-    if (isa(obj,CosDict))
-      if locate_keyword!(ps,STREAM) == 0
-        ensure_line_feed_eol(ps)
-        # Here you can make sure file data is decoded into a file
-        # later it can be made into a memory based on size etc.
-        #Since, these are temporary files the spec is system file only
-        isInternal = read_internal_stream_data(ps,obj)
-
-        obj = CosStream(obj, isInternal)
-
-        #Now eat away the ENDSTREAM token
-        locate_keyword!(ps,ENDSTREAM)
-      end
-    end
+    obj = postprocess_indirect_object(ps, obj, xref)
     chomp_space!(ps)
     skip!(ps,ENDOBJ)
     return CosIndirectObject(objn, genn, obj)

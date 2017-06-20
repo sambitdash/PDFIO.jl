@@ -5,11 +5,6 @@ export CosDoc,
 
 abstract CosDoc
 
-type CosObjectLoc
-  loc::Int
-  obj::CosObject
-  CosObjectLoc(l,o=CosNull)=new(l,o)
-end
 
 type CosDocImpl <: CosDoc
   filepath::String
@@ -47,27 +42,29 @@ function cosDocOpen(fp::String)
 end
 
 function cosDocGetRoot(doc::CosDoc)
-  if isa(doc, CosDocImpl)
-    root = get(doc.trailer[1], Trailer_Root)
-    return cosDocGetObject(doc,root)
-  else
-    return CosNull
-  end
+  return CosNull
 end
 
-function cosDocGetObject(doc::CosDoc, ref::CosObject)
-  if !isa(ref, CosIndirectObjectRef)
-    return ref
-  elseif !isa(doc, CosDocImpl)
-    return CosNull
-  else
-    locObj = doc.xref[ref]
-    if (locObj.obj == CosNull)
-      seek(doc.ps,locObj.loc)
-      locObj.obj = parse_indirect_obj(doc.ps)
-    end
-    return locObj.obj
+function cosDocGetRoot(doc::CosDocImpl)
+  root = get(doc.trailer[1], Trailer_Root)
+  return cosDocGetObject(doc,root)
+end
+
+function cosDocGetObject(doc::CosDoc, obj::CosObject)
+  return CosNull
+end
+
+function cosDocGetObject(doc::CosDocImpl, obj::CosObject)
+  return obj
+end
+
+function cosDocGetObject(doc::CosDocImpl, ref::CosIndirectObjectRef)
+  locObj = doc.xref[ref]
+  if (locObj.obj == CosNull)
+    seek(doc.ps,locObj.loc)
+    locObj.obj = parse_indirect_obj(doc.ps, doc.xref)
   end
+  return locObj.obj
 end
 
 function read_header(ps)

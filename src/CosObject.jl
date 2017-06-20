@@ -93,7 +93,7 @@ Set the value to object. If the object is CosNull the key is deleted.
 """
 function set!(dict::CosDict, name::CosName, obj::CosObject)
   if (obj === CosNull)
-    return delete!(dict,name)
+    return delete!(dict.val,name)
   else
     dict.val[name] = obj
     return dict

@@ -22,10 +22,21 @@ function decode_flate(stm::CosStream)
   print("Ready to decode the flate stream")
 end
 
-const function_map = (
+"""
+Decodes using the LZWDecode compression
+"""
+function decode_lzw(stm::CosStream)
+  print("Ready to decode the LZW stream")
+end
+
+function _not_implemented(stm::CosStream)
+  error(E_NOT_IMPLEMENTED)
+end
+
+const function_map = Dict(
    Filter_ASCIIHexDecode => _not_implemented,
    Filter_ASCII85Decode => _not_implemented,
-   Filter_LZWDecode => _not_implemented,
+   Filter_LZWDecode => decode_lzw,
    Filter_FlateDecode => decode_flate,
    Filter_RunLengthDecode => _not_implemented,
    Filter_CCITTFaxDecode => _not_implemented,
@@ -38,7 +49,9 @@ const function_map = (
 """
 Reads the filter data and decodes the stream.
 """
-function decode(stm::CosStream)
+function decode(obj::CosObject)
+  stm = isa(obj, CosIndirectObject)? obj.obj : obj
+
   filename = get(stm, CosStream_F)
   filters = get(stm, CosStream_FFilter)
   if (isa(filters,CosArray))
