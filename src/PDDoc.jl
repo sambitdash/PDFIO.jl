@@ -3,7 +3,7 @@ export PDDoc,
        pdDocGetPageCount,
        pdDocGetPage
 
-abstract PDDoc
+@compat abstract type PDDoc end
 
 function pdDocOpen(fp::String)
   doc = PDDocImpl(fp)

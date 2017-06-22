@@ -7,6 +7,7 @@ module Cos
 
 using ..Common
 using ..Common.Parser
+using Compat
 
 include("CosObject.jl")
 include("CosStream.jl")

@@ -3,8 +3,7 @@ export CosDoc,
        cosDocGetRoot,
        cosDocGetObject
 
-abstract CosDoc
-
+@compat abstract type CosDoc end
 
 type CosDocImpl <: CosDoc
   filepath::String

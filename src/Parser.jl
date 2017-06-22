@@ -20,7 +20,7 @@ export ParserState,
        read!,
        _error
 
-abstract ParserState
+@compat abstract type ParserState end
 
 type MemoryParserState <: ParserState
     utf8data::Vector{UInt8}

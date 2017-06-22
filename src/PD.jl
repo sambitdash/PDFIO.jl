@@ -1,6 +1,7 @@
 module PD
 
 using ..Cos
+using Compat
 
 include("PDNames.jl")
 include("PDDoc.jl")

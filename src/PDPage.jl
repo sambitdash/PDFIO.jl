@@ -2,7 +2,7 @@ export PDPage,
        pdPageGetContent,
        pdPageIsEmpty
 
-abstract PDPage
+@compat abstract type PDPage end
 
 type PDPageImpl <: PDPage
   doc::PDDocImpl

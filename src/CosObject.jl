@@ -4,14 +4,14 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
        CosIndirectObjectRef, CosStream, get, set!, convert
 
-abstract CosObject
+@compat abstract type CosObject end
 
 function get{T<:CosObject}(o::T)
   return o.val
 end
 
-abstract CosString <: CosObject
-abstract CosNumeric <: CosObject
+@compat abstract type CosString <: CosObject end
+@compat abstract type CosNumeric <: CosObject end
 
 immutable CosBoolean <: CosObject
     val::Bool
