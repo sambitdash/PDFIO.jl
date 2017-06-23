@@ -56,11 +56,9 @@ end
 get(o::CosIndirectObject) = get(o.obj)
 
 immutable CosName <: CosObject
-    val::String
+    val::Symbol
+    CosName(str::String)=new(Symbol("CosName_",str))
 end
-
-hash(o::CosName, h::UInt=zero(UInt)) = hash(o.val, h)
-isequal(r1::CosName, r2::CosName) = isequal(r1.val,r2.val)
 
 immutable CosXString <: CosString
     val::String
@@ -103,13 +101,13 @@ end
 set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
             set!(o.obj, name, obj)
 
-const CosStream_Length=CosName("Length")
-const CosStream_Filter= CosName("Filter")
-const CosStream_DecodeParms = CosName("DecodeParms")
-const CosStream_F      = CosName("F")
-const CosStream_FFilter = CosName("FFilter")
-const CosStream_FDecodeParms = CosName("FDecodeParms")
-const CosStream_DL=CosName("DL")
+#const CosStream_Length=CosName("Length")
+#const CosStream_Filter= CosName("Filter")
+#const CosStream_DecodeParms = CosName("DecodeParms")
+#const CosStream_F      = CosName("F")
+#const CosStream_FFilter = CosName("FFilter")
+#const CosStream_FDecodeParms = CosName("FDecodeParms")
+#const CosStream_DL=CosName("DL")
 
 
 type CosStream <: CosObject

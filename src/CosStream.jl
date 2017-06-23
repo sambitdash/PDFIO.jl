@@ -1,15 +1,6 @@
 export decode
 
-const Filter_ASCIIHexDecode=CosName("ASCIIHexDecode")
-const Filter_ASCII85Decode=CosName("ASCII85Decode")
-const Filter_LZWDecode=CosName("LZWDecode")
-const Filter_FlateDecode=CosName("FlateDecode")
-const Filter_RunLengthDecode=CosName("RunLengthDecode")
-const Filter_CCITTFaxDecode=CosName("CCITTFaxDecode")
-const Filter_JBIG2Decode=CosName("JBIG2Decode")
-const Filter_DCTDecode=CosName("DCTDecode")
-const Filter_JPXDecode=CosName("JPXDecode")
-const Filter_Crypt=CosName("Crypt")
+
 
 function _not_implemented(input)
   error(E_NOT_IMPLEMENTED)
@@ -43,16 +34,16 @@ function decode_rle(input)
 end
 
 const function_map = Dict(
-   Filter_ASCIIHexDecode => decode_asciihex,
-   Filter_ASCII85Decode => decode_ascii85,
-   Filter_LZWDecode => _not_implemented,
-   Filter_FlateDecode => decode_flate,
-   Filter_RunLengthDecode => decode_rle,
-   Filter_CCITTFaxDecode => _not_implemented,
-   Filter_JBIG2Decode => _not_implemented,
-   Filter_DCTDecode => _not_implemented,
-   Filter_JPXDecode => _not_implemented,
-   Filter_Crypt => _not_implemented
+   CosName("ASCIIHexDecode") => decode_asciihex,
+   CosName("ASCII85Decode") => _not_implemented,
+   CosName("LZWDecode") => _not_implemented,
+   CosName("FlateDecode") => decode_flate,
+   CosName("RunLengthDecode") => decode_rle,
+   CosName("CCITTFaxDecode") => _not_implemented,
+   CosName("JBIG2Decode") => _not_implemented,
+   CosName("DCTDecode") => _not_implemented,
+   CosName("JPXDecode") => _not_implemented,
+   CosName("Crypt") => _not_implemented
 )
 
 
@@ -204,7 +195,7 @@ function decode_asciihex(input::BufferedInputStream)
   return BufferedInputStream(ASCIIHexDecodeSource(input))
 end
 
-#This is still buggy. Needs to be worked upon. 
+#This is still buggy. Needs to be worked upon.
 
 type ASCII85DecodeSource{T<:BufferedInputStream}
   input::T

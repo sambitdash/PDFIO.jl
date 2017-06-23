@@ -45,9 +45,9 @@ Recursively reads the page object and populates the indirect objects
 Ensures indirect objects are read and updated in the xref Dictionary.
 """
 function populate_doc_pages(doc::PDDocImpl, dict::CosObject)
-  if (isequal(Catlog_PageTree_Root,get(dict, PageTreeNode_Type)))
+  if (CosName("Pages") == get(dict, CosName("Type")))
     #print(dict)
-    kids = get(dict, PageTreeNode_Kids)
+    kids = get(dict, CosName("Kids"))
     arr = get(kids)
     len = length(arr)
     for i=1:len
@@ -59,25 +59,25 @@ function populate_doc_pages(doc::PDDocImpl, dict::CosObject)
       end
     end
   end
-  parent = get(dict, PageTreeNode_Parent)
+  parent = get(dict, CosName("Parent"))
   if !isequal(parent,CosNull)
     obj = cosDocGetObject(doc.cosDoc, parent)
-    set!(dict,PageTreeNode_Parent,obj)
+    set!(dict,CosName("Parent"),obj)
   end
   return nothing
 end
 
 function update_page_tree(doc::PDDocImpl)
-  pagesref = get(doc.catalog, Catlog_PageTree_Root)
+  pagesref = get(doc.catalog, CosName("Pages"))
   doc.pages = cosDocGetObject(doc.cosDoc, pagesref)
   populate_doc_pages(doc, doc.pages)
 end
 
 function get_internal_pagecount(dict::CosObject)
-  mytype = get(dict, PageTreeNode_Type)
-  if (isequal(mytype, Catlog_PageTree_Root))
-    return get(get(dict, PageTreeNode_Count))
-  elseif (isequal(mytype, PageTreeNode_Page))
+  mytype = get(dict, CosName("Type"))
+  if (isequal(mytype, CosName("Pages")))
+    return get(get(dict, CosName("Count")))
+  elseif (isequal(mytype, CosName("Page")))
     return 1
   else
     error(E_INVALID_OBJECT)
@@ -91,9 +91,9 @@ discount the possibility of an intermediate node having page and pages nodes
 in the kids array. Hence, this implementation.
 """
 function find_page_from_treenode(node::CosObject, pageno::Int)
-  mytype = get(node, PageTreeNode_Type)
+  mytype = get(node, CosName("Type"))
   #If this is a page object the pageno has to be 1
-  if isequal(mytype, PageTreeNode_Page)
+  if isequal(mytype, CosName("Page"))
     if pageno == 1
       return node
     else
@@ -101,7 +101,7 @@ function find_page_from_treenode(node::CosObject, pageno::Int)
     end
   end
 
-  kids = get(node, PageTreeNode_Kids)
+  kids = get(node, CosName("Kids"))
   kidsarr = get(kids)
 
   sum = 0

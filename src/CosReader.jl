@@ -218,7 +218,7 @@ The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 """
 function read_internal_stream_data(ps::ParserState, extent::CosDict, len::Int)
-  if get(extent, CosStream_F) != CosNull
+  if get(extent, CosName("F")) != CosNull
     return false
   end
 
@@ -228,18 +228,18 @@ function read_internal_stream_data(ps::ParserState, extent::CosDict, len::Int)
   close(io)
 
   #Ensuring all the data is written to a file
-  set!(extent, CosStream_F, CosLiteralString(path))
+  set!(extent, CosName("F"), CosLiteralString(path))
 
-  filter = get(extent, CosStream_Filter)
+  filter = get(extent, CosName("Filter"))
   if (filter != CosNull)
-    set!(extent, CosStream_FFilter, filter)
-    set!(extent, CosStream_Filter, CosNull)
+    set!(extent, CosName("FFilter"), filter)
+    set!(extent, CosName("Filter"), CosNull)
   end
 
-  parms = get(extent, CosStream_DecodeParms)
+  parms = get(extent, CosName("DecodeParms"))
   if (parms != CosNull)
-    set!(extent, CosStream_FDecodeParms, filter)
-    set!(extent, CosStream_DecodeParms,CosNull)
+    set!(extent, CosName("FDecodeParms"), filter)
+    set!(extent, CosName("DecodeParms"),CosNull)
   end
 
   return true
@@ -248,8 +248,9 @@ end
 
 type CosObjectLoc
   loc::Int
+  stm::CosObject
   obj::CosObject
-  CosObjectLoc(l,o=CosNull)=new(l,o)
+  CosObjectLoc(l,s=CosNull,o=CosNull)=new(l,s,o)
 end
 
 function process_stream_length(stmlen::CosInt, ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
@@ -273,14 +274,14 @@ function postprocess_indirect_object(ps::ParserState, obj::CosDict, xref::Dict{C
     ensure_line_feed_eol(ps)
     pos = position(ps)
 
-    stmlen = get(obj, CosStream_Length)
+    stmlen = get(obj, CosName("Length"))
 
     lenobj = process_stream_length(stmlen, ps, xref)
 
     len = get(lenobj)
 
     if (lenobj != stmlen)
-      set!(obj, CosStream_Length, lenobj)
+      set!(obj, CosName("Length"), lenobj)
     end
 
     seek(ps,pos)

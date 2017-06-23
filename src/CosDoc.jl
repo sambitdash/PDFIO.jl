@@ -14,17 +14,17 @@ type CosDocImpl <: CosDoc
   version::Tuple{Int,Int}
   xref::Dict{CosIndirectObjectRef, CosObjectLoc}
   trailer::Array{CosDict,1}
+  xrefstm::Array{CosIndirectObject{CosStream},1}
   isPDF::Bool
+  hasNativeXRefStm::Bool
   function CosDocImpl(fp::String)
     io = open(fp,"r")
     ps = getParserState(io)
-    new(fp,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], false)
+    new(fp,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], [], false, false)
   end
 end
 
 
-const Trailer_Root=CosName("Root")
-const Trailer_Prev=CosName("Prev")
 
 function cosDocOpen(fp::String)
   doc = CosDocImpl(abspath(fp));
@@ -45,7 +45,7 @@ function cosDocGetRoot(doc::CosDoc)
 end
 
 function cosDocGetRoot(doc::CosDocImpl)
-  root = get(doc.trailer[1], Trailer_Root)
+  root = get(doc.trailer[1], CosName("Root"))
   return cosDocGetObject(doc,root)
 end
 
@@ -107,6 +107,8 @@ function read_trailer(ps::ParserState, lookahead::Int)
   return dict
 end
 
+@inline may_have_xrefstream(doc::CosDocImpl) = (doc.version[2] >= 5)
+
 function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
   const TRAILER_REWIND=200
 
@@ -114,7 +116,7 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
 
   trailer = read_trailer(ps, TRAILER_REWIND)
 
-  if (get(trailer, Trailer_Root) != CosNull)
+  if (get(trailer, CosName("Root")) != CosNull)
     # doc trailer must contain the root, the trailer following the
     # xref following startxref will have it.
     doc.trailer = trailer
@@ -136,31 +138,80 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
 
   if doc.isPDF
     seek(ps, doc.startxref)
-    found = false
-    while(true)
-      read_xref_table(ps,doc)
-      trailer = read_trailer(ps, length(TRAILER))
+    if (may_have_xrefstream(doc))
+      if (ispdfnumber(current(ps)))
+        doc.hasNativeXRefStm = true
+      end
+    end
+    if (doc.hasNativeXRefStm)
+      read_xref_streams(ps, doc)
+    else
+      read_xref_tables(ps, doc)
+    end
+  end
+end
 
-      if (!found)
-        if (get(trailer, Trailer_Root) == CosNull)
-          _error(E_BAD_TRAILER,ps)
-        else
-          push!(doc.trailer, trailer)
-        end
-        found = true
+function read_xref_streams(ps::ParserState, doc::CosDocImpl)
+  found = false
+  while(true)
+    xrefstm = parse_indirect_obj(ps, doc.xref)
+    if (!found)
+      if (get(xrefstm,  CosName("Root")) == CosNull)
+        _error(E_BAD_TRAILER,ps)
+      else
+        push!(doc.xrefstm, xrefstm)
+      end
+      found = true
+    else
+      push!(doc.xrefstm, xrefstm)
+    end
+    read_xref_stream(xrefstm, doc)
+    prev = get(xrefstm,  CosName("Prev"))
+    if (prev == CosNull)
+      break
+    end
+    seek(ps, prev.val)
+  end
+end
+
+function read_xref_tables(ps::ParserState, doc::CosDocImpl)
+  found = false
+  while(true)
+    read_xref_table(ps,doc)
+    trailer = read_trailer(ps, length(TRAILER))
+
+    if (!found)
+      if (get(trailer,  CosName("Root")) == CosNull)
+        _error(E_BAD_TRAILER,ps)
       else
         push!(doc.trailer, trailer)
       end
-      prev = get(trailer, Trailer_Prev)
-      if (prev == CosNull)
-        break
-      end
-      seek(ps, prev.val)
+      found = true
+    else
+      push!(doc.trailer, trailer)
     end
-  end
+    #Hybrid case
+    loc = get(trailer,  CosName("XRefStm"))
+    if (loc != CosNull)
+      seek(ps, get(loc))
+      xrefstm = parse_indirect_obj(ps, doc.xref)
+      read_xref_stream(xrefstm,doc)
+    end
 
+
+    prev = get(trailer, CosName("Prev"))
+    if (prev == CosNull)
+      break
+    end
+    seek(ps, prev.val)
+  end
 end
 
+# The xref stream may be accessed later. There is no point encrypting this data
+#Ideal will be to remove the filter.
+function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
+
+end
 
 function read_xref_table(ps::ParserState, doc::CosDocImpl)
     skip!(ps, XREF)
