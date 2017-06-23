@@ -37,7 +37,7 @@ This will return a CosArray of ref or ref to a stream. This needs to be converte
 to an actual stream object
 =#
 function get_page_content_ref(page::PDPageImpl)
-  return get(page.cospage, PDName_Contents)
+  return get(page.cospage, CosName("Contents"))
 end
 
 function get_page_contents(page::PDPageImpl, contents::CosArray)

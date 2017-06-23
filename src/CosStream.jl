@@ -52,8 +52,8 @@ Reads the filter data and decodes the stream.
 """
 function decode(stm::CosObject)
 
-  filename = get(stm, CosStream_F)
-  filters = get(stm, CosStream_FFilter)
+  filename = get(stm, CosName("F"))
+  filters = get(stm, CosName("FFilter"))
 
   io = open(filename |> get, "r")
 
