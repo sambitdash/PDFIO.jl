@@ -1,14 +1,12 @@
-import Base:get,hash,isequal, convert
+import Base:get,length
 
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
-       CosIndirectObjectRef, CosStream, get, set!, convert
+       CosIndirectObjectRef, CosStream, get, set!
 
 @compat abstract type CosObject end
 
-function get{T<:CosObject}(o::T)
-  return o.val
-end
+@inline get{T<:CosObject}(o::T)=o.val
 
 @compat abstract type CosString <: CosObject end
 @compat abstract type CosNumeric <: CosObject end
@@ -32,8 +30,6 @@ immutable CosInt <: CosNumeric
     val::Int64
 end
 
-
-
 """
 A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
@@ -44,8 +40,8 @@ immutable CosIndirectObjectRef <: CosObject
   CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
 
-hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
-isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
+#hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
+#isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
 
 type CosIndirectObject{T <: CosObject} <: CosObject
     num::Int
@@ -72,17 +68,26 @@ end
 
 type CosArray <: CosObject
     val::Array{CosObject,1}
+    function CosArray(arr::Array{T,1} where {T<:CosObject})
+      val = Array{CosObject,1}()
+      for v in arr
+        push!(val,v)
+      end
+      new(val)
+    end
     CosArray()=new(Array{CosObject,1}())
 end
+
+
+get(o::CosArray, isNative=false)=isNative?map((x)->get(x),o.val):o.val
+length(o::CosArray)=length(o.val)
 
 type CosDict <: CosObject
     val::Dict{CosName,CosObject}
     CosDict()=new(Dict{CosName,CosObject}())
 end
 
-function get(dict::CosDict, name::CosName)
-  return get(dict.val,name,CosNull)
-end
+get(dict::CosDict, name::CosName)=get(dict.val,name,CosNull)
 
 get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
 
@@ -101,15 +106,6 @@ end
 set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
             set!(o.obj, name, obj)
 
-#const CosStream_Length=CosName("Length")
-#const CosStream_Filter= CosName("Filter")
-#const CosStream_DecodeParms = CosName("DecodeParms")
-#const CosStream_F      = CosName("F")
-#const CosStream_FFilter = CosName("FFilter")
-#const CosStream_FDecodeParms = CosName("FDecodeParms")
-#const CosStream_DL=CosName("DL")
-
-
 type CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
@@ -120,7 +116,66 @@ get(stm::CosStream, name::CosName) = get(stm.extent, name)
 
 get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj,name)
 
+set!(stm::CosStream, name::CosName, obj::CosObject)=
+    set!(stm.extent, name, obj)
+
+set!(o::CosIndirectObject{CosStream}, name::CosName, obj::CosObject)=
+    set!(o.obj,name,obj)
+
 """
-Decodes the stream and provides output as an IO.
+Decodes the stream and provides output as an BufferedInputStream.
 """
 get(stm::CosStream) = decode(stm)
+
+type CosObjectStream<: CosObject
+  stm::CosStream
+  n::Int
+  first::Int
+  oids::Vector{Int}
+  oloc::Vector{Int}
+  function CosObjectStream(s::CosStream)
+    n = get(s, CosName("N"))
+    @assert n != CosNull
+    first = get(s, CosName("First"))
+    @assert first != CosNull
+    cosStreamRemoveFilters(s)
+    n_n = get(n)
+    first_n = get(first)
+    oids = Vector{Int}(n_n)
+    oloc = Vector{Int}(n_n)
+    read_object_info_from_stm(s, oids, oloc, n_n, first_n)
+    new(s, n_n, first_n,oids, oloc)
+  end
+end
+
+get(os::CosObjectStream, name::CosName) = get(os.stm, name)
+
+get(os::CosIndirectObject{CosObjectStream}, name::CosName) = get(os.obj,name)
+
+set!(os::CosObjectStream, name::CosName, obj::CosObject)=
+    set!(os.stm, name, obj)
+
+set!(os::CosIndirectObject{CosObjectStream}, name::CosName, obj::CosObject)=
+    set!(os.obj,name,obj)
+
+get(os::CosObjectStream) = get(os.stm)
+
+type CosXRefStream<: CosObject
+  stm::CosStream
+  isDecoded::Bool
+  function CosXRefStream(s::CosStream,isDecoded::Bool=false)
+    new(s,isDecoded)
+  end
+end
+
+get(os::CosXRefStream, name::CosName) = get(os.stm, name)
+
+get(os::CosIndirectObject{CosXRefStream}, name::CosName) = get(os.obj,name)
+
+set!(os::CosXRefStream, name::CosName, obj::CosObject)=
+    set!(os.stm, name, obj)
+
+set!(os::CosIndirectObject{CosXRefStream}, name::CosName, obj::CosObject)=
+    set!(os.obj,name,obj)
+
+get(os::CosXRefStream) = get(os.stm)

@@ -1,12 +1,14 @@
-export decode
+import Base:eof
 
-
+export cosStreamRemoveFilters
 
 function _not_implemented(input)
   error(E_NOT_IMPLEMENTED)
 end
 
 using Libz
+
+using BufferedStreams
 
 """
 Decodes using the LZWDecode compression
@@ -15,21 +17,25 @@ function decode_lzw(stm::CosStream)
   print("Ready to decode the LZW stream")
 end
 
-function decode_flate(input)
-  return ZlibInflateInputStream(input; gzip=false)
+function decode_flate(input, parms)
+  deflate = ZlibInflateInputStream(input; gzip=false)
+  return apply_flate_params(deflate, parms)
 end
+
+
+apply_flate_params(input,parms)=input
 
 using BufferedStreams
 
-function decode_asciihex(input)
+function decode_asciihex(input, parms)
   return decode_asciihex(BufferedInputStream(input))
 end
 
-function decode_ascii85(input)
+function decode_ascii85(input, parms)
   return decode_ascii85(BufferedInputStream(input))
 end
 
-function decode_rle(input)
+function decode_rle(input, parms)
   return decode_rle(BufferedInputStream(input))
 end
 
@@ -46,6 +52,19 @@ const function_map = Dict(
    CosName("Crypt") => _not_implemented
 )
 
+function cosStreamRemoveFilters(stm::CosObject)
+  filters = get(stm, CosName("FFilter"))
+
+  if (filters != CosNull)
+    bufstm = decode(stm)
+    data = read(bufstm)
+    close(bufstm)
+    filename = get(stm, CosName("F"))
+    write(filename |> get, data)
+    set!(stm, CosName("FFilter"),CosNull)
+  end
+  return stm
+end
 
 """"
 Reads the filter data and decodes the stream.
@@ -54,22 +73,174 @@ function decode(stm::CosObject)
 
   filename = get(stm, CosName("F"))
   filters = get(stm, CosName("FFilter"))
+  parms = get(stm, CosName("FDecodeParms"))
 
-  io = open(filename |> get, "r")
+  io = (open(filename |> get, "r") |> BufferedInputStream)
 
-  return decode_filter(io, filters)
+  return decode_filter(io, filters, parms)
 end
 
-function decode_filter(io, filter::CosName)
-  return (io |> function_map[filter])
+function decode_filter(io, filter::CosNullType, parms::CosObject)
+  return io
 end
 
-function decode_filter(io, filters::CosArray)
+function decode_filter(io, filter::CosName, parms::CosObject)
+  f = function_map[filter]
+  return f(io, parms)
+end
+
+function decode_filter(io, filters::CosArray, parms::CosObject)
   bufstm = io
-  for filter in filters
-    bufstm = decode_filter(bufstm, filter)
+  for filter in get(filters)
+    bufstm = decode_filter(bufstm, filter, parms)
   end
   return bufstm
+end
+
+type PNGPredictorSource{T<:BufferedInputStream}
+  input::T
+  predictor::UInt8
+  columns::UInt32
+  prev::Vector{UInt8}
+  curr::Vector{UInt8}
+  s::Int32
+  e::Int32
+  isResidue::Bool
+  isEOF::Bool
+  count_scanline::Int32
+
+  function PNGPredictorSource{T}(input::T,pred::Int,columns::Int) where{T<:BufferedInputStream}
+    @assert pred >= 10
+    prev = zeros(Vector{UInt8}(columns))
+    curr = zeros(Vector{UInt8}(columns))
+    new(input, pred - 10,columns,prev,curr,0,0,false, false, 0)
+  end
+end
+
+
+function apply_flate_params(input::BufferedInputStream, parms::CosDict)
+  predictor = get(parms, CosName("Predictor"))
+  colors    = get(parms, CosName("Colors"))
+  bitspercomponent = get(parms, CosName("BitsPerComponent"))
+  columns = get(parms, CosName("Columns"))
+
+  predictor_n = (predictor!=CosNull)?get(predictor):0
+  colors_n = (colors!=CosNull)?get(predictor):0
+  bitspercomponent_n = (bitspercomponent!=CosNull)?get(bitspercomponent):0
+  columns_n = (columns !=CosNull)?get(columns):0
+
+  #@printf "Predictor %d\n" predictor_n
+  #@printf "Columns %d\n" columns_n
+
+  source = PNGPredictorSource{BufferedInputStream}(input, predictor_n, columns_n)
+
+  return (predictor_n == 2)? error(E_NOT_IMPLEMENTED):
+         (predictor_n >= 10)? BufferedInputStream(source):input
+end
+
+function eof(source::PNGPredictorSource)
+  return eof(source.input) || source.isEOF
+end
+
+function BufferedStreams.readbytes!{T<:BufferedInputStream}(
+        source::PNGPredictorSource{T},
+        buffer::Vector{UInt8},
+        from::Int, to::Int)
+  count = 0
+  while((from <= to) && !eof(source))
+    if (source.isResidue)
+      nbres = source.e - source.s + 1
+      nbbuf = to - from + 1
+      isResidue = (nbres > nbbuf)
+      nbcpy = isResidue? nbbuf : nbres
+      copy!(buffer, from, source.curr, source.s, nbcpy)
+
+      count = count + nbcpy
+      source.s = isResidue? 0: (source.s + nbcpy)
+      source.isResidue = isResidue
+
+      if (nbres >= nbbuf)
+        #@printf "Buffer Size %d\n" count
+        return count
+      end
+
+      from = from + nbcpy
+    else
+      load_png_row!(source)
+    end
+  end
+  #@printf "Buffer Size %d\n" count
+  return count
+end
+
+function png_predictor_rule(source, row, rule)
+  if (rule == 0)
+    copy!(source.curr, source.s, row, 2, source.e)
+  elseif (rule == 1)
+    source.curr[1] = row[2]
+    for i=2:source.e
+      source.curr[i] = source.curr[i-1]+row[i+1]
+    end
+  elseif (rule == 2)
+    for i=1:source.e
+      source.curr[i] = source.prev[i]+row[i+1]
+    end
+  elseif (rule == 3)
+    source.curr[1] = source.prev[1]+row[2]
+    for i=2:source.e
+      avg = div(source.curr[i-1] + source.prev[i],2)
+      source.curr[i] = avg+row[i+1]
+    end
+  elseif (rule == 4)
+    source.curr[1] = source.prev[1]+row[2]
+    for i=2:source.e
+      pred = PaethPredictor(source.curr[i-1], source.prev[i], source.prev[i-1])
+      source.curr[i] = pred + row[i+1]
+    end
+  end
+end
+
+#Exactly as coded in https://www.w3.org/TR/PNG-Filters.html
+function PaethPredictor(a::Int32, b::Int32, c::Int32)
+     # a = left, b = above, c = upper left
+     p = a + b - c        # initial estimate
+     pa = abs(p - a)      # distances to a, b, c
+     pb = abs(p - b)
+     pc = abs(p - c)
+     #return nearest of a,b,c,
+     #breaking ties in order a,b,c.
+     return  (pa <= pb && pa <= pc)? UInt8(a):
+             (pb <= pc)? UInt8(b):
+              UInt8(c)
+end
+
+function load_png_row!(source::PNGPredictorSource)
+  if (source.isResidue || eof(source.input))
+    return source
+  end
+
+  incolumns = source.columns + 1
+  row = Vector{UInt8}(incolumns)
+  ncols = BufferedStreams.readbytes!(source.input, row, 1, incolumns)
+
+  if (ncols > 1)
+    @assert (source.predictor != 5) && (row[1] == source.predictor)
+    source.e = ncols-1
+    source.s = 1
+    #Before loading next scan line preserve the previous
+    if (source.count_scanline >= 1)
+      copy!(source.prev, source.curr)
+    end
+    png_predictor_rule(source, row, row[1])
+    source.isResidue=true
+    source.count_scanline +=1
+  else
+    source.e = 0
+    source.isResidue=false
+    source.s = 0
+    source.isEOF = true
+  end
+  return source
 end
 
 type RLEDecodeSource{T<:BufferedInputStream}
@@ -79,7 +250,6 @@ type RLEDecodeSource{T<:BufferedInputStream}
   e::UInt8
   isResidue::Bool
   isEOD::Bool
-
 end
 
 function RLEDecodeSource(input::T) where {T<:BufferedInputStream}
@@ -166,7 +336,7 @@ function BufferedStreams.readbytes!(
   nbread   = nbneeded*2
   data::Array{UInt,1}
 
-  ndata = readbytes!(source.input, data, 1, nbread)
+  ndata = BufferedStreams.readbytes!(source.input, data, 1, nbread)
   if (ndata < nbread)
     if (rem(ndata,2)==1)
       ndata = ndata + 1

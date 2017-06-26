@@ -40,28 +40,39 @@ function cosDocOpen(fp::String)
   return doc
 end
 
-function cosDocGetRoot(doc::CosDoc)
-  return CosNull
-end
+cosDocGetRoot(doc::CosDoc) = CosNull
+cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
+
 
 function cosDocGetRoot(doc::CosDocImpl)
-  root = get(doc.trailer[1], CosName("Root"))
+
+  root = (doc.hasNativeXRefStm)?
+          get(doc.xrefstm[1], CosName("Root")):
+          get(doc.trailer[1], CosName("Root"))
   return cosDocGetObject(doc,root)
 end
 
-function cosDocGetObject(doc::CosDoc, obj::CosObject)
-  return CosNull
-end
-
-function cosDocGetObject(doc::CosDocImpl, obj::CosObject)
-  return obj
-end
+cosDocGetObject(doc::CosDocImpl, obj::CosObject)=obj
 
 function cosDocGetObject(doc::CosDocImpl, ref::CosIndirectObjectRef)
   locObj = doc.xref[ref]
+  return cosDocGetObject(doc, locObj.stm, ref, locObj)
+end
+
+function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
+  ref::CosIndirectObjectRef, locObj::CosObjectLoc)
   if (locObj.obj == CosNull)
     seek(doc.ps,locObj.loc)
     locObj.obj = parse_indirect_obj(doc.ps, doc.xref)
+  end
+  return locObj.obj
+end
+
+function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
+  ref::CosIndirectObjectRef, locObj::CosObjectLoc)
+  objstm = cosDocGetObject(doc, stmref)
+  if (locObj.obj == CosNull)
+    locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
   end
   return locObj.obj
 end
@@ -107,42 +118,32 @@ function read_trailer(ps::ParserState, lookahead::Int)
   return dict
 end
 
-@inline may_have_xrefstream(doc::CosDocImpl) = (doc.version[2] >= 5)
+#PDF-Version >= 1.5
+@inline may_have_xrefstream(doc::CosDocImpl)=
+  (doc.version[1]>=1)&&(doc.version[2]>=5)
 
 function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
-  const TRAILER_REWIND=200
+  const TRAILER_REWIND=50
 
   seek(ps,-TRAILER_REWIND)
 
-  trailer = read_trailer(ps, TRAILER_REWIND)
-
-  if (get(trailer, CosName("Root")) != CosNull)
-    # doc trailer must contain the root, the trailer following the
-    # xref following startxref will have it.
-    doc.trailer = trailer
-  end
-
   if (doc.isPDF)
-    if locate_keyword!(ps,STARTXREF) != 0
+    if locate_keyword!(ps,STARTXREF,TRAILER_REWIND) < 0
       _error(E_UNEXPECTED_CHAR,ps)
     end
     chomp_space!(ps)
     doc.startxref = parse_number(ps).val
     chomp_space!(ps)
-  end
-
-  #Check for EOF
-  if locate_keyword!(ps,EOF) != 0
-      _error(E_UNEXPECTED_CHAR,ps)
+    #Check for EOF
+    if locate_keyword!(ps,EOF) != 0
+        _error(E_UNEXPECTED_CHAR,ps)
+    end
   end
 
   if doc.isPDF
     seek(ps, doc.startxref)
-    if (may_have_xrefstream(doc))
-      if (ispdfnumber(current(ps)))
-        doc.hasNativeXRefStm = true
-      end
-    end
+    doc.hasNativeXRefStm=(may_have_xrefstream(doc) && ispdfdigit(current(ps)))
+
     if (doc.hasNativeXRefStm)
       read_xref_streams(ps, doc)
     else
@@ -166,11 +167,12 @@ function read_xref_streams(ps::ParserState, doc::CosDocImpl)
       push!(doc.xrefstm, xrefstm)
     end
     read_xref_stream(xrefstm, doc)
+
     prev = get(xrefstm,  CosName("Prev"))
     if (prev == CosNull)
       break
     end
-    seek(ps, prev.val)
+    seek(ps, get(prev))
   end
 end
 
@@ -203,14 +205,14 @@ function read_xref_tables(ps::ParserState, doc::CosDocImpl)
     if (prev == CosNull)
       break
     end
-    seek(ps, prev.val)
+    seek(ps, get(prev))
   end
 end
 
 # The xref stream may be accessed later. There is no point encrypting this data
 #Ideal will be to remove the filter.
 function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
-
+  return read_xref_stream(xrefstm, doc.xref)
 end
 
 function read_xref_table(ps::ParserState, doc::CosDocImpl)

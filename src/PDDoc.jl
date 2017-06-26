@@ -69,6 +69,7 @@ end
 
 function update_page_tree(doc::PDDocImpl)
   pagesref = get(doc.catalog, CosName("Pages"))
+  println(pagesref)
   doc.pages = cosDocGetObject(doc.cosDoc, pagesref)
   populate_doc_pages(doc, doc.pages)
 end

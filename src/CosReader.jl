@@ -238,7 +238,7 @@ function read_internal_stream_data(ps::ParserState, extent::CosDict, len::Int)
 
   parms = get(extent, CosName("DecodeParms"))
   if (parms != CosNull)
-    set!(extent, CosName("FDecodeParms"), filter)
+    set!(extent, CosName("FDecodeParms"), parms)
     set!(extent, CosName("DecodeParms"),CosNull)
   end
 
@@ -253,11 +253,13 @@ type CosObjectLoc
   CosObjectLoc(l,s=CosNull,o=CosNull)=new(l,s,o)
 end
 
-function process_stream_length(stmlen::CosInt, ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-  return stmlen
-end
+process_stream_length(stmlen::CosInt,
+                      ps::ParserState,
+                      xref::Dict{CosIndirectObjectRef, CosObjectLoc})=stmlen
 
-function process_stream_length(stmlen::CosIndirectObjectRef, ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+function process_stream_length(stmlen::CosIndirectObjectRef,
+                               ps::ParserState,
+                               xref::Dict{CosIndirectObjectRef, CosObjectLoc})
   cosObjectLoc = xref[stmlen]
   if (cosObjectLoc.obj === CosNull)
     seek(ps,cosObjectLoc.loc)
@@ -269,7 +271,8 @@ function process_stream_length(stmlen::CosIndirectObjectRef, ps::ParserState, xr
   return cosObjectLoc.obj
 end
 
-function postprocess_indirect_object(ps::ParserState, obj::CosDict, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+function postprocess_indirect_object(ps::ParserState, obj::CosDict,
+                              xref::Dict{CosIndirectObjectRef, CosObjectLoc})
   if locate_keyword!(ps,STREAM) == 0
     ensure_line_feed_eol(ps)
     pos = position(ps)
@@ -296,16 +299,16 @@ function postprocess_indirect_object(ps::ParserState, obj::CosDict, xref::Dict{C
     #Now eat away the ENDSTREAM token
     chomp_space!(ps)
     skip!(ps,ENDSTREAM)
+    obj = createObjectStreams(obj)
   end
   return obj
 end
 
-function postprocess_indirect_object(ps::ParserState, obj::CosObject, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-  return obj
-end
+postprocess_indirect_object(ps::ParserState, obj::CosObject,
+                            xref::Dict{CosIndirectObjectRef, CosObjectLoc})=obj
 
-
-function parse_indirect_obj(ps::ParserState, xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+function parse_indirect_obj(ps::ParserState,
+                            xref::Dict{CosIndirectObjectRef, CosObjectLoc})
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
@@ -339,7 +342,8 @@ function try_parse_indirect_reference(ps::ParserState)
         objn = nobj.val
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
-        if locate_keyword!(ps,LATIN_UPPER_R)==0 #This can happen in consecutive numbers in an array
+        if locate_keyword!(ps,LATIN_UPPER_R)==0
+          #This can happen in consecutive numbers in an array
           return CosIndirectObjectRef(objn, genn)
         else
           seek(ps, pos)
@@ -419,16 +423,13 @@ function parse_unsignednumber(ps::ParserState)
 
     @inbounds while hasmore(ps)
         c = current(ps)
-
         if ispdfdigit(c)
             push!(number, UInt8(c))
         else
             break
         end
-
         incr!(ps)
     end
-
     return number_from_bytes(ps, isint, number, 1, length(number))
 end
 

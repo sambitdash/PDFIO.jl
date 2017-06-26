@@ -12,6 +12,7 @@ using Compat
 include("CosObject.jl")
 include("CosStream.jl")
 include("CosReader.jl")
+include("CosObjStream.jl")
 include("CosDoc.jl")
 
 end
