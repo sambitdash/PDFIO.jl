@@ -106,11 +106,11 @@ from it.
 ## Reference to Adobe
 
 It's almost impossible to talk PDF without reference to Adobe. All copyrights or
-trademarks are that are owned by Adobe or ISO which has been referred to
-inadvertently stating ownership of copyright are owned by them. The author also
+trademarks are that are owned by Adobe or ISO, which have been referred to
+inadvertently without stating ownership, are owned by them. The author also
 has been part of Adobe's development culture in early part of his career with
 specific to PDF technology for about 2 years. However, the author has not been
 part of any activities related to PDF development from 2003. Hence, this API can
- be considered a clean room development for most part. Usage of words like
+ be considered a clean room development. Usage of words like
  Carousel and Cos are pretty much public knowledge and large number of reference
  to the same can be obtained from industry related websites etc.  
