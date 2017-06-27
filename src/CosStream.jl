@@ -351,11 +351,13 @@ function BufferedStreams.readbytes!(
     c = data[i+=1]
     n = DIGIT_ZERO    <= c <= DIGIT_NINE    ? c - DIGIT_ZERO :
         LATIN_A       <= c <= LATIN_F       ? c - LATIN_A + 10 :
-        LATIN_UPPER_A <= c <= LATIN_UPPER_F ? c - LATIN_UPPER_A + 10 : error("Input string isn't a hexadecimal string")
+        LATIN_UPPER_A <= c <= LATIN_UPPER_F ? c - LATIN_UPPER_A + 10 :
+        error("Input string isn't a hexadecimal string")
     c = data[i+=1]
     n = DIGIT_ZERO    <= c <= DIGIT_NINE    ? n << 4 + c - DIGIT_ZERO :
         LATIN_A       <= c <= LATIN_F       ? n << 4 + c - LATIN_A + 10 :
-        LATIN_UPPER_A <= c <= LATIN_UPPER_F ? n << 4 + c - LATIN_UPPER_A + 10 : error("Input string isn't a hexadecimal string")
+        LATIN_UPPER_A <= c <= LATIN_UPPER_F ? n << 4 + c - LATIN_UPPER_A + 10 :
+        error("Input string isn't a hexadecimal string")
     buffer[j+=1] = n
   end
   return nbreturn
