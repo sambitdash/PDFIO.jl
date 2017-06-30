@@ -73,7 +73,8 @@ native support in a modern language. Although, one can claim PDF is not the most
 
  *Nothing stops anyone to extend this APIs into a fully developed PDF Library
  that's available to both commercial as well as non-commercial licensing under a
- flexible license model. I am happy to collaborate with anyone who sees value in extending this library in that direction. MIT License looks most flexible to
+ flexible license model. I am happy to collaborate with anyone who sees value in
+  extending this library in that direction. MIT License looks most flexible to
  the author for the time-being.*
 
 ### Common

@@ -66,7 +66,7 @@ function cosStreamRemoveFilters(stm::CosObject)
   return stm
 end
 
-""""
+"""
 Reads the filter data and decodes the stream.
 """
 function decode(stm::CosObject)
@@ -436,8 +436,6 @@ function BufferedStreams.readbytes!(
   end
   return count + reslen
 end
-
-
 
 function decode_ascii85(input::BufferedInputStream)
   return BufferedInputStream(ASCII85DecodeSource(input))
