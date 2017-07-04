@@ -132,8 +132,6 @@ function parse_string(ps::ParserState)
             continue
         elseif c == LEFT_PAREN
             paren_cnt+=1
-        elseif c < SPACE
-            _error(E_BAD_CONTROL, ps)
         elseif c == RIGHT_PAREN
             if (paren_cnt > 0)
                 paren_cnt-=1

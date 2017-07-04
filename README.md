@@ -114,4 +114,13 @@ specific to PDF technology for about 2 years. However, the author has not been
 part of any activities related to PDF development from 2003. Hence, this API can
  be considered a clean room development. Usage of words like
  Carousel and Cos are pretty much public knowledge and large number of reference
- to the same can be obtained from industry related websites etc.  
+ to the same can be obtained from industry related websites etc.
+
+## Test files
+
+Not all PDF files that were used to test the library has been owned by the
+author. Hence, the author cannot make those files available to general public
+for distribution under the source code license. However, the author is grateful
+to the PDF document [library](http://www.stillhq.com/pdfdb/db.html) maintained
+by [mikal@stillhq.com](mikal@stillhq.com). Some of the files have to downloaded
+from the database for unit testing of the documents. 
