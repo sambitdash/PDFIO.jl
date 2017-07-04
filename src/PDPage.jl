@@ -1,5 +1,5 @@
 export PDPage,
-       pdPageGetContent,
+       pdPageGetContents,
        pdPageIsEmpty
 
 @compat abstract type PDPage end
