@@ -27,16 +27,16 @@ buf = read(bufstm)
 
 #This file is to be downloaded from the test database
 
-download("http://www.stillhq.com/pdfdb/000003/data.pdf", "files/3.pdf")
-doc = pdDocOpen("files/3.pdf")
+download("http://www.stillhq.com/pdfdb/000003/data.pdf", "downloads/3.pdf")
+doc = pdDocOpen("downloads/3.pdf")
 @test pdDocGetPageCount(doc) == 30
 page = pdDocGetPage(doc, 1)
 @test pdPageIsEmpty(page) == false
 
 #This file is to be downloaded from the test database
 
-download("http://www.stillhq.com/pdfdb/000582/data.pdf", "files/582.pdf")
-doc = pdDocOpen("files/582.pdf")
+download("http://www.stillhq.com/pdfdb/000582/data.pdf", "downloads/582.pdf")
+doc = pdDocOpen("downloads/582.pdf")
 @test pdDocGetPageCount(doc) == 12
 obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(177, 0))
 stm=get(obj)
