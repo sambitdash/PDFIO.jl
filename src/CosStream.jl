@@ -1,5 +1,9 @@
 import Base:eof
 
+import Libz:BufferedStreams.readbytes!
+
+import BufferedStreams:readbytes!
+
 export cosStreamRemoveFilters
 
 function _not_implemented(input)
@@ -22,21 +26,33 @@ function decode_flate(input, parms)
   return apply_flate_params(deflate, parms)
 end
 
-
 apply_flate_params(input,parms)=input
 
 using BufferedStreams
 
 function decode_asciihex(input, parms)
+  println("decode_asciihex(input,parms)")
   return decode_asciihex(BufferedInputStream(input))
+end
+
+function decode_asciihex(input::BufferedInputStream, parms)
+  return decode_asciihex(input)
 end
 
 function decode_ascii85(input, parms)
   return decode_ascii85(BufferedInputStream(input))
 end
 
+function decode_ascii85(input::BufferedInputStream, parms)
+  return decode_ascii85(input)
+end
+
 function decode_rle(input, parms)
   return decode_rle(BufferedInputStream(input))
+end
+
+function decode_rle(input::BufferedInputStream, parms)
+  return decode_rle(input)
 end
 
 const function_map = Dict(
@@ -144,7 +160,7 @@ end
 
 function BufferedStreams.readbytes!{T<:BufferedInputStream}(
         source::PNGPredictorSource{T},
-        buffer::Vector{UInt8},
+        buffer::AbstractArray{UInt8},
         from::Int, to::Int)
   count = 0
   while((from <= to) && !eof(source))
@@ -260,9 +276,9 @@ function eof(source::RLEDecodeSource)
   return source.isEOD && eof(source.input)
 end
 
-function BufferedStreams.readbytes!(
-        source::RLEDecodeSource,
-        buffer::Vector{UInt8},
+function BufferedStreams.readbytes!{T<:BufferedInputStream}(
+        source::RLEDecodeSource{T},
+        buffer::AbstractArray{UInt8},
         from::Int, to::Int)
   count = 0
   while((from <= to) && !eof(source))
@@ -329,13 +345,17 @@ type ASCIIHexDecodeSource{T<:BufferedInputStream}
   input::T
 end
 
-function BufferedStreams.readbytes!(
-        source::ASCIIHexDecodeSource,
-        buffer::Vector{UInt8},
+function eof(source::ASCIIHexDecodeSource)
+  return eof(source.input)
+end
+
+function BufferedStreams.readbytes!{T<:BufferedInputStream}(
+        source::ASCIIHexDecodeSource{T},
+        buffer::AbstractArray{UInt8},
         from::Int, to::Int)
   nbneeded = to - from + 1
   nbread   = nbneeded*2
-  data::Array{UInt,1}
+  data=Vector{UInt8}(nbread)
 
   ndata = BufferedStreams.readbytes!(source.input, data, 1, nbread)
   if (ndata < nbread)
@@ -375,9 +395,9 @@ type ASCII85DecodeSource{T<:BufferedInputStream}
   residue::Array{UInt8,1}
 end
 
-function BufferedStreams.readbytes!(
-        source::ASCII85DecodeSource,
-        buffer::Vector{UInt8},
+function BufferedStreams.readbytes!{T<:BufferedInputStream}(
+        source::ASCII85DecodeSource{T},
+        buffer::AbstractArray{UInt8},
         from::Int, to::Int)
   nbneeded = to - from + 1
   reslen = length(source.residue)
@@ -399,7 +419,7 @@ function BufferedStreams.readbytes!(
 
   data::Array{UInt,1}
 
-  ndata = readbytes!(source.input, data, 1, nbread)
+  ndata = BufferedStreams.readbytes!{T}(source.input, data, 1, nbread)
 
   count = 0
   iter = 0
