@@ -1,0 +1,25 @@
+```@docs
+pdDocOpen(String)
+pdDocGetPageCount(doc)
+pdDocGetPage(doc, pageno)
+cosDocOpen(filepath)
+cosDocGetRoot,
+cosDocGetObject
+CosDict
+CosString
+CosNumeric
+CosBoolean
+CosTrue
+CosFalse
+CosObject
+CosNull
+CosFloat
+CosInt
+CosArray
+CosName
+CosDict
+CosIndirectObjectRef
+CosStream
+get
+set!
+```
