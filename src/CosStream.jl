@@ -245,7 +245,7 @@ end
 
 type RLEDecodeSource{T<:BufferedInputStream}
   input::T
-  run::Array{UInt8,1}
+  run::Vector{UInt8}
   s::UInt8
   e::UInt8
   isResidue::Bool
@@ -253,7 +253,7 @@ type RLEDecodeSource{T<:BufferedInputStream}
 end
 
 function RLEDecodeSource(input::T) where {T<:BufferedInputStream}
-  return RLEDecodeSource(input, zeros(run, UInt8, (128,)), 0x00, 0x00, false, false)
+  return RLEDecodeSource(input, zeros(Vector{UInt8}(), UInt8, (128,)), 0x00, 0x00, false, false)
 end
 
 function eof(source::RLEDecodeSource)
@@ -280,7 +280,7 @@ function BufferedStreams.readbytes!(
       source.isResidue = isResidue
 
       if (nbres >= nbbuf)
-        return nbbuf
+        return count
       end
 
       from = from + nbcpy
@@ -288,6 +288,7 @@ function BufferedStreams.readbytes!(
       load_rle_input!(source)
     end
   end
+  return count
 end
 
 function load_rle_input!(source::RLEDecodeSource)
@@ -295,20 +296,20 @@ function load_rle_input!(source::RLEDecodeSource)
     return source
   end
 
-  lb::UInt8[1]
-  readbytes!(source.input, lb, 1, 1)
+  lb=[NULL]
+  BufferedStreams.readbytes!(source.input, lb, 1, 1)
 
   source.e = 0
   if (lb[1] == 128)
     source.isEOD = true
     return source
   elseif (lb[1] < 128)
-    nb = readbytes!(source.input, source.run, 1, lb[1]+1)
+    nb = BufferedStreams.readbytes!(source.input, source.run, 1, lb[1]+1)
     source.e = nb
   else
     if (!eof(source.input))
-      c::UInt8[1]
-      readbytes!(source.input, c, 1, 1)
+      c=[NULL]
+      BufferedStreams.readbytes!(source.input, c, 1, 1)
       fill!(source.run, c[1])
       source.e = 257 - lb[1]
     end
