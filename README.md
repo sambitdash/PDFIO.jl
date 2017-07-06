@@ -47,6 +47,9 @@ The *ParserState* type has been taken from the
 [JuliaIO/JSON.jl](/JuliaIO/JSON.jl). The file headers are not added. Hence,
 author acknowledges the efforts of the developers for the same package and
 expects the same be honored by any person developing any derivative work.
+*Note*-*ParserState* is no longer in use. The parser has been moved to the
+*BufferedStreams* interfaces. Some minor helper methods are ported to the new
+interface.
 
 **Cos** module is the low level file format for PDF. Carousel Object Structure
 was original term proposed inside Adobe which later transformed into Acrobat.
@@ -92,7 +95,8 @@ a linient approach may be taken in the PD layers.
 1. Streams have larger number of filter types. Only Flate has been tested to
 work reasonably.
 2. Filterparms are varied and only PNG filter UP has been tested to some extent
-as part of ObjectStream
+as part of ObjectStream. RLE, ACII85, ASCIIHex are tested as well. Multiple
+filters per stream has been tested as well.
 3. Object stream extends attribute has not been considered. May not be needed
 for a reader context.
 4. Free indirect objects are ignored in the PDF file as it's not typically a
@@ -123,4 +127,4 @@ author. Hence, the author cannot make those files available to general public
 for distribution under the source code license. However, the author is grateful
 to the PDF document [library](http://www.stillhq.com/pdfdb/db.html) maintained
 by [mikal@stillhq.com](mikal@stillhq.com). Some of the files have to downloaded
-from the database for unit testing of the documents. 
+from the database for unit testing of the documents.
