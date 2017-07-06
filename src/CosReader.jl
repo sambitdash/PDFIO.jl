@@ -2,10 +2,12 @@
 Given a `ParserState`, after possibly any amount of whitespace, return the next
 parseable value.
 """
-function parse_value(ps::ParserState)
+const ParserState=BufferedInputStream
+
+function parse_value(ps::BufferedInputStream)
     chomp_space!(ps)
 
-    @inbounds byte = byteat(ps)
+    @inbounds byte = peek(ps)
     if byte == LEFT_PAREN
         parse_string(ps)
     elseif byte == LESS_THAN
@@ -25,9 +27,9 @@ function parse_value(ps::ParserState)
     end
 end
 
-function parse_comment(ps::ParserState)
+function parse_comment(ps::BufferedInputStream)
     b = UInt8[]
-    incr!(ps)  # ski opening quote
+    skip(ps,1)  # ski opening quote
     while true
         c = advance!(ps)
         if is_crorlf(c)
@@ -38,62 +40,62 @@ function parse_comment(ps::ParserState)
     return b
 end
 
-function parse_name(ps::ParserState)
+function parse_name(ps::BufferedInputStream)
     b = UInt8[]
-    incr!(ps)  #skip solidus
+    skip(ps,1)  #skip solidus
     while true
-        c = byteat(ps)
+        c = peek(ps)
         if ispdfspace(c) || ispdfdelimiter(c)
             break
         elseif (c == NUMBER_SIGN)
-            incr!(ps)
+            skip(ps,1)
             #Now look for 2 hex numbers
-            c1 = byteat(ps)
-            incr!(ps)
-            c2 = byteat(ps)
+            c1 = peek(ps)
+            skip(ps,1)
+            c2 = peek(ps)
             if ispdfxdigit(c1) && ispdfxdigit(c2)
                 c = UInt8(c1*16+c2)
             else
                 _error(E_UNEXPECTED_CHAR, ps)
             end
         end
-        incr!(ps)
+        skip(ps,1)
         push!(b, c)
     end
     return CosName(String(b))
 end
 
 
-function parse_pdfconstant(ps::ParserState)
+function parse_pdfconstant(ps::BufferedInputStream)
     c = advance!(ps)
     if c == LATIN_T      # true
-        skip!(ps, LATIN_R, LATIN_U, LATIN_E)
+        skipv(ps, LATIN_R, LATIN_U, LATIN_E)
         return CosTrue
     elseif c == LATIN_F  # false
-        skip!(ps, LATIN_A, LATIN_L, LATIN_S, LATIN_E)
+        skipv(ps, LATIN_A, LATIN_L, LATIN_S, LATIN_E)
         return CosFalse
     elseif c == LATIN_N  # null
-        skip!(ps, LATIN_U, LATIN_L, LATIN_L)
+        skipv(ps, LATIN_U, LATIN_L, LATIN_L)
         return CosNull
     else
         _error(E_UNEXPECTED_CHAR, ps)
     end
 end
 
-function parse_array(ps::ParserState)
+function parse_array(ps::BufferedInputStream)
     result=CosArray()
-    @inbounds incr!(ps)  # Skip over opening '['
+    @inbounds skip(ps,1)  # Skip over opening '['
     chomp_space!(ps)
-    if byteat(ps) ≠ RIGHT_SB  # special case for empty array
+    if peek(ps) ≠ RIGHT_SB  # special case for empty array
         @inbounds while true
             push!(result.val, parse_value(ps))
             chomp_space!(ps)
-            b = byteat(ps)
+            b = peek(ps)
             b == RIGHT_SB && break
         end
     end
 
-    @inbounds incr!(ps)
+    @inbounds skip(ps,1)
     result
 end
 
@@ -113,9 +115,9 @@ function read_octal_escape!(c, ps)
 end
 
 
-function parse_string(ps::ParserState)
+function parse_string(ps::BufferedInputStream)
     b = UInt8[]
-    incr!(ps)  # skip opening quote
+    skip(ps,1)  # skip opening quote
     local paren_cnt = 0
     while true
         c = advance!(ps)
@@ -145,9 +147,9 @@ function parse_string(ps::ParserState)
 end
 
 
-function parse_xstring(ps::ParserState)
+function parse_xstring(ps::BufferedInputStream)
     b = UInt8[]
-    incr!(ps)  # skip open LT
+    skip(ps,1)  # skip open LT
 
     count = 0
     while true
@@ -170,14 +172,14 @@ function parse_xstring(ps::ParserState)
     end
 end
 
-function parse_dict(ps::ParserState)
+function parse_dict(ps::BufferedInputStream)
     #Move the cursor beyond < char
     chomp_space!(ps)
 
     dict=CosDict()
 
-    while(hasmore(ps))
-        skip!(ps,SOLIDUS)
+    while(true)
+        @assert peek(ps)==SOLIDUS
         key = parse_name(ps)
         chomp_space!(ps)
 
@@ -185,12 +187,13 @@ function parse_dict(ps::ParserState)
         if (val != CosNull)
             dict.val[key] = val
         end
+
         chomp_space!(ps)
 
-        c = byteat(ps)
+        c = peek(ps)
         if (c == GREATER_THAN)
-            incr!(ps)
-            skip!(ps, GREATER_THAN)
+            skip(ps,1)
+            skipv(ps, GREATER_THAN)
             break
         end
         keyfound = false
@@ -198,10 +201,10 @@ function parse_dict(ps::ParserState)
     return dict
 end
 
-function ensure_line_feed_eol(ps::ParserState)
+function ensure_line_feed_eol(ps::BufferedInputStream)
   c = advance!(ps)
   if (c == RETURN)
-    skip!(ps,LINE_FEED)
+    skipv(ps,LINE_FEED)
   elseif (c == LINE_FEED)
     return c
   else
@@ -215,13 +218,13 @@ If it's already an externalized stream then false is returned.
 The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 """
-function read_internal_stream_data(ps::ParserState, extent::CosDict, len::Int)
+function read_internal_stream_data(ps::BufferedInputStream, extent::CosDict, len::Int)
   if get(extent, CosName("F")) != CosNull
     return false
   end
 
   (path,io) = get_tempfilepath()
-  data = read!(ps,len)
+  data = read(ps,len)
   write(io, data)
   close(io)
 
@@ -252,11 +255,11 @@ type CosObjectLoc
 end
 
 process_stream_length(stmlen::CosInt,
-                      ps::ParserState,
+                      ps::BufferedInputStream,
                       xref::Dict{CosIndirectObjectRef, CosObjectLoc})=stmlen
 
 function process_stream_length(stmlen::CosIndirectObjectRef,
-                               ps::ParserState,
+                               ps::BufferedInputStream,
                                xref::Dict{CosIndirectObjectRef, CosObjectLoc})
   cosObjectLoc = xref[stmlen]
   if (cosObjectLoc.obj === CosNull)
@@ -296,13 +299,13 @@ function postprocess_indirect_object(ps::ParserState, obj::CosDict,
 
     #Now eat away the ENDSTREAM token
     chomp_space!(ps)
-    skip!(ps,ENDSTREAM)
+    skipv(ps,ENDSTREAM)
     obj = createObjectStreams(obj)
   end
   return obj
 end
 
-postprocess_indirect_object(ps::ParserState, obj::CosObject,
+postprocess_indirect_object(ps::BufferedInputStream, obj::CosObject,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})=obj
 
 function parse_indirect_obj(ps::ParserState,
@@ -311,21 +314,21 @@ function parse_indirect_obj(ps::ParserState,
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
     chomp_space!(ps)
-    skip!(ps, OBJ)
+    skipv(ps, OBJ)
     obj = parse_value(ps)
     chomp_space!(ps)
     obj = postprocess_indirect_object(ps, obj, xref)
     chomp_space!(ps)
-    skip!(ps,ENDOBJ)
+    skipv(ps,ENDOBJ)
     return CosIndirectObject(objn, genn, obj)
 end
 
-function parse_indirect_ref(ps::ParserState)
+function parse_indirect_ref(ps::BufferedInputStream)
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
     chomp_space!(ps)
-    skip!(ps, LATIN_UPPER_R)
+    skipv(ps, LATIN_UPPER_R)
     return CosIndirectObjectRef(objn, genn)
 end
 
@@ -336,7 +339,7 @@ function try_parse_indirect_reference(ps::ParserState)
     end
     chomp_space!(ps)
     pos = position(ps)
-    if ispdfdigit(byteat(ps))
+    if ispdfdigit(peek(ps))
         objn = nobj.val
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
@@ -389,9 +392,8 @@ function int_from_bytes(bytes::Vector{UInt8}, from::Int, to::Int)
     return ifelse(isnegative, -num, num)
 end
 
-function number_from_bytes(ps::ParserState, isint::Bool,
+function number_from_bytes(ps::BufferedInputStream, isint::Bool,
                            bytes::Vector{UInt8}, from::Int, to::Int)
-
     #=
     @inbounds if hasleadingzero(bytes, from, to)
         _error(E_LEADING_ZERO, ps)
@@ -415,29 +417,29 @@ function number_from_bytes(ps::ParserState, isint::Bool,
     end
 end
 
-function parse_unsignednumber(ps::ParserState)
+function parse_unsignednumber(ps::BufferedInputStream)
     number = UInt8[]
     isint = true
 
-    @inbounds while hasmore(ps)
-        c = current(ps)
+    while true
+        c = peek(ps)
         if ispdfdigit(c)
             push!(number, UInt8(c))
         else
             break
         end
-        incr!(ps)
+        skip(ps,1)
     end
     return number_from_bytes(ps, isint, number, 1, length(number))
 end
 
 
-function parse_number(ps::ParserState)
+function parse_number(ps::BufferedInputStream)
     number = UInt8[]
     isint = true
 
-    @inbounds while hasmore(ps)
-        c = current(ps)
+    while true
+        c = peek(ps)
 
         if ispdfdigit(c) || c == MINUS_SIGN
             push!(number, UInt8(c))
@@ -449,7 +451,7 @@ function parse_number(ps::ParserState)
             break
         end
 
-        incr!(ps)
+        skip(ps,1)
     end
 
     return number_from_bytes(ps, isint, number, 1, length(number))

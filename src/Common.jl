@@ -8,6 +8,6 @@ using Compat
 include("bytes.jl")
 include("errors.jl")
 include("Utils.jl")
-include("Parser.jl")
+include("BufferParser.jl")
 
 end

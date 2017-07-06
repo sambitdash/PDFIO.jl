@@ -1,3 +1,5 @@
+using BufferedStreams
+
 # The xref stream may be accessed later. There is no point encrypting this data
 #Ideal will be to remove the filter.
 function make_number(data, start, nbytes)
@@ -122,7 +124,7 @@ function cosObjectStreamGetObject(stm::CosObjectStream,
   ref::CosNullType, loc::Int)
   filename = get(stm, CosName("F"))
   io = open(filename |> get,"r")
-  ps = getParserState(io)
+  ps = BufferedInputStream(io)
   seek(ps, stm.oloc[loc+1])
   obj = parse_value(ps)
   close(io)

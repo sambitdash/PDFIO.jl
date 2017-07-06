@@ -7,8 +7,9 @@ export CosDoc,
 
 type CosDocImpl <: CosDoc
   filepath::String
-  io::IO
-  ps::ParserState
+  size::Int
+  io::IOStream
+  ps::BufferedInputStream{IOStream}
   header::String
   startxref::Int
   version::Tuple{Int,Int}
@@ -19,8 +20,9 @@ type CosDocImpl <: CosDoc
   hasNativeXRefStm::Bool
   function CosDocImpl(fp::String)
     io = open(fp,"r")
-    ps = getParserState(io)
-    new(fp,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], [], false, false)
+    sz = filesize(fp)
+    ps = BufferedInputStream(io)
+    new(fp,sz,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], [], false, false)
   end
 end
 
@@ -78,7 +80,7 @@ function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
 end
 
 function read_header(ps)
-  skip!(ps,PERCENT)
+  skipv(ps,PERCENT)
   b = UInt8[]
   c = advance!(ps)
   while(c != MINUS_SIGN)
@@ -89,28 +91,28 @@ function read_header(ps)
   if ispdfdigit(major)
       major -= DIGIT_ZERO
   else
-      _error(E_BAD_HEADER, ps)
+      error(E_BAD_HEADER)
   end
-  skip!(ps,PERIOD)
+  skipv(ps,PERIOD)
   minor = advance!(ps)
 
   if ispdfdigit(minor)
       minor -= DIGIT_ZERO
   else
-      _error(E_BAD_HEADER, ps)
+      error(E_BAD_HEADER)
   end
   return [major,minor,b]
 end
 
 
-function read_trailer(ps::ParserState, lookahead::Int)
+function read_trailer(ps::BufferedInputStream, lookahead::Int)
   if locate_keyword!(ps,TRAILER,lookahead) < 0
-      _error(E_UNEXPECTED_CHAR,ps)
+      error(E_UNEXPECTED_CHAR)
   end
   #Check for EOL
   chomp_eol!(ps)
-  skip!(ps,LESS_THAN)
-  skip!(ps,LESS_THAN)
+  skipv(ps,LESS_THAN)
+  skipv(ps,LESS_THAN)
 
   dict = parse_dict(ps)
   chomp_space!(ps)
@@ -122,27 +124,27 @@ end
 @inline may_have_xrefstream(doc::CosDocImpl)=
   (doc.version[1]>=1)&&(doc.version[2]>=5)
 
-function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
+function doc_trailer_update(ps::BufferedInputStream, doc::CosDocImpl)
   const TRAILER_REWIND=50
 
-  seek(ps,-TRAILER_REWIND)
+  seek(ps, doc.size-TRAILER_REWIND)
 
   if (doc.isPDF)
     if locate_keyword!(ps,STARTXREF,TRAILER_REWIND) < 0
-      _error(E_UNEXPECTED_CHAR,ps)
+      error(E_UNEXPECTED_CHAR)
     end
     chomp_space!(ps)
     doc.startxref = parse_number(ps).val
     chomp_space!(ps)
     #Check for EOF
     if locate_keyword!(ps,EOF) != 0
-        _error(E_UNEXPECTED_CHAR,ps)
+        error(E_UNEXPECTED_CHAR)
     end
   end
 
   if doc.isPDF
     seek(ps, doc.startxref)
-    doc.hasNativeXRefStm=(may_have_xrefstream(doc) && ispdfdigit(current(ps)))
+    doc.hasNativeXRefStm=(may_have_xrefstream(doc) && ispdfdigit(peek(ps)))
 
     if (doc.hasNativeXRefStm)
       read_xref_streams(ps, doc)
@@ -152,13 +154,13 @@ function doc_trailer_update(ps::ParserState, doc::CosDocImpl)
   end
 end
 
-function read_xref_streams(ps::ParserState, doc::CosDocImpl)
+function read_xref_streams(ps::BufferedInputStream, doc::CosDocImpl)
   found = false
   while(true)
     xrefstm = parse_indirect_obj(ps, doc.xref)
     if (!found)
       if (get(xrefstm,  CosName("Root")) == CosNull)
-        _error(E_BAD_TRAILER,ps)
+        error(E_BAD_TRAILER)
       else
         push!(doc.xrefstm, xrefstm)
       end
@@ -176,7 +178,7 @@ function read_xref_streams(ps::ParserState, doc::CosDocImpl)
   end
 end
 
-function read_xref_tables(ps::ParserState, doc::CosDocImpl)
+function read_xref_tables(ps::BufferedInputStream, doc::CosDocImpl)
   found = false
   while(true)
     read_xref_table(ps,doc)
@@ -184,7 +186,7 @@ function read_xref_tables(ps::ParserState, doc::CosDocImpl)
 
     if (!found)
       if (get(trailer,  CosName("Root")) == CosNull)
-        _error(E_BAD_TRAILER,ps)
+        error(E_BAD_TRAILER)
       else
         push!(doc.trailer, trailer)
       end
@@ -215,17 +217,17 @@ function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
   return read_xref_stream(xrefstm, doc.xref)
 end
 
-function read_xref_table(ps::ParserState, doc::CosDocImpl)
-    skip!(ps, XREF)
+function read_xref_table(ps::BufferedInputStream, doc::CosDocImpl)
+    skipv(ps, XREF)
     chomp_eol!(ps)
 
 
     while (true)
-        if !ispdfdigit(current(ps))
+        if !ispdfdigit(peek(ps))
             break
         end
         oid = parse_unsignednumber(ps).val
-        skip!(ps, SPACE)
+        skipv(ps, SPACE)
         n_entry = parse_unsignednumber(ps).val
         chomp_space!(ps)
 
