@@ -31,8 +31,8 @@ buf = read(bufstm)
 
 println("General File Opening 3")
 
-download("http://www.stillhq.com/pdfdb/000003/data.pdf", "downloads/3.pdf")
-doc = pdDocOpen("downloads/3.pdf")
+download("http://www.stillhq.com/pdfdb/000003/data.pdf", "3.pdf")
+doc = pdDocOpen("3.pdf")
 @test pdDocGetPageCount(doc) == 30
 page = pdDocGetPage(doc, 1)
 @test pdPageIsEmpty(page) == false
@@ -40,8 +40,8 @@ page = pdDocGetPage(doc, 1)
 #This file is to be downloaded from the test database
 
 println("Test RunLengthDecode")
-download("http://www.stillhq.com/pdfdb/000582/data.pdf", "downloads/582.pdf")
-doc = pdDocOpen("downloads/582.pdf")
+download("http://www.stillhq.com/pdfdb/000582/data.pdf", "582.pdf")
+doc = pdDocOpen("582.pdf")
 @test pdDocGetPageCount(doc) == 12
 obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(177, 0))
 stm=get(obj)
@@ -52,8 +52,8 @@ data=read(stm)
 #This file is to be downloaded from the test database
 
 println("Test ASCIIHexDecode")
-download("http://www.stillhq.com/pdfdb/000325/data.pdf", "downloads/325.pdf")
-doc = pdDocOpen("downloads/325.pdf")
+download("http://www.stillhq.com/pdfdb/000325/data.pdf", "325.pdf")
+doc = pdDocOpen("325.pdf")
 @test pdDocGetPageCount(doc) == 1
 obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(7, 0))
 stm=get(obj)
@@ -62,8 +62,8 @@ data=read(stm)
 
 
 println("Test ASCII85Decode")
-download("http://www.stillhq.com/pdfdb/000388/data.pdf", "downloads/388.pdf")
-doc = pdDocOpen("downloads/388.pdf")
+download("http://www.stillhq.com/pdfdb/000388/data.pdf", "388.pdf")
+doc = pdDocOpen("388.pdf")
 @test pdDocGetPageCount(doc) == 1
 obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(9, 0))
 stm=get(obj)
