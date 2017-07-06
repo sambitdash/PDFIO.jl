@@ -6,7 +6,7 @@ export BACKSPACE, NULL,TAB, LINE_FEED,NEWLINE, FORM_FEED, RETURN,
        OBJECT_BEGIN, OBJECT_END, ESCAPES, REVERSE_ESCAPES,
        ESCAPED_ARRAY, LEFT_PAREN, RIGHT_PAREN, LESS_THAN,
        GREATER_THAN, LEFT_CB, RIGHT_CB, LEFT_SB, RIGHT_SB,
-       PERCENT,PERIOD, NUMBER_SIGN, BANG, LATIN_UPPER_D,STREAM,ENDSTREAM,
+       PERCENT,PERIOD, NUMBER_SIGN, BANG, TILDE, LATIN_UPPER_D,STREAM,ENDSTREAM,
        LATIN_UPPER_E,LATIN_UPPER_F, LATIN_UPPER_O, LATIN_UPPER_P,
        LATIN_UPPER_R,XREF, TRAILER, STARTXREF, EOF, OBJ, ENDOBJ, ispdfspace,
        ispdfdelimiter,ispdfdigit, ispdfodigit, ispdfxdigit, is_crorlf
@@ -36,6 +36,7 @@ const PERCENT        = UInt8('%')
 const PERIOD         = UInt8('.')
 const NUMBER_SIGN    = UInt8('#')
 const BANG           = UInt8('!')
+const TILDE          = UInt8('~')
 
 const STRING_DELIM   = UInt8('"')
 const PLUS_SIGN      = UInt8('+')

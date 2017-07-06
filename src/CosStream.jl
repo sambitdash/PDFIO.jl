@@ -57,7 +57,7 @@ end
 
 const function_map = Dict(
    CosName("ASCIIHexDecode") => decode_asciihex,
-   CosName("ASCII85Decode") => _not_implemented,
+   CosName("ASCII85Decode") => decode_ascii85,
    CosName("LZWDecode") => _not_implemented,
    CosName("FlateDecode") => decode_flate,
    CosName("RunLengthDecode") => decode_rle,
@@ -392,71 +392,121 @@ end
 
 type ASCII85DecodeSource{T<:BufferedInputStream}
   input::T
-  residue::Array{UInt8,1}
+  residue::Vector{UInt8}
+  isEOF::Bool
+  len::Int
+  s::Int
+  isPending::Bool
+  function ASCII85DecodeSource{T}(t::T,r::Vector{UInt8},isEOF::Bool) where{T<:BufferedInputStream}
+    return new(t,r,isEOF,4,1,false)
+  end
 end
+
+ASCII85DecodeSource{T<:BufferedInputStream}(t::T)=ASCII85DecodeSource{T}(t, Vector{UInt8}(4),false)
+
+eof(source::ASCII85DecodeSource)=(source.isEOF || eof(source.input))
 
 function BufferedStreams.readbytes!{T<:BufferedInputStream}(
         source::ASCII85DecodeSource{T},
         buffer::AbstractArray{UInt8},
         from::Int, to::Int)
-  nbneeded = to - from + 1
-  reslen = length(source.residue)
+  ofrom=from
 
-  if (reslen >= nbneeded)
-    copy!(buffer, from, source.residue, 1, nbneeded)
-    splice!(source.residue, 1:nbneeded)
-    return nbneeded
-  else
-    copy!(buffer, from, source.residue, 1, reslen)
-    splice!(source.residue, 1:reslen)
-    nbneeded = nbneeded - reslen
-    from = from + reslen
-  end
-  nbneeded = to - from + 1
-  nbneeded = (nbneeded + 3)/4*4
-
-  nbread   = nbneeded/4*5
-
-  data::Array{UInt,1}
-
-  ndata = BufferedStreams.readbytes!{T}(source.input, data, 1, nbread)
-
-  count = 0
-  iter = 0
-  while (count < nbneeded) || (iter < ndata)
-    n::UInt32 = 0
-    b1 = ((iter+=1) < ndata)? data[iter]:BANG
-    if (b1 == LATIN_Z)
-      n = 0
+  if (source.isPending)
+    nread = source.len - source.s + 1
+    if (from + nread <= to)
+      copy!(buffer, from, source.residue, source.s, nread)
+      from += nread
+      source.s = 1
+      source.len = 4
+      source.isPending = false
     else
-      n = (b1-BANG)*85
-      b2 = ((iter+=1) < ndata)? data[iter]:BANG
-      n += (b2-BANG)
-      b3 = ((iter+=1) < ndata)? data[iter]:BANG
-      n *= 85
-      n += (b3-BANG)
-      b4 = ((iter+=1) < ndata)? data[iter]:BANG
-      n *= 85
-      n += (b4-BANG)
-      b5 = ((iter+=1) < ndata)? data[iter]:BANG
-      n *= 85
-      n += (b5-BANG)
-    end
-    arr = reinterpret(UInt8[4], n)
-    if (from+4 <= to)
-      copy!(buffer, from, arr, 1, 4)
-      from += 4
-      count += 4
-    else
-      copy!(buffer, from, arr, 1, to - from + 1)
-      from = to + 1
-      count += (to - from +1)
-      rest = 4 - (to - from +1)
-      copy!(source.residue, 1, arr, to-from+2, rest)
+      nbytes = to - from + 1
+      copy!(buffer, from, source.residue, 1, nbytes)
+      from+=nbytes
+      source.s = nbytes+1
+      source.isPending = true
+      return nbytes
     end
   end
-  return count + reslen
+
+  while(from <= to) && !eof(source)
+    nread=read_next_ascii85_token(source)
+    if (from + nread <= to)
+      copy!(buffer, from, source.residue, 1, nread)
+      from += nread
+      source.isPending = false
+    else
+      nbytes = to - from + 1
+      copy!(buffer, from, source.residue, 1, nbytes)
+      from+=nbytes
+      source.s = nbytes+1
+      source.isPending = true
+    end
+  end
+
+  return from-ofrom+1
 end
+
+function read_next_ascii85_token(source::ASCII85DecodeSource)
+  if(source.isPending)
+    return 0
+  end
+
+  b = read(source.input,UInt8)
+
+  count = 1
+  if (b == LATIN_Z)
+    fill!(source.residue,0)
+    source.isPending = true
+    return(source.len=4)
+  elseif (b == TILDE)
+    b = read(source.input, UInt8)
+    if (b == GREATER_THAN)
+      source.isEOF = true
+      source.isPending = false
+      return (source.len=0)
+    else
+      error(E_UNEXPECTED_EOF)
+    end
+  elseif ispdfspace(b)
+    count = 0
+  end
+
+  n::UInt32 = 0
+
+  if (count == 1)
+    n = b-BANG
+    @assert(0 <= n <= 84)
+  end
+  while(count < 5)&& !eof(source)
+    b = peek(source.input)
+    if (BANG <= b <= LATIN_U)
+      n *= 85
+      skip(source.input,1)
+      n += (b-BANG)
+      count+=1
+    elseif (b == TILDE)
+      break
+    elseif ispdfspace(b)
+      skip(source.input,1)
+      continue
+    else
+      error(E_UNEXPECTED_CHAR)
+    end
+  end
+
+  sz = 0
+  for i=(count-1):-1:1
+    source.residue[i] = rem(n,256)
+    n = div(n, 256)
+    sz += 1
+  end
+
+  source.isPending = (sz > 0)
+  return (source.len=sz)
+end
+
 
 function decode_ascii85(input::BufferedInputStream)
   return BufferedInputStream(ASCII85DecodeSource(input))
