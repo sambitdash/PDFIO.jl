@@ -107,23 +107,6 @@ function get_pdfconstant(b::Vector{UInt8})
   end
 end
 
-
-function parse_pdfconstant(ps::BufferedInputStream)
-    c = advance!(ps)
-    if c == LATIN_T      # true
-        skipv(ps, LATIN_R, LATIN_U, LATIN_E)
-        return CosTrue
-    elseif c == LATIN_F  # false
-        skipv(ps, LATIN_A, LATIN_L, LATIN_S, LATIN_E)
-        return CosFalse
-    elseif c == LATIN_N  # null
-        skipv(ps, LATIN_U, LATIN_L, LATIN_L)
-        return CosNull
-    else
-        _error(E_UNEXPECTED_CHAR, ps)
-    end
-end
-
 function parse_array(ps::BufferedInputStream)
     result=CosArray()
     @inbounds skip(ps,1)  # Skip over opening '['
