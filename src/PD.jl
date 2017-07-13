@@ -5,5 +5,6 @@ using Compat
 
 include("PDDoc.jl")
 include("PDPage.jl")
+include("PDPageElement.jl")
 
 end

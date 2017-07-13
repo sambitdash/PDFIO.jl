@@ -1,9 +1,21 @@
+export parse_value,
+       get_pdfcontentops
+
+get_pdfcontentops(b)=error(E_NOT_IMPLEMENTED)
+
+function parse_data(filename)
+  ps=BufferedInputStream(open(filename))
+
+  while(!eof(ps))
+    println(parse_value(ps))
+    chomp_space!(ps)
+  end
+end
+
 """
-Given a `ParserState`, after possibly any amount of whitespace, return the next
+Given a `BufferedInputStream`, after possibly any amount of whitespace, return the next
 parseable value.
 """
-const ParserState=BufferedInputStream
-
 function parse_value(ps::BufferedInputStream)
     chomp_space!(ps)
 
@@ -23,7 +35,7 @@ function parse_value(ps::BufferedInputStream)
     elseif byte == LEFT_SB
         parse_array(ps)
     else
-        parse_pdfconstant(ps)
+        parse_pdfOpsOrConst(ps)
     end
 end
 
@@ -63,6 +75,36 @@ function parse_name(ps::BufferedInputStream)
         push!(b, c)
     end
     return CosName(String(b))
+end
+
+function parse_pdfOpsOrConst(ps::BufferedInputStream)
+  b = UInt8[]
+
+  while true
+      c = peek(ps)
+      if ispdfspace(c) || ispdfdelimiter(c)
+          break
+      end
+      skip(ps,1)
+      push!(b, c)
+  end
+  obj = get_pdfconstant(b)
+  if (obj==nothing)
+    obj = get_pdfcontentops(b)
+  end
+  return obj
+end
+
+function get_pdfconstant(b::Vector{UInt8})
+  if (b==[LATIN_T,LATIN_R,LATIN_U,LATIN_E])
+    return CosTrue
+  elseif (b==[LATIN_F,LATIN_A, LATIN_L, LATIN_S, LATIN_E])
+    return CosFalse
+  elseif (b==[LATIN_N, LATIN_U, LATIN_L, LATIN_L])
+    return CosNull
+  else
+    return nothing
+  end
 end
 
 
@@ -272,7 +314,7 @@ function process_stream_length(stmlen::CosIndirectObjectRef,
   return cosObjectLoc.obj
 end
 
-function postprocess_indirect_object(ps::ParserState, obj::CosDict,
+function postprocess_indirect_object(ps::BufferedInputStream, obj::CosDict,
                               xref::Dict{CosIndirectObjectRef, CosObjectLoc})
   if locate_keyword!(ps,STREAM) == 0
     ensure_line_feed_eol(ps)
@@ -308,7 +350,7 @@ end
 postprocess_indirect_object(ps::BufferedInputStream, obj::CosObject,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})=obj
 
-function parse_indirect_obj(ps::ParserState,
+function parse_indirect_obj(ps::BufferedInputStream,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
@@ -332,25 +374,27 @@ function parse_indirect_ref(ps::BufferedInputStream)
     return CosIndirectObjectRef(objn, genn)
 end
 
-function try_parse_indirect_reference(ps::ParserState)
+function try_parse_indirect_reference(ps::BufferedInputStream)
     nobj = parse_number(ps)
     if isa(nobj,CosFloat)
         return nobj
     end
     chomp_space!(ps)
-    pos = position(ps)
+    mark(ps)
     if ispdfdigit(peek(ps))
         objn = nobj.val
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
         if locate_keyword!(ps,LATIN_UPPER_R)==0
           #This can happen in consecutive numbers in an array
+          unmark(ps)
           return CosIndirectObjectRef(objn, genn)
         else
-          seek(ps, pos)
+          reset(ps)
           return nobj
         end
     else
+        unmark(ps)
         return nobj
     end
 end

@@ -4,7 +4,8 @@ import Libz:BufferedStreams.readbytes!
 
 import BufferedStreams:readbytes!
 
-export cosStreamRemoveFilters
+export cosStreamRemoveFilters,
+       decode
 
 function _not_implemented(input)
   error(E_NOT_IMPLEMENTED)

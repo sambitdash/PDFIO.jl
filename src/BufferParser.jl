@@ -7,13 +7,13 @@ export skipv,
        chomp_eol!
 
 @inline function chomp_space!(ps::BufferedInputStream)
-    while ispdfspace(peek(ps))
+    while !eof(ps) && ispdfspace(peek(ps))
       skip(ps,1)
     end
 end
 
 @inline function chomp_eol!(ps::BufferedInputStream)
-    @inbounds while is_crorlf(peek(ps))
+    @inbounds while !eof(ps) && is_crorlf(peek(ps))
         skip(ps,1)
     end
 end
@@ -64,8 +64,7 @@ function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyw
     q = 0
     found=false
     offset = 0
-    pos = position(ps)
-
+    mark(ps)
     while(true)
         c = advance!(ps)
         offset += 1
@@ -85,9 +84,10 @@ function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyw
         end
     end
     if found
+      unmark(ps)
       return (offset - length(keyword))
     else
-      seek(ps, pos)
+      reset(ps)
       peek(ps)
       return -1
     end

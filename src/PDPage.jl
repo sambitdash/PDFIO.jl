@@ -59,3 +59,21 @@ end
 function get_page_contents(page::PDPage, contents::CosObject)
   return CosNull
 end
+
+function get_page_load_objects(page::PDPage)
+  stm = pdPageGetContents(page)
+  get_page_load_objects(stm)
+end
+
+function get_page_load_objects(stm::CosObject)
+  bufstm = decode(stm)
+  while(!eof(bufstm))
+    println(parse_value(bufstm))
+  end
+end
+
+function get_page_load_objects(stm::CosArray)
+  for s in get(stm)
+    get_page_load_objects(s)
+  end
+end
