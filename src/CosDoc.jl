@@ -227,9 +227,7 @@ function read_xref_table(ps::BufferedInputStream, doc::CosDocImpl)
             break
         end
         oid = parse_unsignednumber(ps).val
-        skipv(ps, SPACE)
         n_entry = parse_unsignednumber(ps).val
-        chomp_space!(ps)
 
         for i=1:n_entry
             v = UInt8[]

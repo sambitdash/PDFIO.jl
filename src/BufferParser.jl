@@ -19,7 +19,7 @@ end
 end
 
 function skipv(ps::BufferedInputStream, c::UInt8)
-    if peek(ps) == c
+    if !eof(ps) && (peek(ps) == c)
         skip(ps,1)
     else
         error("Expected '$(Char(c))' here")
@@ -57,7 +57,7 @@ function kmp_preprocess(P)
     return pi
 end
 
-# This cannot be called on a marked stream. 
+# This cannot be called on a marked stream.
 function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyword))
     m = length(keyword)
     pi = kmp_preprocess(keyword)

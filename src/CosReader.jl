@@ -49,6 +49,7 @@ function parse_comment(ps::BufferedInputStream)
         end
         push!(b, c)
     end
+    chomp_space!(ps)
     return b
 end
 
@@ -74,6 +75,7 @@ function parse_name(ps::BufferedInputStream)
         skip(ps,1)
         push!(b, c)
     end
+    chomp_space!(ps)
     return CosName(String(b))
 end
 
@@ -88,6 +90,7 @@ function parse_pdfOpsOrConst(ps::BufferedInputStream)
       skip(ps,1)
       push!(b, c)
   end
+  chomp_space!(ps)
   obj = get_pdfconstant(b)
   if (obj==nothing)
     obj = get_pdfcontentops(b)
@@ -121,6 +124,7 @@ function parse_array(ps::BufferedInputStream)
     end
 
     @inbounds skip(ps,1)
+    chomp_space!(ps)
     result
 end
 
@@ -163,6 +167,7 @@ function parse_string(ps::BufferedInputStream)
             if (paren_cnt > 0)
                 paren_cnt-=1
             else
+                chomp_space!(ps)
                 return CosLiteralString(String(b))
             end
         end
@@ -186,7 +191,7 @@ function parse_xstring(ps::BufferedInputStream)
                 count +=1
                 push!(b, NULL)
             end
-
+            chomp_space!(ps)
             return CosXString(String(b))
         elseif !ispdfxdigit(c)
             _error(E_UNEXPECTED_CHAR, ps)
@@ -223,6 +228,7 @@ function parse_dict(ps::BufferedInputStream)
         end
         keyfound = false
     end
+    chomp_space!(ps)
     return dict
 end
 
@@ -354,6 +360,7 @@ function parse_indirect_ref(ps::BufferedInputStream)
     genn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     skipv(ps, LATIN_UPPER_R)
+    chomp_space!(ps)
     return CosIndirectObjectRef(objn, genn)
 end
 
@@ -371,13 +378,16 @@ function try_parse_indirect_reference(ps::BufferedInputStream)
         if (peek(ps)==LATIN_UPPER_R)
           unmark(ps)
           skip(ps,1)
+          chomp_space!(ps)
           return CosIndirectObjectRef(objn, genn)
         else
           reset(ps)
+          chomp_space!(ps)
           return nobj
         end
     else
         unmark(ps)
+        chomp_space!(ps)
         return nobj
     end
 end
@@ -457,6 +467,7 @@ function parse_unsignednumber(ps::BufferedInputStream)
         end
         skip(ps,1)
     end
+    chomp_space!(ps)
     return number_from_bytes(ps, isint, number, 1, length(number))
 end
 
@@ -480,6 +491,6 @@ function parse_number(ps::BufferedInputStream)
 
         skip(ps,1)
     end
-
+    chomp_space!(ps)
     return number_from_bytes(ps, isint, number, 1, length(number))
 end
