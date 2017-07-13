@@ -57,6 +57,7 @@ function kmp_preprocess(P)
     return pi
 end
 
+# This cannot be called on a marked stream. 
 function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyword))
     m = length(keyword)
     pi = kmp_preprocess(keyword)
@@ -64,6 +65,7 @@ function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyw
     q = 0
     found=false
     offset = 0
+    @assert !ismarked(ps)
     mark(ps)
     while(true)
         c = advance!(ps)

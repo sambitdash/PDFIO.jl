@@ -385,9 +385,9 @@ function try_parse_indirect_reference(ps::BufferedInputStream)
         objn = nobj.val
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
-        if locate_keyword!(ps,LATIN_UPPER_R)==0
-          #This can happen in consecutive numbers in an array
+        if (peek(ps)==LATIN_UPPER_R)
           unmark(ps)
+          skip(ps,1)
           return CosIndirectObjectRef(objn, genn)
         else
           reset(ps)
