@@ -1,3 +1,5 @@
+using BufferedStreams
+
 @compat abstract type PDPageObject end
 
 """
@@ -19,9 +21,67 @@ PDPageElement(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0)=
   PDPageElement(Symbol(ts),ver,nop,Vector{CosObject}())
 
 type PDPageObjectGroup <: PDPageObject
-  s::PDPageElement
-  e::PDPageElement
-  objects::Vector{PDPageObject}
+  isEOG::Bool
+  objs::Vector{Union{PDPageObject,CosObject}}
+  PDPageObjectGroup(isEOG::Bool=false)=
+    new(isEOG,Vector{Union{PDPageObject,CosObject}}())
+end
+
+function load_objects(grp::PDPageObjectGroup, bis::BufferedInputStream)
+  while(!grp.isEOG && !eof(bis))
+    obj = parse_value(bis)
+    collect_object(grp, obj, bis)
+  end
+end
+
+function collect_object(grp::PDPageObjectGroup,
+                        obj::CosObject,
+                        bis::BufferedInputStream)
+  push!(grp.objs, obj)
+end
+
+function collect_object(grp::PDPageObjectGroup,
+                        elem::PDPageElement,
+                        bis::BufferedInputStream)
+  #Find operands for the Operator
+  for i=1:elem.noperand
+    operand=pop!(grp.objs)
+    unshift!(elem.operands,operand)
+  end
+  println(elem)
+  push!(grp.objs, elem)
+end
+
+type PDPageTextObject <: PDPageObject
+  group::PDPageObjectGroup
+  PDPageTextObject()=new(PDPageObjectGroup())
+end
+
+type PDPage_BeginGroup
+  elem::PDPageElement
+  objT::Type
+  PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
+    new(PDPageElement(ts,ver,nop),t)
+end
+
+type PDPage_EndGroup
+  elem::PDPageElement
+  PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
+    new(PDPageElement(ts,ver,nop))
+end
+
+function collect_object(grp::PDPageObjectGroup,
+                        elem::PDPage_BeginGroup,
+                        bis::BufferedInputStream)
+  newobj=elem.objT()
+  load_objects(newobj.group,bis)
+  push!(grp.objs, newobj)
+end
+
+function collect_object(grp::PDPageObjectGroup,
+                        elem::PDPage_EndGroup,
+                        bis::BufferedInputStream)
+  grp.isEOG = true
 end
 
 """
@@ -85,13 +145,13 @@ end
 |TJ||Show text, allowing individual glyph positioning|109|
 |\'||Move to next line and show text|109|
 |\"||Set word and character spacing, move to next line, and show text|109|
-|Tc||Set character spacing||
-|Tf|selectfont|Set text font and size||
-|TL||Set text leading||
-|Tr||Set text rendering mode||
-|Ts||Set text rise||
-|Tw||Set word spacing||
-|Tz||Set horizontal text scaling||
+|Tc||Set character spacing|105|
+|Tf|selectfont|Set text font and size|105|
+|TL||Set text leading|105|
+|Tr||Set text rendering mode|105|
+|Ts||Set text rise|105|
+|Tw||Set word spacing|105|
+|Tz||Set horizontal text scaling|105|
 |d0|setcharwidth|Set glyph width in Type 3 font|113|
 |d1|setcachedevice|Set glyph width and bounding box in Type 3 font|113|
 |BDC||(PDF 1.2) Begin marked-content sequence with property list|320|
@@ -101,78 +161,79 @@ end
 |MP||(PDF 1.2) Define marked-content point|320|
 """
 const PD_CONTENT_OPERATORS=Dict(
-"\'"=>[PDPageElement,"\'",(1,0),0],
-"\""=>[PDPageElement,"\"",(1,0),0],
+"\'"=>[PDPageElement,"\'",(1,0),1],
+"\""=>[PDPageElement,"\"",(1,0),3],
 "b"=>[PDPageElement,"b",(1,0),0],
 "b*"=>[PDPageElement,"b*",(1,0),0],
 "B"=>[PDPageElement,"B",(1,0),0],
 "B*"=>[PDPageElement,"B*",(1,0),0],
-"BDC"=>[PDPageElement,"BDC",(1,2),0],
+"BDC"=>[PDPageElement,"BDC",(1,2),2],
 "BI"=>[PDPageElement,"BI",(1,0),0],
-"BMC"=>[PDPageElement,"BMC",(1,2),0],
-"BT"=>[PDPageElement,"BT",(1,0),0],
+"BMC"=>[PDPageElement,"BMC",(1,2),1],
+"BT"=>[PDPage_BeginGroup,"BT",(1,0),0,PDPageTextObject],
 "BX"=>[PDPageElement,"BX",(1,1),0],
-"c"=>[PDPageElement,"c",(1,0),0],
-"cm"=>[PDPageElement,"cm",(1,0),0],
-"cs"=>[PDPageElement,"cs",(1,1),0],
-"CS"=>[PDPageElement,"CS",(1,1),0],
-"d"=>[PDPageElement,"d",(1,0),0],
-"d0"=>[PDPageElement,"d0",(1,0),0],
-"d1"=>[PDPageElement,"d1",(1,0),0],
-"Do"=>[PDPageElement,"Do",(1,0),0],
+"c"=>[PDPageElement,"c",(1,0),6],
+"cm"=>[PDPageElement,"cm",(1,0),6],
+"cs"=>[PDPageElement,"cs",(1,1),1],
+"CS"=>[PDPageElement,"CS",(1,1),1],
+"d"=>[PDPageElement,"d",(1,0),2],
+"d0"=>[PDPageElement,"d0",(1,0),2],
+"d1"=>[PDPageElement,"d1",(1,0),6],
+"Do"=>[PDPageElement,"Do",(1,0),1],
 "DP"=>[PDPageElement,"DP",(1,2),0],
 "EI"=>[PDPageElement,"EI",(1,0),0],
 "EMC"=>[PDPageElement,"EMC",(1,2),0],
-"ET"=>[PDPageElement,"ET",(1,0),0],
+"ET"=>[PDPage_EndGroup,"ET",(1,0),0],
 "EX"=>[PDPageElement,"EX",(1,1),0],
 "f"=>[PDPageElement,"f",(1,0),0],
 "f*"=>[PDPageElement,"f*",(1,0),0],
 "F"=>[PDPageElement,"F",(1,0),0],
-"g"=>[PDPageElement,"g",(1,0),0],
-"G"=>[PDPageElement,"G",(1,0),0],
-"gs"=>[PDPageElement,"gs",(1,2),0],
+"g"=>[PDPageElement,"g",(1,0),1],
+"G"=>[PDPageElement,"G",(1,0),1],
+"gs"=>[PDPageElement,"gs",(1,2),1],
 "h"=>[PDPageElement,"h",(1,0),0],
-"i"=>[PDPageElement,"i",(1,0),0],
+"i"=>[PDPageElement,"i",(1,0),1],
 "ID"=>[PDPageElement,"ID",(1,0),0],
-"j"=>[PDPageElement,"j",(1,0),0],
-"J"=>[PDPageElement,"J",(1,0),0],
-"k"=>[PDPageElement,"k",(1,0),0],
-"K"=>[PDPageElement,"K",(1,0),0],
-"l"=>[PDPageElement,"l",(1,0),0],
-"m"=>[PDPageElement,"m",(1,0),0],
-"M"=>[PDPageElement,"M",(1,0),0],
+"j"=>[PDPageElement,"j",(1,0),1],
+"J"=>[PDPageElement,"J",(1,0),1],
+"k"=>[PDPageElement,"k",(1,0),4],
+"K"=>[PDPageElement,"K",(1,0),4],
+"l"=>[PDPageElement,"l",(1,0),2],
+"m"=>[PDPageElement,"m",(1,0),2],
+"M"=>[PDPageElement,"M",(1,0),1],
 "MP"=>[PDPageElement,"MP",(1,2),0],
 "n"=>[PDPageElement,"n",(1,0),0],
 "q"=>[PDPageElement,"q",(1,0),0],
 "Q"=>[PDPageElement,"Q",(1,0),0],
-"re"=>[PDPageElement,"re",(1,0),0],
-"rg"=>[PDPageElement,"rg",(1,0),0],
-"RG"=>[PDPageElement,"RG",(1,0),0],
-"ri"=>[PDPageElement,"ri",(1,0),0],
+"re"=>[PDPageElement,"re",(1,0),4],
+"rg"=>[PDPageElement,"rg",(1,0),3],
+"RG"=>[PDPageElement,"RG",(1,0),3],
+"ri"=>[PDPageElement,"ri",(1,0),1],
 "s"=>[PDPageElement,"s",(1,0),0],
 "S"=>[PDPageElement,"S",(1,0),0],
 "sc"=>[PDPageElement,"sc",(1,1),0],
 "SC"=>[PDPageElement,"SC",(1,1),0],
 "scn"=>[PDPageElement,"scn",(1,2),0],
 "SCN"=>[PDPageElement,"SCN",(1,2),0],
-"sh"=>[PDPageElement,"sh",(1,3),0],
+"sh"=>[PDPageElement,"sh",(1,3),1],
 "T*"=>[PDPageElement,"T*",(1,0),0],
-"Tc"=>[PDPageElement,"Tc",(1,0),0],
-"Td"=>[PDPageElement,"Td",(1,0),0],
-"TD"=>[PDPageElement,"TD",(1,0),0],
-"Tf"=>[PDPageElement,"Tf",(1,0),0],
-"Tj"=>[PDPageElement,"Tj",(1,0),0],
-"TJ"=>[PDPageElement,"TJ",(1,0),0],
-"TL"=>[PDPageElement,"TL",(1,0),0],
-"Tr"=>[PDPageElement,"Tr",(1,0),0],
-"Ts"=>[PDPageElement,"Ts",(1,0),0],
-"Tw"=>[PDPageElement,"Tw",(1,0),0],
-"Tz"=>[PDPageElement,"Tz",(1,0),0],
-"v"=>[PDPageElement,"v",(1,0),0],
-"w"=>[PDPageElement,"w",(1,0),0],
+"Tc"=>[PDPageElement,"Tc",(1,0),1],
+"Td"=>[PDPageElement,"Td",(1,0),2],
+"TD"=>[PDPageElement,"TD",(1,0),2],
+"Tf"=>[PDPageElement,"Tf",(1,0),2],
+"Tj"=>[PDPageElement,"Tj",(1,0),1],
+"TJ"=>[PDPageElement,"TJ",(1,0),1],
+"TL"=>[PDPageElement,"TL",(1,0),1],
+"Tm"=>[PDPageElement,"Tm",(1,0),6],
+"Tr"=>[PDPageElement,"Tr",(1,0),1],
+"Ts"=>[PDPageElement,"Ts",(1,0),1],
+"Tw"=>[PDPageElement,"Tw",(1,0),1],
+"Tz"=>[PDPageElement,"Tz",(1,0),1],
+"v"=>[PDPageElement,"v",(1,0),4],
+"w"=>[PDPageElement,"w",(1,0),1],
 "W"=>[PDPageElement,"W",(1,0),0],
 "W*"=>[PDPageElement,"W*",(1,0),0],
-"y"=>[PDPageElement,"y",(1,0),0]
+"y"=>[PDPageElement,"y",(1,0),4]
 )
 
 import ..Cos: get_pdfcontentops
@@ -182,6 +243,6 @@ function get_pdfcontentops(b::Vector{UInt8})
   if (arr == CosNull)
     return CosNull
   else
-    return arr[1](arr[2], arr[3], arr[4])
+    return eval(Expr(:call,arr...))
   end
 end

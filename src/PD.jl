@@ -4,7 +4,7 @@ using ..Cos
 using Compat
 
 include("PDDoc.jl")
-include("PDPage.jl")
 include("PDPageElement.jl")
+include("PDPage.jl")
 
 end
