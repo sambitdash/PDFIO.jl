@@ -38,18 +38,33 @@ function collect_object(grp::PDPageObjectGroup,
                         obj::CosObject,
                         bis::BufferedInputStream)
   push!(grp.objs, obj)
+  return obj
+end
+
+function populate_element(grp::PDPageObjectGroup,
+                          elem::PDPageElement)
+  #Find operands for the Operator
+  if (elem.noperand >= 0)
+    for i=1:elem.noperand
+      operand=pop!(grp.objs)
+      unshift!(elem.operands,operand)
+    end
+  else
+    len=endof(grp.objs)
+    while(isa(grp.objs[len],CosObject))
+      operand=pop!(grp.objs)
+      unshift!(elem.operands,operand)
+      len = endof(grp.objs)
+    end
+  end
 end
 
 function collect_object(grp::PDPageObjectGroup,
                         elem::PDPageElement,
                         bis::BufferedInputStream)
-  #Find operands for the Operator
-  for i=1:elem.noperand
-    operand=pop!(grp.objs)
-    unshift!(elem.operands,operand)
-  end
-  println(elem)
+  populate_element(grp,elem)
   push!(grp.objs, elem)
+  return elem
 end
 
 type PDPageTextObject <: PDPageObject
@@ -57,7 +72,12 @@ type PDPageTextObject <: PDPageObject
   PDPageTextObject()=new(PDPageObjectGroup())
 end
 
-type PDPage_BeginGroup
+type PDPageMarkedContent <: PDPageObject
+  group::PDPageObjectGroup
+  PDPageMarkedContent()=new(PDPageObjectGroup())
+end
+
+type PDPage_BeginGroup <: PDPageObject
   elem::PDPageElement
   objT::Type
   PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
@@ -71,17 +91,22 @@ type PDPage_EndGroup
 end
 
 function collect_object(grp::PDPageObjectGroup,
-                        elem::PDPage_BeginGroup,
+                        beg::PDPage_BeginGroup,
                         bis::BufferedInputStream)
-  newobj=elem.objT()
+  populate_element(grp,beg.elem)
+  newobj=beg.objT()
+  push!(newobj.group.objs,beg.elem)
   load_objects(newobj.group,bis)
   push!(grp.objs, newobj)
+  return newobj
 end
 
 function collect_object(grp::PDPageObjectGroup,
                         elem::PDPage_EndGroup,
                         bis::BufferedInputStream)
+  collect_object(grp,elem.elem,bis)
   grp.isEOG = true
+  return grp
 end
 
 """
@@ -167,9 +192,9 @@ const PD_CONTENT_OPERATORS=Dict(
 "b*"=>[PDPageElement,"b*",(1,0),0],
 "B"=>[PDPageElement,"B",(1,0),0],
 "B*"=>[PDPageElement,"B*",(1,0),0],
-"BDC"=>[PDPageElement,"BDC",(1,2),2],
+"BDC"=>[PDPage_BeginGroup,"BDC",(1,2),2,PDPageMarkedContent],
 "BI"=>[PDPageElement,"BI",(1,0),0],
-"BMC"=>[PDPageElement,"BMC",(1,2),1],
+"BMC"=>[PDPage_BeginGroup,"BMC",(1,2),1,PDPageMarkedContent],
 "BT"=>[PDPage_BeginGroup,"BT",(1,0),0,PDPageTextObject],
 "BX"=>[PDPageElement,"BX",(1,1),0],
 "c"=>[PDPageElement,"c",(1,0),6],
@@ -182,7 +207,7 @@ const PD_CONTENT_OPERATORS=Dict(
 "Do"=>[PDPageElement,"Do",(1,0),1],
 "DP"=>[PDPageElement,"DP",(1,2),0],
 "EI"=>[PDPageElement,"EI",(1,0),0],
-"EMC"=>[PDPageElement,"EMC",(1,2),0],
+"EMC"=>[PDPage_EndGroup,"EMC",(1,2),0],
 "ET"=>[PDPage_EndGroup,"ET",(1,0),0],
 "EX"=>[PDPageElement,"EX",(1,1),0],
 "f"=>[PDPageElement,"f",(1,0),0],
@@ -211,10 +236,10 @@ const PD_CONTENT_OPERATORS=Dict(
 "ri"=>[PDPageElement,"ri",(1,0),1],
 "s"=>[PDPageElement,"s",(1,0),0],
 "S"=>[PDPageElement,"S",(1,0),0],
-"sc"=>[PDPageElement,"sc",(1,1),0],
-"SC"=>[PDPageElement,"SC",(1,1),0],
-"scn"=>[PDPageElement,"scn",(1,2),0],
-"SCN"=>[PDPageElement,"SCN",(1,2),0],
+"sc"=>[PDPageElement,"sc",(1,1),-1],
+"SC"=>[PDPageElement,"SC",(1,1),-1],
+"scn"=>[PDPageElement,"scn",(1,2),-1],
+"SCN"=>[PDPageElement,"SCN",(1,2),-1],
 "sh"=>[PDPageElement,"sh",(1,3),1],
 "T*"=>[PDPageElement,"T*",(1,0),0],
 "Tc"=>[PDPageElement,"Tc",(1,0),1],
