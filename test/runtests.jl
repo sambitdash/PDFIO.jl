@@ -14,6 +14,7 @@ contents = pdPageGetContents(page)
 bufstm = get(contents)
 buf = read(bufstm)
 @test length(buf) == 18669
+@test length(pdPageGetContentObjects(page).objs)==190
 
 #This file is part of the test folder
 
@@ -26,6 +27,7 @@ contents = pdPageGetContents(page)
 bufstm = get(contents)
 buf = read(bufstm)
 @test length(buf) == 1021
+@test length(pdPageGetContentObjects(page).objs)==1
 
 #This file is to be downloaded from the test database
 
