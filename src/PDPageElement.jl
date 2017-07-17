@@ -77,6 +77,69 @@ type PDPageMarkedContent <: PDPageObject
   PDPageMarkedContent()=new(PDPageObjectGroup())
 end
 
+type PDPageInlineImage <: PDPageObject
+  params::CosDict
+  data::Vector{UInt8}
+  isRead::Bool
+  PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
+end
+
+type PDPage_BeginInlineImage <: PDPageObject
+  elem::PDPageElement
+  PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
+    new(PDPageElement(ts,ver,nop))
+end
+
+function collect_object(grp::PDPageObjectGroup,
+                        beg::PDPage_BeginInlineImage,
+                        bis::BufferedInputStream)
+  newobj=PDPageInlineImage()
+
+  while(!newobj.isRead)
+    value=parse_value(bis)
+    collect_inline_image(img,value,bis)
+  end
+  push!(grp.objs, newobj)
+  return newobj
+end
+
+function collect_inline_image(img::PDPageInlineImage, name::CosName,
+  bis::BufferedInputStream)
+  value = parse_value(bis)
+  set!(img.params, name, value)
+end
+
+function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
+  bis::BufferedInputStream)
+  if (elem.t == Symbol("ID"))
+    while(!image.isRead && !eof(bis))
+      b1 = peek(bis)
+      if (b1 == LATIN_E)
+        mark(bis)
+        skip(bis,1);
+        b2 = peek(bis)
+        if (b2 == LATIN_I)
+          skip(bis,1);b3 = peek(bis)
+          if (is_crorlf(b3))
+            skip(bis,1)
+            img.isRead=true
+            unmark(s)
+            break
+          else
+            reset(bis)
+          end
+        else
+          reset(bis)
+        end
+      end
+      push!(img.data, b1)
+      skip(bis,1);
+    end
+  end
+  return img
+end
+
+
 type PDPage_BeginGroup <: PDPageObject
   elem::PDPageElement
   objT::Type
@@ -193,7 +256,7 @@ const PD_CONTENT_OPERATORS=Dict(
 "B"=>[PDPageElement,"B",(1,0),0],
 "B*"=>[PDPageElement,"B*",(1,0),0],
 "BDC"=>[PDPage_BeginGroup,"BDC",(1,2),2,PDPageMarkedContent],
-"BI"=>[PDPageElement,"BI",(1,0),0],
+"BI"=>[PDPage_BeginInlineImage,"BI",(1,0),0,PDPageInlineImage],
 "BMC"=>[PDPage_BeginGroup,"BMC",(1,2),1,PDPageMarkedContent],
 "BT"=>[PDPage_BeginGroup,"BT",(1,0),0,PDPageTextObject],
 "BX"=>[PDPageElement,"BX",(1,1),0],

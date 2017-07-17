@@ -55,7 +55,7 @@ end
 
 function parse_name(ps::BufferedInputStream)
     b = UInt8[]
-    skip(ps,1)  #skip solidus
+    skipv(ps,SOLIDUS)  #skip solidus and ensure it
     while true
         c = peek(ps)
         if ispdfspace(c) || ispdfdelimiter(c)
