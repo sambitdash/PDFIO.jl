@@ -131,12 +131,12 @@ end
 function read_octal_escape!(c, ps)
     local n::UInt16 = (c << 3)
     for _ in 1:2
-        b = advance!(ps)
+        b = peek(ps)
         n = n << 3
         if (ispdfodigit(b))
             n += b
+            skip(ps,1)
         else
-            retract!(ps)
             break
         end
     end
@@ -154,7 +154,7 @@ function parse_string(ps::BufferedInputStream)
         if c == BACKSLASH
             c = advance!(ps)
             if ispdfodigit(c) #Read octal digits
-                append!(b, Vector{UInt8}(string(read_octal_escape!(ps))))
+                append!(b, Vector{UInt8}(string(read_octal_escape!(c,ps))))
             else
                 c = get(ESCAPES, c, 0x00)
                 c == 0x00 && _error(E_BAD_ESCAPE, ps)

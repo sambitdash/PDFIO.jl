@@ -5,4 +5,5 @@ docs/build/
 docs/site/
 test/downloads
 test/*.pdf
+test/pvt
 file.txt
