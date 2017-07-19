@@ -61,8 +61,6 @@ function read_xref_stream(xrefstm::CosObject,
   @assert rem(lenidx,2) == 0
   idx_int=get(index,true)
 
-  println(idx_int)
-
   it = 0 #iterator for data
   count_record = 0
   for i = 1:div(lenidx,2)
@@ -99,8 +97,6 @@ function read_object_info_from_stm(stm::CosStream,
     val = readuntil(io, ' ')
     oloc[i] = parse(Int,val) + first
   end
-  println(oids)
-  println(oloc)
 end
 
 function cosObjectStreamGetObject(stm::CosIndirectObject{CosObjectStream},

@@ -36,7 +36,7 @@ end
 PDPageImpl(doc::PDDocImpl, cospage::CosObject)=PDPageImpl(doc, cospage,CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
-which will make the constructor complex. This is the default will all default
+which will make the constructor complex. This is the default with all default
 values.
 =#
 function create_pdpage(doc::PDDocImpl, cospage::CosObject)
@@ -79,6 +79,8 @@ function load_page_objects(page::PDPageImpl)
   load_page_objects(page, stm)
 end
 
+load_page_objects(page::PDPageImpl, stm::CosNullType)=nothing
+
 function load_page_objects(page::PDPageImpl, stm::CosObject)
   bufstm = decode(stm)
   load_objects(get(page.content_objects), bufstm)
@@ -86,6 +88,6 @@ end
 
 function load_page_objects(page::PDPageImpl, stm::CosArray)
   for s in get(stm)
-    get_page_load_objects(s)
+    load_page_objects(page,s)
   end
 end

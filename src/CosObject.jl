@@ -1,8 +1,8 @@
 import Base:get,length
 
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
-       CosObject, CosNull, CosFloat, CosInt, CosArray, CosName, CosDict,
-       CosIndirectObjectRef, CosStream, get, set!
+       CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
+       CosDict, CosIndirectObjectRef, CosStream, get, set!
 
 @compat abstract type CosObject end
 

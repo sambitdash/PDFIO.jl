@@ -145,35 +145,36 @@ end
 
 
 function parse_string(ps::BufferedInputStream)
-    b = UInt8[]
-    skip(ps,1)  # skip opening quote
-    local paren_cnt = 0
-    while true
-        c = advance!(ps)
+  b = UInt8[]
+  skip(ps,1)  # skip opening quote
+  local paren_cnt = 0
+  while true
+    c = advance!(ps)
 
-        if c == BACKSLASH
-            c = advance!(ps)
-            if ispdfodigit(c) #Read octal digits
-                append!(b, Vector{UInt8}(string(read_octal_escape!(c,ps))))
-            else
-                c = get(ESCAPES, c, 0x00)
-                c == 0x00 && _error(E_BAD_ESCAPE, ps)
-                push!(b, c)
-            end
-            continue
-        elseif c == LEFT_PAREN
-            paren_cnt+=1
-        elseif c == RIGHT_PAREN
-            if (paren_cnt > 0)
-                paren_cnt-=1
-            else
-                chomp_space!(ps)
-                return CosLiteralString(String(b))
-            end
-        end
-
+    if c == BACKSLASH
+      c = advance!(ps)
+      if ispdfodigit(c) #Read octal digits
+        append!(b, Vector{UInt8}(string(read_octal_escape!(c,ps))))
+      elseif is_crorlf(c) #ignore the solidus, EOLs and move on
+        chomp_space!(ps)
+      else
+        c = get(ESCAPES, c, 0x00)
+        c == 0x00 && error(E_BAD_ESCAPE)
         push!(b, c)
+      end
+      continue
+    elseif c == LEFT_PAREN
+      paren_cnt+=1
+    elseif c == RIGHT_PAREN
+      if (paren_cnt > 0)
+        paren_cnt-=1
+      else
+        chomp_space!(ps)
+        return CosLiteralString(String(b))
+      end
     end
+    push!(b, c)
+  end
 end
 
 
