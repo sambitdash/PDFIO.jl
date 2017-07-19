@@ -5,6 +5,8 @@ using Base.Test
 
 #This file is part of the test folder
 
+@testset "PDFIO tests" begin
+
 println("Test FlateDecode")
 doc = pdDocOpen("files/1.pdf")
 @test pdDocGetPageCount(doc) == 2
@@ -71,3 +73,8 @@ obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(9, 0))
 stm=get(obj)
 data=read(stm)
 @test length(data)==38118
+
+println("Test read_string")
+@test (PDFIO.Cos.parse_data("files/page5.txt");true)
+
+end
