@@ -27,7 +27,7 @@ immutable CosFloat <: CosNumeric
 end
 
 immutable CosInt <: CosNumeric
-    val::Int64
+    val::Int
 end
 
 """

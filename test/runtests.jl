@@ -18,6 +18,7 @@ using Base.Test
       contents = pdPageGetContents(page)
       bufstm = get(contents)
       buf = read(bufstm)
+      close(bufstm)
       @assert length(buf) == 18669
       @assert length(pdPageGetContentObjects(page).objs)==190
       pdDocClose(doc)
@@ -37,6 +38,7 @@ using Base.Test
       contents = pdPageGetContents(page)
       bufstm = get(contents)
       buf = read(bufstm)
+      close(bufstm)
       @assert length(buf) == 1021
       @assert length(pdPageGetContentObjects(page).objs)==1
       pdDocClose(doc)
