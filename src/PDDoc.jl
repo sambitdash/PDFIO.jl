@@ -1,5 +1,6 @@
 export PDDoc,
        pdDocOpen,
+       pdDocClose,
        pdDocGetPageCount,
        pdDocGetPage
 
@@ -9,6 +10,10 @@ function pdDocOpen(fp::String)
   doc = PDDocImpl(fp)
   update_page_tree(doc)
   return doc
+end
+
+function pdDocClose(doc::PDDoc)
+  cosDocClose(doc.cosDoc)
 end
 
 function pdDocGetPageCount(doc::PDDoc)
@@ -46,7 +51,6 @@ Ensures indirect objects are read and updated in the xref Dictionary.
 """
 function populate_doc_pages(doc::PDDocImpl, dict::CosObject)
   if (CosName("Pages") == get(dict, CosName("Type")))
-    #print(dict)
     kids = get(dict, CosName("Kids"))
     arr = get(kids)
     len = length(arr)
@@ -69,7 +73,6 @@ end
 
 function update_page_tree(doc::PDDocImpl)
   pagesref = get(doc.catalog, CosName("Pages"))
-  println(pagesref)
   doc.pages = cosDocGetObject(doc.cosDoc, pagesref)
   populate_doc_pages(doc, doc.pages)
 end

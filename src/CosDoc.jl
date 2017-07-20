@@ -1,5 +1,6 @@
 export CosDoc,
        cosDocOpen,
+       cosDocClose,
        cosDocGetRoot,
        cosDocGetObject
 
@@ -14,19 +15,26 @@ type CosDocImpl <: CosDoc
   startxref::Int
   version::Tuple{Int,Int}
   xref::Dict{CosIndirectObjectRef, CosObjectLoc}
-  trailer::Array{CosDict,1}
-  xrefstm::Array{CosIndirectObject{CosStream},1}
+  trailer::Vector{CosDict}
+  xrefstm::Vector{CosIndirectObject{CosStream}}
+  tmpfiles::Vector{AbstractString}
   isPDF::Bool
   hasNativeXRefStm::Bool
   function CosDocImpl(fp::String)
     io = open(fp,"r")
     sz = filesize(fp)
     ps = BufferedInputStream(io)
-    new(fp,sz,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),[], [], false, false)
+    new(fp,sz,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),
+        [], [], [], false, false)
   end
 end
 
-
+function cosDocClose(doc::CosDocImpl)
+  close(doc.ps)
+  for path in doc.tmpfiles
+    rm(path)
+  end
+end
 
 function cosDocOpen(fp::String)
   doc = CosDocImpl(abspath(fp));
@@ -66,6 +74,7 @@ function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
   if (locObj.obj == CosNull)
     seek(doc.ps,locObj.loc)
     locObj.obj = parse_indirect_obj(doc.ps, doc.xref)
+    attach_object(doc, locObj.obj)
   end
   return locObj.obj
 end
@@ -75,6 +84,7 @@ function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
   objstm = cosDocGetObject(doc, stmref)
   if (locObj.obj == CosNull)
     locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
+    attach_object(doc, locObj.obj)
   end
   return locObj.obj
 end
@@ -154,19 +164,40 @@ function doc_trailer_update(ps::BufferedInputStream, doc::CosDocImpl)
   end
 end
 
+attach_object(doc::CosDocImpl, obj::CosObject)=nothing
+
+attach_object(doc::CosDocImpl, objstm::CosIndirectObject{CosObjectStream})=
+  attach_object(doc,objstm.obj.stm)
+  
+attach_object(doc::CosDocImpl, indstm::CosIndirectObject{CosStream})=
+  attach_object(doc,indstm.obj)
+
+function attach_object(doc::CosDocImpl, stm::CosStream)
+  tmpfile = get(get(stm,  CosName("F")))
+  push!(doc.tmpfiles, tmpfile)
+  return nothing
+end
+
+function attach_xref_stream(doc::CosDocImpl,
+  xrefstm::CosIndirectObject{CosStream})
+  attach_object(doc, xrefstm)
+  push!(doc.xrefstm, xrefstm)
+end
+
 function read_xref_streams(ps::BufferedInputStream, doc::CosDocImpl)
   found = false
   while(true)
     xrefstm = parse_indirect_obj(ps, doc.xref)
+
     if (!found)
       if (get(xrefstm,  CosName("Root")) == CosNull)
         error(E_BAD_TRAILER)
       else
-        push!(doc.xrefstm, xrefstm)
+        attach_xref_stream(doc, xrefstm)
       end
       found = true
     else
-      push!(doc.xrefstm, xrefstm)
+      attach_xref_stream(doc, xrefstm)
     end
     read_xref_stream(xrefstm, doc)
 
@@ -199,6 +230,7 @@ function read_xref_tables(ps::BufferedInputStream, doc::CosDocImpl)
     if (loc != CosNull)
       seek(ps, get(loc))
       xrefstm = parse_indirect_obj(ps, doc.xref)
+      attach_object(doc, xrefstm)
       read_xref_stream(xrefstm,doc)
     end
 

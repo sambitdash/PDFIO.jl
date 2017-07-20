@@ -5,10 +5,13 @@ get_pdfcontentops(b)=error(E_NOT_IMPLEMENTED)
 
 function parse_data(filename)
   ps=BufferedInputStream(open(filename))
-
-  while(!eof(ps))
-    println(parse_value(ps))
-    chomp_space!(ps)
+  try
+    while(!eof(ps))
+      println(parse_value(ps))
+      chomp_space!(ps)
+    end
+  finally
+    close(ps)
   end
 end
 
@@ -41,7 +44,7 @@ end
 
 function parse_comment(ps::BufferedInputStream)
     b = UInt8[]
-    skip(ps,1)  # ski opening quote
+    skip(ps,1)  # skip comment marker
     while true
         c = advance!(ps)
         if is_crorlf(c)
@@ -256,9 +259,12 @@ function read_internal_stream_data(ps::BufferedInputStream, extent::CosDict, len
   end
 
   (path,io) = get_tempfilepath()
-  data = read(ps,len)
-  write(io, data)
-  close(io)
+  try
+    data = read(ps,len)
+    write(io, data)
+  finally
+    close(io)
+  end
 
   #Ensuring all the data is written to a file
   set!(extent, CosName("F"), CosLiteralString(path))

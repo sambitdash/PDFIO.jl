@@ -1,80 +1,130 @@
 using PDFIO
 using PDFIO.PD
 using PDFIO.Cos
+using PDFIO.Common
 using Base.Test
 
-#This file is part of the test folder
 
 @testset "PDFIO tests" begin
 
-println("Test FlateDecode")
-doc = pdDocOpen("files/1.pdf")
-@test pdDocGetPageCount(doc) == 2
-page = pdDocGetPage(doc, 1)
-@test pdPageIsEmpty(page) == false
-contents = pdPageGetContents(page)
-bufstm = get(contents)
-buf = read(bufstm)
-@test length(buf) == 18669
-@test length(pdPageGetContentObjects(page).objs)==190
+  @testset "Test FlateDecode" begin
+    @test begin
+      filename="files/1.pdf"
+      println(filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 2
+      page = pdDocGetPage(doc, 1)
+      @assert pdPageIsEmpty(page) == false
+      contents = pdPageGetContents(page)
+      bufstm = get(contents)
+      buf = read(bufstm)
+      @assert length(buf) == 18669
+      @assert length(pdPageGetContentObjects(page).objs)==190
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-#This file is part of the test folder
+  @testset "PDF File with ObjectStreams" begin
+    @test begin
+      filename="files/pdf-17.pdf"
+      println(filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 1
+      page = pdDocGetPage(doc, 1)
+      @assert pdPageIsEmpty(page) == false
+      contents = pdPageGetContents(page)
+      bufstm = get(contents)
+      buf = read(bufstm)
+      @assert length(buf) == 1021
+      @assert length(pdPageGetContentObjects(page).objs)==1
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-println("PDF File with ObjectStreams")
-doc = pdDocOpen("files/pdf-17.pdf")
-@test pdDocGetPageCount(doc) == 1
-page = pdDocGetPage(doc, 1)
-@test pdPageIsEmpty(page) == false
-contents = pdPageGetContents(page)
-bufstm = get(contents)
-buf = read(bufstm)
-@test length(buf) == 1021
-@test length(pdPageGetContentObjects(page).objs)==1
+  @testset "General File Opening 3" begin
+    @test begin
+      filename="3.pdf"
+      println(filename)
+      isfile(filename)||
+        download("http://www.stillhq.com/pdfdb/000003/data.pdf",filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 30
+      page = pdDocGetPage(doc, 1)
+      @assert pdPageIsEmpty(page) == false
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-#This file is to be downloaded from the test database
+  @testset "Test RunLengthDecode" begin
+    @test begin
+      filename="582.pdf"
+      println(filename)
+      isfile(filename)||
+        download("http://www.stillhq.com/pdfdb/000582/data.pdf",filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 12
+      obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc,
+        PDFIO.Cos.CosIndirectObjectRef(177, 0))
+      stm=get(obj)
+      data=read(stm)
+      close(stm)
+      @assert length(data)==273
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-println("General File Opening 3")
+  @testset "Test ASCIIHexDecode" begin
+    @test begin
+      filename="325.pdf"
+      println(filename)
+      isfile(filename)||
+        download("http://www.stillhq.com/pdfdb/000325/data.pdf",filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 1
+      obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc,
+        PDFIO.Cos.CosIndirectObjectRef(7, 0))
+      stm=get(obj)
+      data=read(stm)
+      close(stm)
+      @assert length(data)==121203
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-download("http://www.stillhq.com/pdfdb/000003/data.pdf", "3.pdf")
-doc = pdDocOpen("3.pdf")
-@test pdDocGetPageCount(doc) == 30
-page = pdDocGetPage(doc, 1)
-@test pdPageIsEmpty(page) == false
+  @testset "Test ASCII85Decode" begin
+    @test begin
+      filename="388.pdf"
+      println(filename)
+      isfile(filename)||
+        download("http://www.stillhq.com/pdfdb/000388/data.pdf",filename)
+      doc = pdDocOpen(filename)
+      @assert pdDocGetPageCount(doc) == 1
+      obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc,
+        PDFIO.Cos.CosIndirectObjectRef(9, 0))
+      stm=get(obj)
+      data=read(stm)
+      close(stm)
+      @assert length(data)==38118
+      pdDocClose(doc)
+      files=readdir(get_tempdir())
+      length(files)==0
+    end
+  end
 
-#This file is to be downloaded from the test database
-
-println("Test RunLengthDecode")
-download("http://www.stillhq.com/pdfdb/000582/data.pdf", "582.pdf")
-doc = pdDocOpen("582.pdf")
-@test pdDocGetPageCount(doc) == 12
-obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(177, 0))
-stm=get(obj)
-data=read(stm)
-@test length(data)==273
-
-
-#This file is to be downloaded from the test database
-
-println("Test ASCIIHexDecode")
-download("http://www.stillhq.com/pdfdb/000325/data.pdf", "325.pdf")
-doc = pdDocOpen("325.pdf")
-@test pdDocGetPageCount(doc) == 1
-obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(7, 0))
-stm=get(obj)
-data=read(stm)
-@test length(data)==121203
-
-
-println("Test ASCII85Decode")
-download("http://www.stillhq.com/pdfdb/000388/data.pdf", "388.pdf")
-doc = pdDocOpen("388.pdf")
-@test pdDocGetPageCount(doc) == 1
-obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(9, 0))
-stm=get(obj)
-data=read(stm)
-@test length(data)==38118
-
-println("Test read_string")
-@test (PDFIO.Cos.parse_data("files/page5.txt");true)
-
+  @testset "Test read_string" begin
+    @test begin
+      PDFIO.Cos.parse_data("files/page5.txt")
+      true
+    end
+  end
 end

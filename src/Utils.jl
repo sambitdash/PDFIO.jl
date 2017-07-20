@@ -11,7 +11,7 @@ that will have the path of the new directory.
 """
 function get_tempdir()
     global CURRENT_TMPDIR
-    if (CURRENT_TMPDIR == "" )
+    if (CURRENT_TMPDIR == "" )||!isdir(CURRENT_TMPDIR)
         CURRENT_TMPDIR= abspath(mktempdir())
     end
     return CURRENT_TMPDIR
@@ -20,6 +20,14 @@ end
 """
 Gets a temp file path and io to work on.
 """
+#MYCOUNTER=0
 function get_tempfilepath()
-    return mktemp(get_tempdir())
+#=
+  global MYCOUNTER
+  MYCOUNTER+=1
+  path=get_tempdir()*"/"*string(MYCOUNTER)
+  #println(path)
+  return (path,open(path,"w"))
+=#
+  return mktemp(get_tempdir())
 end

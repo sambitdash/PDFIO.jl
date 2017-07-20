@@ -19,7 +19,7 @@ using BufferedStreams
 Decodes using the LZWDecode compression
 """
 function decode_lzw(stm::CosStream)
-  print("Ready to decode the LZW stream")
+  println("Ready to decode the LZW stream")
 end
 
 function decode_flate(input, parms)
