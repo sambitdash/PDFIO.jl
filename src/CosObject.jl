@@ -23,7 +23,7 @@ const CosFalse=CosBoolean(false)
 const CosNull=CosNullType()
 
 @compat struct CosFloat <: CosNumeric
-    val::Float
+    val::Float64
 end
 
 @compat struct CosInt <: CosNumeric
