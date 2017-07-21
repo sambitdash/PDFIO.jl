@@ -140,14 +140,14 @@ function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
 end
 
 
-type PDPage_BeginGroup <: PDPageObject
+@compat mutable struct PDPage_BeginGroup <: PDPageObject
   elem::PDPageElement
   objT::Type
   PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
     new(PDPageElement(ts,ver,nop),t)
 end
 
-type PDPage_EndGroup
+@compat mutable struct PDPage_EndGroup
   elem::PDPageElement
   PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))
