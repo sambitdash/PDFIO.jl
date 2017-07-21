@@ -34,7 +34,7 @@ end
 
 
 
-type PDDocImpl <: PDDoc
+@compat mutable struct PDDocImpl <: PDDoc
   cosDoc::CosDoc
   catalog::CosObject
   pages::CosObject

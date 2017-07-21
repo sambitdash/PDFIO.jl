@@ -75,7 +75,7 @@ function cosStreamRemoveFilters(stm::CosObject)
   if (filters != CosNull)
     bufstm = decode(stm)
     data = read(bufstm)
-    close(bufstm)
+    util_close(bufstm)
     filename = get(stm, CosName("F"))
     write(filename |> get, data)
     set!(stm, CosName("FFilter"),CosNull)
@@ -114,7 +114,7 @@ function decode_filter(io, filters::CosArray, parms::CosObject)
   return bufstm
 end
 
-type PNGPredictorSource{T<:BufferedInputStream}
+@compat mutable struct PNGPredictorSource{T<:BufferedInputStream}
   input::T
   predictor::UInt8
   columns::UInt32
@@ -260,7 +260,7 @@ function load_png_row!(source::PNGPredictorSource)
   return source
 end
 
-type RLEDecodeSource{T<:BufferedInputStream}
+@compat mutable struct RLEDecodeSource{T<:BufferedInputStream}
   input::T
   run::Vector{UInt8}
   s::UInt8
@@ -342,7 +342,7 @@ function decode_rle(input::BufferedInputStream)
   return BufferedInputStream(RLEDecodeSource(input))
 end
 
-type ASCIIHexDecodeSource{T<:BufferedInputStream}
+@compat mutable struct ASCIIHexDecodeSource{T<:BufferedInputStream}
   input::T
 end
 
@@ -391,7 +391,7 @@ end
 
 #This is still buggy. Needs to be worked upon.
 
-type ASCII85DecodeSource{T<:BufferedInputStream}
+@compat mutable struct ASCII85DecodeSource{T<:BufferedInputStream}
   input::T
   residue::Vector{UInt8}
   isEOF::Bool

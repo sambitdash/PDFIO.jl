@@ -5,7 +5,7 @@ export PDPage,
 
 @compat abstract type PDPage end
 
-type PDPageImpl <: PDPage
+@compat mutable struct PDPageImpl <: PDPage
   doc::PDDocImpl
   cospage::CosObject
   contents::CosObject

@@ -52,7 +52,7 @@ function read_xref_stream(xrefstm::CosObject,
 
   input = get(xrefstm)
   data = read(input)
-  close(input)
+  util_close(input)
 
   w_n = get(w,true) #This size is 3
   recsize = sum(w_n)
@@ -90,7 +90,7 @@ end
 function read_object_info_from_stm(stm::CosStream,
   oids::Vector{Int}, oloc::Vector{Int}, n::Int, first::Int)
   filename = get(stm, CosName("F"))
-  io = open(filename |> get,"r")
+  io = util_open(filename |> get,"r")
   try
     for i = 1:n
       val = readuntil(io, ' ')
@@ -99,7 +99,7 @@ function read_object_info_from_stm(stm::CosStream,
       oloc[i] = parse(Int,val) + first
     end
   finally
-    close(io)
+    util_close(io)
   end
 end
 
@@ -121,13 +121,13 @@ end
 function cosObjectStreamGetObject(stm::CosObjectStream,
   ref::CosNullType, loc::Int)
   filename = get(stm, CosName("F"))
-  io = open(filename |> get,"r")
+  io = util_open(filename |> get,"r")
   ps = BufferedInputStream(io)
   try
     seek(ps, stm.oloc[loc+1])
     obj = parse_value(ps)
     return obj
   finally
-    close(ps)
+    util_close(ps)
   end
 end

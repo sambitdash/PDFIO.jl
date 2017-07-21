@@ -4,14 +4,14 @@ export parse_value,
 get_pdfcontentops(b)=error(E_NOT_IMPLEMENTED)
 
 function parse_data(filename)
-  ps=BufferedInputStream(open(filename))
+  ps=BufferedInputStream(util_open(filename,"r"))
   try
     while(!eof(ps))
       println(parse_value(ps))
       chomp_space!(ps)
     end
   finally
-    close(ps)
+    util_close(ps)
   end
 end
 
@@ -263,7 +263,7 @@ function read_internal_stream_data(ps::BufferedInputStream, extent::CosDict, len
     data = read(ps,len)
     write(io, data)
   finally
-    close(io)
+    util_close(io)
   end
 
   #Ensuring all the data is written to a file
@@ -285,7 +285,7 @@ function read_internal_stream_data(ps::BufferedInputStream, extent::CosDict, len
 end
 
 
-type CosObjectLoc
+@compat mutable struct CosObjectLoc
   loc::Int
   stm::CosObject
   obj::CosObject
@@ -464,7 +464,6 @@ end
 function parse_unsignednumber(ps::BufferedInputStream)
     number = UInt8[]
     isint = true
-
     while true
         c = peek(ps)
         if ispdfdigit(c)
