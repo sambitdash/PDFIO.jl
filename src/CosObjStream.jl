@@ -12,7 +12,7 @@ function make_number(data, start, nbytes)
 end
 
 function get_xref_record(data, start, w)
-  v=Array{Int64,1}()
+  v=Vector{Int}()
   for tw in w
     n = make_number(data, start, tw)
     start += tw

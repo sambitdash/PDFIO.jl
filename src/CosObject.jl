@@ -26,8 +26,13 @@ const CosNull=CosNullType()
     val::Float64
 end
 
+<<<<<<< HEAD
 @compat struct CosInt <: CosNumeric
     val::Int64
+=======
+immutable CosInt <: CosNumeric
+    val::Int
+>>>>>>> a80496a38556b917c7d47f51b75da136522c0c01
 end
 
 """
