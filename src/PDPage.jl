@@ -83,7 +83,11 @@ load_page_objects(page::PDPageImpl, stm::CosNullType)=nothing
 
 function load_page_objects(page::PDPageImpl, stm::CosObject)
   bufstm = decode(stm)
-  load_objects(get(page.content_objects), bufstm)
+  try
+    load_objects(get(page.content_objects), bufstm)
+  finally
+    close(bufstm)
+  end
 end
 
 function load_page_objects(page::PDPageImpl, stm::CosArray)

@@ -18,11 +18,11 @@ using Base.Test
       contents = pdPageGetContents(page)
       bufstm = get(contents)
       buf = read(bufstm)
-      util_close(bufstm)
+      close(bufstm)
       @assert length(buf) == 18669
       @assert length(pdPageGetContentObjects(page).objs)==190
       pdDocClose(doc)
-      println(OPEN_FILES)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -38,14 +38,12 @@ using Base.Test
       @assert pdPageIsEmpty(page) == false
       contents = pdPageGetContents(page)
       bufstm = get(contents)
-      println(OPEN_FILES)
       buf = read(bufstm)
-      util_close(bufstm)
-      println(OPEN_FILES)
+      close(bufstm)
       @assert length(buf) == 1021
       @assert length(pdPageGetContentObjects(page).objs)==1
       pdDocClose(doc)
-      println(OPEN_FILES)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -62,6 +60,7 @@ using Base.Test
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false
       pdDocClose(doc)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -79,9 +78,10 @@ using Base.Test
         PDFIO.Cos.CosIndirectObjectRef(177, 0))
       stm=get(obj)
       data=read(stm)
-      util_close(stm)
+      close(stm)
       @assert length(data)==273
       pdDocClose(doc)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -99,9 +99,10 @@ using Base.Test
         PDFIO.Cos.CosIndirectObjectRef(7, 0))
       stm=get(obj)
       data=read(stm)
-      util_close(stm)
+      close(stm)
       @assert length(data)==121203
       pdDocClose(doc)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -119,9 +120,10 @@ using Base.Test
         PDFIO.Cos.CosIndirectObjectRef(9, 0))
       stm=get(obj)
       data=read(stm)
-      util_close(stm)
+      close(stm)
       @assert length(data)==38118
       pdDocClose(doc)
+      utilPrintOpenFiles()
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -130,7 +132,7 @@ using Base.Test
   @testset "Test read_string" begin
     @test begin
       PDFIO.Cos.parse_data("files/page5.txt")
-      println(OPEN_FILES)
+      utilPrintOpenFiles()
       true
     end
   end

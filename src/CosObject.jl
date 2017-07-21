@@ -79,7 +79,7 @@ end
 end
 
 
-get(o::CosArray, isNative=false)=isNative?map((x)->get(x),o.val):o.val
+get(o::CosArray, isNative=false)=isNative ? map((x)->get(x),o.val) : o.val
 length(o::CosArray)=length(o.val)
 
 @compat mutable struct CosDict <: CosObject

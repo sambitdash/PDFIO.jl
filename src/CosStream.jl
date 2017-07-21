@@ -1,4 +1,4 @@
-import Base:eof
+import Base:eof,close
 
 import Libz:BufferedStreams.readbytes!
 
@@ -75,7 +75,7 @@ function cosStreamRemoveFilters(stm::CosObject)
   if (filters != CosNull)
     bufstm = decode(stm)
     data = read(bufstm)
-    util_close(bufstm)
+    close(bufstm)
     filename = get(stm, CosName("F"))
     write(filename |> get, data)
     set!(stm, CosName("FFilter"),CosNull)
@@ -92,7 +92,7 @@ function decode(stm::CosObject)
   filters = get(stm, CosName("FFilter"))
   parms = get(stm, CosName("FDecodeParms"))
 
-  io = (open(filename |> get, "r") |> BufferedInputStream)
+  io = (util_open(filename |> get, "r") |> BufferedInputStream)
 
   return decode_filter(io, filters, parms)
 end
@@ -125,15 +125,20 @@ end
   isResidue::Bool
   isEOF::Bool
   count_scanline::Int32
+  isClosed::Bool
 
   function PNGPredictorSource{T}(input::T,pred::Int,columns::Int) where{T<:BufferedInputStream}
     @assert pred >= 10
     prev = zeros(Vector{UInt8}(columns))
     curr = zeros(Vector{UInt8}(columns))
-    new(input, pred - 10,columns,prev,curr,0,0,false, false, 0)
+    new(input, pred - 10,columns,prev,curr,0,0,false, false, 0, false)
   end
 end
 
+function close(source::PNGPredictorSource)
+  source.isClosed=true
+  close(source.input)
+end
 
 function apply_flate_params(input::BufferedInputStream, parms::CosDict)
   predictor = get(parms, CosName("Predictor"))
@@ -267,10 +272,17 @@ end
   e::UInt8
   isResidue::Bool
   isEOD::Bool
+  isClosed::Bool
 end
 
 function RLEDecodeSource(input::T) where {T<:BufferedInputStream}
-  return RLEDecodeSource(input, zeros(Vector{UInt8}(), UInt8, (128,)), 0x00, 0x00, false, false)
+  return RLEDecodeSource(input, zeros(Vector{UInt8}(), UInt8, (128,)), 0x00, 0x00, false, false, false)
+end
+
+
+function close(source::RLEDecodeSource)
+  source.isClosed=true
+  close(source.input)
 end
 
 function eof(source::RLEDecodeSource)
@@ -344,6 +356,15 @@ end
 
 @compat mutable struct ASCIIHexDecodeSource{T<:BufferedInputStream}
   input::T
+  isClosed::Bool
+end
+
+ASCIIHexDecodeSource(input::T) where {T<:BufferedInputStream}=
+  ASCIIHexDecodeSource(input,false)
+
+function close(source::ASCIIHexDecodeSource)
+  source.isClosed=true
+  close(source.input)
 end
 
 function eof(source::ASCIIHexDecodeSource)
@@ -398,12 +419,18 @@ end
   len::Int
   s::Int
   isPending::Bool
+  isClosed::Bool
   function ASCII85DecodeSource{T}(t::T,r::Vector{UInt8},isEOF::Bool) where{T<:BufferedInputStream}
-    return new(t,r,isEOF,4,1,false)
+    return new(t,r,isEOF,4,1,false, false)
   end
 end
 
 ASCII85DecodeSource{T<:BufferedInputStream}(t::T)=ASCII85DecodeSource{T}(t, Vector{UInt8}(4),false)
+
+function close(source::ASCII85DecodeSource)
+  source.isClosed=true
+  close(source.input)
+end
 
 eof(source::ASCII85DecodeSource)=(source.isEOF || eof(source.input))
 

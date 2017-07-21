@@ -11,7 +11,7 @@ function parse_data(filename)
       chomp_space!(ps)
     end
   finally
-    util_close(ps)
+    close(ps)
   end
 end
 

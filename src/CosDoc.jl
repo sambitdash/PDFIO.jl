@@ -1,3 +1,7 @@
+using ..Common
+
+import Base: close
+
 export CosDoc,
        cosDocOpen,
        cosDocClose,
@@ -30,7 +34,7 @@ export CosDoc,
 end
 
 function cosDocClose(doc::CosDocImpl)
-  util_close(doc.ps)
+  close(doc.ps)
   for path in doc.tmpfiles
     rm(path)
   end
