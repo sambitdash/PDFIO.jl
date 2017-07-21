@@ -6,7 +6,7 @@ export CosDoc,
 
 @compat abstract type CosDoc end
 
-type CosDocImpl <: CosDoc
+@compat mutable struct CosDocImpl <: CosDoc
   filepath::String
   size::Int
   io::IOStream
@@ -56,7 +56,7 @@ cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 
 function cosDocGetRoot(doc::CosDocImpl)
 
-  root = (doc.hasNativeXRefStm)?
+  root = (doc.hasNativeXRefStm) ?
           get(doc.xrefstm[1], CosName("Root")):
           get(doc.trailer[1], CosName("Root"))
   return cosDocGetObject(doc,root)
@@ -168,7 +168,7 @@ attach_object(doc::CosDocImpl, obj::CosObject)=nothing
 
 attach_object(doc::CosDocImpl, objstm::CosIndirectObject{CosObjectStream})=
   attach_object(doc,objstm.obj.stm)
-  
+
 attach_object(doc::CosDocImpl, indstm::CosIndirectObject{CosStream})=
   attach_object(doc,indstm.obj)
 

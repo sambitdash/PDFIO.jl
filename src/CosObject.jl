@@ -11,22 +11,22 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
 @compat abstract type CosString <: CosObject end
 @compat abstract type CosNumeric <: CosObject end
 
-immutable CosBoolean <: CosObject
+@compat struct CosBoolean <: CosObject
     val::Bool
 end
 
 const CosTrue=CosBoolean(true)
 const CosFalse=CosBoolean(false)
 
-immutable CosNullType <: CosObject end
+@compat struct CosNullType <: CosObject end
 
 const CosNull=CosNullType()
 
-immutable CosFloat <: CosNumeric
+@compat struct CosFloat <: CosNumeric
     val::Float64
 end
 
-immutable CosInt <: CosNumeric
+@compat struct CosInt <: CosNumeric
     val::Int64
 end
 
@@ -35,7 +35,7 @@ A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
 the object should be searched from the CosDoc and returned.
 """
-immutable CosIndirectObjectRef <: CosObject
+@compat struct CosIndirectObjectRef <: CosObject
   val::Tuple{Int,Int}
   CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
@@ -43,7 +43,7 @@ end
 #hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
 #isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
 
-type CosIndirectObject{T <: CosObject} <: CosObject
+@compat mutable struct CosIndirectObject{T <: CosObject} <: CosObject
     num::Int
     gen::Int
     obj::T
@@ -51,22 +51,22 @@ end
 
 get(o::CosIndirectObject) = get(o.obj)
 
-immutable CosName <: CosObject
+@compat struct CosName <: CosObject
     val::Symbol
     CosName(str::String)=new(Symbol("CosName_",str))
 end
 
-immutable CosXString <: CosString
+@compat struct CosXString <: CosString
     val::String
     CosXString(str::String)=new(str)
 end
 
-immutable CosLiteralString <: CosString
+@compat struct CosLiteralString <: CosString
     val::String
     CosLiteralString(str::String)=new(str)
 end
 
-type CosArray <: CosObject
+@compat mutable struct CosArray <: CosObject
     val::Array{CosObject,1}
     function CosArray(arr::Array{T,1} where {T<:CosObject})
       val = Array{CosObject,1}()
@@ -82,7 +82,7 @@ end
 get(o::CosArray, isNative=false)=isNative?map((x)->get(x),o.val):o.val
 length(o::CosArray)=length(o.val)
 
-type CosDict <: CosObject
+@compat mutable struct CosDict <: CosObject
     val::Dict{CosName,CosObject}
     CosDict()=new(Dict{CosName,CosObject}())
 end
@@ -106,7 +106,7 @@ end
 set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
             set!(o.obj, name, obj)
 
-type CosStream <: CosObject
+@compat mutable struct CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
     CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
@@ -127,7 +127,7 @@ Decodes the stream and provides output as an BufferedInputStream.
 """
 get(stm::CosStream) = decode(stm)
 
-type CosObjectStream<: CosObject
+@compat mutable struct CosObjectStream<: CosObject
   stm::CosStream
   n::Int
   first::Int
@@ -160,7 +160,7 @@ set!(os::CosIndirectObject{CosObjectStream}, name::CosName, obj::CosObject)=
 
 get(os::CosObjectStream) = get(os.stm)
 
-type CosXRefStream<: CosObject
+@compat mutable struct CosXRefStream<: CosObject
   stm::CosStream
   isDecoded::Bool
   function CosXRefStream(s::CosStream,isDecoded::Bool=false)

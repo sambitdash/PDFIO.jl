@@ -8,7 +8,7 @@ operators.
 
 The operands are like attributes of the element to be used for any operations.
 """
-type PDPageElement <: PDPageObject
+@compat mutable struct PDPageElement <: PDPageObject
   t::Symbol
   version::Tuple{Int,Int}
   noperand::Int
@@ -20,7 +20,7 @@ end
 PDPageElement(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0)=
   PDPageElement(Symbol(ts),ver,nop,Vector{CosObject}())
 
-type PDPageObjectGroup <: PDPageObject
+@compat mutable struct PDPageObjectGroup <: PDPageObject
   isEOG::Bool
   objs::Vector{Union{PDPageObject,CosObject}}
   PDPageObjectGroup(isEOG::Bool=false)=
@@ -67,24 +67,24 @@ function collect_object(grp::PDPageObjectGroup,
   return elem
 end
 
-type PDPageTextObject <: PDPageObject
+@compat mutable struct PDPageTextObject <: PDPageObject
   group::PDPageObjectGroup
   PDPageTextObject()=new(PDPageObjectGroup())
 end
 
-type PDPageMarkedContent <: PDPageObject
+@compat mutable struct PDPageMarkedContent <: PDPageObject
   group::PDPageObjectGroup
   PDPageMarkedContent()=new(PDPageObjectGroup())
 end
 
-type PDPageInlineImage <: PDPageObject
+@compat mutable struct PDPageInlineImage <: PDPageObject
   params::CosDict
   data::Vector{UInt8}
   isRead::Bool
   PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
-type PDPage_BeginInlineImage <: PDPageObject
+@compat mutable struct PDPage_BeginInlineImage <: PDPageObject
   elem::PDPageElement
   PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))
@@ -140,14 +140,14 @@ function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
 end
 
 
-type PDPage_BeginGroup <: PDPageObject
+@compat mutable struct PDPage_BeginGroup <: PDPageObject
   elem::PDPageElement
   objT::Type
   PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
     new(PDPageElement(ts,ver,nop),t)
 end
 
-type PDPage_EndGroup
+@compat mutable struct PDPage_EndGroup
   elem::PDPageElement
   PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))

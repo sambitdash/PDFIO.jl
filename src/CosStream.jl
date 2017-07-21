@@ -114,7 +114,7 @@ function decode_filter(io, filters::CosArray, parms::CosObject)
   return bufstm
 end
 
-type PNGPredictorSource{T<:BufferedInputStream}
+@compat mutable struct PNGPredictorSource{T<:BufferedInputStream}
   input::T
   predictor::UInt8
   columns::UInt32
@@ -141,18 +141,18 @@ function apply_flate_params(input::BufferedInputStream, parms::CosDict)
   bitspercomponent = get(parms, CosName("BitsPerComponent"))
   columns = get(parms, CosName("Columns"))
 
-  predictor_n = (predictor!=CosNull)?get(predictor):0
-  colors_n = (colors!=CosNull)?get(predictor):0
-  bitspercomponent_n = (bitspercomponent!=CosNull)?get(bitspercomponent):0
-  columns_n = (columns !=CosNull)?get(columns):0
+  predictor_n = (predictor!=CosNull) ?get(predictor):0
+  colors_n = (colors!=CosNull) ?get(predictor):0
+  bitspercomponent_n = (bitspercomponent!=CosNull) ?get(bitspercomponent):0
+  columns_n = (columns !=CosNull) ?get(columns):0
 
   #@printf "Predictor %d\n" predictor_n
   #@printf "Columns %d\n" columns_n
 
   source = PNGPredictorSource{BufferedInputStream}(input, predictor_n, columns_n)
 
-  return (predictor_n == 2)? error(E_NOT_IMPLEMENTED):
-         (predictor_n >= 10)? BufferedInputStream(source):input
+  return (predictor_n == 2) ? error(E_NOT_IMPLEMENTED):
+         (predictor_n >= 10) ? BufferedInputStream(source):input
 end
 
 function eof(source::PNGPredictorSource)
@@ -226,8 +226,8 @@ function PaethPredictor(a::Int32, b::Int32, c::Int32)
      pc = abs(p - c)
      #return nearest of a,b,c,
      #breaking ties in order a,b,c.
-     return  (pa <= pb && pa <= pc)? UInt8(a):
-             (pb <= pc)? UInt8(b):
+     return  (pa <= pb && pa <= pc) ? UInt8(a):
+             (pb <= pc) ? UInt8(b):
               UInt8(c)
 end
 
@@ -260,7 +260,7 @@ function load_png_row!(source::PNGPredictorSource)
   return source
 end
 
-type RLEDecodeSource{T<:BufferedInputStream}
+@compat mutable struct RLEDecodeSource{T<:BufferedInputStream}
   input::T
   run::Vector{UInt8}
   s::UInt8
@@ -342,7 +342,7 @@ function decode_rle(input::BufferedInputStream)
   return BufferedInputStream(RLEDecodeSource(input))
 end
 
-type ASCIIHexDecodeSource{T<:BufferedInputStream}
+@compat mutable struct ASCIIHexDecodeSource{T<:BufferedInputStream}
   input::T
 end
 
@@ -391,7 +391,7 @@ end
 
 #This is still buggy. Needs to be worked upon.
 
-type ASCII85DecodeSource{T<:BufferedInputStream}
+@compat mutable struct ASCII85DecodeSource{T<:BufferedInputStream}
   input::T
   residue::Vector{UInt8}
   isEOF::Bool
