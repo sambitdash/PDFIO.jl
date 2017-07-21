@@ -12,7 +12,7 @@ function make_number(data, start, nbytes)
 end
 
 function get_xref_record(data, start, w)
-  v=Vector{Int}()
+  v=Array{Int64,1}()
   for tw in w
     n = make_number(data, start, tw)
     start += tw
@@ -70,11 +70,11 @@ function read_xref_stream(xrefstm::CosObject,
       @assert length(record) == 3
       @assert record[1] in 0:2
 
-      loc = (record[1] == 1)? record[2]:
-            (record[1] == 2)? record[3]: 0
-      stm = (record[1] == 2)? CosIndirectObjectRef(record[2],0):CosNull
-      ref = (record[1] == 1)? CosIndirectObjectRef(oid, record[3]):
-            (record[1] == 2)? CosIndirectObjectRef(oid, 0):
+      loc = (record[1] == 1) ? record[2]:
+            (record[1] == 2) ? record[3]: 0
+      stm = (record[1] == 2) ? CosIndirectObjectRef(record[2],0):CosNull
+      ref = (record[1] == 1) ? CosIndirectObjectRef(oid, record[3]):
+            (record[1] == 2) ? CosIndirectObjectRef(oid, 0):
                               CosIndirectObjectRef(0,0)
 
       it += recsize
