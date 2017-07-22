@@ -9,8 +9,6 @@ are not affected.
 
 const DEBUG=true
 
-IODebug=[0,Vector{Tuple{AbstractString,IOStream}}()]
-
 if DEBUG
 
 import PDFIO.Common: get_tempfilepath,
@@ -29,6 +27,8 @@ function Base.close(stream::BufferedInputStream{IOStream})
   empty!(stream.buffer)
   return
 end
+
+IODebug=[0,Vector{Tuple{AbstractString,IOStream}}()]
 
 function get_tempfilepath()
   global IODebug

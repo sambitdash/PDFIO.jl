@@ -117,14 +117,14 @@ end
 @compat mutable struct PNGPredictorSource{T<:BufferedInputStream}
   input::T
   predictor::UInt8
-  columns::UInt32
+  columns::Int
   prev::Vector{UInt8}
   curr::Vector{UInt8}
-  s::Int32
-  e::Int32
+  s::Int
+  e::Int
   isResidue::Bool
   isEOF::Bool
-  count_scanline::Int32
+  count_scanline::Int
   isClosed::Bool
 
   function PNGPredictorSource{T}(input::T,pred::Int,columns::Int) where{T<:BufferedInputStream}

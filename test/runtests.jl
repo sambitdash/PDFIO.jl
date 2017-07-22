@@ -23,9 +23,7 @@ include("debugIO.jl")
       @assert length(buf) == 18669
       @assert length(pdPageGetContentObjects(page).objs)==190
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -44,9 +42,7 @@ include("debugIO.jl")
       @assert length(buf) == 1021
       @assert length(pdPageGetContentObjects(page).objs)==1
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -61,9 +57,7 @@ include("debugIO.jl")
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -82,9 +76,7 @@ include("debugIO.jl")
       close(stm)
       @assert length(data)==273
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -103,9 +95,7 @@ include("debugIO.jl")
       close(stm)
       @assert length(data)==121203
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -124,9 +114,7 @@ include("debugIO.jl")
       close(stm)
       @assert length(data)==38118
       pdDocClose(doc)
-      @assert length(utilPrintOpenFiles())==0
-      files=readdir(get_tempdir())
-      length(files)==0
+      length(utilPrintOpenFiles())==0
     end
   end
 
@@ -136,4 +124,10 @@ include("debugIO.jl")
       length(utilPrintOpenFiles())==0
     end
   end
+  files=readdir(get_tempdir())
+  @assert length(files)==0
+end
+
+if isfile("pvt/pvttests.jl")
+  #include("pvt/pvttests.jl")
 end
