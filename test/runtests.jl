@@ -4,6 +4,7 @@ using PDFIO.Cos
 using PDFIO.Common
 using Base.Test
 
+include("debugIO.jl")
 
 @testset "PDFIO tests" begin
 
@@ -22,7 +23,7 @@ using Base.Test
       @assert length(buf) == 18669
       @assert length(pdPageGetContentObjects(page).objs)==190
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -43,7 +44,7 @@ using Base.Test
       @assert length(buf) == 1021
       @assert length(pdPageGetContentObjects(page).objs)==1
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -60,7 +61,7 @@ using Base.Test
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -81,7 +82,7 @@ using Base.Test
       close(stm)
       @assert length(data)==273
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -102,7 +103,7 @@ using Base.Test
       close(stm)
       @assert length(data)==121203
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -123,7 +124,7 @@ using Base.Test
       close(stm)
       @assert length(data)==38118
       pdDocClose(doc)
-      utilPrintOpenFiles()
+      @assert length(utilPrintOpenFiles())==0
       files=readdir(get_tempdir())
       length(files)==0
     end
@@ -132,8 +133,9 @@ using Base.Test
   @testset "Test read_string" begin
     @test begin
       PDFIO.Cos.parse_data("files/page5.txt")
-      utilPrintOpenFiles()
-      true
+      length(utilPrintOpenFiles())==0
     end
   end
 end
+
+include("pvt/pvttests.jl")
