@@ -137,5 +137,3 @@ include("debugIO.jl")
     end
   end
 end
-
-include("pvt/pvttests.jl")
