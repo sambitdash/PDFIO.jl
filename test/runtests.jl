@@ -46,6 +46,8 @@ include("debugIO.jl")
     end
   end
 
+
+
   @testset "General File Opening 3" begin
     @test begin
       filename="3.pdf"
@@ -57,6 +59,28 @@ include("debugIO.jl")
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false
       pdDocClose(doc)
+      length(utilPrintOpenFiles())==0
+    end
+  end
+
+  @testset "Hybrid x-ref" begin
+    @test begin
+      filename="A1947-14.pdf"
+      println(filename)
+      isfile(filename)||
+        download("http://lawmin.nic.in/ld/P-ACT/1947/A1947-14.pdf",filename)
+      doc = pdDocOpen(filename)
+      try
+        npage= pdDocGetPageCount(doc)
+        for i=1:npage
+          page = pdDocGetPage(doc, i)
+          if pdPageIsEmpty(page)==false
+            pdPageGetContentObjects(page)
+          end
+        end
+      finally
+        pdDocClose(doc)
+      end
       length(utilPrintOpenFiles())==0
     end
   end
