@@ -128,4 +128,8 @@ author. Hence, the author cannot make those files available to general public
 for distribution under the source code license. However, the author is grateful
 to the PDF document [library](http://www.stillhq.com/pdfdb/db.html) maintained
 by [mikal@stillhq.com](mikal@stillhq.com). Some of the files have to downloaded
-from the database for unit testing of the documents.
+from the database for unit testing of the documents. Some files are also
+included from
+[openpreserve](/openpreserve/format-corpus/tree/master/pdfCabinetOfHorrors).
+These files can be distributed with
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/).
