@@ -80,7 +80,9 @@ function read_xref_stream(xrefstm::CosObject,
       it += recsize
       if (record[1] != 0)
         count_record +=1
-        xref[ref]=CosObjectLoc(loc,stm)
+        if !haskey(xref,ref)
+          xref[ref]=CosObjectLoc(loc,stm)
+        end
       end
     end
   end

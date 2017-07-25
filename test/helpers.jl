@@ -78,3 +78,45 @@ function pdfhlp_extract_doc_embedded_files(filename,dir=tempdir())
     pdDocClose(doc)
   end
 end
+
+function pdfhlp_extract_doc_attachment_files(filename,dir=tempdir())
+  file=rsplit(filename, '/',limit=2)
+  filenm=file[end]
+  dirpath=joinpath(dir,filenm)
+  if isdir(dirpath)
+    rm(dirpath; force=true, recursive=true)
+  end
+  mkdir(dirpath)
+  doc=pdDocOpen(filename)
+  cosDoc=pdDocGetCosDoc(doc)
+  try
+    npage= pdDocGetPageCount(doc)
+    for i=1:npage
+      page = pdDocGetPage(doc, i)
+      cospage = pdPageGetCosObject(page)
+      annots=cosDocGetObject(cosDoc, get(cospage, CosName("Annots")))
+      if (annots === CosNull)
+        continue
+      end
+      annotsarr=get(annots)
+      for annot in annotsarr
+        annotdict = cosDocGetObject(cosDoc, annot)
+        subtype = get(annotdict,CosName("Subtype"))
+        if (subtype == CosName("FileAttachment"))
+          filespec=cosDocGetObject(cosDoc, get(annotdict,CosName("FS")))
+          ef=get(filespec, CosName("EF"))
+          filename=get(filespec,CosName("F")) #UF could be there as well.
+          stmref=get(ef, CosName("F"))
+          stm=cosDocGetObject(cosDoc,stmref)
+          bufstm=decode(stm)
+          buf=read(bufstm)
+          close(bufstm)
+          path=joinpath(dirpath,get(filename))
+          write(path,buf)
+        end
+      end
+    end
+  finally
+    pdDocClose(doc)
+  end
+end

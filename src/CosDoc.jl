@@ -275,7 +275,9 @@ function read_xref_table(ps::BufferedInputStream, doc::CosDocImpl)
             if (v[18] != LATIN_F)
                 ref = CosIndirectObjectRef(oid, parse(Int,String(v[12:16])))
 
-                doc.xref[ref] = CosObjectLoc(parse(Int,String(v[1:10])))
+                if !haskey(doc.xref,ref)
+                    doc.xref[ref] = CosObjectLoc(parse(Int,String(v[1:10])))
+                end
             end
 
             oid +=1

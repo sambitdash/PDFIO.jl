@@ -1,6 +1,7 @@
 export PDPage,
        pdPageGetContents,
        pdPageIsEmpty,
+       pdPageGetCosObject,
        pdPageGetContentObjects
 
 @compat abstract type PDPage end
@@ -13,6 +14,8 @@ export PDPage,
   PDPageImpl(doc,cospage,contents)=
     new(doc, cospage, contents, Nullable{PDPageObjectGroup}())
 end
+
+pdPageGetCosObject(page)=page.cospage
 
 function pdPageGetContents(page::PDPageImpl)
   if (page.contents === CosNull)

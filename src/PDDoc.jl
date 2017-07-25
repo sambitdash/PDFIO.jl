@@ -1,6 +1,8 @@
 export PDDoc,
        pdDocOpen,
        pdDocClose,
+       pdDocGetCatalog,
+       pdDocGetCosDoc,
        pdDocGetPageCount,
        pdDocGetPage
 
@@ -9,6 +11,7 @@ export PDDoc,
 function pdDocOpen(fp::String)
   doc = PDDocImpl(fp)
   update_page_tree(doc)
+  update_structure_tree(doc)
   return doc
 end
 
@@ -24,6 +27,8 @@ function pdDocGetCatalog(doc::PDDoc)
   return doc.catalog
 end
 
+pdDocGetCosDoc(doc::PDDoc)= doc.cosDoc
+
 function pdDocGetPage(doc::PDDoc, num::Int)
   cosobj = find_page_from_treenode(doc.pages, num)
   return create_pdpage(doc, cosobj)
@@ -38,10 +43,11 @@ end
   cosDoc::CosDoc
   catalog::CosObject
   pages::CosObject
+  isTagged::Symbol #Valid values :tagged, :none and :suspect
   function PDDocImpl(fp::String)
     cosDoc = cosDocOpen(fp)
     catalog = cosDocGetRoot(cosDoc)
-    new(cosDoc,catalog,CosNull)
+    new(cosDoc,catalog,CosNull,:none)
   end
 end
 
@@ -116,5 +122,17 @@ function find_page_from_treenode(node::CosObject, pageno::Int)
     else
       sum += cnt
     end
+  end
+end
+
+function update_structure_tree(doc::PDDocImpl)
+  catalog = pdDocGetCatalog(doc)
+  marking = get(catalog, CosName("MarkInfo"))
+
+  if (marking !== CosNull)
+    tagged = get(marking, CosName("Marked"))
+    suspect = get(marking, CosName("Suspect"))
+    doc.isTagged = (suspect === CosTrue) ? (:suspect) :
+                   (tagged  === CosTrue) ? (:tagged)  : (:none)
   end
 end
