@@ -75,9 +75,10 @@ end
 
 CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
 
-Base.convert(::Type{Vector{UInt8}}, str::CosLiteralString)=str.val
+Base.convert(::Type{Vector{UInt8}}, str::CosLiteralString)=copy(str.val)
 
-Base.convert(::Type{String}, str::CosLiteralString)=String(str.val)
+Base.convert(::Type{String}, str::CosLiteralString)=
+  String(convert(Vector{UInt8},str))
 
 @compat mutable struct CosArray <: CosObject
     val::Array{CosObject,1}
