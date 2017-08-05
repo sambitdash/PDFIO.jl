@@ -77,7 +77,7 @@ function cosStreamRemoveFilters(stm::CosObject)
     data = read(bufstm)
     close(bufstm)
     filename = get(stm, CosName("F"))
-    write(filename |> get, data)
+    write(filename |> get |> String, data)
     set!(stm, CosName("FFilter"),CosNull)
   end
   return stm
@@ -92,7 +92,7 @@ function decode(stm::CosObject)
   filters = get(stm, CosName("FFilter"))
   parms = get(stm, CosName("FDecodeParms"))
 
-  io = (util_open(filename |> get, "r") |> BufferedInputStream)
+  io = (util_open(String(filename), "r") |> BufferedInputStream)
 
   return decode_filter(io, filters, parms)
 end

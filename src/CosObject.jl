@@ -57,14 +57,27 @@ get(o::CosIndirectObject) = get(o.obj)
 end
 
 @compat struct CosXString <: CosString
-    val::String
-    CosXString(str::String)=new(str)
+  val::Vector{UInt8}
+  CosXString(arr::Vector{UInt8})=new(arr)
 end
 
+Base.convert(::Type{Vector{UInt8}}, xstr::CosXString)=
+  (xstr.val |> String |> hex2bytes)
+
+Base.convert(::Type{String}, xstr::CosXString)=
+  String(convert(Vector{UInt8},xstr))
+
+
 @compat struct CosLiteralString <: CosString
-    val::String
-    CosLiteralString(str::String)=new(str)
+    val::Vector{UInt8}
+    CosLiteralString(arr::Vector{UInt8})=new(arr)
 end
+
+CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
+
+Base.convert(::Type{Vector{UInt8}}, str::CosLiteralString)=str.val
+
+Base.convert(::Type{String}, str::CosLiteralString)=String(str.val)
 
 @compat mutable struct CosArray <: CosObject
     val::Array{CosObject,1}

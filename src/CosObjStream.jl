@@ -92,7 +92,7 @@ end
 function read_object_info_from_stm(stm::CosStream,
   oids::Vector{Int}, oloc::Vector{Int}, n::Int, first::Int)
   filename = get(stm, CosName("F"))
-  io = util_open(filename |> get,"r")
+  io = util_open(String(filename),"r")
   try
     for i = 1:n
       val = readuntil(io, ' ')
@@ -123,7 +123,7 @@ end
 function cosObjectStreamGetObject(stm::CosObjectStream,
   ref::CosNullType, loc::Int)
   filename = get(stm, CosName("F"))
-  io = util_open(filename |> get,"r")
+  io = util_open(String(filename),"r")
   ps = BufferedInputStream(io)
   try
     seek(ps, stm.oloc[loc+1])

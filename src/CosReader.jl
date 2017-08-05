@@ -173,7 +173,7 @@ function parse_string(ps::BufferedInputStream)
         paren_cnt-=1
       else
         chomp_space!(ps)
-        return CosLiteralString(String(b))
+        return CosLiteralString(b)
       end
     end
     push!(b, c)
@@ -196,7 +196,7 @@ function parse_xstring(ps::BufferedInputStream)
                 push!(b, NULL)
             end
             chomp_space!(ps)
-            return CosXString(String(b))
+            return CosXString(b)
         elseif !ispdfxdigit(c)
             _error(E_UNEXPECTED_CHAR, ps)
         else

@@ -178,7 +178,7 @@ attach_object(doc::CosDocImpl, indstm::CosIndirectObject{CosStream})=
 
 function attach_object(doc::CosDocImpl, stm::CosStream)
   tmpfile = get(get(stm,  CosName("F")))
-  push!(doc.tmpfiles, tmpfile)
+  push!(doc.tmpfiles, String(tmpfile))
   return nothing
 end
 
