@@ -1,4 +1,4 @@
-import Base:get,length
+import Base:get, length, show
 
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
@@ -30,6 +30,10 @@ end
     val::Int
 end
 
+show(io::IO, o::CosObject) = print(io, o.val)
+
+show(io::IO, o::CosNullType) = print(io, "null")
+
 """
 A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
@@ -40,25 +44,49 @@ the object should be searched from the CosDoc and returned.
   CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
 
+show(io::IO, o::CosIndirectObjectRef) = @printf io "%d %d R" o.val[1] o.val[2]
+
 #hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
 #isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
 
 @compat mutable struct CosIndirectObject{T <: CosObject} <: CosObject
-    num::Int
-    gen::Int
-    obj::T
+  num::Int
+  gen::Int
+  obj::T
 end
 
 get(o::CosIndirectObject) = get(o.obj)
+
+showref(io::IO, o::CosIndirectObject) = @printf io "%d %d R" o.num o.gen
+
+showref(io::IO, o::CosObject)=show(io, o)
+
+function show(io::IO, o::CosIndirectObject)
+  str = @sprintf "%d %d obj\n" o.num o.gen
+  print(io, str)
+  show(io, o.obj)
+end
 
 @compat struct CosName <: CosObject
     val::Symbol
     CosName(str::String)=new(Symbol("CosName_",str))
 end
 
+function show(io::IO, o::CosName)
+  val = String(o.val)
+  val = split(val,'_')[2]
+  str = @sprintf "/%s" val
+  print(io, str)
+end
+
 @compat struct CosXString <: CosString
   val::Vector{UInt8}
   CosXString(arr::Vector{UInt8})=new(arr)
+end
+
+function show(io::IO, o::CosXString)
+  str = @sprintf "%s" "<"*String(copy(o.val))*">"
+  print(io, str)
 end
 
 Base.convert(::Type{Vector{UInt8}}, xstr::CosXString)=
@@ -74,6 +102,11 @@ Base.convert(::Type{String}, xstr::CosXString)=
 end
 
 CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
+
+function show(io::IO, o::CosLiteralString)
+  str = @sprintf "%s" "("*String(copy(o.val))*")"
+  print(io, str)
+end
 
 Base.convert(::Type{Vector{UInt8}}, str::CosLiteralString)=copy(str.val)
 
@@ -92,6 +125,14 @@ Base.convert(::Type{String}, str::CosLiteralString)=
     CosArray()=new(Array{CosObject,1}())
 end
 
+function show(io::IO, o::CosArray)
+  print(io, '[')
+  for obj in o.val
+    showref(io, obj)
+    print(io, ' ')
+  end
+  print(io, ']')
+end
 
 get(o::CosArray, isNative=false)=isNative ? map((x)->get(x),o.val) : o.val
 length(o::CosArray)=length(o.val)
@@ -104,6 +145,18 @@ end
 get(dict::CosDict, name::CosName)=get(dict.val,name,CosNull)
 
 get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
+
+function show(io::IO, o::CosDict)
+  print(io, "<<\n")
+  for key in keys(o.val)
+    print(io, "\t")
+    show(io, key)
+    print(io, "\t")
+    showref(io, get(o,key))
+    println(io, "")
+  end
+  print(io, ">>")
+end
 
 """
 Set the value to object. If the object is CosNull the key is deleted.
@@ -126,6 +179,11 @@ set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
     CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
 end
 
+function show(io::IO, stm::CosStream)
+  show(io, stm.extent);
+  print(io, "stream\n...\nendstream\n")
+end
+
 get(stm::CosStream, name::CosName) = get(stm.extent, name)
 
 get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj,name)
@@ -141,7 +199,7 @@ Decodes the stream and provides output as an BufferedInputStream.
 """
 get(stm::CosStream) = decode(stm)
 
-@compat mutable struct CosObjectStream<: CosObject
+@compat mutable struct CosObjectStream <: CosObject
   stm::CosStream
   n::Int
   first::Int
@@ -161,6 +219,8 @@ get(stm::CosStream) = decode(stm)
     new(s, n_n, first_n,oids, oloc)
   end
 end
+
+show(io::IO, os::CosObjectStream) = show(io, os.stm)
 
 get(os::CosObjectStream, name::CosName) = get(os.stm, name)
 

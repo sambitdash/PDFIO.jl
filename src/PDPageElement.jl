@@ -1,4 +1,5 @@
 using BufferedStreams
+import Base: show
 
 @compat abstract type PDPageObject end
 
@@ -19,6 +20,14 @@ end
 
 PDPageElement(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0)=
   PDPageElement(Symbol(ts),ver,nop,Vector{CosObject}())
+
+function show(io::IO, e::PDPageElement)
+  for op in e.operands
+    show(io, op)
+    print(io, ' ')
+  end
+  print(io, String(e.t))
+end
 
 @compat mutable struct PDPageObjectGroup <: PDPageObject
   isEOG::Bool
@@ -152,6 +161,10 @@ end
   PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))
 end
+
+show(io::IO, e::PDPage_BeginGroup) = show(io, e.elem)
+
+show(io::IO, e::PDPage_EndGroup) = show(io, e.elem)
 
 function collect_object(grp::PDPageObjectGroup,
                         beg::PDPage_BeginGroup,
