@@ -389,6 +389,7 @@ function BufferedStreams.readbytes!{T<:BufferedInputStream}(
   nbreturn = ndata / 2
 
   i = j = 0
+  c = n = UInt(0) # Ensuring computation at the word boundary. 
   while i < nbreturn
     n = 0
     c = data[i+=1]
