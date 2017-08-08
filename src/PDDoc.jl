@@ -2,9 +2,12 @@ export PDDoc,
        pdDocOpen,
        pdDocClose,
        pdDocGetCatalog,
+       pdDocGetInfo, pdDocGetProducers,
        pdDocGetCosDoc,
        pdDocGetPageCount,
        pdDocGetPage
+
+using ..Common
 
 @compat abstract type PDDoc end
 
@@ -37,7 +40,18 @@ end
 function pdDocGetPage(doc::PDDoc, name::String)
 end
 
+function pdDocGetInfo(doc::PDDoc)
+    ref = get(doc.cosDoc.trailer[1], CosName("Info"))
+    obj = cosDocGetObject(doc.cosDoc, ref)
+    return obj
+end
 
+function pdDocGetProducers(doc::PDDoc)
+    info = pdDocGetInfo(doc)
+    creator = CDTextString(get(info, CosName("Creator")))
+    producer = CDTextString(get(info, CosName("Producer")))
+    return Dict("creator" => creator, "producer" => producer)
+end
 
 @compat mutable struct PDDocImpl <: PDDoc
   cosDoc::CosDoc

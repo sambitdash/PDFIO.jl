@@ -4,6 +4,8 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
        CosDict, CosIndirectObjectRef, CosStream, get, set!
 
+using StringEncodings
+
 @compat abstract type CosObject end
 
 @inline get{T<:CosObject}(o::T)=o.val
@@ -61,24 +63,12 @@ end
   CosXString(arr::Vector{UInt8})=new(arr)
 end
 
-Base.convert(::Type{Vector{UInt8}}, xstr::CosXString)=
-  (xstr.val |> String |> hex2bytes)
-
-Base.convert(::Type{String}, xstr::CosXString)=
-  String(convert(Vector{UInt8},xstr))
-
-
 @compat struct CosLiteralString <: CosString
     val::Vector{UInt8}
     CosLiteralString(arr::Vector{UInt8})=new(arr)
 end
 
 CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
-
-Base.convert(::Type{Vector{UInt8}}, str::CosLiteralString)=copy(str.val)
-
-Base.convert(::Type{String}, str::CosLiteralString)=
-  String(convert(Vector{UInt8},str))
 
 @compat mutable struct CosArray <: CosObject
     val::Array{CosObject,1}

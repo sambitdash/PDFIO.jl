@@ -10,6 +10,7 @@ using ..Common
 using Compat
 
 include("CosObject.jl")
+include("CosObjectHelpers.jl")
 include("CosStream.jl")
 include("CosReader.jl")
 include("CosObjStream.jl")
