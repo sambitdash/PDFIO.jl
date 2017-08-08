@@ -13,6 +13,8 @@ include("debugIO.jl")
       filename="files/1.pdf"
       println(filename)
       doc = pdDocOpen(filename)
+      cosDoc = pdDocGetCosDoc(doc)
+      println(cosDocGetRoot(cosDoc))
       @assert pdDocGetPageCount(doc) == 2
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false
