@@ -16,8 +16,8 @@ include("debugIO.jl")
       println(pdDocGetCatalog(doc))
       cosDoc = pdDocGetCosDoc(doc)
       map(println, cosDoc.trailer)
-      println(pdDocGetInfo(doc))
-      println(pdDocGetProducers(doc))
+      info = pdDocGetInfo(doc)
+      @assert info["Producer"] == "LibreOffice 5.3" && info["Creator"] == "Writer"
       @assert pdDocGetPageCount(doc) == 2
       page = pdDocGetPage(doc, 1)
       @assert pdPageIsEmpty(page) == false

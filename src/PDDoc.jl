@@ -2,7 +2,7 @@ export PDDoc,
        pdDocOpen,
        pdDocClose,
        pdDocGetCatalog,
-       pdDocGetInfo, pdDocGetProducers,
+       pdDocGetInfo,
        pdDocGetCosDoc,
        pdDocGetPageCount,
        pdDocGetPage
@@ -43,14 +43,13 @@ end
 function pdDocGetInfo(doc::PDDoc)
     ref = get(doc.cosDoc.trailer[1], CosName("Info"))
     obj = cosDocGetObject(doc.cosDoc, ref)
-    return obj
-end
-
-function pdDocGetProducers(doc::PDDoc)
-    info = pdDocGetInfo(doc)
-    creator = CDTextString(get(info, CosName("Creator")))
-    producer = CDTextString(get(info, CosName("Producer")))
-    return Dict("creator" => creator, "producer" => producer)
+    dInfo = Dict{CDTextString, Union{CDTextString, CDDate}}()
+    for (index, data) in enumerate(get(obj))
+        skey = CDTextString(data[1])
+        dInfo[skey] = (skey == "CreationDate") || (skey == "ModDate") ?
+                      CDDate(data[2]) : CDTextString(data[2])
+    end
+    return dInfo
 end
 
 @compat mutable struct PDDocImpl <: PDDoc

@@ -33,8 +33,8 @@ IODebug=[0,Vector{Tuple{AbstractString,IOStream}}()]
 function get_tempfilepath()
   global IODebug
   IODebug[1]+=1
-  path=get_tempdir()*"/"*string(IODebug[1])
-  return (path,util_open(path,"w"))
+  path = joinpath(get_tempdir(), string(IODebug[1]))
+  return (path, util_open(path,"w"))
 end
 
 function util_open(filename, mode)

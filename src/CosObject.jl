@@ -4,8 +4,6 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
        CosDict, CosIndirectObjectRef, CosStream, get, set!
 
-using StringEncodings
-
 @compat abstract type CosObject end
 
 @inline get{T<:CosObject}(o::T)=o.val
@@ -191,7 +189,7 @@ showref(io::IO, o::CosObject) = show(io, o)
 
 show(io::IO, o::CosNullType) = print(io, "null")
 
-show(io::IO, o::CosName) = @printf io "/%s" split(String(o.val),'_')[2]
+show(io::IO, o::CosName) = @printf io "/%s" String(o)
 
 show(io::IO, o::CosXString) =  @printf "%s" "<"*String(copy(o.val))*">"
 
