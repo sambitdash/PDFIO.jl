@@ -4,9 +4,9 @@ export PDPage,
        pdPageGetCosObject,
        pdPageGetContentObjects
 
-@compat abstract type PDPage end
+abstract type PDPage end
 
-@compat mutable struct PDPageImpl <: PDPage
+mutable struct PDPageImpl <: PDPage
   doc::PDDocImpl
   cospage::CosObject
   contents::CosObject

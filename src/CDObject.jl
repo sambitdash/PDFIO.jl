@@ -8,7 +8,7 @@ using TimeZones
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 
 """
-@compat struct CDDate
+struct CDDate
     d::ZonedDateTime
     CDDate(d::ZonedDateTime) = new(d)
 end
@@ -30,7 +30,7 @@ end
 
 Base.show(io::IO, dt::CDDate) = show(io, dt.d)
 
-@compat struct CDRect{T <: Number}
+struct CDRect{T <: Number}
     llx::T
     lly::T
     urx::T

@@ -8,9 +8,9 @@ export CosDoc,
        cosDocGetRoot,
        cosDocGetObject
 
-@compat abstract type CosDoc end
+abstract type CosDoc end
 
-@compat mutable struct CosDocImpl <: CosDoc
+mutable struct CosDocImpl <: CosDoc
   filepath::String
   size::Int
   io::IOStream

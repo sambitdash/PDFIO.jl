@@ -285,7 +285,7 @@ function read_internal_stream_data(ps::BufferedInputStream, extent::CosDict, len
 end
 
 
-@compat mutable struct CosObjectLoc
+mutable struct CosObjectLoc
   loc::Int
   stm::CosObject
   obj::CosObject

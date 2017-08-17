@@ -114,7 +114,7 @@ function decode_filter(io, filters::CosArray, parms::CosObject)
   return bufstm
 end
 
-@compat mutable struct PNGPredictorSource{T<:BufferedInputStream}
+mutable struct PNGPredictorSource{T<:BufferedInputStream}
   input::T
   predictor::UInt8
   columns::Int
@@ -265,7 +265,7 @@ function load_png_row!(source::PNGPredictorSource)
   return source
 end
 
-@compat mutable struct RLEDecodeSource{T<:BufferedInputStream}
+mutable struct RLEDecodeSource{T<:BufferedInputStream}
   input::T
   run::Vector{UInt8}
   s::UInt8
@@ -354,7 +354,7 @@ function decode_rle(input::BufferedInputStream)
   return BufferedInputStream(RLEDecodeSource(input))
 end
 
-@compat mutable struct ASCIIHexDecodeSource{T<:BufferedInputStream}
+mutable struct ASCIIHexDecodeSource{T<:BufferedInputStream}
   input::T
   isClosed::Bool
 end
@@ -389,7 +389,7 @@ function BufferedStreams.readbytes!{T<:BufferedInputStream}(
   nbreturn = ndata / 2
 
   i = j = 0
-  c = n = UInt(0) # Ensuring computation at the word boundary. 
+  c = n = UInt(0) # Ensuring computation at the word boundary.
   while i < nbreturn
     n = 0
     c = data[i+=1]
@@ -413,7 +413,7 @@ end
 
 #This is still buggy. Needs to be worked upon.
 
-@compat mutable struct ASCII85DecodeSource{T<:BufferedInputStream}
+mutable struct ASCII85DecodeSource{T<:BufferedInputStream}
   input::T
   residue::Vector{UInt8}
   isEOF::Bool

@@ -2,6 +2,7 @@ export PDDoc,
        pdDocOpen,
        pdDocClose,
        pdDocGetCatalog,
+       pdDocGetNamesDict,
        pdDocGetInfo,
        pdDocGetCosDoc,
        pdDocGetPageCount,
@@ -9,7 +10,7 @@ export PDDoc,
 
 using ..Common
 
-@compat abstract type PDDoc end
+abstract type PDDoc end
 
 function pdDocOpen(fp::String)
   doc = PDDocImpl(fp)
@@ -44,15 +45,21 @@ function pdDocGetInfo(doc::PDDoc)
     ref = get(doc.cosDoc.trailer[1], CosName("Info"))
     obj = cosDocGetObject(doc.cosDoc, ref)
     dInfo = Dict{CDTextString, Union{CDTextString, CDDate}}()
-    for (index, data) in enumerate(get(obj))
-        skey = CDTextString(data[1])
+    for (key, val) in get(obj)
+        skey = CDTextString(key)
         dInfo[skey] = (skey == "CreationDate") || (skey == "ModDate") ?
-                      CDDate(data[2]) : CDTextString(data[2])
+                      CDDate(val) : CDTextString(val)
     end
     return dInfo
 end
 
-@compat mutable struct PDDocImpl <: PDDoc
+function pdDocGetNamesDict(doc::PDDoc)
+    catalog = pdDocGetCatalog(doc)
+    ref = get(catalog, CosName("Names"))
+    obj = cosDocGetObject(doc.cosDoc, ref)
+end
+
+mutable struct PDDocImpl <: PDDoc
   cosDoc::CosDoc
   catalog::CosObject
   pages::CosObject

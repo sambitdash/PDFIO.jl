@@ -4,29 +4,29 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
        CosDict, CosIndirectObjectRef, CosStream, get, set!
 
-@compat abstract type CosObject end
+abstract type CosObject end
 
 @inline get{T<:CosObject}(o::T)=o.val
 
-@compat abstract type CosString <: CosObject end
-@compat abstract type CosNumeric <: CosObject end
+abstract type CosString <: CosObject end
+abstract type CosNumeric <: CosObject end
 
-@compat struct CosBoolean <: CosObject
+struct CosBoolean <: CosObject
     val::Bool
 end
 
 const CosTrue=CosBoolean(true)
 const CosFalse=CosBoolean(false)
 
-@compat struct CosNullType <: CosObject end
+struct CosNullType <: CosObject end
 
 const CosNull=CosNullType()
 
-@compat struct CosFloat <: CosNumeric
+struct CosFloat <: CosNumeric
     val::Float64
 end
 
-@compat struct CosInt <: CosNumeric
+struct CosInt <: CosNumeric
     val::Int
 end
 
@@ -35,15 +35,12 @@ A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
 the object should be searched from the CosDoc and returned.
 """
-@compat struct CosIndirectObjectRef <: CosObject
+struct CosIndirectObjectRef <: CosObject
   val::Tuple{Int,Int}
   CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
 
-#hash(o::CosIndirectObjectRef, h::UInt=zero(UInt)) = hash(o.val, h)
-#isequal(r1::CosIndirectObjectRef, r2::CosIndirectObjectRef) = isequal(r1.val, r2.val)
-
-@compat mutable struct CosIndirectObject{T <: CosObject} <: CosObject
+mutable struct CosIndirectObject{T <: CosObject} <: CosObject
   num::Int
   gen::Int
   obj::T
@@ -51,24 +48,24 @@ end
 
 get(o::CosIndirectObject) = get(o.obj)
 
-@compat struct CosName <: CosObject
+struct CosName <: CosObject
     val::Symbol
     CosName(str::String)=new(Symbol("CosName_",str))
 end
 
-@compat struct CosXString <: CosString
+struct CosXString <: CosString
   val::Vector{UInt8}
   CosXString(arr::Vector{UInt8})=new(arr)
 end
 
-@compat struct CosLiteralString <: CosString
+struct CosLiteralString <: CosString
     val::Vector{UInt8}
     CosLiteralString(arr::Vector{UInt8})=new(arr)
 end
 
 CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
 
-@compat mutable struct CosArray <: CosObject
+mutable struct CosArray <: CosObject
     val::Array{CosObject,1}
     function CosArray(arr::Array{T,1} where {T<:CosObject})
       val = Array{CosObject,1}()
@@ -83,7 +80,7 @@ end
 get(o::CosArray, isNative=false)=isNative ? map((x)->get(x),o.val) : o.val
 length(o::CosArray)=length(o.val)
 
-@compat mutable struct CosDict <: CosObject
+mutable struct CosDict <: CosObject
     val::Dict{CosName,CosObject}
     CosDict()=new(Dict{CosName,CosObject}())
 end
@@ -107,7 +104,7 @@ end
 set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
             set!(o.obj, name, obj)
 
-@compat mutable struct CosStream <: CosObject
+mutable struct CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
     CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
@@ -128,7 +125,7 @@ Decodes the stream and provides output as an BufferedInputStream.
 """
 get(stm::CosStream) = decode(stm)
 
-@compat mutable struct CosObjectStream <: CosObject
+mutable struct CosObjectStream <: CosObject
   stm::CosStream
   n::Int
   first::Int
@@ -161,7 +158,7 @@ set!(os::CosIndirectObject{CosObjectStream}, name::CosName, obj::CosObject)=
 
 get(os::CosObjectStream) = get(os.stm)
 
-@compat mutable struct CosXRefStream<: CosObject
+mutable struct CosXRefStream<: CosObject
   stm::CosStream
   isDecoded::Bool
   function CosXRefStream(s::CosStream,isDecoded::Bool=false)
@@ -180,6 +177,64 @@ set!(os::CosIndirectObject{CosXRefStream}, name::CosName, obj::CosObject)=
     set!(os.obj,name,obj)
 
 get(os::CosXRefStream) = get(os.stm)
+
+"""
+Can be a Number Tree or a Name Tree.
+
+`kids`: is `null` in case of a leaf node
+`range`: is `null` in case of a root node
+`values`: is `null` in case of an intermediate node
+
+Intent: faster loookup without needing to load the complete tree structure. Hence, the tree
+will not be loaded on full scan.
+"""
+mutable struct CosTreeNode{K}
+    values::Nullable{Vector{Pair{K,CosObject}}}
+    kids::Nullable{Vector{CosIndirectObjectRef}}
+    range::Nullable{Pair{K,K}}
+end
+
+function createTreeNode(dict::CosObject)
+    range = get(dict, CosName("Limits"))
+    kids  = get(dict, CosName("Kids"))
+    names = get(dict, CosName("Names"))
+    nums  = get(dict, CosName("Nums"))
+
+
+end
+
+#=
+function find_tree{S}(search_fn::Function, doc::CosDoc, root::CosObject, term::S)
+end
+
+function find{K}(fn::Function, doc::CosDoc, node::CosTreeNode{K}, key::K)
+    inrange = 0
+    if (!isnull(node.range))
+        inrange = (key < node.range[1]) ? -1 :
+                  (key > node.range[2]) ?  1 : 0
+    end
+    if inrange == 0
+        if isnull(node.kids) # This is the leaf
+            # TBD: look into the values.
+            return (found, fn(key, node.values))
+        end
+        for kid in kids
+            kidobj = cosDocGetObject(doc, kid)
+            kidnode = CosTreeNode(kidobj)
+            inrange, val = find(fn, doc, kidnode, key)
+            if inrange == -1
+                break
+            elseif inrange == 0
+                return (inrange,val)
+            end
+        end
+    else
+        return (inrange, nothing)
+    end
+    return (inrange, nothing)
+end
+
+=#
 
 # All show methods
 

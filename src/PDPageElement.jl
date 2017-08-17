@@ -1,7 +1,7 @@
 using BufferedStreams
 import Base: show
 
-@compat abstract type PDPageObject end
+abstract type PDPageObject end
 
 """
 *PDPageElement* type is a representation of organization of content and content
@@ -9,7 +9,7 @@ operators.
 
 The operands are like attributes of the element to be used for any operations.
 """
-@compat mutable struct PDPageElement <: PDPageObject
+mutable struct PDPageElement <: PDPageObject
   t::Symbol
   version::Tuple{Int,Int}
   noperand::Int
@@ -29,7 +29,7 @@ function show(io::IO, e::PDPageElement)
   print(io, String(e.t))
 end
 
-@compat mutable struct PDPageObjectGroup <: PDPageObject
+mutable struct PDPageObjectGroup <: PDPageObject
   isEOG::Bool
   objs::Vector{Union{PDPageObject,CosObject}}
   PDPageObjectGroup(isEOG::Bool=false)=
@@ -76,24 +76,24 @@ function collect_object(grp::PDPageObjectGroup,
   return elem
 end
 
-@compat mutable struct PDPageTextObject <: PDPageObject
+mutable struct PDPageTextObject <: PDPageObject
   group::PDPageObjectGroup
   PDPageTextObject()=new(PDPageObjectGroup())
 end
 
-@compat mutable struct PDPageMarkedContent <: PDPageObject
+mutable struct PDPageMarkedContent <: PDPageObject
   group::PDPageObjectGroup
   PDPageMarkedContent()=new(PDPageObjectGroup())
 end
 
-@compat mutable struct PDPageInlineImage <: PDPageObject
+mutable struct PDPageInlineImage <: PDPageObject
   params::CosDict
   data::Vector{UInt8}
   isRead::Bool
   PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
-@compat mutable struct PDPage_BeginInlineImage <: PDPageObject
+mutable struct PDPage_BeginInlineImage <: PDPageObject
   elem::PDPageElement
   PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))
@@ -149,14 +149,14 @@ function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
 end
 
 
-@compat mutable struct PDPage_BeginGroup <: PDPageObject
+mutable struct PDPage_BeginGroup <: PDPageObject
   elem::PDPageElement
   objT::Type
   PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
     new(PDPageElement(ts,ver,nop),t)
 end
 
-@compat mutable struct PDPage_EndGroup
+mutable struct PDPage_EndGroup
   elem::PDPageElement
   PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
     new(PDPageElement(ts,ver,nop))
