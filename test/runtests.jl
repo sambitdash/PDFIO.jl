@@ -11,11 +11,11 @@ include("debugIO.jl")
     @testset "Test FlateDecode" begin
         @test begin
             filename="files/1.pdf"
-            DEBUG && println(filename)
+            println(filename)
             doc = pdDocOpen(filename)
-            DEBUG && println(pdDocGetCatalog(doc))
+            println(pdDocGetCatalog(doc))
             cosDoc = pdDocGetCosDoc(doc)
-            DEBUG && map(println, cosDoc.trailer)
+            map(println, cosDoc.trailer)
             info = pdDocGetInfo(doc)
             @assert info["Producer"] == "LibreOffice 5.3" && info["Creator"] == "Writer"
             @assert pdDocGetPageCount(doc) == 2
@@ -28,7 +28,7 @@ include("debugIO.jl")
             @assert length(buf) == 18669
             @assert length(pdPageGetContentObjects(page).objs)==190
             pdDocClose(doc)
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
   end
 
@@ -47,7 +47,7 @@ include("debugIO.jl")
             @assert length(buf) == 1021
             @assert length(pdPageGetContentObjects(page).objs)==1
             pdDocClose(doc)
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
@@ -56,13 +56,13 @@ include("debugIO.jl")
             filename="3.pdf"
             DEBUG && println(filename)
             isfile(filename)||
-            download("http://www.stillhq.com/pdfdb/000003/data.pdf",filename)
+                download("http://www.stillhq.com/pdfdb/000003/data.pdf",filename)
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 30
             page = pdDocGetPage(doc, 1)
             @assert pdPageIsEmpty(page) == false
             pdDocClose(doc)
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
@@ -77,14 +77,14 @@ include("debugIO.jl")
                 npage= pdDocGetPageCount(doc)
                 for i=1:npage
                     page = pdDocGetPage(doc, i)
-                    if pdPageIsEmpty(page)==false
+                    if pdPageIsEmpty(page) == false
                         pdPageGetContentObjects(page)
                     end
                 end
             finally
                 pdDocClose(doc)
             end
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
@@ -101,9 +101,9 @@ include("debugIO.jl")
             stm=get(obj)
             data=read(stm)
             close(stm)
-            @assert length(data)==273
+            @assert length(data) == 273
             pdDocClose(doc)
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
@@ -146,7 +146,7 @@ include("debugIO.jl")
     @testset "Test read_string" begin
         @test begin
             DEBUG && PDFIO.Cos.parse_data("files/page5.txt")
-            length(utilPrintOpenFiles())==0
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
@@ -171,7 +171,7 @@ include("debugIO.jl")
     end
 
     files=readdir(get_tempdir())
-    @assert length(files)==0
+    @assert length(files) == 0
 end
 
 if isfile("pvt/pvttests.jl")
