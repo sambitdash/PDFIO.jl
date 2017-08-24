@@ -11,14 +11,16 @@ function convert(::Type{CDTextString}, xstr::CosXString)
     data = xstr.val
     buffer = data |> String |> hex2bytes
     if prefix == feff || prefix == FEFF
+        len2 = div(length(buffer),2)
+        utf_16_arr = Vector{UInt16}(len2-1)
+        utf_16_data = reinterpret(UInt8, utf_16_arr)
         if (0x04030201 == ENDIAN_BOM)
-            len2 = div(length(buffer),2)
             for i=1:len2
                 (buffer[2i-1], buffer[2i]) = (buffer[2i], buffer[2i-1])
             end
         end
-        utf_16_data = reinterpret(UInt16, buffer[3:end])
-        str = transcode(String, utf_16_data)
+        copy!(utf_16_data, 1, buffer, 3, 2len2-2)
+        str = transcode(String, utf_16_arr)
     else
         # Assume PDFDocEncoding (ISO-8859-1)
         str = StringEncodings.decode(buffer, "ISO_8859-1")
