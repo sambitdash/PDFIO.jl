@@ -21,29 +21,19 @@ parseable value.
 """
 function parse_value(ps::BufferedInputStream)
     chomp_space!(ps)
-
     @inbounds byte = peek(ps)
-    if byte == LEFT_PAREN
-        parse_string(ps)
-    elseif byte == LESS_THAN
-        parse_xstring(ps)
-    elseif byte == PERCENT
-        parse_comment(ps)
-    elseif byte == SOLIDUS
-        parse_name(ps)
-    elseif byte == MINUS_SIGN || byte == PLUS_SIGN || byte == PERIOD
-        parse_number(ps)
-    elseif ispdfdigit(byte)
-        try_parse_indirect_reference(ps)
-    elseif byte == LEFT_SB
-        parse_array(ps)
-    else
-        parse_pdfOpsOrConst(ps)
-    end
+    byte == LEFT_PAREN ? parse_string(ps) :
+    byte == LESS_THAN  ? parse_xstring(ps) :
+    byte == PERCENT    ? parse_comment(ps) :
+    byte == SOLIDUS    ? parse_name(ps) :
+    byte == MINUS_SIGN || byte == PLUS_SIGN || byte == PERIOD ? parse_number(ps) :
+    ispdfdigit(byte)   ? try_parse_indirect_reference(ps) :
+    byte == LEFT_SB    ? parse_array(ps) :
+    parse_pdfOpsOrConst(ps)
 end
 
 function parse_comment(ps::BufferedInputStream)
-    b = UInt8[]
+    b = Vector{UInt8}()
     skip(ps,1)  # skip comment marker
     while true
         c = advance!(ps)
@@ -102,15 +92,10 @@ function parse_pdfOpsOrConst(ps::BufferedInputStream)
 end
 
 function get_pdfconstant(b::Vector{UInt8})
-  if (b==[LATIN_T,LATIN_R,LATIN_U,LATIN_E])
-    return CosTrue
-  elseif (b==[LATIN_F,LATIN_A, LATIN_L, LATIN_S, LATIN_E])
-    return CosFalse
-  elseif (b==[LATIN_N, LATIN_U, LATIN_L, LATIN_L])
-    return CosNull
-  else
+    b == [LATIN_T,LATIN_R,LATIN_U,LATIN_E]              && return CosTrue
+    b == [LATIN_F,LATIN_A, LATIN_L, LATIN_S, LATIN_E]   && return CosFalse
+    b == [LATIN_N, LATIN_U, LATIN_L, LATIN_L]           && return CosNull
     return nothing
-  end
 end
 
 function parse_array(ps::BufferedInputStream)
@@ -213,13 +198,15 @@ function parse_dict(ps::BufferedInputStream)
     dict=CosDict()
 
     while(true)
-        @assert peek(ps)==SOLIDUS
-        key = parse_name(ps)
-        chomp_space!(ps)
+        # Empty dict File 431 stillhq
+        if peek(ps)==SOLIDUS
+            key = parse_name(ps)
+            chomp_space!(ps)
 
-        val = parse_value(ps)
-        if (val != CosNull)
-            dict.val[key] = val
+            val = parse_value(ps)
+            if (val !== CosNull)
+                dict.val[key] = val
+            end
         end
 
         chomp_space!(ps)
@@ -230,7 +217,6 @@ function parse_dict(ps::BufferedInputStream)
             skipv(ps, GREATER_THAN)
             break
         end
-        keyfound = false
     end
     chomp_space!(ps)
     return dict

@@ -2,7 +2,8 @@ import Base:get, length, show
 
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
-       CosDict, CosIndirectObjectRef, CosStream, get, set!
+       CosDict, CosIndirectObjectRef, CosStream, get, set!, @cn_str,
+       createTreeNode, CosTreeNode
 
 abstract type CosObject end
 
@@ -51,6 +52,10 @@ get(o::CosIndirectObject) = get(o.obj)
 struct CosName <: CosObject
     val::Symbol
     CosName(str::String)=new(Symbol("CosName_",str))
+end
+
+macro cn_str(str)
+    return CosName(str)
 end
 
 struct CosXString <: CosString
@@ -188,53 +193,52 @@ Can be a Number Tree or a Name Tree.
 Intent: faster loookup without needing to load the complete tree structure. Hence, the tree
 will not be loaded on full scan.
 """
-mutable struct CosTreeNode{K}
-    values::Nullable{Vector{Pair{K,CosObject}}}
+mutable struct CosTreeNode{K <: Union{Int, String}}
+    values::Nullable{Vector{Tuple{K,CosObject}}}
     kids::Nullable{Vector{CosIndirectObjectRef}}
-    range::Nullable{Pair{K,K}}
+    range::Nullable{Tuple{K,K}}
+    function CosTreeNode{K}() where {K <: Union{Int, String}}
+        new(Nullable{Vector{Tuple{K,CosObject}}}(),
+            Nullable{Vector{CosIndirectObjectRef}}(),
+            Nullable{Tuple{K,K}}())
+    end
 end
 
-function createTreeNode(dict::CosObject)
+# If K is Int, it's a number tree else it's a String which is a name tree
+function createTreeNode{K}(::Type{K}, dict::CosObject)
     range = get(dict, CosName("Limits"))
     kids  = get(dict, CosName("Kids"))
+    node = CosTreeNode{K}()
+    if (range !== CosNull)
+        r = get(range, true)
+        node.range = Nullable((r[1],r[2]))
+    end
+    if (kids !== CosNull)
+        ks = get(kids)
+        node.kids = Nullable(ks)
+    end
+    return populate_values(node, dict)
+end
+
+function populate_values(node::CosTreeNode{Int}, dict::CosObject)
+    nums = get(dict, CosName("Nums"))
+    if (nums !== CosNull)
+        v = get(nums)
+        values = [(get(v[2i-1]),v[2i]) for i=1:div(length(v),2)]
+        node.values = Nullable(values)
+    end
+    return node
+end
+
+function populate_values(node::CosTreeNode{String}, dict::CosObject)
     names = get(dict, CosName("Names"))
-    nums  = get(dict, CosName("Nums"))
-
-
-end
-
-#=
-function find_tree{S}(search_fn::Function, doc::CosDoc, root::CosObject, term::S)
-end
-
-function find{K}(fn::Function, doc::CosDoc, node::CosTreeNode{K}, key::K)
-    inrange = 0
-    if (!isnull(node.range))
-        inrange = (key < node.range[1]) ? -1 :
-                  (key > node.range[2]) ?  1 : 0
+    if (names !== CosNull)
+        v = get(names, true)
+        values = [(get(v[2i-1]),v[2i]) for i=1:div(length(v),2)]
+        node.values = Nullable(values)
     end
-    if inrange == 0
-        if isnull(node.kids) # This is the leaf
-            # TBD: look into the values.
-            return (found, fn(key, node.values))
-        end
-        for kid in kids
-            kidobj = cosDocGetObject(doc, kid)
-            kidnode = CosTreeNode(kidobj)
-            inrange, val = find(fn, doc, kidnode, key)
-            if inrange == -1
-                break
-            elseif inrange == 0
-                return (inrange,val)
-            end
-        end
-    else
-        return (inrange, nothing)
-    end
-    return (inrange, nothing)
+    return node
 end
-
-=#
 
 # All show methods
 
@@ -246,9 +250,9 @@ show(io::IO, o::CosNullType) = print(io, "null")
 
 show(io::IO, o::CosName) = @printf io "/%s" String(o)
 
-show(io::IO, o::CosXString) =  @printf "%s" "<"*String(copy(o.val))*">"
+show(io::IO, o::CosXString) =  @printf io "%s" "<"*String(copy(o.val))*">"
 
-show(io::IO, o::CosLiteralString) = @printf "%s" "("*String(copy(o.val))*")"
+show(io::IO, o::CosLiteralString) = @printf io "%s" "("*String(copy(o.val))*")"
 
 function show(io::IO, o::CosArray)
   print(io, '[')
@@ -260,15 +264,15 @@ function show(io::IO, o::CosArray)
 end
 
 function show(io::IO, o::CosDict)
-  print(io, "<<\n")
-  map(keys(o.val)) do key
-    print(io, '\t')
-    show(io, key)
-    print(io, '\t')
-    showref(io, get(o, key))
-    println(io, "")
-  end
-  print(io, ">>")
+    print(io, "<<\n")
+    for (k,v) in o.val
+        print(io, '\t')
+        show(io, k)
+        print(io, '\t')
+        showref(io, v)
+        println(io, "")
+    end
+    print(io, ">>")
 end
 
 show(io::IO, stm::CosStream) =

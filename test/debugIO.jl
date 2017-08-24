@@ -7,7 +7,7 @@ This is kept external to the regular library to ensure normal library operations
 are not affected.
 =#
 
-const DEBUG=true
+const DEBUG=false
 
 if DEBUG
 

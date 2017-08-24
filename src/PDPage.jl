@@ -6,6 +6,56 @@ export PDPage,
 
 abstract type PDPage end
 
+"""
+```
+    pdPageGetCosObject(page::PDPage) -> CosObject
+```
+PDF document format is developed in two layers. A logical PDF document information is
+represented over a physical file structure called COS. This method provides the internal
+COS object associated with the page object.
+"""
+pdPageGetCosObject(page::PDPage) = page.cospage
+
+"""
+```
+    pdPageGetContents(page::PDPage) -> CosObject
+```
+Page rendering objects are normally stored in a `CosStream` object in a PDF file. This
+method provides access to the stream object.
+"""
+function pdPageGetContents(page::PDPage)
+    if (page.contents === CosNull)
+        ref = get_page_content_ref(page)
+        page.contents = get_page_contents(page, ref)
+    end
+    return page.contents
+end
+
+"""
+```
+    pdPageIsEmpty(page::PDPage) -> Bool
+```
+Returns `true` when the page has no associated content object.
+"""
+function pdPageIsEmpty(page::PDPage)
+    return page.contents === CosNull && get_page_content_ref(page) === CosNull
+end
+
+"""
+```
+    pdPageGetContentObjects(page::PDPage) -> CosObject
+```
+A page object can have multiple associated content objects. This method will return a
+`CosArray` if there are multiple of content objects associated. Otherwise an indirect
+object of `CosStream` type will be returned.
+"""
+function pdPageGetContentObjects(page::PDPage)
+    if (isnull(page.content_objects))
+        load_page_objects(page)
+    end
+    return get(page.content_objects)
+end
+
 mutable struct PDPageImpl <: PDPage
   doc::PDDocImpl
   cospage::CosObject
@@ -15,44 +65,20 @@ mutable struct PDPageImpl <: PDPage
     new(doc, cospage, contents, Nullable{PDPageObjectGroup}())
 end
 
-pdPageGetCosObject(page)=page.cospage
-
-function pdPageGetContents(page::PDPageImpl)
-  if (page.contents === CosNull)
-    ref = get_page_content_ref(page)
-    page.contents = get_page_contents(page, ref)
-  end
-  return page.contents
-end
-
-function pdPageIsEmpty(page::PDPageImpl)
-  return page.contents === CosNull && get_page_content_ref(page) === CosNull
-end
-
-function pdPageGetContentObjects(page::PDPageImpl)
-  if (isnull(page.content_objects))
-    load_page_objects(page)
-  end
-  return get(page.content_objects)
-end
-
-PDPageImpl(doc::PDDocImpl, cospage::CosObject)=PDPageImpl(doc, cospage,CosNull)
+PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage,CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default
 values.
 =#
-function create_pdpage(doc::PDDocImpl, cospage::CosObject)
-  return PDPageImpl(doc, cospage)
-end
-
+create_pdpage(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage)
+create_pdpage(doc::PDDocImpl, cospage::CosNullType) =
+    throw(ErorException(E_INVALID_OBJECT))
 #=
 This will return a CosArray of ref or ref to a stream. This needs to be
 converted to an actual stream object
 =#
-function get_page_content_ref(page::PDPageImpl)
-  return get(page.cospage, CosName("Contents"))
-end
+get_page_content_ref(page::PDPageImpl) = get(page.cospage, cn"Contents")
 
 function get_page_contents(page::PDPageImpl, contents::CosArray)
   len = length(contents)

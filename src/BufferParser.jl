@@ -1,44 +1,28 @@
 using BufferedStreams
 
-export skipv,
-       advance!,
-       locate_keyword!,
-       chomp_space!,
-       chomp_eol!
+export  skipv,
+        advance!,
+        locate_keyword!,
+        chomp_space!,
+        chomp_eol!
 
-@inline function chomp_space!(ps::BufferedInputStream)
-    while !eof(ps) && ispdfspace(peek(ps))
-      skip(ps,1)
-    end
+@inline chomp_space!(ps::BufferedInputStream) =
+    while !eof(ps) && ispdfspace(peek(ps)) skip(ps,1) end
+
+@inline chomp_eol!(ps::BufferedInputStream) =
+    @inbounds while !eof(ps) && is_crorlf(peek(ps)) skip(ps,1) end
+
+@inline function skipv(ps::BufferedInputStream, c::UInt8)
+    ch = 0xff
+    !eof(ps) && ((ch = peek(ps)) == c) && return skip(ps,1)
+    error("Found '$(UInt8(ch))' Expected '$(Char(c))' here")
 end
 
-@inline function chomp_eol!(ps::BufferedInputStream)
-    @inbounds while !eof(ps) && is_crorlf(peek(ps))
-        skip(ps,1)
-    end
-end
+@inline skipv(ps::BufferedInputStream, cs::UInt8...) = for c in cs skipv(ps, c) end
 
-function skipv(ps::BufferedInputStream, c::UInt8)
-    if !eof(ps) && (peek(ps) == c)
-        skip(ps,1)
-    else
-        error("Expected '$(Char(c))' here")
-    end
-end
+@inline skipv(ps::BufferedInputStream, cs::Vector{UInt8}) = for c in cs skipv(ps, c) end
 
-function skipv(ps::BufferedInputStream, cs::UInt8...)
-    for c in cs
-        skipv(ps, c)
-    end
-end
-
-function skipv(ps::BufferedInputStream, cs::Array{UInt8,1})
-    for c in cs
-        skipv(ps, c)
-    end
-end
-
-@inline advance!(ps::BufferedInputStream)=read(ps,UInt8)
+@inline advance!(ps::BufferedInputStream) = read(ps,UInt8)
 
 function kmp_preprocess(P)
     m = length(P)
@@ -82,15 +66,15 @@ function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyw
             break
         end
         if (offset >= maxoffset)
-          break
+            break
         end
     end
     if found
-      unmark(ps)
-      return (offset - length(keyword))
+        unmark(ps)
+        return (offset - length(keyword))
     else
-      reset(ps)
-      peek(ps)
-      return -1
+        reset(ps)
+        peek(ps)
+        return -1
     end
 end
