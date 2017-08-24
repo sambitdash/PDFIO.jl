@@ -164,7 +164,7 @@ include("debugIO.jl")
                 range(3,1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "42") ==
                 range(46,1)
-
+            pdDocGetPageRange(doc, "iii")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
