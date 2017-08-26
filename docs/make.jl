@@ -15,7 +15,7 @@ deploydocs(
     repo   = "github.com/sambitdash/PDFIO.jl.git",
     target = "build",
     branch = "gh-pages",
-    julia  = 0.6,
+    julia  = "0.6",
     deps   = nothing,
     make   = nothing
 )
