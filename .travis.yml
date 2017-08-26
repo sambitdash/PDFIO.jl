@@ -35,3 +35,6 @@ after_success:
   - julia -e 'cd(Pkg.dir("PDFIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("PDFIO")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  # push documentation from gh-pages
+  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'cd(Pkg.dir("PDFIO")); include(joinpath("docs", "make.jl"))'
