@@ -4,8 +4,7 @@
 [![Win status](https://ci.appveyor.com/api/projects/status/9cocsctqdkx603q0?svg=true)](https://ci.appveyor.com/project/sambitdash/pdfio-jl)
 [![Coverage Status](https://coveralls.io/repos/sambitdash/PDFIO.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/sambitdash/PDFIO.jl?branch=master)
 [![codecov.io](http://codecov.io/github/sambitdash/PDFIO.jl/coverage.svg?branch=master)](http://codecov.io/github/sambitdash/PDFIO.jl?branch=master)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sambitdash.github.io/PDFIO.jl/stable)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/latest)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/docs/build)
 
 PDFIO is a simple PDF API focused on processing text from PDF files. The
 APIs is kept fairly simple and follows the PDF-32000-1:2008 specification as
