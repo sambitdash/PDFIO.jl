@@ -5,13 +5,56 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosDict, CosIndirectObjectRef, CosStream, get, set!, @cn_str,
        createTreeNode, CosTreeNode
 
+"""
+```
+    CosObject
+```
+PDF is a structured document format with lots of internal data structures like
+dictionaries, arrays, trees. `CosObject` is the interface to access these objects and get
+detailed access to the objects and gather additional information. Although, defined in the
+COS layer, objects of these type are returned from almost all the APIs. Hence, the objects
+have a separate significance whether you need to use the `Cos` layer or not. Below is the
+object hierarchy.
+
+```
+CosObject                           Abstract
+    CosNull                         Value (CosNullType)
+CosString                           Abstract
+CosName                             Concrete
+CosNumeric                          Abstract
+    CosInt                          Concrete
+    CosFloat                        Concrete
+CosBoolean                          Concrete
+    CosTrue                         Value (CosBoolean)
+    CosFalse                        Value (CosBoolean)
+CosDict                             Concrete
+CosArray                            Concrete
+CosStream                           Concrete (always wrapped as an indirect object)
+CosIndirectObjectRef                Concrete (only useful when CosDoc is available)
+```
+"""
 abstract type CosObject end
 
 @inline get{T<:CosObject}(o::T)=o.val
 
+"""
+```
+    CosString
+```
+"""
 abstract type CosString <: CosObject end
+"""
+```
+    CosNumeric
+```
+"""
 abstract type CosNumeric <: CosObject end
 
+"""
+```
+    CosBoolean
+```
+"""
 struct CosBoolean <: CosObject
     val::Bool
 end
@@ -21,17 +64,35 @@ const CosFalse=CosBoolean(false)
 
 struct CosNullType <: CosObject end
 
+"""
+```
+    CosNull
+```
+"""
 const CosNull=CosNullType()
 
+"""
+```
+    CosFloat
+```
+"""
 struct CosFloat <: CosNumeric
     val::Float64
 end
 
+"""
+```
+    CosFloat
+```
+"""
 struct CosInt <: CosNumeric
     val::Int
 end
 
 """
+```
+    CosIndirectObjectRef
+```
 A parsed data structure to ensure the object information is stored as an object.
 This has no meaning without a associated CosDoc. When a reference object is hit
 the object should be searched from the CosDoc and returned.
@@ -49,20 +110,40 @@ end
 
 get(o::CosIndirectObject) = get(o.obj)
 
+"""
+```
+    CosName
+```
+"""
 struct CosName <: CosObject
     val::Symbol
     CosName(str::String)=new(Symbol("CosName_",str))
 end
 
+"""
+```
+    @cn_str
+```
+"""
 macro cn_str(str)
     return CosName(str)
 end
 
+"""
+```
+    CosXString
+```
+"""
 struct CosXString <: CosString
   val::Vector{UInt8}
   CosXString(arr::Vector{UInt8})=new(arr)
 end
 
+"""
+```
+    CosLiteralString
+```
+"""
 struct CosLiteralString <: CosString
     val::Vector{UInt8}
     CosLiteralString(arr::Vector{UInt8})=new(arr)
@@ -70,6 +151,11 @@ end
 
 CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
 
+"""
+```
+    CosArray
+```
+"""
 mutable struct CosArray <: CosObject
     val::Array{CosObject,1}
     function CosArray(arr::Array{T,1} where {T<:CosObject})
@@ -85,6 +171,11 @@ end
 get(o::CosArray, isNative=false)=isNative ? map((x)->get(x),o.val) : o.val
 length(o::CosArray)=length(o.val)
 
+"""
+```
+    CosDict
+```
+"""
 mutable struct CosDict <: CosObject
     val::Dict{CosName,CosObject}
     CosDict()=new(Dict{CosName,CosObject}())
@@ -109,6 +200,11 @@ end
 set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
             set!(o.obj, name, obj)
 
+"""
+```
+    CosStream
+```
+"""
 mutable struct CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
@@ -130,6 +226,11 @@ Decodes the stream and provides output as an BufferedInputStream.
 """
 get(stm::CosStream) = decode(stm)
 
+"""
+```
+    CosObjectStream
+```
+"""
 mutable struct CosObjectStream <: CosObject
   stm::CosStream
   n::Int
@@ -163,6 +264,11 @@ set!(os::CosIndirectObject{CosObjectStream}, name::CosName, obj::CosObject)=
 
 get(os::CosObjectStream) = get(os.stm)
 
+"""
+```
+    CosObjectStream
+```
+"""
 mutable struct CosXRefStream<: CosObject
   stm::CosStream
   isDecoded::Bool

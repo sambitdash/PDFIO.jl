@@ -1,9 +1,9 @@
 export CDTextString, CDDate, CDRect
 
 """
-'''
+```
     CDTextString
-'''
+```
 PDF file format structure provides two primary string types. Hexadecimal string `CosXString`
 and literal string `CosLiteralString`. However, these are mere binary representation of
 string types without having any encoding associated for semantic representation.
@@ -40,7 +40,7 @@ end
 
 """
 ```
-    CDDate
+    CDDate(s::CDTextString)
 ```
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 """

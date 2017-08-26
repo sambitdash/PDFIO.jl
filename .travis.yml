@@ -10,6 +10,8 @@ notifications:
   email: false
 git:
   depth: 99999999
+env:
+  - DOCUMENTER_DEBUG=true
 
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
