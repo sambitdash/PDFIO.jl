@@ -43,6 +43,8 @@ abstract type CosObject end
 ```
 """
 abstract type CosString <: CosObject end
+
+@inline get{T<:CosString}(o::T) = copy(o.val)
 """
 ```
     CosNumeric
@@ -382,7 +384,7 @@ function show(io::IO, o::CosDict)
 end
 
 show(io::IO, stm::CosStream) =
-  (show(io, stm.extent); print(io, "stream\n...\nendstream\n"))
+  (show(io, stm.extent); print(io, "\nstream\n...\nendstream"))
 
 show(io::IO, os::CosObjectStream) = show(io, os.stm)
 

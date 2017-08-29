@@ -30,6 +30,11 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
+        @test_throws ErrorException begin
+            doc = pdDocOpen("files/1.pdf")
+            page = pdDocGetPage(doc, 1)
+            pdPageExtractText(IOBuffer(), page)
+        end
   end
 
     @testset "PDF File with ObjectStreams" begin
@@ -79,6 +84,7 @@ include("debugIO.jl")
                     page = pdDocGetPage(doc, i)
                     if pdPageIsEmpty(page) == false
                         pdPageGetContentObjects(page)
+                        pdPageExtractText(IOBuffer(), page)
                     end
                 end
             finally

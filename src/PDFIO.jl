@@ -29,7 +29,8 @@ export  PDDoc,
             pdPageGetContents,
             pdPageIsEmpty,
             pdPageGetCosObject,
-            pdPageGetContentObjects
+            pdPageGetContentObjects,
+            pdPageExtractText
 
 using .Cos
 export  CosDoc,

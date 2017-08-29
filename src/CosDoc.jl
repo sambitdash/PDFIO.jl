@@ -48,6 +48,25 @@ end
 
 """
 ```
+    show(io::IO, doc::CosDoc)
+```
+Prints the CosDoc. The intent is to print lesser information from the structure.
+"""
+function show(io::IO, doc::CosDoc)
+    print(io, "\nCosDoc ==>\n")
+    print(io, "\tfilepath:\t\t$(doc.filepath)\n")
+    print(io, "\tsize:\t\t\t$(doc.size)\n")
+    print(io, "\thasNativeXRefStm:\t $(doc.hasNativeXRefStm)\n")
+    print(io, "\tTrailer dictionaries: \n")
+    for t in doc.trailer
+        print(io, '\t')
+        print(io, t)
+        print(io, '\n')
+    end
+end
+
+"""
+```
     cosDocClose(doc::CosDoc)
 ```
 Reclaims all system resources consumed by the `CosDoc`. The `CosDoc` should not be used
@@ -432,7 +451,7 @@ cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) -> 
 ```
 PDF utilizes two pagination schemes. An internal global page number that is maintained
 serially as an integer and `PageLabel` that is shown by the viewers. Given a `label` this
-method returns a `range` of valid page numbers for the given label. 
+method returns a `range` of valid page numbers for the given label.
 """
 function cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString)
     ref = get(catalog, cn"PageLabels")

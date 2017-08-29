@@ -10,179 +10,198 @@ operators.
 The operands are like attributes of the element to be used for any operations.
 """
 mutable struct PDPageElement <: PDPageObject
-  t::Symbol
-  version::Tuple{Int,Int}
-  noperand::Int
-  operands::Vector{CosObject}
-  PDPageElement(t::Symbol,ver::Tuple{Int,Int},
-                nop::Int,opds::Vector{CosObject})=new(t,ver,nop,opds)
+    t::Symbol
+    version::Tuple{Int,Int}
+    noperand::Int
+    operands::Vector{CosObject}
 end
 
 PDPageElement(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0)=
   PDPageElement(Symbol(ts),ver,nop,Vector{CosObject}())
 
 function show(io::IO, e::PDPageElement)
-  for op in e.operands
-    show(io, op)
-    print(io, ' ')
-  end
-  print(io, String(e.t))
+    for op in e.operands
+        show(io, op)
+        print(io, ' ')
+    end
+    print(io, String(e.t))
 end
 
 mutable struct PDPageObjectGroup <: PDPageObject
-  isEOG::Bool
-  objs::Vector{Union{PDPageObject,CosObject}}
-  PDPageObjectGroup(isEOG::Bool=false)=
-    new(isEOG,Vector{Union{PDPageObject,CosObject}}())
+    isEOG::Bool
+    objs::Vector{Union{PDPageObject,CosObject}}
+    PDPageObjectGroup(isEOG::Bool=false) =
+        new(isEOG,Vector{Union{PDPageObject,CosObject}}())
 end
 
 function load_objects(grp::PDPageObjectGroup, bis::BufferedInputStream)
-  while(!grp.isEOG && !eof(bis))
-    obj = parse_value(bis)
-    collect_object(grp, obj, bis)
-  end
-end
-
-function collect_object(grp::PDPageObjectGroup,
-                        obj::CosObject,
-                        bis::BufferedInputStream)
-  push!(grp.objs, obj)
-  return obj
-end
-
-function populate_element(grp::PDPageObjectGroup,
-                          elem::PDPageElement)
-  #Find operands for the Operator
-  if (elem.noperand >= 0)
-    for i=1:elem.noperand
-      operand=pop!(grp.objs)
-      unshift!(elem.operands,operand)
+    while(!grp.isEOG && !eof(bis))
+        obj = parse_value(bis)
+        collect_object(grp, obj, bis)
     end
-  else
-    len=endof(grp.objs)
-    while(isa(grp.objs[len],CosObject))
-      operand=pop!(grp.objs)
-      unshift!(elem.operands,operand)
-      len = endof(grp.objs)
-    end
-  end
 end
 
-function collect_object(grp::PDPageObjectGroup,
-                        elem::PDPageElement,
+collect_object(grp::PDPageObjectGroup, obj::CosObject, bis::BufferedInputStream) =
+    push!(grp.objs, obj)
+
+function populate_element(grp::PDPageObjectGroup, elem::PDPageElement)
+    #Find operands for the Operator
+    if (elem.noperand >= 0)
+        for i=1:elem.noperand
+            operand=pop!(grp.objs)
+            unshift!(elem.operands,operand)
+        end
+    else
+        len=endof(grp.objs)
+        while(isa(grp.objs[len],CosObject))
+            operand=pop!(grp.objs)
+            unshift!(elem.operands,operand)
+            len = endof(grp.objs)
+        end
+    end
+end
+
+function collect_object(grp::PDPageObjectGroup, elem::PDPageElement,
                         bis::BufferedInputStream)
-  populate_element(grp,elem)
-  push!(grp.objs, elem)
-  return elem
+    populate_element(grp,elem)
+    push!(grp.objs, elem)
+    return elem
 end
 
 mutable struct PDPageTextObject <: PDPageObject
-  group::PDPageObjectGroup
-  PDPageTextObject()=new(PDPageObjectGroup())
+    group::PDPageObjectGroup
+    PDPageTextObject()=new(PDPageObjectGroup())
 end
 
 mutable struct PDPageMarkedContent <: PDPageObject
-  group::PDPageObjectGroup
-  PDPageMarkedContent()=new(PDPageObjectGroup())
+    group::PDPageObjectGroup
+    PDPageMarkedContent()=new(PDPageObjectGroup())
 end
 
 mutable struct PDPageInlineImage <: PDPageObject
-  params::CosDict
-  data::Vector{UInt8}
-  isRead::Bool
-  PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
+    params::CosDict
+    data::Vector{UInt8}
+    isRead::Bool
+    PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
 mutable struct PDPage_BeginInlineImage <: PDPageObject
-  elem::PDPageElement
-  PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
-    new(PDPageElement(ts,ver,nop))
+    elem::PDPageElement
+    PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
+        new(PDPageElement(ts,ver,nop))
 end
 
-function collect_object(grp::PDPageObjectGroup,
-                        beg::PDPage_BeginInlineImage,
+function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
                         bis::BufferedInputStream)
-  newobj=PDPageInlineImage()
+    newobj=PDPageInlineImage()
 
-  while(!newobj.isRead)
-    value=parse_value(bis)
-    collect_inline_image(img,value,bis)
-  end
-  push!(grp.objs, newobj)
-  return newobj
+    while(!newobj.isRead)
+        value=parse_value(bis)
+        collect_inline_image(img,value,bis)
+    end
+    push!(grp.objs, newobj)
+    return newobj
 end
+
+mutable struct PDPageTextRun <: PDPageObject
+    ss::Vector{CosString}
+    elem::PDPageElement
+    PDPageTextRun(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0) =
+        new(Vector{String}(), PDPageElement(ts, ver, nop))
+end
+
+show(io::IO, tr::PDPageTextRun) = show(io, tr.ss)
+
+function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
+                        bis::BufferedInputStream)
+    elem = collect_object(grp, tr.elem, bis)
+    for operand in elem.operands
+        if isa(operand, CosString)
+            push!(tr.ss, operand)
+        elseif isa(operand, CosArray)
+            for td in get(operand)
+                if isa(td, CosString)
+                    push!(tr.ss, td)
+                end
+            end
+        end
+    end
+    val = pop!(grp.objs)
+    push!(grp.objs, tr)
+    return tr
+end
+
+
 
 function collect_inline_image(img::PDPageInlineImage, name::CosName,
-  bis::BufferedInputStream)
-  value = parse_value(bis)
-  set!(img.params, name, value)
+    bis::BufferedInputStream)
+    value = parse_value(bis)
+    set!(img.params, name, value)
 end
 
 function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
-  bis::BufferedInputStream)
-  if (elem.t == Symbol("ID"))
-    while(!image.isRead && !eof(bis))
-      b1 = peek(bis)
-      if (b1 == LATIN_E)
-        mark(bis)
-        skip(bis,1);
-        b2 = peek(bis)
-        if (b2 == LATIN_I)
-          skip(bis,1);b3 = peek(bis)
-          if (is_crorlf(b3))
-            skip(bis,1)
-            img.isRead=true
-            unmark(s)
-            break
-          else
-            reset(bis)
-          end
-        else
-          reset(bis)
+                              bis::BufferedInputStream)
+    if (elem.t == Symbol("ID"))
+        while(!image.isRead && !eof(bis))
+            b1 = peek(bis)
+            if (b1 == LATIN_E)
+                mark(bis)
+                skip(bis,1);
+                b2 = peek(bis)
+                if (b2 == LATIN_I)
+                    skip(bis,1);b3 = peek(bis)
+                    if (is_crorlf(b3))
+                        skip(bis,1)
+                        img.isRead=true
+                        unmark(s)
+                        break
+                    else
+                        reset(bis)
+                    end
+                else
+                    reset(bis)
+                end
+            end
+            push!(img.data, b1)
+            skip(bis,1);
         end
-      end
-      push!(img.data, b1)
-      skip(bis,1);
     end
-  end
-  return img
+    return img
 end
 
 
 mutable struct PDPage_BeginGroup <: PDPageObject
-  elem::PDPageElement
-  objT::Type
-  PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type)=
-    new(PDPageElement(ts,ver,nop),t)
+    elem::PDPageElement
+    objT::Type
+    PDPage_BeginGroup(ts::AbstractString,ver::Tuple{Int,Int},nop,t::Type) =
+        new(PDPageElement(ts,ver,nop),t)
 end
 
 mutable struct PDPage_EndGroup
-  elem::PDPageElement
-  PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop)=
-    new(PDPageElement(ts,ver,nop))
+    elem::PDPageElement
+    PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop) =
+        new(PDPageElement(ts,ver,nop))
 end
 
 show(io::IO, e::PDPage_BeginGroup) = show(io, e.elem)
 
 show(io::IO, e::PDPage_EndGroup) = show(io, e.elem)
 
-function collect_object(grp::PDPageObjectGroup,
-                        beg::PDPage_BeginGroup,
+function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginGroup,
                         bis::BufferedInputStream)
-  populate_element(grp,beg.elem)
-  newobj=beg.objT()
-  push!(newobj.group.objs,beg.elem)
-  load_objects(newobj.group,bis)
-  push!(grp.objs, newobj)
-  return newobj
+    populate_element(grp,beg.elem)
+    newobj=beg.objT()
+    push!(newobj.group.objs,beg.elem)
+    load_objects(newobj.group,bis)
+    push!(grp.objs, newobj)
+    return newobj
 end
 
-function collect_object(grp::PDPageObjectGroup,
-                        elem::PDPage_EndGroup,
+function collect_object(grp::PDPageObjectGroup, elem::PDPage_EndGroup,
                         bis::BufferedInputStream)
-  collect_object(grp,elem.elem,bis)
-  grp.isEOG = true
-  return grp
+    collect_object(grp,elem.elem,bis)
+    grp.isEOG = true
+    return grp
 end
 
 """
@@ -261,9 +280,9 @@ end
 |EMC||(PDF 1.2) End marked-content sequence|320|
 |MP||(PDF 1.2) Define marked-content point|320|
 """
-const PD_CONTENT_OPERATORS=Dict(
-"\'"=>[PDPageElement,"\'",(1,0),1],
-"\""=>[PDPageElement,"\"",(1,0),3],
+const PD_CONTENT_OPERATORS = Dict(
+"\'"=>[PDPageTextRun,"\'",(1,0),1],
+"\""=>[PDPageTextRun,"\"",(1,0),3],
 "b"=>[PDPageElement,"b",(1,0),0],
 "b*"=>[PDPageElement,"b*",(1,0),0],
 "B"=>[PDPageElement,"B",(1,0),0],
@@ -322,8 +341,8 @@ const PD_CONTENT_OPERATORS=Dict(
 "Td"=>[PDPageElement,"Td",(1,0),2],
 "TD"=>[PDPageElement,"TD",(1,0),2],
 "Tf"=>[PDPageElement,"Tf",(1,0),2],
-"Tj"=>[PDPageElement,"Tj",(1,0),1],
-"TJ"=>[PDPageElement,"TJ",(1,0),1],
+"Tj"=>[PDPageTextRun,"Tj",(1,0),1],
+"TJ"=>[PDPageTextRun,"TJ",(1,0),1],
 "TL"=>[PDPageElement,"TL",(1,0),1],
 "Tm"=>[PDPageElement,"Tm",(1,0),6],
 "Tr"=>[PDPageElement,"Tr",(1,0),1],
@@ -340,10 +359,37 @@ const PD_CONTENT_OPERATORS=Dict(
 import ..Cos: get_pdfcontentops
 
 function get_pdfcontentops(b::Vector{UInt8})
-  arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
-  if (arr == CosNull)
-    return CosNull
-  else
-    return eval(Expr(:call,arr...))
-  end
+    arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
+    if (arr == CosNull)
+        return CosNull
+    else
+        return eval(Expr(:call,arr...))
+    end
 end
+
+function showtext(io::IO, grp::PDPageObjectGroup)
+    for obj in grp.objs
+        showtext(io, obj)
+    end
+    return io
+end
+
+function showtext(io::IO, tr::PDPageTextRun)
+    for s in tr.ss
+        cdtext = CDTextString(s)
+        write(io, cdtext)
+    end
+    return io
+end
+
+showtext(io::IO, pdo::PDPageTextObject) = showtext(io, pdo.group)
+
+function showtext(io::IO, pdo::PDPageMarkedContent)
+    tag = pdo.group.objs[1].operands[1] # can be used for XML tagging. 
+    showtext(io, pdo.group)
+    write(io, '\n')
+end
+
+showtext(io::IO, pdo::PDPageElement) = io
+
+showtext(io::IO, pdo::CosObject) = show(io, pdo)

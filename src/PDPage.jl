@@ -2,7 +2,8 @@ export PDPage,
        pdPageGetContents,
        pdPageIsEmpty,
        pdPageGetCosObject,
-       pdPageGetContentObjects
+       pdPageGetContentObjects,
+       pdPageExtractText
 
 abstract type PDPage end
 
@@ -54,6 +55,18 @@ function pdPageGetContentObjects(page::PDPage)
         load_page_objects(page)
     end
     return get(page.content_objects)
+end
+
+"""
+```
+    pdPageExtractText(io::IO, page::PDPage) -> IO
+```
+Extracts the text from the `page`. This extraction works only for tagged PDF files only.
+"""
+function pdPageExtractText(io::IO, page::PDPage)
+    page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
+    showtext(io, pdPageGetContentObjects(page))
+    return io
 end
 
 mutable struct PDPageImpl <: PDPage
