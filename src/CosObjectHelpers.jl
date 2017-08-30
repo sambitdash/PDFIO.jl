@@ -9,7 +9,7 @@ function convert(::Type{CDTextString}, xstr::CosXString)
     const FEFF = [LATIN_UPPER_F, LATIN_UPPER_E, LATIN_UPPER_F, LATIN_UPPER_F]
     prefix = xstr.val[1:4]
     hasPrefix = (prefix == feff || prefix == FEFF)
-    isUTF16   = hasPrefix || prefix[1:2] == UInt8[0x00, 0x00]
+    isUTF16   = hasPrefix || prefix[1:2] == UInt8[0x30, 0x30]
     data = xstr.val
     buffer = data |> String |> hex2bytes
     if isUTF16

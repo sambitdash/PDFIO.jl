@@ -41,6 +41,8 @@ abstract type CosObject end
 ```
     CosString
 ```
+Abstract type that represents a PDF string. In PDF objects are mere byte representations.
+They translate to actual text strings by application of fonts and associated encodings.
 """
 abstract type CosString <: CosObject end
 
@@ -49,6 +51,8 @@ abstract type CosString <: CosObject end
 ```
     CosNumeric
 ```
+Abstract type for numeric objects. The objects can be an integer [`CosInt`](@ref) or float
+[`CosFloat`](@ref).
 """
 abstract type CosNumeric <: CosObject end
 
@@ -56,6 +60,7 @@ abstract type CosNumeric <: CosObject end
 ```
     CosBoolean
 ```
+A boolean object in PDF which is either a `CosTrue` or `CosFalse`
 """
 struct CosBoolean <: CosObject
     val::Bool
@@ -70,6 +75,7 @@ struct CosNullType <: CosObject end
 ```
     CosNull
 ```
+PDF representation of a `null` object. Can be applied to [`CosObject`](@ref) of any type.
 """
 const CosNull=CosNullType()
 
@@ -77,6 +83,7 @@ const CosNull=CosNullType()
 ```
     CosFloat
 ```
+A numeric float data type.
 """
 struct CosFloat <: CosNumeric
     val::Float64
@@ -84,8 +91,9 @@ end
 
 """
 ```
-    CosFloat
+    CosInt
 ```
+An integer in PDF document.
 """
 struct CosInt <: CosNumeric
     val::Int
@@ -116,6 +124,7 @@ get(o::CosIndirectObject) = get(o.obj)
 ```
     CosName
 ```
+Name objects are symbols used in PDF documents.
 """
 struct CosName <: CosObject
     val::Symbol
@@ -124,8 +133,9 @@ end
 
 """
 ```
-    @cn_str
+    @cn_str(str) -> CosName
 ```
+A string decorator for easier instantiation of a [`CosName`](@ref)
 """
 macro cn_str(str)
     return CosName(str)
@@ -135,6 +145,8 @@ end
 ```
     CosXString
 ```
+Concrete representation of a [`CosString`](@ref) object. The underlying data is represented
+as hexadecimal characters in ASCII.
 """
 struct CosXString <: CosString
   val::Vector{UInt8}
@@ -145,6 +157,8 @@ end
 ```
     CosLiteralString
 ```
+Concrete representation of a [`CosString`](@ref) object. The underlying data is represented
+by byte representations without any encoding.
 """
 struct CosLiteralString <: CosString
     val::Vector{UInt8}
@@ -157,55 +171,84 @@ CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
 ```
     CosArray
 ```
+An array in a PDF file. The objects can be any combination of [`CosObject`](@ref).
 """
 mutable struct CosArray <: CosObject
-    val::Array{CosObject,1}
-    function CosArray(arr::Array{T,1} where {T<:CosObject})
-      val = Array{CosObject,1}()
+    val::Vector{CosObject}
+    function CosArray(arr::Vector{T} where {T<:CosObject})
+      val = Vector{CosObject}()
       for v in arr
         push!(val,v)
       end
       new(val)
     end
-    CosArray()=new(Array{CosObject,1}())
+    CosArray()=new(Vector{CosObject}())
 end
 
-get(o::CosArray, isNative=false)=isNative ? map((x)->get(x),o.val) : o.val
+"""
+```
+    get(o::CosArray, isNative=false) -> Vector{CosObject}
+```
+An array in a PDF file. The objects can be any combination of [`CosObject`](@ref).
+
+`isNative = true` will return the underlying native object inside the `CosArray` by
+invoking get method on it.
+"""
+get(o::CosArray, isNative=false) = isNative ? map((x)->get(x),o.val) : o.val
+"""
+```
+    length(o::CosArray) -> Int
+```
+Length of the `CosArray`
+"""
 length(o::CosArray)=length(o.val)
 
 """
 ```
     CosDict
 ```
+Name value pair of a PDF objects. The object is very similar to the `Dict` object. The `key`
+has to be of a [`CosName`](@ref) type.
 """
 mutable struct CosDict <: CosObject
     val::Dict{CosName,CosObject}
     CosDict()=new(Dict{CosName,CosObject}())
 end
 
-get(dict::CosDict, name::CosName)=get(dict.val,name,CosNull)
+"""
+```
+    get(dict::CosDict, name::CosName) -> CosObject
+```
+Returns the value as a [`CosObject`](@ref) for the key `name`
+"""
+get(dict::CosDict, name::CosName) = get(dict.val,name,CosNull)
 
 get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
 
 """
-Set the value to object. If the object is CosNull the key is deleted.
+```
+    set!(dict::CosDict, name::CosName, obj::CosObject) -> CosObject
+```
+Sets the value on a dictionary object. Setting a `CosNull` object deletes the object from
+the dictionary. 
 """
 function set!(dict::CosDict, name::CosName, obj::CosObject)
-  if (obj === CosNull)
-    return delete!(dict.val,name)
-  else
-    dict.val[name] = obj
+    if (obj === CosNull)
+        delete!(dict.val,name)
+    else
+        dict.val[name] = obj
+    end
     return dict
-  end
 end
 
-set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
-            set!(o.obj, name, obj)
+set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) = set!(o.obj, name, obj)
 
 """
 ```
     CosStream
 ```
+A stream object in a PDF. Stream objects have an `extends` disctionary, followed by binary
+data.
 """
 mutable struct CosStream <: CosObject
     extent::CosDict

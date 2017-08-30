@@ -67,6 +67,19 @@ pdPageIsEmpty
 pdPageGetCosObject
 pdPageGetContentObjects
 ```
+## PDF Page objects
+```@docs
+PDPageObject
+PDPageElement
+PDPageObjectGroup
+PDPageTextObject
+PDPageTextRun
+PDPageMarkedContent
+PDPageInlineImage
+PDPage_BeginGroup
+PDPage_EndGroup
+```
+
 # Cos
 ```@docs
 CosDoc

@@ -15,7 +15,7 @@ using ..Common
 ```
     PDDoc
 ```
-A in memory representation of a PDF document. Once created this type has to be used to
+An in memory representation of a PDF document. Once created this type has to be used to
 access a PDF document.
 """
 abstract type PDDoc end
@@ -61,7 +61,7 @@ end
     pdDocGetCatalog(doc::PDDoc) -> CosObject
 ```
 `Catalog` is considered the topmost level object in  PDF document that is subsequently
-used to traverse and extract information on a PDF document. To be used for accessing PDF
+used to traverse and extract information from a PDF document. To be used for accessing PDF
 internal objects from document structure when no direct API is available.
 """
 function pdDocGetCatalog(doc::PDDoc)
@@ -78,7 +78,7 @@ physical file structure of the PDF document. To be used for accessing PDF intern
 from document structure when no direct API is available.
 
 One can access any aspect of PDF using the COS level APIs alone. However, they may require
-you to know the PDF specification in details and not the most intuititive.
+you to know the PDF specification in details and it is not the most intuititive.
 """
 pdDocGetCosDoc(doc::PDDoc)= doc.cosDoc
 
@@ -86,7 +86,7 @@ pdDocGetCosDoc(doc::PDDoc)= doc.cosDoc
 ```
     pdDocGetPage(doc::PDDoc, num::Int) -> PDPage
 ```
-Given a document absolute page number provides the associated page.
+Given a document absolute page number, provides the associated page object.
 """
 function pdDocGetPage(doc::PDDoc, num::Int)
   cosobj = find_page_from_treenode(doc.pages, num)
@@ -118,9 +118,11 @@ end
     pdDocGetInfo(doc::PDDoc) -> Dict
 ```
 Given a PDF document provides the document information available in the `DocumentInfo`
-disctionary. The information typically includes _creation date, modification date, author,
-creator_ used etc. However, information content are not all mandatory and all information
-may not be available in a document. Please refer to the PDF specification for details.
+dictionary. The information typically includes *creation date, modification date, author,
+creator* used etc. However, all information content are not mandatory. Hence, all
+information needed may not be available in a document.
+
+Please refer to the PDF specification for further details.
 """
 function pdDocGetInfo(doc::PDDoc)
     ref = get(doc.cosDoc.trailer[1], CosName("Info"))
@@ -140,8 +142,10 @@ end
 ```
 Some information in PDF is stored as name and value pairs not essentially a dictionary.
 They are all aggregated and can be accessed from one `names` dictionary object in the
-document catalog. This method provides access to such dictionary in a PDF file. Not all PDF
+document catalog. This method provides access to such values in a PDF file. Not all PDF
 document may have a names dictionary. In such cases, a `CosNull` object may be returned.
+
+Please refer to the PDF specification for further details.
 """
 function pdDocGetNamesDict(doc::PDDoc)
     catalog = pdDocGetCatalog(doc)

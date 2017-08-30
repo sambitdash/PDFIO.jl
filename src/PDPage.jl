@@ -23,6 +23,8 @@ pdPageGetCosObject(page::PDPage) = page.cospage
 ```
 Page rendering objects are normally stored in a `CosStream` object in a PDF file. This
 method provides access to the stream object.
+
+Please refer to the PDF specification for further details.
 """
 function pdPageGetContents(page::PDPage)
     if (page.contents === CosNull)
@@ -46,9 +48,8 @@ end
 ```
     pdPageGetContentObjects(page::PDPage) -> CosObject
 ```
-A page object can have multiple associated content objects. This method will return a
-`CosArray` if there are multiple of content objects associated. Otherwise an indirect
-object of `CosStream` type will be returned.
+Page rendering objects are normally stored in a `CosStream` object in a PDF file. This
+method provides access to the stream object.
 """
 function pdPageGetContentObjects(page::PDPage)
     if (isnull(page.content_objects))

@@ -1,13 +1,55 @@
+export  PDPageObject,
+        PDPageElement,
+        PDPageObjectGroup,
+        PDPageTextObject,
+        PDPageTextRun,
+        PDPageMarkedContent,
+        PDPageInlineImage,
+        PDPage_BeginGroup,
+        PDPage_EndGroup
+
 using BufferedStreams
 import Base: show
 
+"""
+```
+    PDPageObject
+```
+
+The content streams associated with PDF pages contain the objects that can be rendered.
+These objects are represented by `PDPageObject`. These objects can contain
+a postfix notation based operator prefixed by its operands like:
+```
+(Draw this text) Tj
+```
+As can be seen above, the string object is a [`CosString`](@ref) which is a parameter to the
+operand `Tj` or draw text. These class of objects are represented by
+[`PDPageElement`](@ref).
+
+However, there are certain objects which only provide grouping information or begin and end
+markers for grouping information. For example, a text object:
+```
+BT
+    /F1 11 Tf  %Set font
+    (Draw this text) Tj
+ET
+```
+These kind of objects are represented by [`PDPageObjectGroup`](@ref). In this case, the
+[`PDPageObjectGroup`](@ref) contains four [`PDPageElement`](@ref). Namely, represented as operators `BT`,
+`Tf`, `Tj`, `ET`.
+
+`PDPageElement` and [`PDPageObjectGroup`](@ref) can be extended by composition. Hence, there are
+more specialized objects that can be seen as well.
+
+"""
 abstract type PDPageObject end
 
 """
-*PDPageElement* type is a representation of organization of content and content
-operators.
-
-The operands are like attributes of the element to be used for any operations.
+```
+    PDPageElement
+```
+A representation of a content object with operator and operand. See [`PDPageObject`](@ref)
+for more details.
 """
 mutable struct PDPageElement <: PDPageObject
     t::Symbol
@@ -27,6 +69,13 @@ function show(io::IO, e::PDPageElement)
     print(io, String(e.t))
 end
 
+"""
+```
+    PDPageObjectGroup
+```
+A representation of a content object that encloses other content objects. See
+[`PDPageObject`](@ref) for more details.
+"""
 mutable struct PDPageObjectGroup <: PDPageObject
     isEOG::Bool
     objs::Vector{Union{PDPageObject,CosObject}}
@@ -68,16 +117,38 @@ function collect_object(grp::PDPageObjectGroup, elem::PDPageElement,
     return elem
 end
 
+"""
+```
+    PDPageTextObject
+```
+A [`PDPageObjectGroup`](@ref) object that represents a block of text. See [`PDPageObject`](@ref)
+for more details.
+"""
 mutable struct PDPageTextObject <: PDPageObject
     group::PDPageObjectGroup
     PDPageTextObject()=new(PDPageObjectGroup())
 end
 
+"""
+```
+    PDPageMarkedContent
+```
+A [`PDPageObjectGroup`](@ref) object that represents a group of a object that is logically
+grouped together in case of a structured PDF document.
+"""
 mutable struct PDPageMarkedContent <: PDPageObject
     group::PDPageObjectGroup
     PDPageMarkedContent()=new(PDPageObjectGroup())
 end
 
+"""
+```
+    PDPageInlineImage
+```
+Most images in PDF documents are defined in the PDF document and referenced from the page
+content stream. [`PDPageInlineImage`](@ref) objects are directly defined in the page
+content stream.
+"""
 mutable struct PDPageInlineImage <: PDPageObject
     params::CosDict
     data::Vector{UInt8}
@@ -85,6 +156,12 @@ mutable struct PDPageInlineImage <: PDPageObject
     PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
+"""
+```
+    PDPage_BeginInlineImage
+```
+A [`PDPageElement`](@ref) that represents the beginning of an inline image.
+"""
 mutable struct PDPage_BeginInlineImage <: PDPageObject
     elem::PDPageElement
     PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
@@ -103,6 +180,17 @@ function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
     return newobj
 end
 
+"""
+```
+    PDPageTextRun
+```
+In PDF text may not be contiguous as there may be chnge of font, style, graphics rendering
+parameters. `PDPageTextRun` is a unit of text which can be rendered without any change to
+the graphical parameters. There is no guarantee that a text run will represent a meaningful
+word or sentence.
+
+`PDPageTextRun` is a composition implementation of [`PDPageElement`](@ref).
+"""
 mutable struct PDPageTextRun <: PDPageObject
     ss::Vector{CosString}
     elem::PDPageElement
@@ -169,7 +257,12 @@ function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
     return img
 end
 
-
+"""
+```
+    PDPage_BeginGroup
+```
+A [`PDPageElement`](@ref) that represents the beginning of a group object.
+"""
 mutable struct PDPage_BeginGroup <: PDPageObject
     elem::PDPageElement
     objT::Type
@@ -177,6 +270,12 @@ mutable struct PDPage_BeginGroup <: PDPageObject
         new(PDPageElement(ts,ver,nop),t)
 end
 
+"""
+```
+    PDPage_EndGroup
+```
+A [`PDPageElement`](@ref) that represents the end of a group object.
+"""
 mutable struct PDPage_EndGroup
     elem::PDPageElement
     PDPage_EndGroup(ts::AbstractString,ver::Tuple{Int,Int},nop) =
@@ -367,14 +466,14 @@ function get_pdfcontentops(b::Vector{UInt8})
     end
 end
 
-function showtext(io::IO, grp::PDPageObjectGroup)
+function showtext(io::IO, grp::PDPageObjectGroup, state::Dict=Dict())
     for obj in grp.objs
-        showtext(io, obj)
+        showtext(io, obj, state)
     end
     return io
 end
 
-function showtext(io::IO, tr::PDPageTextRun)
+function showtext(io::IO, tr::PDPageTextRun, state::Dict=Dict())
     for s in tr.ss
         cdtext = CDTextString(s)
         write(io, cdtext)
@@ -382,14 +481,14 @@ function showtext(io::IO, tr::PDPageTextRun)
     return io
 end
 
-showtext(io::IO, pdo::PDPageTextObject) = showtext(io, pdo.group)
+showtext(io::IO, pdo::PDPageTextObject, state::Dict=Dict()) = showtext(io, pdo.group, state)
 
-function showtext(io::IO, pdo::PDPageMarkedContent)
-    tag = pdo.group.objs[1].operands[1] # can be used for XML tagging. 
-    showtext(io, pdo.group)
+function showtext(io::IO, pdo::PDPageMarkedContent, state::Dict)
+    tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
+    showtext(io, pdo.group, state)
     write(io, '\n')
 end
 
-showtext(io::IO, pdo::PDPageElement) = io
+showtext(io::IO, pdo::PDPageElement, state::Dict=Dict()) = io
 
-showtext(io::IO, pdo::CosObject) = show(io, pdo)
+showtext(io::IO, pdo::CosObject, state::Dict=Dict()) = (show(io, pdo); io)

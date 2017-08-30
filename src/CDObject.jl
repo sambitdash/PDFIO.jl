@@ -10,7 +10,7 @@ string types without having any encoding associated for semantic representation.
 Determination of encoding is carried out mostly by associated fonts and character maps in
 the content stream. There are also strings used in descriptions and other attributes of a
 PDF file where no font or mapping information is provided. This represents the string type
-in such situations. Typically, strings in PDFs are 3 types.
+in such situations. Typically, strings in PDFs are of 3 types.
 
 1. Text string
     a. PDDocEncoded string - Similar to ISO_8859-1

@@ -19,7 +19,7 @@ physical file structure of the PDF document. To be used for accessing PDF intern
 from document structure when no direct API is available.
 
 One can access any aspect of PDF using the COS level APIs alone. However, they may require
-you to know the PDF specification in details and not the most intuititive.
+you to know the PDF specification in details and they are not the most intuititive.
 """
 abstract type CosDoc end
 
@@ -50,7 +50,8 @@ end
 ```
     show(io::IO, doc::CosDoc)
 ```
-Prints the CosDoc. The intent is to print lesser information from the structure.
+Prints the CosDoc. The intent is to print lesser information from the structure as default
+can be overwhelming flooding the REPL.
 """
 function show(io::IO, doc::CosDoc)
     print(io, "\nCosDoc ==>\n")
@@ -71,7 +72,7 @@ end
 ```
 Reclaims all system resources consumed by the `CosDoc`. The `CosDoc` should not be used
 after this method is called. `cosDocClose` only needs to be explicitly called if you have
-opened the document by'cosDocOpen'. Documents opened with `pdDocOpen` do not need to use
+opened the document by 'cosDocOpen'. Documents opened with `pdDocOpen` do not need to use
 this method.
 """
 function cosDocClose(doc::CosDocImpl)
@@ -105,8 +106,8 @@ end
     cosDocGetRoot(doc::CosDoc) -> CosDoc
 ```
 The structural starting point of a PDF document. Also known as document root dictionary.
-This provides details object locations and document access methodology. This should not be
-confused with the `catalog` object of the PDF document.
+This provides details of object locations and document access methodology. This should not
+be confused with the `catalog` object of the PDF document.
 """
 cosDocGetRoot(doc::CosDoc) = CosNull
 
@@ -121,7 +122,7 @@ access to the direct object after searching for the object in the document struc
 indirect object reference is passed as an `obj` parameter the complete `indirect object`
 (reference as well as all content of the object) are returned. A `direct object` passed to
 the method is returned as is without any translation. This ensures the user does not have
-to go through type check of the objects before accessing the contents.
+to go through checking the type of the objects before accessing the contents.
 """
 cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 
@@ -451,7 +452,7 @@ cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) -> 
 ```
 PDF utilizes two pagination schemes. An internal global page number that is maintained
 serially as an integer and `PageLabel` that is shown by the viewers. Given a `label` this
-method returns a `range` of valid page numbers for the given label.
+method returns a `range` of valid page numbers.
 """
 function cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString)
     ref = get(catalog, cn"PageLabels")

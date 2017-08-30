@@ -30,7 +30,15 @@ export  PDDoc,
             pdPageIsEmpty,
             pdPageGetCosObject,
             pdPageGetContentObjects,
-            pdPageExtractText
+            pdPageExtractText,
+        PDPageObject,
+            PDPageObjectGroup,
+                PDPage_BeginGroup, PDPage_EndGroup,
+            PDPageTextObject,
+            PDPageMarkedContent,
+            PDPageElement,
+                PDPageTextRun,
+            PDPageInlineImage
 
 using .Cos
 export  CosDoc,
