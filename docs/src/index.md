@@ -66,6 +66,7 @@ pdPageGetContents
 pdPageIsEmpty
 pdPageGetCosObject
 pdPageGetContentObjects
+pdPageExtractText
 ```
 ## PDF Page objects
 ```@docs

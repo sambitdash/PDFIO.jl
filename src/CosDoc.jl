@@ -126,6 +126,20 @@ to go through checking the type of the objects before accessing the contents.
 """
 cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 
+"""
+```
+    cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName) -> CosObject
+```
+Returns the object referenced inside the `dict` dictionary. `dict` can be a PDF dictionary
+object reference or an indirect object or a direct `CosDict` object.
+"""
+function cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName)
+    if dict isa CosIndirectObjectRef
+        dict = cosDocGetObject(doc, dict)
+    end
+    dict === CosNull && return CosNull
+    return cosDocGetObject(doc, get(dict, key))
+end
 
 function cosDocGetRoot(doc::CosDocImpl)
     root = doc.hasNativeXRefStm ? get(doc.xrefstm[1], CosName("Root")) :

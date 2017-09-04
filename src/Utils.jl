@@ -42,9 +42,6 @@ function dict_remap(ab, bc)
     d = Dict()
     for (a, b) in ab
         c = get(bc, b, zero(valtype(bc)))
-        if a == 0x20
-            println("a $a: b $b :c -$c-")
-        end
         d[a] = c
     end
     return d

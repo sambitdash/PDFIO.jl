@@ -64,10 +64,11 @@ end
 ```
     pdPageExtractText(io::IO, page::PDPage) -> IO
 ```
-Extracts the text from the `page`. This extraction works only for tagged PDF files only.
+Extracts the text from the `page`. This extraction works best for tagged PDF files only.
+For PDFs not tagged, some line and word breaks will not be extracted properly. 
 """
 function pdPageExtractText(io::IO, page::PDPage)
-    page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
+    # page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
     state = Dict()
     state[:page] = page
     showtext(io, pdPageGetContentObjects(page), state)
@@ -144,16 +145,47 @@ function load_page_objects(page::PDPageImpl, stm::CosArray)
   end
 end
 
-function merge_encoding(pdfont::PDFont, encoding::CosName, page::PDPage, font::CosObject)
-    pdfont.encoding = encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
-                      encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
-                      encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
-                      STDEncoding_to_Unicode
+function merge_encoding!(pdfont::PDFont, encoding::CosName, page::PDPage, font::CosObject)
+    encoding_mapping =  encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
+                        encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
+                        encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
+                        STDEncoding_to_Unicode
+    merge!(pdfont.encoding, encoding_mapping)
+    return pdfont
 end
 
-function merge_encoding(pdfont::PDFont, encoding::CosNullType,
+# for type 0 use cmap.
+# for symbol and zapfdingbats - use font encoding
+# for others use STD Encoding
+function merge_encoding!(pdfont::PDFont, encoding::CosNullType,
                         page::PDPage, font::CosObject)
-    pdfont.encoding = STDEncoding_to_Unicode
+    merge!(pdfont.encoding, STDEncoding_to_Unicode)
+    return pdfont
+end
+
+function merge_encoding!(pdfont::PDFont,
+                        encoding::Union{CosDict, CosIndirectObject{CosDict}},
+                        page::PDPage, font::CosObject)
+    baseenc = cosDocGetObject(page.doc.cosDoc, get(encoding, cn"BaseEncoding"))
+    baseenc !==  CosNull && merge_encoding!(pdfont, baseenc, page, font)
+    # Add the Differences
+    diff = cosDocGetObject(page.doc.cosDoc, get(encoding, cn"Differences"))
+    diff === CosNull && return pdfont
+    values = get(diff)
+    d = Dict()
+    cid = 0
+    for v in values
+        if v isa CosInt
+            cid = get(v)
+        else
+            @assert cid != 0
+            d[cid] = v
+            cid += 1
+        end
+    end
+    dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
+    merge!(pdfont.encoding, dict_to_unicode)
+    return pdfont
 end
 
 function populate_font_encoding(page, font, fontname)
@@ -163,7 +195,7 @@ function populate_font_encoding(page, font, fontname)
         #diff = cosDocGetObject(page.doc.cosDoc, get(font, cn"Differences"))
         toUnicode = cosDocGetObject(page.doc.cosDoc, get(font, cn"ToUnicode"))
         #pdfont.toUnicode = read_cmap(toUnicode)
-        merge_encoding(pdfont, encoding, page, font)
+        merge_encoding!(pdfont, encoding, page, font)
         page.fonts[fontname] = pdfont
     end
 end

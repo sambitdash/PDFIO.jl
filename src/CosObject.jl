@@ -3,7 +3,7 @@ import Base:get, length, show
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
        CosDict, CosIndirectObjectRef, CosStream, get, set!, @cn_str,
-       createTreeNode, CosTreeNode
+       createTreeNode, CosTreeNode, CosIndirectObject
 
 """
 ```
