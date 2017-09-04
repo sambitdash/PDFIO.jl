@@ -2,7 +2,7 @@ julia 0.6
 Compat
 BufferedStreams 0.3
 Libz 0.2
-StringEncodings
 TimeZones
 Documenter
 LabelNumerals
+IntervalTrees

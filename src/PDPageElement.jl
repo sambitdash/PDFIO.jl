@@ -30,7 +30,7 @@ However, there are certain objects which only provide grouping information or be
 markers for grouping information. For example, a text object:
 ```
 BT
-    /F1 11 Tf  %Set font
+    /F1 11 Tf  %selectfont
     (Draw this text) Tj
 ET
 ```
@@ -85,7 +85,7 @@ end
 
 function load_objects(grp::PDPageObjectGroup, bis::BufferedInputStream)
     while(!grp.isEOG && !eof(bis))
-        obj = parse_value(bis)
+        obj = parse_value(bis, get_pdfcontentops)
         collect_object(grp, obj, bis)
     end
 end
@@ -173,7 +173,7 @@ function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
     newobj=PDPageInlineImage()
 
     while(!newobj.isRead)
-        value=parse_value(bis)
+        value=parse_value(bis, get_pdfcontentops)
         collect_inline_image(img,value,bis)
     end
     push!(grp.objs, newobj)
@@ -223,7 +223,7 @@ end
 
 function collect_inline_image(img::PDPageInlineImage, name::CosName,
     bis::BufferedInputStream)
-    value = parse_value(bis)
+    value = parse_value(bis, get_pdfcontentops)
     set!(img.params, name, value)
 end
 
@@ -455,8 +455,6 @@ const PD_CONTENT_OPERATORS = Dict(
 "y"=>[PDPageElement,"y",(1,0),4]
 )
 
-import ..Cos: get_pdfcontentops
-
 function get_pdfcontentops(b::Vector{UInt8})
     arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
     if (arr == CosNull)
@@ -474,9 +472,11 @@ function showtext(io::IO, grp::PDPageObjectGroup, state::Dict=Dict())
 end
 
 function showtext(io::IO, tr::PDPageTextRun, state::Dict=Dict())
+    fontname, font = get(state, :font, CosNull)
+    page = get(state, :page, CosNull)
     for s in tr.ss
-        cdtext = CDTextString(s)
-        write(io, cdtext)
+        text = get_encoded_string(s, fontname, page)
+        write(io, text)
     end
     return io
 end
@@ -489,6 +489,15 @@ function showtext(io::IO, pdo::PDPageMarkedContent, state::Dict)
     write(io, '\n')
 end
 
-showtext(io::IO, pdo::PDPageElement, state::Dict=Dict()) = io
+function showtext(io::IO, pdo::PDPageElement, state::Dict=Dict())
+    page = get(state, :page, CosName)
+    page === CosNull && return io
+    pdo.t != :Tf && return io
+    fontname = pdo.operands[1]
+    font = page_find_font(page, fontname)
+    font === CosNull && return io
+    state[:font] = (fontname, font)
+    return io
+end
 
 showtext(io::IO, pdo::CosObject, state::Dict=Dict()) = (show(io, pdo); io)

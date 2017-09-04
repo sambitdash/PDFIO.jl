@@ -81,6 +81,7 @@ include("debugIO.jl")
             try
                 npage= pdDocGetPageCount(doc)
                 for i=1:npage
+                    println(i)
                     page = pdDocGetPage(doc, i)
                     if pdPageIsEmpty(page) == false
                         pdPageGetContentObjects(page)

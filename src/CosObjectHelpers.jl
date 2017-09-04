@@ -1,8 +1,5 @@
 using ..Common
-
 import Base: convert
-
-using StringEncodings
 
 function convert(::Type{CDTextString}, xstr::CosXString)
     const feff = [LATIN_F, LATIN_E, LATIN_F, LATIN_F]
@@ -23,16 +20,19 @@ function convert(::Type{CDTextString}, xstr::CosXString)
         end
         hasPrefix ? copy!(utf_16_data, 1, buffer, 3, 2len2-2) :
             copy!(utf_16_data, 1, buffer, 1, 2len2)
-        str = transcode(String, utf_16_arr)
+        str = transcode(CDTextString, utf_16_arr)
     else
-        # Assume PDFDocEncoding (ISO-8859-1)
-        str = StringEncodings.decode(buffer, "ISO_8859-1")
+        str = CDTextString(PDFEncodingToUnicode(buffer))
     end
-    return CDTextString(str)
+    return str
 end
 
+convert(::Type{Vector{UInt8}}, xstr::CosXString) = xstr |> get |> String |> hex2bytes
+
+convert(::Type{Vector{UInt8}}, str::CosLiteralString) = str |> get
+
 convert(::Type{CDTextString}, lstr::CosLiteralString) =
-    CDTextString(StringEncodings.decode(lstr.val, "ISO_8859-1"))
+    CDTextString(PDFEncodingToUnicode(lstr.val))
 
 convert{T <: Number}(::Type{T}, i::CosInt) = T(get(i))
 

@@ -230,7 +230,7 @@ get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
     set!(dict::CosDict, name::CosName, obj::CosObject) -> CosObject
 ```
 Sets the value on a dictionary object. Setting a `CosNull` object deletes the object from
-the dictionary. 
+the dictionary.
 """
 function set!(dict::CosDict, name::CosName, obj::CosObject)
     if (obj === CosNull)

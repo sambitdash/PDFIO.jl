@@ -1,7 +1,7 @@
 export parse_value,
        get_pdfcontentops
 
-get_pdfcontentops(b)=error(E_NOT_IMPLEMENTED)
+@inline do_nothing(b) = nothing
 
 function parse_data(filename)
   ps=BufferedInputStream(util_open(filename,"r"))
@@ -19,7 +19,7 @@ end
 Given a `BufferedInputStream`, after possibly any amount of whitespace, return the next
 parseable value.
 """
-function parse_value(ps::BufferedInputStream)
+function parse_value(ps::BufferedInputStream, fparse_more::Function=do_nothing)
     chomp_space!(ps)
     @inbounds byte = peek(ps)
     byte == LEFT_PAREN ? parse_string(ps) :
@@ -29,7 +29,7 @@ function parse_value(ps::BufferedInputStream)
     byte == MINUS_SIGN || byte == PLUS_SIGN || byte == PERIOD ? parse_number(ps) :
     ispdfdigit(byte)   ? try_parse_indirect_reference(ps) :
     byte == LEFT_SB    ? parse_array(ps) :
-    parse_pdfOpsOrConst(ps)
+    parse_pdfOpsOrConst(ps, fparse_more)
 end
 
 function parse_comment(ps::BufferedInputStream)
@@ -60,7 +60,7 @@ function parse_name(ps::BufferedInputStream)
             skip(ps,1)
             c2 = peek(ps)
             if ispdfxdigit(c1) && ispdfxdigit(c2)
-                c = UInt8(c1*16+c2)
+                c = UInt8(gethexval(c1)*16+gethexval(c2))
             else
                 _error(E_UNEXPECTED_CHAR, ps)
             end
@@ -72,10 +72,9 @@ function parse_name(ps::BufferedInputStream)
     return CosName(String(b))
 end
 
-function parse_pdfOpsOrConst(ps::BufferedInputStream)
+function parse_pdfOpsOrConst(ps::BufferedInputStream, fparse_more::Function)
   b = UInt8[]
-
-  while true
+  while !eof(ps)
       c = peek(ps)
       if ispdfspace(c) || ispdfdelimiter(c)
           break
@@ -85,10 +84,8 @@ function parse_pdfOpsOrConst(ps::BufferedInputStream)
   end
   chomp_space!(ps)
   obj = get_pdfconstant(b)
-  if (obj==nothing)
-    obj = get_pdfcontentops(b)
-  end
-  return obj
+  obj != nothing && return obj
+  return fparse_more(b)
 end
 
 function get_pdfconstant(b::Vector{UInt8})
