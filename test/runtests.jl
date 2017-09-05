@@ -171,6 +171,26 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Symbol Fonts test" begin
+        @test begin
+            filename="431.pdf"
+            DEBUG && println(filename)
+            isfile(filename) ||
+                download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
+            doc = pdDocOpen(filename)
+            (npage = pdDocGetPageCount(doc)) == 54
+            for i=1:npage
+                page = pdDocGetPage(doc, i)
+                if pdPageIsEmpty(page) == false
+                    pdPageGetContentObjects(page)
+                    pdPageExtractText(IOBuffer(), page)
+                end
+            end
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end

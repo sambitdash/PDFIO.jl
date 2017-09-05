@@ -62,7 +62,7 @@ function NativeEncodingToUnicode(barr::Vector{UInt8}, mapping::Dict)
     l = length(barr)
     carr = Vector{Char}(l)
     for i = 1:l
-        carr[i] = get(mapping, barr[i], Char(0x0))
+        carr[i] = get(mapping, barr[i], zero(Char))
     end
     return carr
 end

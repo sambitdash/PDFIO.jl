@@ -9,7 +9,7 @@ export BACKSPACE, NULL,TAB, LINE_FEED,NEWLINE, FORM_FEED, RETURN,
        PERCENT,PERIOD, NUMBER_SIGN, BANG, TILDE, LATIN_UPPER_D,STREAM,ENDSTREAM,
        LATIN_UPPER_E,LATIN_UPPER_F, LATIN_UPPER_O, LATIN_UPPER_P,
        LATIN_UPPER_R,XREF, TRAILER, STARTXREF, EOF, OBJ, ENDOBJ, ispdfspace,
-       ispdfdelimiter,ispdfdigit, ispdfodigit, ispdfxdigit, gethexval, is_crorlf
+       ispdfdelimiter, ispdfdigit, ispdfodigit, ispdfxdigit, gethexval, getnumval, is_crorlf
 
 
 
@@ -144,6 +144,9 @@ ispdfxdigit(b::UInt8) =
 gethexval(b::UInt8) =   (DIGIT_ZERO <= b <= DIGIT_NINE) ? b - DIGIT_ZERO :
                         (LATIN_UPPER_A <= b <= LATIN_UPPER_F) ? b - LATIN_UPPER_A + 0xa :
                         (LATIN_A <= b <= LATIN_F) ? b - LATIN_A + 0xa :
+                        throw(ErrorException(E_BAD_NUMBER))
+
+getnumval(b::UInt8) =   (DIGIT_ZERO <= b <= DIGIT_NINE) ? b - DIGIT_ZERO :
                         throw(ErrorException(E_BAD_NUMBER))
 
 is_crorlf(b::UInt8) = ((b == RETURN) ||(b == LINE_FEED))

@@ -114,18 +114,14 @@ function parse_array(ps::BufferedInputStream)
 end
 
 function read_octal_escape!(c, ps)
-    local n::UInt16 = (c << 3)
+    local n::UInt8 = getnumval(c)
     for _ in 1:2
         b = peek(ps)
-        n = n << 3
-        if (ispdfodigit(b))
-            n += b
-            skip(ps,1)
-        else
-            break
-        end
+        !ispdfodigit(b) && return n
+        n = (n << 3) + getnumval(b)
+        skip(ps,1)
     end
-    n
+    return n
 end
 
 
@@ -139,7 +135,7 @@ function parse_string(ps::BufferedInputStream)
     if c == BACKSLASH
       c = advance!(ps)
       if ispdfodigit(c) #Read octal digits
-        append!(b, Vector{UInt8}(string(read_octal_escape!(c,ps))))
+        append!(b, read_octal_escape!(c,ps))
       elseif is_crorlf(c) #ignore the solidus, EOLs and move on
         chomp_space!(ps)
       else

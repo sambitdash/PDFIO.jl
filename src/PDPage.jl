@@ -65,7 +65,7 @@ end
     pdPageExtractText(io::IO, page::PDPage) -> IO
 ```
 Extracts the text from the `page`. This extraction works best for tagged PDF files only.
-For PDFs not tagged, some line and word breaks will not be extracted properly. 
+For PDFs not tagged, some line and word breaks will not be extracted properly.
 """
 function pdPageExtractText(io::IO, page::PDPage)
     # page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
@@ -157,9 +157,19 @@ end
 # for type 0 use cmap.
 # for symbol and zapfdingbats - use font encoding
 # for others use STD Encoding
+# Reading encoding from the font files in case of Symbolic fonts are not supported.
+# Font subset is addressed with font name identification.
 function merge_encoding!(pdfont::PDFont, encoding::CosNullType,
                         page::PDPage, font::CosObject)
-    merge!(pdfont.encoding, STDEncoding_to_Unicode)
+    subtype  = cosDocGetObject(page.doc.cosDoc, font, cn"Subtype")
+    (subtype != cn"Type1") && (subtype != cn"MMType1") && return pdfont
+    basefont = cosDocGetObject(page.doc.cosDoc, font, cn"BaseFont")
+    basefont_with_subset = CDTextString(basefont)
+    basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
+    enc = (basefont_str == "Symbol") ? SYMEncoding_to_Unicode :
+          (basefont_str == "ZapfDigbats") ? ZAPEncoding_to_Unicode :
+          STDEncoding_to_Unicode
+    merge!(pdfont.encoding, enc)
     return pdfont
 end
 
