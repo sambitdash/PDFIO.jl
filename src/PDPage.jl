@@ -80,7 +80,7 @@ mutable struct PDPageImpl <: PDPage
   cospage::CosObject
   contents::CosObject
   content_objects::Nullable{PDPageObjectGroup}
-  fonts::Dict
+  fums::Dict{CosName, FontUnicodeMapping}
   PDPageImpl(doc,cospage,contents)=
     new(doc, cospage, contents, Nullable{PDPageObjectGroup}(), Dict())
 end
@@ -145,68 +145,12 @@ function load_page_objects(page::PDPageImpl, stm::CosArray)
   end
 end
 
-function merge_encoding!(pdfont::PDFont, encoding::CosName, page::PDPage, font::CosObject)
-    encoding_mapping =  encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
-                        encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
-                        encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
-                        STDEncoding_to_Unicode
-    merge!(pdfont.encoding, encoding_mapping)
-    return pdfont
-end
-
-# for type 0 use cmap.
-# for symbol and zapfdingbats - use font encoding
-# for others use STD Encoding
-# Reading encoding from the font files in case of Symbolic fonts are not supported.
-# Font subset is addressed with font name identification.
-function merge_encoding!(pdfont::PDFont, encoding::CosNullType,
-                        page::PDPage, font::CosObject)
-    subtype  = cosDocGetObject(page.doc.cosDoc, font, cn"Subtype")
-    (subtype != cn"Type1") && (subtype != cn"MMType1") && return pdfont
-    basefont = cosDocGetObject(page.doc.cosDoc, font, cn"BaseFont")
-    basefont_with_subset = CDTextString(basefont)
-    basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
-    enc = (basefont_str == "Symbol") ? SYMEncoding_to_Unicode :
-          (basefont_str == "ZapfDigbats") ? ZAPEncoding_to_Unicode :
-          STDEncoding_to_Unicode
-    merge!(pdfont.encoding, enc)
-    return pdfont
-end
-
-function merge_encoding!(pdfont::PDFont,
-                        encoding::Union{CosDict, CosIndirectObject{CosDict}},
-                        page::PDPage, font::CosObject)
-    baseenc = cosDocGetObject(page.doc.cosDoc, get(encoding, cn"BaseEncoding"))
-    baseenc !==  CosNull && merge_encoding!(pdfont, baseenc, page, font)
-    # Add the Differences
-    diff = cosDocGetObject(page.doc.cosDoc, get(encoding, cn"Differences"))
-    diff === CosNull && return pdfont
-    values = get(diff)
-    d = Dict()
-    cid = 0
-    for v in values
-        if v isa CosInt
-            cid = get(v)
-        else
-            @assert cid != 0
-            d[cid] = v
-            cid += 1
-        end
-    end
-    dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
-    merge!(pdfont.encoding, dict_to_unicode)
-    return pdfont
-end
 
 function populate_font_encoding(page, font, fontname)
-    if get(page.fonts, fontname, CosNull) == CosNull
-        pdfont = PDFont()
-        encoding = cosDocGetObject(page.doc.cosDoc, get(font, cn"Encoding"))
-        #diff = cosDocGetObject(page.doc.cosDoc, get(font, cn"Differences"))
-        toUnicode = cosDocGetObject(page.doc.cosDoc, get(font, cn"ToUnicode"))
-        #pdfont.toUnicode = read_cmap(toUnicode)
-        merge_encoding!(pdfont, encoding, page, font)
-        page.fonts[fontname] = pdfont
+    if get(page.fums, fontname, CosNull) == CosNull
+        fum = FontUnicodeMapping()
+        merge_encoding!(fum, page.doc.cosDoc, font)
+        page.fums[fontname] = fum
     end
 end
 
@@ -219,21 +163,17 @@ function page_find_font(page::PDPageImpl, fontname::CosName)
         resref = get(pgnode, cn"Resources")
         resources = cosDocGetObject(cosdoc, resref)
         if resources !== CosNull
-            fonts = cosDocGetObject(cosdoc, get(resources, cn"Font"))
+            fonts = cosDocGetObject(cosdoc, resources, cn"Font")
             if fonts !== CosNull
-                font = cosDocGetObject(cosdoc, get(fonts, fontname))
+                font = cosDocGetObject(cosdoc, fonts, fontname)
                 font !== CosNull && break
             end
         end
-        pgnode = cosDocGetObject(cosdoc, get(pgnode, cn"Parent"))
+        pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
     end
     populate_font_encoding(page, font, fontname)
     return font
 end
 
-function get_encoded_string(s::CosString, fontname::CosName, page::PDPage)
-    pdfont = get(page.fonts, fontname, nothing)
-    pdfont == nothing && return CDTextString(s)
-    carr = NativeEncodingToUnicode(Vector{UInt8}(s), pdfont.encoding)
-    return String(carr)
-end
+get_encoded_string(s::CosString, fontname::CosName, page::PDPage) =
+    get_encoded_string(s, get(page.fums, fontname, nothing))

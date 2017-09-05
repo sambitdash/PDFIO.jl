@@ -2,108 +2,11 @@ import ..Cos: CosXString
 
 using IntervalTrees
 
-# This is a very crude method to read a CMap. Standards compliant CMap reader can be very
-# involved. This is a quick and dirty way to extract the encoding information.
-#= Sample ToUnicode C-Map
+#=
+Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory for 8 and
+16-bit toUnicode CMaps.
 
-/CIDInit /ProcSet findresource begin
-18 dict begin
-begincmap
-/CIDSystemInfo
-<< /Registry (Adobe)
-/Ordering (UCS)
-/Supplement 0
->> def
-/CMapName /Adobe-Identity-UCS def
-/CMapType 2 def
-1 begincodespacerange
-<0000> <FFFF>
-endcodespacerange
-1 beginbfchar
-<0003> <0020>
-endbfchar
-1 beginbfrange
-<000B> <000C> <0028>
-endbfrange
-2 beginbfchar
-<000F> <002C>
-<0011> <002E>
-endbfchar
-3 beginbfrange
-<0013> <001C> <0030>
-<0024> <0027> <0041>
-<0029> <002A> <0046>
-endbfrange
-1 beginbfchar
-<002C> <0049>
-endbfchar
-2 beginbfrange
-<0031> <0033> <004E>
-<0035> <0037> <0052>
-endbfrange
-1 beginbfchar
-<0039> <0056>
-endbfchar
-4 beginbfrange
-<0044> <0053> <0061>
-<0055> <005C> <0072>
-<00B2> <00B2> [<2014>]
-<00B3> <00B4> <201C>
-endbfrange
-1 beginbfchar
-<00B6> <2019>
-endbfchar
-endcmap
-CMapName currentdict /CMap defineresource pop
-end
-end
-
-Single byte ToUnicode CMap
-
-/CIDInit /ProcSet findresource begin 12 dict begin begincmap /CIDSystemInfo <<
-/Registry (F15+0) /Ordering (T1UV) /Supplement 0 >> def
-/CMapName /F15+0 def
-/CMapType 2 def
-1 begincodespacerange <01> <c9> endcodespacerange
-18 beginbfchar
-<05> <260E>
-<0a> <261B>
-<0b> <261E>
-<20> <0020>
-<29> <2605>
-<4d> <25CF>
-<4e> <274D>
-<4f> <25A0>
-<54> <25B2>
-<55> <25BC>
-<56> <25C6>
-<57> <2756>
-<58> <25D7>
-<75> <2663>
-<76> <2666>
-<77> <2665>
-<78> <2660>
-<a2> <2192>
-endbfchar
-15 beginbfrange
-<01> <04> <2701>
-<06> <09> <2706>
-<0c> <1f> <270C>
-<21> <28> <2720>
-<2a> <4c> <2729>
-<50> <53> <274F>
-<59> <5f> <2758>
-<60> <6d> <F8D7>
-<6e> <74> <2761>
-<79> <82> <2460>
-<83> <a1> <2776>
-<a3> <a4> <2194>
-<a5> <a7> <2798>
-<a8> <bb> <279C>
-<bc> <c9> <27B1>
-endbfrange
-endcmap CMapName currentdict /CMap defineresource pop end end
-
+CMaps can have both 8 and 16 bit ranges in the same CMap file as well.
 =#
 const beginbfchar = b"beginbfchar"
 const endbfchar   = b"endbfchar"
@@ -119,11 +22,91 @@ mutable struct CMap
         IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}())
 end
 
-mutable struct PDFont
+mutable struct FontUnicodeMapping
     encoding::Dict
-    toUnicode::CMap
-    PDFont() = new(Dict(), CMap())
+    cmap::CMap
+    hasCMap::Bool
+    FontUnicodeMapping() = new(Dict(), CMap(), false)
 end
+
+function merge_encoding!(fum::FontUnicodeMapping, encoding::CosName,
+                         doc::CosDoc, font::CosObject)
+    encoding_mapping =  encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
+                        encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
+                        encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
+                        STDEncoding_to_Unicode
+    merge!(fum.encoding, encoding_mapping)
+    return fum
+end
+
+# for type 0 use cmap.
+# for symbol and zapfdingbats - use font encoding
+# for others use STD Encoding
+# Reading encoding from the font files in case of Symbolic fonts are not supported.
+# Font subset is addressed with font name identification.
+function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
+                        doc::CosDoc, font::CosObject)
+    subtype  = cosDocGetObject(doc, font, cn"Subtype")
+    (subtype != cn"Type1") && (subtype != cn"MMType1") && return fum
+    basefont = cosDocGetObject(doc, font, cn"BaseFont")
+    basefont_with_subset = CDTextString(basefont)
+    basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
+    enc = (basefont_str == "Symbol") ? SYMEncoding_to_Unicode :
+          (basefont_str == "ZapfDigbats") ? ZAPEncoding_to_Unicode :
+          STDEncoding_to_Unicode
+    merge!(fum.encoding, enc)
+    return fum
+end
+
+function merge_encoding!(fum::FontUnicodeMapping,
+                        encoding::Union{CosDict, CosIndirectObject{CosDict}},
+                        doc::CosDoc, font::CosObject)
+    baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
+    baseenc !==  CosNull && merge_encoding!(fum, baseenc, doc, font)
+    # Add the Differences
+    diff = cosDocGetObject(doc, encoding, cn"Differences")
+    diff === CosNull && return fum
+    values = get(diff)
+    d = Dict()
+    cid = 0
+    for v in values
+        if v isa CosInt
+            cid = get(v)
+        else
+            @assert cid != 0
+            d[cid] = v
+            cid += 1
+        end
+    end
+    dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
+    merge!(fum.encoding, dict_to_unicode)
+    return fum
+end
+
+function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc, font::CosObject)
+    encoding = cosDocGetObject(doc, font, cn"Encoding")
+    merge_encoding!(fum, encoding, doc, font)
+#    toUnicode = cosDocGetObject(doc, font, cn"ToUnicode")
+#    toUnicode == CosNull && return fum
+#    merge_encoding!(fum, toUnicode, doc, font)
+end
+
+function merge_encoding!(fum::FontUnicodeMapping, cmap::CosIndirectObject{CosStream},
+                         doc::CosDoc, font::CosObject)
+    fum.toUnicode = read_cmap(get(cmap))
+    return fum
+end
+
+get_encoded_string(s::CosString, fum::Void) = CDTextString(s)
+
+function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
+    fum.hasCMap && return get_encoded_string(s, fum.cmap)
+    carr = NativeEncodingToUnicode(Vector{UInt8}(s), fum.encoding)
+    return String(carr)
+end
+
+# Placeholder only
+get_encoded_string(s::CosString, cmap::CMap) = CDTextString(s)
 
 function cmap_command(b::Vector{UInt8})
     b != beginbfchar && b != beginbfrange && b != begincodespacerange && return nothing
@@ -170,11 +153,9 @@ end
 on_cmap_command(stm::BufferedInputStream, command::CosObject,
                 params::Vector{CosInt}, cmap::CMap) = nothing
 
-function read_cmap(cmap::CosObject)
-    cmap === CosNull && return CosNull
+function read_cmap(stm::BufferedInputStream)
     tcmap = CMap()
     params = Vector{CosInt}()
-    stm = get(cmap)
     while !eof(stm)
         obj = parse_value(stm, cmap_command)
         if isa(obj, CosInt)
