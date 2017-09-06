@@ -23,13 +23,6 @@ mutable struct CMap
         IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}())
 end
 
-#=
-mutable struct CMap
-    code_space::Array{UInt8,2}
-    CMap() = new(zeros(UInt8, 256, 3))
-end
-=#
-
 function show(io::IO, cmap::CMap)
     show(io, "Code Space:\n")
     show(io, cmap.code_space)

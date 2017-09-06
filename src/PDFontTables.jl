@@ -57,7 +57,9 @@ const GlyphName_to_ZAPEncoding = reverse_dict(ZAPEncoding_to_GlyphName)
 
 # To be deleted when AGL gets registered.
 
-if Pkg.installed("AdobeGlyphList") === nothing
+try
+    Pkg.installed("AdobeGlyphList") !== nothing
+catch
     Pkg.clone("https://github.com/sambitdash/AdobeGlyphList.jl.git")
 end
 
