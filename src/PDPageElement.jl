@@ -486,7 +486,8 @@ showtext(io::IO, pdo::PDPageTextObject, state::Dict=Dict()) = showtext(io, pdo.g
 function showtext(io::IO, pdo::PDPageMarkedContent, state::Dict)
     tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
     showtext(io, pdo.group, state)
-    write(io, '\n')
+    print(io, '\n')
+    return io
 end
 
 function showtext(io::IO, pdo::PDPageElement, state::Dict=Dict())

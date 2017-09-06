@@ -68,6 +68,29 @@ include("debugIO.jl")
 
     @testset "Hybrid x-ref" begin
         @test begin
+            filename="A1947-15.pdf"
+            DEBUG && println(filename)
+            isfile(filename)||
+                download("http://lawmin.nic.in/ld/P-ACT/1947/A1947-15.pdf",filename)
+            doc = pdDocOpen(filename)
+            try
+                npage= pdDocGetPageCount(doc)
+                for i=1:npage
+                    page = pdDocGetPage(doc, i)
+                    if pdPageIsEmpty(page) == false
+                        pdPageGetContentObjects(page)
+                        pdPageExtractText(IOBuffer(), page)
+                    end
+                end
+            finally
+                pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
+    @testset "Corrupt File" begin
+        @test begin
             filename="A1947-14.pdf"
             DEBUG && println(filename)
             isfile(filename)||
@@ -88,6 +111,7 @@ include("debugIO.jl")
             length(utilPrintOpenFiles()) == 0
         end
     end
+
 
     @testset "Test RunLengthDecode" begin
         @test begin
