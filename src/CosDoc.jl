@@ -37,7 +37,7 @@ mutable struct CosDocImpl <: CosDoc
   tmpfiles::Vector{AbstractString}
   isPDF::Bool
   hasNativeXRefStm::Bool
-  function CosDocImpl(fp::String)
+  function CosDocImpl(fp::AbstractString)
     io = util_open(fp,"r")
     sz = filesize(fp)
     ps = BufferedInputStream(io)
@@ -84,13 +84,13 @@ end
 
 """
 ```
-    cosDocOpen(filepath::String) -> CosDoc
+    cosDocOpen(filepath::AbstractString) -> CosDoc
 ```
 Provides the access to the physical file and file structure of the PDF document. Returns a
 `CosDoc` which can be subsequently used for all query into the PDF files. Remember to
 release the document with `cosDocClose`, once the object is used.
 """
-function cosDocOpen(fp::String)
+function cosDocOpen(fp::AbstractString)
     doc = CosDocImpl(abspath(fp));
     ps = doc.ps
     h = read_header(ps)

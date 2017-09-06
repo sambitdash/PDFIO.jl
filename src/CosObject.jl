@@ -128,7 +128,7 @@ Name objects are symbols used in PDF documents.
 """
 struct CosName <: CosObject
     val::Symbol
-    CosName(str::String)=new(Symbol("CosName_",str))
+    CosName(str::AbstractString) = new(Symbol("CosName_",str))
 end
 
 """
