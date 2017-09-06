@@ -472,7 +472,7 @@ function showtext(io::IO, grp::PDPageObjectGroup, state::Dict=Dict())
 end
 
 function showtext(io::IO, tr::PDPageTextRun, state::Dict=Dict())
-    fontname, font = get(state, :font, CosNull)
+    fontname, font = get(state, :font, (CosNull, CosNull))
     page = get(state, :page, CosNull)
     for s in tr.ss
         text = get_encoded_string(s, fontname, page)

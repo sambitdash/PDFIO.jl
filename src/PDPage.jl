@@ -159,7 +159,7 @@ function page_find_font(page::PDPageImpl, fontname::CosName)
     cosdoc = page.doc.cosDoc
     pgnode = page.cospage
 
-    while font === CosNull || pgnode !== CosNull
+    while font === CosNull && pgnode !== CosNull
         resref = get(pgnode, cn"Resources")
         resources = cosDocGetObject(cosdoc, resref)
         if resources !== CosNull
@@ -174,6 +174,8 @@ function page_find_font(page::PDPageImpl, fontname::CosName)
     populate_font_encoding(page, font, fontname)
     return font
 end
+
+get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) = CDTextString(s)
 
 get_encoded_string(s::CosString, fontname::CosName, page::PDPage) =
     get_encoded_string(s, get(page.fums, fontname, nothing))

@@ -150,7 +150,8 @@ end
 cosDocGetObject(doc::CosDocImpl, obj::CosObject) = obj
 
 function cosDocGetObject(doc::CosDocImpl, ref::CosIndirectObjectRef)
-    locObj = doc.xref[ref]
+    locObj = get(doc.xref, ref, CosObjectLoc(-1))
+    locObj.loc == -1 && return CosNull
     return cosDocGetObject(doc, locObj.stm, ref, locObj)
 end
 
@@ -165,13 +166,14 @@ function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
 end
 
 function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
-  ref::CosIndirectObjectRef, locObj::CosObjectLoc)
-  objstm = cosDocGetObject(doc, stmref)
-  if (locObj.obj == CosNull)
-    locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
-    attach_object(doc, locObj.obj)
-  end
-  return locObj.obj
+                         ref::CosIndirectObjectRef, locObj::CosObjectLoc)
+    objstm = cosDocGetObject(doc, stmref)
+    (objstm === CosNull) && return CosNull
+    if (locObj.obj == CosNull)
+        locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
+        attach_object(doc, locObj.obj)
+    end
+    return locObj.obj
 end
 
 function read_header(ps)
@@ -234,6 +236,7 @@ function doc_trailer_update(ps::BufferedInputStream, doc::CosDocImpl)
 
     if doc.isPDF
         seek(ps, doc.startxref)
+        chomp_space!(ps)
         doc.hasNativeXRefStm = (may_have_xrefstream(doc) && ispdfdigit(peek(ps)))
         (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) : read_xref_tables(ps, doc)
     end
