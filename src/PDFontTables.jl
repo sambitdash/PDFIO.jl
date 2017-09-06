@@ -55,9 +55,13 @@ const Glyphname_to_MEXEncoding = reverse_dict(MEXEncoding_to_GlyphName)
 const GlyphName_to_SYMEncoding = reverse_dict(SYMEncoding_to_GlyphName)
 const GlyphName_to_ZAPEncoding = reverse_dict(ZAPEncoding_to_GlyphName)
 
-if Pkg.installed("agl_aglfn") !== nothing
+# To be deleted when AGL gets registered.
 
-using agl_aglfn
+if Pkg.installed("AdobeGlyphList") === nothing
+    Pkg.clone("https://github.com/sambitdash/AdobeGlyphList.jl.git")
+end
+
+using AdobeGlyphList
 
 function agl_mapping_to_dict(m)
     dict = Dict{CosName, Char}()
@@ -79,5 +83,3 @@ const WINEncoding_to_Unicode = dict_remap(WINEncoding_to_GlyphName, AGL_Glyph_to
 const MEXEncoding_to_Unicode = dict_remap(MEXEncoding_to_GlyphName, AGL_Glyph_to_Unicode)
 const SYMEncoding_to_Unicode = dict_remap(SYMEncoding_to_GlyphName, AGL_Glyph_to_Unicode)
 const ZAPEncoding_to_Unicode = dict_remap(ZAPEncoding_to_GlyphName, AGL_ZAP_to_Unicode)
-
-end

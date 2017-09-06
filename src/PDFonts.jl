@@ -15,11 +15,26 @@ const endbfrange = b"endbfrange"
 const begincodespacerange = b"begincodespacerange"
 const endcodespacerange = b"endcodespacerange"
 
+
 mutable struct CMap
     code_space::IntervalMap{UInt8, Union{CosNullType, IntervalMap{UInt8, CosNullType}}}
     range_map::IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}
     CMap() = new(IntervalMap{UInt8, Union{CosNullType, IntervalMap{UInt8, CosNullType}}}(),
         IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}())
+end
+
+#=
+mutable struct CMap
+    code_space::Array{UInt8,2}
+    CMap() = new(zeros(UInt8, 256, 3))
+end
+=#
+
+function show(io::IO, cmap::CMap)
+    show(io, "Code Space:\n")
+    show(io, cmap.code_space)
+    show(io, "Range Map:\n")
+    show(io, cmap.range_map)
 end
 
 mutable struct FontUnicodeMapping
@@ -52,7 +67,7 @@ function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
     basefont_with_subset = CDTextString(basefont)
     basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
     enc = (basefont_str == "Symbol") ? SYMEncoding_to_Unicode :
-          (basefont_str == "ZapfDigbats") ? ZAPEncoding_to_Unicode :
+          (basefont_str == "ZapfDingbats") ? ZAPEncoding_to_Unicode :
           STDEncoding_to_Unicode
     merge!(fum.encoding, enc)
     return fum
@@ -86,14 +101,15 @@ end
 function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc, font::CosObject)
     encoding = cosDocGetObject(doc, font, cn"Encoding")
     merge_encoding!(fum, encoding, doc, font)
-#    toUnicode = cosDocGetObject(doc, font, cn"ToUnicode")
-#    toUnicode == CosNull && return fum
-#    merge_encoding!(fum, toUnicode, doc, font)
+    toUnicode = cosDocGetObject(doc, font, cn"ToUnicode")
+    toUnicode == CosNull && return fum
+    merge_encoding!(fum, toUnicode, doc, font)
 end
 
 function merge_encoding!(fum::FontUnicodeMapping, cmap::CosIndirectObject{CosStream},
                          doc::CosDoc, font::CosObject)
-    fum.toUnicode = read_cmap(get(cmap))
+    fum.cmap = read_cmap(get(cmap))
+    fum.hasCMap = true
     return fum
 end
 
@@ -105,18 +121,95 @@ function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
     return String(carr)
 end
 
+function get_unicode_chars(b::UInt8, itv::IntervalValue{UInt8, CosObject})
+    f = first(itv)
+    l = last(itv)
+    v = value(itv)
+    if v isa CosXString
+        bytes = Vector{UInt8}(v)
+        carr = get_unicode_chars(bytes)
+        carr[1] += (b - f)  # Only one char should be generated here
+    else
+        @assert v isa CosArray
+        arr = get(v)
+        xstr = arr[b - f + 1]
+        @assert xstr isa CosXString
+        bytes = Vector{UInt8}(xstr)
+        carr = get_unicode_chars(bytes)
+    end
+    return carr
+end
+
+function get_unicode_chars(barr::Vector{UInt8})
+    l = length(barr)
+    nb = 0
+    retarr = Vector{Char}()
+    while nb < l
+        b1 = barr[1]
+        b2 = barr[2]
+        nb += 2
+        c::UInt32 = 0
+        if 0xD8  <= b1 <= 0xDB
+            # UTF-16 Supplementary plane = 4 bytes
+            b1 -= 0xD8
+            c = b1
+            c = (c << 8) + b2
+            b3 = barr[3]
+            b4 = barr[4]
+            nb += 2
+            if 0xDC <= b3 <= 0xDF
+                b3 -= 0xDC
+                c1 = b3
+                c1 = (c1 << 8) + b4
+                c = (c << 10) + c1
+                c += 0x10000
+            end
+        else
+            c = b1
+            c = (c << 8) + b2
+        end
+        push!(retarr, Char(c))
+    end
+    return retarr
+end
+
 # Placeholder only
-get_encoded_string(s::CosString, cmap::CMap) = CDTextString(s)
+function get_encoded_string(s::CosString, cmap::CMap)
+    cs = cmap.code_space
+    rm = cmap.range_map
+    barr = Vector{UInt8}(s)
+    l = length(barr)
+    b1 = b2 = 0x0
+    carr = Vector{Char}()
+    retarr = Vector{Char}()
+    i = 0
+    while i < l
+        b1 = barr[i+=1]
+        if hasintersection(cs, b1)
+            itree = value(collect(intersect(cs, (b1,b1)))[1])
+            if itree === CosNull
+                itv = collect(intersect(rm, (b1,b1)))[1]
+                carr = get_unicode_chars(b1, itv)
+            else
+                b2 = barr[i+=1]
+                itree1 = value(collect(intersect(rm, (b1,b1)))[1])
+                itv = collect(intersect(itree1, (b2,b2)))[1]
+                carr = get_unicode_chars(b2, itv)
+            end
+            append!(retarr, carr)
+        end
+    end
+    return retarr
+end
 
 function cmap_command(b::Vector{UInt8})
     b != beginbfchar && b != beginbfrange && b != begincodespacerange && return nothing
     return Symbol(String(b))
 end
 
-function on_cmap_command(stm::BufferedInputStream, command::Symbol,
+function on_cmap_command!(stm::BufferedInputStream, command::Symbol,
                          params::Vector{CosInt}, cmap::CMap)
     n = get(pop!(params))
-    println(n)
     o1, o2, o3 = CosNull, CosNull, CosNull
     for i = 1:n
         o1 = parse_value(stm)
@@ -128,14 +221,17 @@ function on_cmap_command(stm::BufferedInputStream, command::Symbol,
         if (command != :begincodespacerange)
             o3 = parse_value(stm)
             @assert isa(o3, CosXString) || isa(o3, CosArray)
-            println(d1)
             l = length(d1)
             if l == 1
                 cmap.range_map[(d1[1],d2[1])] = o3
             else
-                imap = IntervalMap{UInt8, CosObject}()
+                if hasintersection(cmap.range_map, d1[1])
+                    imap = value(collect(intersect(cmap.range_map, (d1[1], d2[1])))[1])
+                else
+                    imap = IntervalMap{UInt8, CosObject}()
+                    cmap.range_map[(d1[1],d2[1])] = imap
+                end
                 imap[(d1[2], d2[2])] = o3
-                cmap.range_map[(d1[1],d2[1])] = imap
             end
         else
             l = length(d1)
@@ -148,9 +244,10 @@ function on_cmap_command(stm::BufferedInputStream, command::Symbol,
             end
         end
     end
+    return cmap
 end
 
-on_cmap_command(stm::BufferedInputStream, command::CosObject,
+on_cmap_command!(stm::BufferedInputStream, command::CosObject,
                 params::Vector{CosInt}, cmap::CMap) = nothing
 
 function read_cmap(stm::BufferedInputStream)
@@ -162,62 +259,7 @@ function read_cmap(stm::BufferedInputStream)
             push!(params, obj)
         end
         (obj == :beginbfchar || obj == :beginbfrange || obj == :begincodespacerange) &&
-            on_cmap_command(stm, obj, params, tcmap)
+            on_cmap_command!(stm, obj, params, tcmap)
     end
     return tcmap
 end
-
-#=
-function get_encoded_string(s::CosXString, cmap::CosObject)
-    cmap_vec = read_cmap(cmap)
-    hexbytes = get(s)
-    data = hexbytes |> String |> hex2bytes
-
-    cmap_len = length(cmap_vec)
-
-    for i = 1:cmap_len
-        nb = cmap_vec[i][1]
-    end
-
-    for b in data
-        #if b in
-    end
-    state = start(cmap_vec)
-    nbytes = []
-    while !done(cmap_vec, state)
-        (r, state) = next(cmap_vec, state)
-        isa(r[2], CosInt) && push!(nbytes, Int(r[2]))
-    end
-    for r in cmap_vec
-        if isa(r[1], CosInt)
-    end
-    i = 1
-    len = length(data)
-    retval = UInt16[]
-    while i < len
-        c = parse(UInt16, String(data[i:i+3]), 16)
-        for r in cmap_range
-            range = r[1]
-            if c in range
-                incr = c - range[1]
-                v = r[2]
-                if isa(v, CosXString)
-                    data2 = get(v)
-                    c2 = parse(UInt16, String(data2), 16)
-                    c2 += incr
-                    push!(retval, c2)
-                elseif isa(v, CosArray)
-                    data2 = get(v)[incr+1]
-                    j = 1
-                    while j < length(data2)
-                        c2 = parse(UInt16, String(data2[j:j+3]), 16)
-                        push!(retval, c2)
-                        j += 4
-                    end
-                end
-            end
-        end
-        i += 4
-    end
-end
-=#

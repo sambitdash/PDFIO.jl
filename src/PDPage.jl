@@ -103,10 +103,10 @@ get_page_content_ref(page::PDPageImpl) = get(page.cospage, cn"Contents")
 function get_page_contents(page::PDPageImpl, contents::CosArray)
   len = length(contents)
   for i = 1:len
-    ref = splice!(contents, 1)
-    cosstm = get_page_contents(page.doc.cosDoc,ref)
+    ref = splice!(get(contents), 1)
+    cosstm = get_page_contents(page,ref)
     if (cosstm != CosNull)
-      push!(contents,cosstm)
+      push!(get(contents),cosstm)
     end
   end
   return contents
