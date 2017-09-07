@@ -353,11 +353,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#PDFIO.PD.pdPageExtractText",
+    "page": "API Structure and Design",
+    "title": "PDFIO.PD.pdPageExtractText",
+    "category": "Function",
+    "text": "    pdPageExtractText(io::IO, page::PDPage) -> IO\n\nExtracts the text from the page. This extraction works best for tagged PDF files only. For PDFs not tagged, some line and word breaks will not be extracted properly.\n\n\n\n"
+},
+
+{
     "location": "index.html#PD-1",
     "page": "API Structure and Design",
     "title": "PD",
     "category": "section",
-    "text": "PDDoc\npdDocOpen\npdDocClose\npdDocGetCatalog\npdDocGetNamesDict\npdDocGetInfo\npdDocGetCosDoc\npdDocGetPage\npdDocGetPageCount\npdDocGetPageRange\npdPageGetContents\npdPageIsEmpty\npdPageGetCosObject\npdPageGetContentObjects"
+    "text": "PDDoc\npdDocOpen\npdDocClose\npdDocGetCatalog\npdDocGetNamesDict\npdDocGetInfo\npdDocGetCosDoc\npdDocGetPage\npdDocGetPageCount\npdDocGetPageRange\npdPageGetContents\npdPageIsEmpty\npdPageGetCosObject\npdPageGetContentObjects\npdPageExtractText"
 },
 
 {
@@ -365,7 +373,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API Structure and Design",
     "title": "PDFIO.PD.PDPageObject",
     "category": "Type",
-    "text": "    PDPageObject\n\nThe content streams associated with PDF pages contain the objects that can be rendered. These objects are represented by PDPageObject. These objects can contain a postfix notation based operator prefixed by its operands like:\n\n(Draw this text) Tj\n\nAs can be seen above, the string object is a CosString which is a parameter to the operand Tj or draw text. These class of objects are represented by PDPageElement.\n\nHowever, there are certain objects which only provide grouping information or begin and end markers for grouping information. For example, a text object:\n\nBT\n    /F1 11 Tf  %Set font\n    (Draw this text) Tj\nET\n\nThese kind of objects are represented by PDPageObjectGroup. In this case, the PDPageObjectGroup contains four PDPageElement. Namely, represented as operators BT, Tf, Tj, ET.\n\nPDPageElement and PDPageObjectGroup can be extended by composition. Hence, there are more specialized objects that can be seen as well.\n\n\n\n"
+    "text": "    PDPageObject\n\nThe content streams associated with PDF pages contain the objects that can be rendered. These objects are represented by PDPageObject. These objects can contain a postfix notation based operator prefixed by its operands like:\n\n(Draw this text) Tj\n\nAs can be seen above, the string object is a CosString which is a parameter to the operand Tj or draw text. These class of objects are represented by PDPageElement.\n\nHowever, there are certain objects which only provide grouping information or begin and end markers for grouping information. For example, a text object:\n\nBT\n    /F1 11 Tf  %selectfont\n    (Draw this text) Tj\nET\n\nThese kind of objects are represented by PDPageObjectGroup. In this case, the PDPageObjectGroup contains four PDPageElement. Namely, represented as operators BT, Tf, Tj, ET.\n\nPDPageElement and PDPageObjectGroup can be extended by composition. Hence, there are more specialized objects that can be seen as well.\n\n\n\n"
 },
 
 {
@@ -453,7 +461,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API Structure and Design",
     "title": "PDFIO.Cos.cosDocOpen",
     "category": "Function",
-    "text": "    cosDocOpen(filepath::String) -> CosDoc\n\nProvides the access to the physical file and file structure of the PDF document. Returns a CosDoc which can be subsequently used for all query into the PDF files. Remember to release the document with cosDocClose, once the object is used.\n\n\n\n"
+    "text": "    cosDocOpen(filepath::AbstractString) -> CosDoc\n\nProvides the access to the physical file and file structure of the PDF document. Returns a CosDoc which can be subsequently used for all query into the PDF files. Remember to release the document with cosDocClose, once the object is used.\n\n\n\n"
 },
 
 {
@@ -477,7 +485,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API Structure and Design",
     "title": "PDFIO.Cos.cosDocGetObject",
     "category": "Function",
-    "text": "    cosDocGetObject(doc::CosDoc, obj::CosObject) -> CosObject\n\nPDF objects are distributed in the file and can be cross referenced from one location to another. This is called as indirect object referencing. However, to extract actual information one needs access to the complete object (direct object). This method provides access to the direct object after searching for the object in the document structure. If an indirect object reference is passed as an obj parameter the complete indirect object (reference as well as all content of the object) are returned. A direct object passed to the method is returned as is without any translation. This ensures the user does not have to go through checking the type of the objects before accessing the contents.\n\n\n\n"
+    "text": "    cosDocGetObject(doc::CosDoc, obj::CosObject) -> CosObject\n\nPDF objects are distributed in the file and can be cross referenced from one location to another. This is called as indirect object referencing. However, to extract actual information one needs access to the complete object (direct object). This method provides access to the direct object after searching for the object in the document structure. If an indirect object reference is passed as an obj parameter the complete indirect object (reference as well as all content of the object) are returned. A direct object passed to the method is returned as is without any translation. This ensures the user does not have to go through checking the type of the objects before accessing the contents.\n\n\n\n    cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName) -> CosObject\n\nReturns the object referenced inside the dict dictionary. dict can be a PDF dictionary object reference or an indirect object or a direct CosDict object.\n\n\n\n"
 },
 
 {
