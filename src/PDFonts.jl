@@ -113,8 +113,9 @@ function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
     carr = NativeEncodingToUnicode(Vector{UInt8}(s), fum.encoding)
     return String(carr)
 end
+# {UInt8, CosObject}
 
-function get_unicode_chars(b::UInt8, itv::IntervalValue{UInt8, CosObject})
+function get_unicode_chars(b::UInt8, itv::IntervalValue)
     f = first(itv)
     l = last(itv)
     v = value(itv)
@@ -122,13 +123,15 @@ function get_unicode_chars(b::UInt8, itv::IntervalValue{UInt8, CosObject})
         bytes = Vector{UInt8}(v)
         carr = get_unicode_chars(bytes)
         carr[1] += (b - f)  # Only one char should be generated here
-    else
+    elseif v isa CosArray
         @assert v isa CosArray
         arr = get(v)
         xstr = arr[b - f + 1]
         @assert xstr isa CosXString
         bytes = Vector{UInt8}(xstr)
         carr = get_unicode_chars(bytes)
+    else
+        @assert 1 == 0
     end
     return carr
 end

@@ -70,3 +70,26 @@ function utilPrintOpenFiles()
 end
 
 end
+
+function files_equal(f1, f2)
+    io1 = open(f1); io2 = open(f2)
+    buf1 = read(io1); buf2 = read(io2)
+    close(io1); close(io2)
+    return buf1 == buf2
+end
+
+function extract_text(io, doc)
+    npage = pdDocGetPageCount(doc)
+    for i=1:npage
+        page = pdDocGetPage(doc, i)
+        if pdPageIsEmpty(page) == false
+            pdPageGetContentObjects(page)
+            pdPageExtractText(io, page)
+        end
+    end
+end
+
+function testfiles(filename)
+    name, ext = splitext(filename)
+    return (name*".res", joinpath(Pkg.dir("PDFIO"), "test", "files", name*".txt"))
+end

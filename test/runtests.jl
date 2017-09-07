@@ -73,18 +73,15 @@ include("debugIO.jl")
             isfile(filename)||
                 download("http://lawmin.nic.in/ld/P-ACT/1947/A1947-15.pdf",filename)
             doc = pdDocOpen(filename)
+            resfile, template = testfiles(filename)
+            io = util_open(resfile, "w")
             try
-                npage= pdDocGetPageCount(doc)
-                for i=1:npage
-                    page = pdDocGetPage(doc, i)
-                    if pdPageIsEmpty(page) == false
-                        pdPageGetContentObjects(page)
-                        pdPageExtractText(IOBuffer(), page)
-                    end
-                end
+                extract_text(io, doc)
             finally
+                util_close(io)
                 pdDocClose(doc)
             end
+            @assert files_equal(resfile, template)
             length(utilPrintOpenFiles()) == 0
         end
     end
@@ -203,22 +200,51 @@ include("debugIO.jl")
                 download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
             doc = pdDocOpen(filename)
             (npage = pdDocGetPageCount(doc)) == 54
-            for i=1:npage
-                page = pdDocGetPage(doc, i)
-                if pdPageIsEmpty(page) == false
-                    pdPageGetContentObjects(page)
-                    pdPageExtractText(IOBuffer(), page)
+            try
+                open("431.res", "w") do io
+                    for i=1:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
                 end
+                @test files_equal("431.res", "files/431.txt")
+            finally
+                pdDocClose(doc)
             end
-            pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
     end
 
+    @testset "MacRomanEncoding Fonts test" begin
+        @test begin
+            filename="files/spec-2.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            @assert (npage = pdDocGetPageCount(doc)) == 1
+            try
+                open("spec-2.res", "w") do io
+                    for i=1:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
+                end
+                @test files_equal("spec-2.res", "files/spec-2.txt")
+            finally
+                pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end
 
 if isfile("pvt/pvttests.jl")
-  #include("pvt/pvttests.jl")
+    #include("pvt/pvttests.jl")
 end

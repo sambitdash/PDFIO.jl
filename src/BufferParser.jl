@@ -18,8 +18,6 @@ export  skipv,
     error("Found '$(UInt8(ch))' Expected '$(Char(c))' here")
 end
 
-@inline skipv(ps::BufferedInputStream, cs::UInt8...) = for c in cs skipv(ps, c) end
-
 @inline skipv(ps::BufferedInputStream, cs::Vector{UInt8}) = for c in cs skipv(ps, c) end
 
 @inline advance!(ps::BufferedInputStream) = read(ps,UInt8)

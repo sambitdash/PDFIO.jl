@@ -457,48 +457,69 @@ const PD_CONTENT_OPERATORS = Dict(
 
 function get_pdfcontentops(b::Vector{UInt8})
     arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
-    if (arr == CosNull)
-        return CosNull
-    else
-        return eval(Expr(:call,arr...))
-    end
+    (arr == CosNull) && return CosNull
+    return eval(Expr(:call,arr...))
 end
 
-function showtext(io::IO, grp::PDPageObjectGroup, state::Dict=Dict())
+function showtext(io::IO, grp::PDPageObjectGroup, state::Vector{Dict}=Vector{Dict}())
     for obj in grp.objs
         showtext(io, obj, state)
     end
     return io
 end
 
-function showtext(io::IO, tr::PDPageTextRun, state::Dict=Dict())
-    fontname, font = get(state, :font, (CosNull, CosNull))
-    page = get(state, :page, CosNull)
+function showtext(io::IO, tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
+    fontname, font = get(state[end], :font, (CosNull, CosNull))
+    page = get(state[end], :page, CosNull)
+    (tr.elem.t == Symbol("\'") || tr.elem.t == Symbol("\"")) && print(io, " LF\n")
     for s in tr.ss
-        text = get_encoded_string(s, fontname, page)
+        text = String(get_encoded_string(s, fontname, page))
         write(io, text)
     end
     return io
 end
 
-showtext(io::IO, pdo::PDPageTextObject, state::Dict=Dict()) = showtext(io, pdo.group, state)
-
-function showtext(io::IO, pdo::PDPageMarkedContent, state::Dict)
-    tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
+showtext(io::IO, pdo::PDPageTextObject, state::Vector{Dict}=Vector{Dict}()) =
     showtext(io, pdo.group, state)
-    print(io, '\n')
-    return io
+
+function showtext(io::IO, pdo::PDPageMarkedContent, state::Vector{Dict})
+    tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
+    tag == cn"Artifact" && return io # Do not print Artifact types
+    return showtext(io, pdo.group, state)
 end
 
-function showtext(io::IO, pdo::PDPageElement, state::Dict=Dict())
-    page = get(state, :page, CosName)
+function showtext(io::IO, pdo::PDPageElement, state::Vector{Dict}=Vector{Dict}())
+    page = get(state[end], :page, CosNull)
     page === CosNull && return io
+    if pdo.t == :q
+        push!(state, copy(state[end]))
+        return io
+    elseif pdo.t == :Q
+        pop!(state)
+        return io
+    end
+    pdo.t == Symbol("T*") && return print(io, "\n")
+    (pdo.t == :Td || pdo.t == :TD) && get(pdo.operands[2]) > 0  &&
+        return print(io, "\n")
+    # If the previous text matrix was at a value higher than the current in y-axis
+    # by 1-unit enter a line-break.
+    if pdo.t == :Tm
+        nyloc = get(pdo.operands[6])
+        oyloc = -10000
+        yloc = get(state[end], :yloc, Vector{Float32}())
+        if length(yloc) != 0
+            oyloc = yloc[end]
+        end
+        if (nyloc < oyloc - 1); print(io, '\n'); end
+        push!(yloc, nyloc)
+        return io
+    end
     pdo.t != :Tf && return io
     fontname = pdo.operands[1]
     font = page_find_font(page, fontname)
     font === CosNull && return io
-    state[:font] = (fontname, font)
+    state[end][:font] = (fontname, font)
     return io
 end
 
-showtext(io::IO, pdo::CosObject, state::Dict=Dict()) = (show(io, pdo); io)
+showtext(io::IO, pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = (show(io, pdo); io)

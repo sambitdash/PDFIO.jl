@@ -69,8 +69,11 @@ For PDFs not tagged, some line and word breaks will not be extracted properly.
 """
 function pdPageExtractText(io::IO, page::PDPage)
     # page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
-    state = Dict()
-    state[:page] = page
+    state = Vector{Dict}()
+    yloc = Vector{Float32}()
+    push!(state, Dict())
+    state[end][:page] = page
+    state[end][:yloc] = yloc
     showtext(io, pdPageGetContentObjects(page), state)
     return io
 end
