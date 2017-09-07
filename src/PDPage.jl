@@ -124,22 +124,22 @@ function get_page_contents(page::PDPage, contents::CosObject)
 end
 
 function load_page_objects(page::PDPageImpl)
-  stm = pdPageGetContents(page)
-  if (isnull(page.content_objects))
-    page.content_objects=Nullable(PDPageObjectGroup())
-  end
-  load_page_objects(page, stm)
+    contents = pdPageGetContents(page)
+    if (isnull(page.content_objects))
+        page.content_objects=Nullable(PDPageObjectGroup())
+    end
+    load_page_objects(page, contents)
 end
 
 load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
 
 function load_page_objects(page::PDPageImpl, stm::CosObject)
-  bufstm = decode(stm)
-  try
-    load_objects(get(page.content_objects), bufstm)
-  finally
-    close(bufstm)
-  end
+    bufstm = decode(stm)
+    try
+        load_objects(get(page.content_objects), bufstm)
+    finally
+        close(bufstm)
+    end
 end
 
 function load_page_objects(page::PDPageImpl, stm::CosArray)

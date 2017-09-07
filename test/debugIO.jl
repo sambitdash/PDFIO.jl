@@ -72,9 +72,9 @@ end
 end
 
 function files_equal(f1, f2)
-    io1 = open(f1); io2 = open(f2)
+    io1 = util_open(f1, "r"); io2 = util_open(f2, "r")
     buf1 = read(io1); buf2 = read(io2)
-    close(io1); close(io2)
+    util_close(io1); util_close(io2)
     return buf1 == buf2
 end
 

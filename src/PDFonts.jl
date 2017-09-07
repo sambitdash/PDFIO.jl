@@ -101,8 +101,13 @@ end
 
 function merge_encoding!(fum::FontUnicodeMapping, cmap::CosIndirectObject{CosStream},
                          doc::CosDoc, font::CosObject)
-    fum.cmap = read_cmap(get(cmap))
-    fum.hasCMap = true
+    stm_cmap = get(cmap)
+    try
+        fum.cmap = read_cmap(stm_cmap)
+        fum.hasCMap = true
+    finally
+        close(stm_cmap)
+    end
     return fum
 end
 
