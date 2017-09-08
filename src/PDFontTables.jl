@@ -55,14 +55,6 @@ const Glyphname_to_MEXEncoding = reverse_dict(MEXEncoding_to_GlyphName)
 const GlyphName_to_SYMEncoding = reverse_dict(SYMEncoding_to_GlyphName)
 const GlyphName_to_ZAPEncoding = reverse_dict(ZAPEncoding_to_GlyphName)
 
-# To be deleted when AGL gets registered.
-
-try
-    Pkg.installed("AdobeGlyphList") !== nothing
-catch
-    Pkg.clone("https://github.com/sambitdash/AdobeGlyphList.jl.git")
-end
-
 using AdobeGlyphList
 
 function agl_mapping_to_dict(m)
