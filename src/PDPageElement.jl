@@ -164,7 +164,7 @@ A [`PDPageElement`](@ref) that represents the beginning of an inline image.
 """
 mutable struct PDPage_BeginInlineImage <: PDPageObject
     elem::PDPageElement
-    PDPage_BeginInlineImage(ts::AbstractString,ver::Tuple{Int,Int},nop)=
+    PDPage_BeginInlineImage(ts::AbstractString, ver::Tuple{Int,Int}, nop, ::Type)=
         new(PDPageElement(ts,ver,nop))
 end
 
@@ -174,7 +174,7 @@ function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
 
     while(!newobj.isRead)
         value=parse_value(bis, get_pdfcontentops)
-        collect_inline_image(img,value,bis)
+        collect_inline_image(newobj, value, bis)
     end
     push!(grp.objs, newobj)
     return newobj
@@ -230,18 +230,18 @@ end
 function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
                               bis::BufferedInputStream)
     if (elem.t == Symbol("ID"))
-        while(!image.isRead && !eof(bis))
+        while(!img.isRead && !eof(bis))
             b1 = peek(bis)
-            if (b1 == LATIN_E)
+            if (b1 == LATIN_UPPER_E)
                 mark(bis)
                 skip(bis,1);
                 b2 = peek(bis)
-                if (b2 == LATIN_I)
+                if (b2 == LATIN_UPPER_I)
                     skip(bis,1);b3 = peek(bis)
-                    if (is_crorlf(b3))
+                    if (ispdfspace(b3))
                         skip(bis,1)
                         img.isRead=true
-                        unmark(s)
+                        unmark(bis)
                         break
                     else
                         reset(bis)
@@ -521,5 +521,7 @@ function showtext(io::IO, pdo::PDPageElement, state::Vector{Dict}=Vector{Dict}()
     state[end][:font] = (fontname, font)
     return io
 end
+
+showtext(io::IO, pdo::PDPageInlineImage, state::Vector{Dict}=Vector{Dict}()) = io
 
 showtext(io::IO, pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = (show(io, pdo); io)

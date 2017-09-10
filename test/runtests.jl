@@ -218,6 +218,30 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Inline Image test" begin
+        @test begin
+            filename="files/Pratham\ Sanskaran.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            (npage = pdDocGetPageCount(doc)) == 54
+            try
+                open("Pratham\ Sanskaran.res", "w") do io
+                    for i=1:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
+                end
+                @test files_equal("Pratham\ Sanskaran.res", "files/Pratham\ Sanskaran.txt")
+            finally
+                pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "MacRomanEncoding Fonts test" begin
         @test begin
             filename="files/spec-2.pdf"
