@@ -195,13 +195,14 @@ include("debugIO.jl")
     @testset "Symbol Fonts test" begin
         @test begin
             filename="431.pdf"
+            result, template_file = local_testfiles(filename)
             DEBUG && println(filename)
             isfile(filename) ||
                 download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
             doc = pdDocOpen(filename)
             (npage = pdDocGetPageCount(doc)) == 54
             try
-                open("431.res", "w") do io
+                open(result, "w") do io
                     for i=1:npage
                         page = pdDocGetPage(doc, i)
                         if pdPageIsEmpty(page) == false
@@ -210,7 +211,7 @@ include("debugIO.jl")
                         end
                     end
                 end
-                @test files_equal("431.res", "files/431.txt")
+                @test files_equal(result, template_file)
             finally
                 pdDocClose(doc)
             end
@@ -220,12 +221,13 @@ include("debugIO.jl")
 
     @testset "Inline Image test" begin
         @test begin
-            filename="files/Pratham\ Sanskaran.pdf"
-            DEBUG && println(filename)
-            doc = pdDocOpen(filename)
-            (npage = pdDocGetPageCount(doc)) == 54
+            filename="Pratham-Sanskaran.pdf"
+            result, template_file, src = local_testfiles(filename)
+            DEBUG && println(src)
+            doc = pdDocOpen(src)
+            (npage = pdDocGetPageCount(doc)) == 3
             try
-                open("Pratham\ Sanskaran.res", "w") do io
+                open(result, "w") do io
                     for i=1:npage
                         page = pdDocGetPage(doc, i)
                         if pdPageIsEmpty(page) == false
@@ -234,7 +236,7 @@ include("debugIO.jl")
                         end
                     end
                 end
-                @test files_equal("Pratham\ Sanskaran.res", "files/Pratham\ Sanskaran.txt")
+                @test files_equal(result, template_file)
             finally
                 pdDocClose(doc)
             end
@@ -244,12 +246,13 @@ include("debugIO.jl")
 
     @testset "MacRomanEncoding Fonts test" begin
         @test begin
-            filename="files/spec-2.pdf"
-            DEBUG && println(filename)
-            doc = pdDocOpen(filename)
+            filename="spec-2.pdf"
+            result, template_file, src = local_testfiles(filename)
+            DEBUG && println(src)
+            doc = pdDocOpen(src)
             @assert (npage = pdDocGetPageCount(doc)) == 1
             try
-                open("spec-2.res", "w") do io
+                open(result, "w") do io
                     for i=1:npage
                         page = pdDocGetPage(doc, i)
                         if pdPageIsEmpty(page) == false
@@ -258,7 +261,7 @@ include("debugIO.jl")
                         end
                     end
                 end
-                @test files_equal("spec-2.res", "files/spec-2.txt")
+                @test files_equal(result, template_file)
             finally
                 pdDocClose(doc)
             end
