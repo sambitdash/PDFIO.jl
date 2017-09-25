@@ -471,7 +471,7 @@ end
 function showtext(io::IO, tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
     fontname, font = get(state[end], :font, (CosNull, CosNull))
     page = get(state[end], :page, CosNull)
-    (tr.elem.t == Symbol("\'") || tr.elem.t == Symbol("\"")) && print(io, " LF\n")
+    (tr.elem.t == Symbol("\'") || tr.elem.t == Symbol("\"")) && print(io, "\n")
     for s in tr.ss
         text = String(get_encoded_string(s, fontname, page))
         write(io, text)
@@ -524,4 +524,4 @@ end
 
 showtext(io::IO, pdo::PDPageInlineImage, state::Vector{Dict}=Vector{Dict}()) = io
 
-showtext(io::IO, pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = (show(io, pdo); io)
+showtext(io::IO, pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = io
