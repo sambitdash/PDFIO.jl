@@ -64,17 +64,14 @@ end
 ```
     pdPageExtractText(io::IO, page::PDPage) -> IO
 ```
-Extracts the text from the `page`. This extraction works best for tagged PDF files only.
+Extracts the text from the `page`. This extraction works best for tagged PDF files.
 For PDFs not tagged, some line and word breaks will not be extracted properly.
 """
 function pdPageExtractText(io::IO, page::PDPage)
-    # page.doc.isTagged != :tagged && throw(ErrorException(E_NOT_TAGGED_PDF))
-    state = Vector{Dict}()
-    yloc = Vector{Float32}()
-    push!(state, Dict())
+    state = init_graphics_state()
     state[end][:page] = page
-    state[end][:yloc] = yloc
-    showtext(io, pdPageGetContentObjects(page), state)
+    evalContent!(pdPageGetContentObjects(page), state)
+    show_text_layout!(io, state)
     return io
 end
 

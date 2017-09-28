@@ -9,7 +9,7 @@ export  PDPageObject,
         PDPage_EndGroup
 
 using BufferedStreams
-import Base: show
+import Base: show, isless
 
 """
 ```
@@ -51,7 +51,7 @@ abstract type PDPageObject end
 A representation of a content object with operator and operand. See [`PDPageObject`](@ref)
 for more details.
 """
-mutable struct PDPageElement <: PDPageObject
+mutable struct PDPageElement{S} <: PDPageObject
     t::Symbol
     version::Tuple{Int,Int}
     noperand::Int
@@ -59,7 +59,7 @@ mutable struct PDPageElement <: PDPageObject
 end
 
 PDPageElement(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0)=
-  PDPageElement(Symbol(ts),ver,nop,Vector{CosObject}())
+  PDPageElement{Symbol(ts)}(Symbol(ts),ver,nop,Vector{CosObject}())
 
 function show(io::IO, e::PDPageElement)
     for op in e.operands
@@ -219,8 +219,6 @@ function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
     return tr
 end
 
-
-
 function collect_inline_image(img::PDPageInlineImage, name::CosName,
     bis::BufferedInputStream)
     value = parse_value(bis, get_pdfcontentops)
@@ -231,13 +229,13 @@ function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
                               bis::BufferedInputStream)
     if (elem.t == Symbol("ID"))
         while(!img.isRead && !eof(bis))
-            b1 = peek(bis)
+            b1 = BufferedStreams.peek(bis)
             if (b1 == LATIN_UPPER_E)
                 mark(bis)
                 skip(bis,1);
-                b2 = peek(bis)
+                b2 = BufferedStreams.peek(bis)
                 if (b2 == LATIN_UPPER_I)
-                    skip(bis,1);b3 = peek(bis)
+                    skip(bis,1);b3 = BufferedStreams.peek(bis)
                     if (ispdfspace(b3))
                         skip(bis,1)
                         img.isRead=true
@@ -458,70 +456,236 @@ const PD_CONTENT_OPERATORS = Dict(
 function get_pdfcontentops(b::Vector{UInt8})
     arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
     (arr == CosNull) && return CosNull
-    return eval(Expr(:call,arr...))
+    return eval(Expr(:call, arr...))
 end
 
-function showtext(io::IO, grp::PDPageObjectGroup, state::Vector{Dict}=Vector{Dict}())
-    for obj in grp.objs
-        showtext(io, obj, state)
+struct TextLayout
+    a::Float32
+    b::Float32
+    c::Float32
+    d::Float32
+    x::Float32
+    y::Float32
+    text::String
+end
+
+function isless(tl1::TextLayout, tl2::TextLayout)
+    dy = tl1.y - tl2.y
+    dx = tl1.x - tl2.x
+    ytol = tl1.d/2
+
+    dy < -ytol && return true
+    dy >  ytol && return false
+    return dx > 0
+end
+
+using DataStructures
+
+function init_graphics_state()
+    state = Vector{Dict}()
+    push!(state, Dict())
+
+    state[end][:text_layout] = mutable_binary_maxheap(TextLayout)
+
+    #Graphics state
+    state[end][:CTM] = eye(3)
+
+    #Text states
+    state[end][:Tc] = 0.0
+    state[end][:Tw] = 0.0
+    state[end][:Tz] = 100.0
+    state[end][:TL] = 0.0
+    state[end][:Tr] = 0
+    state[end][:Ts] = 0.0
+    return state
+end
+
+function show_text_layout!(io::IO, state::Vector{Dict})
+    heap = state[end][:text_layout]
+    x = 0.0
+    y = -1.0
+    while(!isempty(heap))
+        tlayout = pop!(heap)
+        #@printf "%f,%f,%f,%f,%f,%f,%s\n" tlayout.a tlayout.b tlayout.c tlayout.d tlayout.x tlayout.y tlayout.text
+
+        #Horizontal Text
+        if abs(tlayout.b) < 0.001 && abs(tlayout.c) < 0.001
+            w = abs(tlayout.a)
+            h = abs(tlayout.d)
+        #Vertical or any other angle text
+        else
+            w = h = sqrt(tlayout.a*tlayout.d - tlayout.b*tlayout.c)
+            y = -1.0 #Reset the old positions.
+        end
+        @assert w > 0.1
+        @assert h > 0.1
+        while (y > tlayout.y + h)
+            print(io, '\n')
+            y -= h
+            x = 0.0
+        end
+        y = tlayout.y
+        if (x > tlayout.x)
+            x = tlayout.x
+        end
+        while x < tlayout.x
+            print(io, ' ')
+            x += w
+        end
+        len = length(tlayout.text)
+        print(io, tlayout.text)
+        x += w*len
     end
-    return io
 end
 
-function showtext(io::IO, tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
+function evalContent!(grp::PDPageObjectGroup, state::Vector{Dict}=Vector{Dict}())
+    for obj in grp.objs
+        evalContent!(obj, state)
+    end
+    return state
+end
+
+function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
+    evalContent!(tr.elem, state)
+    tfs = get(state[end], :fontsize, 0)
+
+    th = state[end][:Tz]/100.0
+    ts = state[end][:Ts]
+
+    tsm = tfs == 0 ? eye(3) : [tfs*th 0.0 0.0; 0.0 tfs 0.0; 0.0 ts 1.0]
+
+    tm = state[end][:Tm]
+    ctm = state[end][:CTM]
+    trm = tsm*tm*ctm
+
     fontname, font = get(state[end], :font, (CosNull, CosNull))
     page = get(state[end], :page, CosNull)
-    (tr.elem.t == Symbol("\'") || tr.elem.t == Symbol("\"")) && print(io, "\n")
+    text = ""
     for s in tr.ss
-        text = String(get_encoded_string(s, fontname, page))
-        write(io, text)
+        text *= String(get_encoded_string(s, fontname, page))
     end
-    return io
+
+    a = trm[1, 1]
+    b = trm[1, 2]
+    c = trm[2, 1]
+    d = trm[2, 2]
+    e = trm[3, 1]
+    f = trm[3, 2]
+
+    heap = state[end][:text_layout]
+    if !get(state[end], :in_artifact, false)
+        push!(heap, TextLayout(a, b, c, d, e, f, text))
+    end
+    return state
 end
 
-showtext(io::IO, pdo::PDPageTextObject, state::Vector{Dict}=Vector{Dict}()) =
-    showtext(io, pdo.group, state)
+function evalContent!(pdo::PDPageTextObject, state::Vector{Dict}=Vector{Dict}())
+    state[end][:Tm]  = eye(3)
+    state[end][:Tlm] = eye(3)
+    state[end][:Trm] = eye(3)
+    evalContent!(pdo.group, state)
+    delete!(state[end], :Tm)
+    delete!(state[end], :Tlm)
+    delete!(state[end], :Trm)
+    return state
+end
 
-function showtext(io::IO, pdo::PDPageMarkedContent, state::Vector{Dict})
+function evalContent!(pdo::PDPageMarkedContent, state::Vector{Dict})
     tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
-    tag == cn"Artifact" && return io # Do not print Artifact types
-    return showtext(io, pdo.group, state)
+    if tag == cn"Artifact"
+        state[end][:in_artifact] = true
+        evalContent!(pdo.group, state)
+        delete!(state[end], :in_artifact)
+        return state
+    end
+    return evalContent!(pdo.group, state)
 end
 
-function showtext(io::IO, pdo::PDPageElement, state::Vector{Dict}=Vector{Dict}())
+evalContent!(pdo::PDPageElement{S}, state::Vector{Dict}) where S = state
+
+function evalContent!(pdo::PDPageElement{:q}, state::Vector{Dict})
+    push!(state, copy(state[end]))
+    return state
+end
+
+function evalContent!(pdo::PDPageElement{:Q}, state::Vector{Dict})
+    pop!(state)
+    return state
+end
+
+function evalContent!(pdo::PDPageElement{:Tm}, state::Vector{Dict})
+    a = get(pdo.operands[1])
+    b = get(pdo.operands[2])
+    c = get(pdo.operands[3])
+    d = get(pdo.operands[4])
+    e = get(pdo.operands[5])
+    f = get(pdo.operands[6])
+    tm  = [a b 0.0; c d 0.0; e f 1.0]
+    tlm = [a b 0.0; c d 0.0; e f 1.0]
+    state[end][:Tm]  = tm
+    state[end][:Tlm] = tlm
+    return state
+end
+
+function evalContent!(pdo::PDPageElement{:Tf}, state::Vector{Dict})
     page = get(state[end], :page, CosNull)
-    page === CosNull && return io
-    if pdo.t == :q
-        push!(state, copy(state[end]))
-        return io
-    elseif pdo.t == :Q
-        pop!(state)
-        return io
-    end
-    pdo.t == Symbol("T*") && return print(io, "\n")
-    (pdo.t == :Td || pdo.t == :TD) && get(pdo.operands[2]) > 0  &&
-        return print(io, "\n")
-    # If the previous text matrix was at a value higher than the current in y-axis
-    # by 1-unit enter a line-break.
-    if pdo.t == :Tm
-        nyloc = get(pdo.operands[6])
-        oyloc = -10000
-        yloc = get(state[end], :yloc, Vector{Float32}())
-        if length(yloc) != 0
-            oyloc = yloc[end]
-        end
-        if (nyloc < oyloc - 1); print(io, '\n'); end
-        push!(yloc, nyloc)
-        return io
-    end
-    pdo.t != :Tf && return io
+    page === CosNull && return state
     fontname = pdo.operands[1]
     font = page_find_font(page, fontname)
-    font === CosNull && return io
+    font === CosNull && return state
     state[end][:font] = (fontname, font)
-    return io
+    fontsize = get(pdo.operands[2])
+    state[end][:fontsize] = fontsize
+    return state
 end
 
-showtext(io::IO, pdo::PDPageInlineImage, state::Vector{Dict}=Vector{Dict}()) = io
+for op in ["Tc", "Tw", "Tz", "TL", "Tr", "Ts"]
+    @eval evalContent!(pdo::PDPageElement{Symbol($op)}, state::Vector{Dict}) =
+        (state[end][Symbol($op)] = get(pdo.operands[1]); state)
+end
 
-showtext(io::IO, pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = io
+function set_text_pos!(tx, ty, state::Vector{Dict})
+    tmul = [1.0 0.0 0.0; 0.0 1.0 0.0; tx ty 1.0]
+    tlm  = state[end][:Tlm]
+    tm = tlm = tmul*tlm
+
+    state[end][:Tm]  = tm
+    state[end][:Tlm] = tlm
+    return state
+end
+
+function offset_text_leading!(state::Vector{Dict})
+    tl = state[end][:TL]
+    return set_text_pos!(0, -tl, state)
+end
+
+function evalContent!(pdo::PDPageElement{:TD}, state::Vector{Dict})
+    tx = get(pdo.operands[1])
+    ty = get(pdo.operands[2])
+
+    state[end][:TL] = -ty
+    set_text_pos!(tx, ty, state)
+end
+
+function evalContent!(pdo::PDPageElement{:Td}, state::Vector{Dict})
+    tx = get(pdo.operands[1])
+    ty = get(pdo.operands[2])
+
+    set_text_pos!(tx, ty, state)
+end
+
+evalContent!(pdo::PDPageElement{Symbol("T*")}, state::Vector{Dict}) =
+    offset_text_leading!(state)
+
+evalContent!(pdo::PDPageElement{Symbol("\'")}, state::Vector{Dict}) =
+    offset_text_leading!(state)
+
+function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::Vector{Dict})
+    state[end][:Tw] = get(pdo.operands[1])
+    state[end][:Tc] = get(pdo.operands[2])
+    offset_text_leading!(state)
+end
+
+evalContent!(pdo::PDPageInlineImage, state::Vector{Dict}=Vector{Dict}()) = state
+
+evalContent!(pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = state
