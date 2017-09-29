@@ -646,7 +646,7 @@ end
 
 function set_text_pos!(tx, ty, state::Vector{Dict})
     tmul = [1.0 0.0 0.0; 0.0 1.0 0.0; tx ty 1.0]
-    tlm  = state[end][:Tlm]
+    tlm  = get(state[end], :Tlm, eye(3)) #:TL may be called outside of BT...ET block
     tm = tlm = tmul*tlm
 
     state[end][:Tm]  = tm
