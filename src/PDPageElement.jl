@@ -101,11 +101,9 @@ function populate_element(grp::PDPageObjectGroup, elem::PDPageElement)
             unshift!(elem.operands,operand)
         end
     else
-        len=endof(grp.objs)
-        while(isa(grp.objs[len],CosObject))
+        while(isa(grp.objs[end],CosObject))
             operand=pop!(grp.objs)
             unshift!(elem.operands,operand)
-            len = endof(grp.objs)
         end
     end
 end

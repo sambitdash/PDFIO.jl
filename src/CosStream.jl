@@ -4,8 +4,9 @@ import Libz:BufferedStreams.readbytes!
 
 import BufferedStreams:readbytes!
 
-export cosStreamRemoveFilters,
-       decode
+export  cosStreamRemoveFilters,
+        merge_streams,
+        decode
 
 function _not_implemented(input)
   error(E_NOT_IMPLEMENTED)
@@ -81,6 +82,27 @@ function cosStreamRemoveFilters(stm::CosObject)
     set!(stm, CosName("FFilter"),CosNull)
   end
   return stm
+end
+
+function merge_streams(stms::CosArray)
+    (path,io) = get_tempfilepath()
+    try
+        dict = CosDict()
+        println(path)
+        set!(dict, cn"F", CosLiteralString(path))
+        ret = CosStream(dict, false)
+        v = get(stms)
+        for stm in v
+            bufstm = decode(stm)
+            data = read(bufstm)
+            close(bufstm)
+            write(io, data)
+        end
+        return ret
+    finally
+        util_close(io)
+    end
+    return CosNull
 end
 
 """

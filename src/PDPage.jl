@@ -101,31 +101,29 @@ converted to an actual stream object
 get_page_content_ref(page::PDPageImpl) = get(page.cospage, cn"Contents")
 
 function get_page_contents(page::PDPageImpl, contents::CosArray)
-  len = length(contents)
-  for i = 1:len
-    ref = splice!(get(contents), 1)
-    cosstm = get_page_contents(page,ref)
-    if (cosstm != CosNull)
-      push!(get(contents),cosstm)
+    len = length(contents)
+    arr = get(contents)
+    for i = 1:len
+        ref = splice!(arr, 1)
+        cosstm = get_page_contents(page, ref)
+        if (cosstm !== CosNull)
+            push!(arr, cosstm)
+        end
     end
-  end
-  return contents
+    return merge_streams(contents)
 end
 
-function get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef)
-  return cosDocGetObject(page.doc.cosDoc, contents)
-end
+get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef) =
+    cosDocGetObject(page.doc.cosDoc, contents)
 
-function get_page_contents(page::PDPage, contents::CosObject)
-  return CosNull
-end
+get_page_contents(page::PDPage, obj::CosObject) = obj
 
 function load_page_objects(page::PDPageImpl)
     contents = pdPageGetContents(page)
     if (isnull(page.content_objects))
-        page.content_objects=Nullable(PDPageObjectGroup())
+        page.content_objects = Nullable(PDPageObjectGroup())
     end
-    load_page_objects(page, contents)
+    return load_page_objects(page, contents)
 end
 
 load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
@@ -137,12 +135,13 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
     finally
         close(bufstm)
     end
+    return nothing
 end
 
-function load_page_objects(page::PDPageImpl, stm::CosArray)
-  for s in get(stm)
-    load_page_objects(page,s)
-  end
+function load_page_objects(page::PDPageImpl, stms::CosArray)
+    stm = merge_streams(stms)
+    page.contents = stm
+    return load_page_objects(page, stm)
 end
 
 
