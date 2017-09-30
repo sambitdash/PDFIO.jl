@@ -88,7 +88,6 @@ function merge_streams(stms::CosArray)
     (path,io) = get_tempfilepath()
     try
         dict = CosDict()
-        println(path)
         set!(dict, cn"F", CosLiteralString(path))
         ret = CosStream(dict, false)
         v = get(stms)
