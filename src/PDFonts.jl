@@ -118,7 +118,6 @@ function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
     carr = NativeEncodingToUnicode(Vector{UInt8}(s), fum.encoding)
     return String(carr)
 end
-# {UInt8, CosObject}
 
 function get_unicode_chars(b::UInt8, itv::IntervalValue)
     f = first(itv)
@@ -194,8 +193,12 @@ function get_encoded_string(s::CosString, cmap::CMap)
             else
                 b2 = barr[i+=1]
                 itree1 = value(collect(intersect(rm, (b1,b1)))[1])
-                itv = collect(intersect(itree1, (b2,b2)))[1]
-                carr = get_unicode_chars(b2, itv)
+                itv = collect(intersect(itree1, (b2,b2)))
+                if length(itv) > 0
+                    carr = get_unicode_chars(b2, itv[1])
+                else
+                    push!(carr, Char(0))
+                end
             end
             append!(retarr, carr)
         end
