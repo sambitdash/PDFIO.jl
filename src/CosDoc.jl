@@ -168,12 +168,43 @@ end
 function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
                          ref::CosIndirectObjectRef, locObj::CosObjectLoc)
     objstm = cosDocGetObject(doc, stmref)
+    if (objstm === CosNull)
+        #= This is not really needed but PDF specification is kind of equivocal if
+           object streams should be referenced in the XRef stream.
+
+           An object stream itself, like any stream, shall be an indirect object, and
+           therefore, there shall be an entry for it in a cross-reference table or
+           cross-reference stream (see 7.5.8, "Cross-Reference Streams"), although there
+           might not be any references to it (of the form 243 0 R).
+        =#
+        objstm = scan_object_stream(doc, stmref)
+        attach_object(doc, objstm)
+    end
     (objstm === CosNull) && return CosNull
     if (locObj.obj == CosNull)
         locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
         attach_object(doc, locObj.obj)
     end
     return locObj.obj
+end
+
+function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
+    look_ahead = 2048
+    loc = doc.startxref - look_ahead
+    if loc < 0
+        loc = 0
+    end
+    seek(doc.ps, loc)
+    look_ahead = doc.startxref - loc
+    ref = get(stmref)
+    keyword = "$(ref[1]) $(ref[2]) obj"
+    loc1 = locate_keyword!(doc.ps, transcode(UInt8, keyword), look_ahead)
+    loc1 < 0 && return CosNull
+    seek(doc.ps, loc + loc1)
+    obj = parse_indirect_obj(doc.ps, doc.xref)
+    obj === CosNull && return CosNull
+    doc.xref[stmref] = CosObjectLoc(loc + loc1, CosNull, obj)
+    return obj
 end
 
 function read_header(ps)
