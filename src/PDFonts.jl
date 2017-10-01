@@ -114,6 +114,8 @@ end
 get_encoded_string(s::CosString, fum::Void) = CDTextString(s)
 
 function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
+    v = Vector{UInt8}(s)
+    length(v) == 0 && return ""
     fum.hasCMap && return get_encoded_string(s, fum.cmap)
     carr = NativeEncodingToUnicode(Vector{UInt8}(s), fum.encoding)
     return String(carr)
