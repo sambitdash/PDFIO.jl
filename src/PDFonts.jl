@@ -76,12 +76,12 @@ function merge_encoding!(fum::FontUnicodeMapping,
     diff === CosNull && return fum
     values = get(diff)
     d = Dict()
-    cid = 0
+    cid = -1
     for v in values
         if v isa CosInt
             cid = get(v)
         else
-            @assert cid != 0
+            @assert cid != -1
             d[cid] = v
             cid += 1
         end
