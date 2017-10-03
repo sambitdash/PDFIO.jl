@@ -8,7 +8,7 @@ export  cosStreamRemoveFilters,
         merge_streams,
         decode
 
-function _not_implemented(input)
+function _not_implemented(input, params)
   error(E_NOT_IMPLEMENTED)
 end
 
@@ -108,14 +108,13 @@ end
 Reads the filter data and decodes the stream.
 """
 function decode(stm::CosObject)
+    filename = get(stm, CosName("F"))
+    filters = get(stm, CosName("FFilter"))
+    parms = get(stm, CosName("FDecodeParms"))
 
-  filename = get(stm, CosName("F"))
-  filters = get(stm, CosName("FFilter"))
-  parms = get(stm, CosName("FDecodeParms"))
+    io = (util_open(String(filename), "r") |> BufferedInputStream)
 
-  io = (util_open(String(filename), "r") |> BufferedInputStream)
-
-  return decode_filter(io, filters, parms)
+    return decode_filter(io, filters, parms)
 end
 
 function decode_filter(io, filter::CosNullType, parms::CosObject)
