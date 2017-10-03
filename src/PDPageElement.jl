@@ -190,10 +190,10 @@ word or sentence.
 `PDPageTextRun` is a composition implementation of [`PDPageElement`](@ref).
 """
 mutable struct PDPageTextRun <: PDPageObject
-    ss::Vector{CosString}
+    ss::Vector{Union{CosString, CosNumeric}}
     elem::PDPageElement
     PDPageTextRun(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0) =
-        new(Vector{String}(), PDPageElement(ts, ver, nop))
+        new(Vector{Union{CosString, CosNumeric}}(), PDPageElement(ts, ver, nop))
 end
 
 show(io::IO, tr::PDPageTextRun) = show(io, tr.ss)
@@ -206,9 +206,7 @@ function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
             push!(tr.ss, operand)
         elseif isa(operand, CosArray)
             for td in get(operand)
-                if isa(td, CosString)
-                    push!(tr.ss, td)
-                end
+                push!(tr.ss, td)
             end
         end
     end
@@ -549,6 +547,8 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
 
     th = state[end][:Tz]/100.0
     ts = state[end][:Ts]
+    tc = state[end][:Tc]
+    tw = state[end][:Tw]
 
     tsm = tfs == 0 ? eye(3) : [tfs*th 0.0 0.0; 0.0 tfs 0.0; 0.0 ts 1.0]
 
@@ -558,10 +558,6 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
 
     fontname, font = get(state[end], :font, (CosNull, CosNull))
     page = get(state[end], :page, CosNull)
-    text = ""
-    for s in tr.ss
-        text *= String(get_encoded_string(s, fontname, page))
-    end
 
     a = trm[1, 1]
     b = trm[1, 2]
@@ -571,6 +567,25 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
     f = trm[3, 2]
 
     heap = state[end][:text_layout]
+    text = ""
+    bInsertSpace = false
+    for s in tr.ss
+        if s isa CosString
+            t = String(get_encoded_string(s, fontname, page))
+            if bInsertSpace && t[1] != ' '
+                text *= " "
+                bInsertSpace = false
+            end
+            text *= t
+        end
+        if s isa CosNumeric
+            v = s |> get |> Float32
+            v = -v/1000
+            if tr.elem.t == :TJ && abs(b) < 0.001 && abs(c) < 0.001 && v > 0.18
+                bInsertSpace = true
+            end
+        end
+    end
     if !get(state[end], :in_artifact, false)
         push!(heap, TextLayout(a, b, c, d, e, f, text))
     end

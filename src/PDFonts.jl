@@ -190,8 +190,12 @@ function get_encoded_string(s::CosString, cmap::CMap)
         if hasintersection(cs, b1)
             itree = value(collect(intersect(cs, (b1,b1)))[1])
             if itree === CosNull
-                itv = collect(intersect(rm, (b1,b1)))[1]
-                carr = get_unicode_chars(b1, itv)
+                itv = collect(intersect(rm, (b1,b1)))
+                if length(itv) > 0
+                    carr = get_unicode_chars(b1, itv[1])
+                else
+                    push!(carr, Char(0))
+                end
             else
                 b2 = barr[i+=1]
                 itree1 = value(collect(intersect(rm, (b1,b1)))[1])
