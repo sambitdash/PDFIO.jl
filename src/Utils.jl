@@ -36,7 +36,7 @@ zero(::Type{Char}) = Char(0x00)
 function load_data_file(filename)
     path = joinpath(Pkg.dir("PDFIO"), "data", filename)
 @static if VERSION >= v"0.7"
-    return DataFmt.readdlm(path, ',', String, '\n')
+    return DelimitedFiles.readdlm(path, ',', String, '\n')
 else
     return readdlm(path, ',', String, '\n')
 end
