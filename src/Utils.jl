@@ -33,13 +33,13 @@ utilPrintOpenFiles()=[]
 import Base: zero
 zero(::Type{Char}) = Char(0x00)
 
+@static if VERSION >= v"0.7-"
+    using DelimitedFiles
+end
+
 function load_data_file(filename)
     path = joinpath(Pkg.dir("PDFIO"), "data", filename)
-@static if v"0.6" <= VERSION < v"0.7-"
     return readdlm(path, ',', String, '\n')
-else
-    return DelimitedFiles.readdlm(path, ',', String, '\n')
-end
 end
 
 function dict_remap(ab, bc)
