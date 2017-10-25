@@ -626,6 +626,20 @@ function evalContent!(pdo::PDPageElement{:Q}, state::Vector{Dict})
     return state
 end
 
+function evalContent!(pdo::PDPageElement{:cm}, state::Vector{Dict})
+    a = get(pdo.operands[1])
+    b = get(pdo.operands[2])
+    c = get(pdo.operands[3])
+    d = get(pdo.operands[4])
+    e = get(pdo.operands[5])
+    f = get(pdo.operands[6])
+    cm  = [a b 0.0; c d 0.0; e f 1.0]
+    ctm = state[end][:CTM]
+    ctm = cm*ctm
+    state[end][:CTM] = ctm
+    return state
+end
+
 function evalContent!(pdo::PDPageElement{:Tm}, state::Vector{Dict})
     a = get(pdo.operands[1])
     b = get(pdo.operands[2])
