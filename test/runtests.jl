@@ -211,7 +211,7 @@ include("debugIO.jl")
                         end
                     end
                 end
-                @test files_equal(result, template_file)
+                @assert files_equal(result, template_file)
             finally
                 pdDocClose(doc)
             end
