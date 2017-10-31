@@ -31,7 +31,7 @@ Remember to release the document with `pdDocClose`, once the object is used.
 function pdDocOpen(filepath::AbstractString)
     doc = PDDocImpl(filepath)
     update_page_tree(doc)
-    update_structure_tree(doc)
+    update_structure_tree!(doc)
     return doc
 end
 
