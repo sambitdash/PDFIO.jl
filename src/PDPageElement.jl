@@ -468,8 +468,12 @@ end
 function isless(tl1::TextLayout, tl2::TextLayout)
     dy = tl1.y - tl2.y
     dx = tl1.x - tl2.x
-    ytol = tl1.d/2
-
+    # This will ensure superscripts with smaller fonts where baseline
+    # shift is less than half the height of the baseline fonts is aligned
+    # to current line and not an additional line above
+    ytol1 = tl1.d/2
+    ytol2 = tl2.d/2
+    ytol = abs(ytol1) > abs(ytol2) ? ytol1 : ytol2
     dy < -ytol && return true
     dy >  ytol && return false
     return dx > 0
@@ -483,10 +487,13 @@ function init_graphics_state()
 
     state[end][:text_layout] = mutable_binary_maxheap(TextLayout)
 
-    #Graphics state
+    # Histogram along the y-axis. Not used currently.
+    state[end][:y_layout] = SortedDict{Int,Int}(Base.Reverse)
+
+    # Graphics state
     state[end][:CTM] = eye(3)
 
-    #Text states
+    # Text states
     state[end][:Tc] = 0.0
     state[end][:Tw] = 0.0
     state[end][:Tz] = 100.0
@@ -498,6 +505,7 @@ end
 
 function show_text_layout!(io::IO, state::Vector{Dict})
     heap = state[end][:text_layout]
+    yhist = state[end][:y_layout]
     x = 0.0
     y = -1.0
     while(!isempty(heap))
@@ -566,7 +574,6 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
     e = trm[3, 1]
     f = trm[3, 2]
 
-    heap = state[end][:text_layout]
     text = ""
     bInsertSpace = false
     for s in tr.ss
@@ -586,8 +593,18 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
             end
         end
     end
+    heap = state[end][:text_layout]
+    yhist = state[end][:y_layout]
     if !get(state[end], :in_artifact, false)
         push!(heap, TextLayout(a, b, c, d, e, f, text))
+        # Populating the Histogram along the y-axis. Only text with horizontal direction
+        # is included.
+        if abs(b) < 0.001 && abs(c) < 0.001
+            iy = div(round(Int,f*100),10)
+            v = get(yhist, iy, 0)
+            v += length(text)
+            yhist[iy] = v
+        end
     end
     return state
 end
