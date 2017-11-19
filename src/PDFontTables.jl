@@ -16,9 +16,15 @@ function get_latin_charset_dict(col)
 end
 
 const STDEncoding_to_GlyphName = get_latin_charset_dict(2)
-const MACEncoding_to_GlyphName = get_latin_charset_dict(3)
-const WINEncoding_to_GlyphName = get_latin_charset_dict(4)
+MACEncoding_to_GlyphName = get_latin_charset_dict(3)
+WINEncoding_to_GlyphName = get_latin_charset_dict(4)
 const PDFEncoding_to_Glyphname = get_latin_charset_dict(5)
+
+#Special handling for few cases as per spec
+WINEncoding_to_GlyphName[0xAD] = cn"sfthyphen"
+WINEncoding_to_GlyphName[0xA0] = cn"colon"
+
+MACEncoding_to_GlyphName[0xCA] = cn"colon"
 
 function reverse_dict(dict)
     rdict = Dict()

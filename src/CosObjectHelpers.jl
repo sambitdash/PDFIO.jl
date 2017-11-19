@@ -42,4 +42,5 @@ convert(::Type{CDRect}, a::CosArray) = CDRect(a...)
 
 convert{T <: CosString}(::Type{CDDate}, ls::T) = CDDate(CDTextString(ls))
 
-convert(::Type{CDTextString}, name::CosName) = CDTextString(split(String(name.val),'_')[2])
+convert(::Type{CDTextString}, name::CosName) =
+    CDTextString(split(String(name.val), '_'; limit=2)[2])
