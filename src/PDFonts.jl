@@ -70,7 +70,7 @@ function merge_encoding!(fum::FontUnicodeMapping,
                         encoding::Union{CosDict, CosIndirectObject{CosDict}},
                         doc::CosDoc, font::CosObject)
     baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
-    baseenc !==  CosNull && merge_encoding!(fum, baseenc, doc, font)
+    merge_encoding!(fum, baseenc, doc, font)
     # Add the Differences
     diff = cosDocGetObject(doc, encoding, cn"Differences")
     diff === CosNull && return fum
