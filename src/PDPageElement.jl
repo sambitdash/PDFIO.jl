@@ -463,7 +463,12 @@ struct TextLayout
     x::Float32
     y::Float32
     text::String
+    fontname::CosObject
 end
+
+width(tl)    = sqrt(tl.a*tl.a + tl.c*tl.c)
+height(tl)   = sqrt(tl.b*tl.b + tl.d*tl.d)
+is_horiz(tl) = abs(tl.b) < 0.001 && abs(tl.c) < 0.001
 
 function isless(tl1::TextLayout, tl2::TextLayout)
     dy = tl1.y - tl2.y
@@ -504,22 +509,19 @@ function init_graphics_state()
 end
 
 function show_text_layout!(io::IO, state::Vector{Dict})
-    heap = state[end][:text_layout]
-    yhist = state[end][:y_layout]
+    #Make sure to deepcopy. Otherwise the data structures will be lost
+    heap = deepcopy(state[end][:text_layout])
+    yhist = deepcopy(state[end][:y_layout])
     x = 0.0
     y = -1.0
     while(!isempty(heap))
         tlayout = pop!(heap)
         #@printf "%f,%f,%f,%f,%f,%f,%s\n" tlayout.a tlayout.b tlayout.c tlayout.d tlayout.x tlayout.y tlayout.text
 
-        #Horizontal Text
-        if abs(tlayout.b) < 0.001 && abs(tlayout.c) < 0.001
-            w = abs(tlayout.a)
-            h = abs(tlayout.d)
-        #Vertical or any other angle text
-        else
-            w = h = sqrt(tlayout.a*tlayout.d - tlayout.b*tlayout.c)
-            y = -1.0 #Reset the old positions.
+        w = width(tlayout)
+        h = height(tlayout)
+        if !is_horiz(tlayout)
+            y = -1.0
         end
         @assert w > 0.1
         @assert h > 0.1
@@ -534,11 +536,18 @@ function show_text_layout!(io::IO, state::Vector{Dict})
         end
         while x < tlayout.x
             print(io, ' ')
-            x += w
+            # Assuming word spacing of WX=600
+            # Accurate extraction should depend on the Widths array and
+            # Tw of the page. 
+            x += w*0.6
         end
         len = length(tlayout.text)
         print(io, tlayout.text)
-        x += w*len
+        # Without reading the font data this is an approximation for
+        # character width. Courier font metric WX = 600 and Helvetica
+        # for X character WX = 667. This approximation includes an inter
+        # character spacing as well.
+        x += w*len*0.7
     end
 end
 
@@ -576,6 +585,12 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
 
     text = ""
     bInsertSpace = false
+
+    bSplitTJ = get(state[end], :split_TJ, false)
+    bHoriz = abs(b) < 0.001 && abs(c) < 0.001
+    heap = state[end][:text_layout]
+    yhist = state[end][:y_layout]
+
     for s in tr.ss
         if s isa CosString
             t = String(get_encoded_string(s, fontname, page))
@@ -583,23 +598,39 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
                 text *= " "
                 bInsertSpace = false
             end
+            if bSplitTJ
+                a = trm[1, 1]
+                b = trm[1, 2]
+                c = trm[2, 1]
+                d = trm[2, 2]
+                e = trm[3, 1]
+                f = trm[3, 2]
+                tl = TextLayout(a, b, c, d, e, f, t, fontname)
+                push!(heap, tl)
+            end
             text *= t
         end
         if s isa CosNumeric
             v = s |> get |> Float32
             v = -v/1000
-            if tr.elem.t == :TJ && abs(b) < 0.001 && abs(c) < 0.001 && v > 0.18
-                bInsertSpace = true
+            bInsertSpace = !bSplitTJ && tr.elem.t == :TJ && bHoriz && v > 0.18
+            if bSplitTJ
+                # Assuming 667 as WX. This is an approximation.
+                #Most base fonts have X-Width as that value.
+                tx = ((0.667 + v)*tfs + tc)*th
+                ty = 0
+                tm = [1.0 0.0 0.0; 0.0 1.0 0.0; tx ty 1.0]*tm
+                trm = tsm*tm*ctm
             end
         end
     end
-    heap = state[end][:text_layout]
-    yhist = state[end][:y_layout]
-    if !get(state[end], :in_artifact, false)
-        push!(heap, TextLayout(a, b, c, d, e, f, text))
+
+    if !get(state[end], :in_artifact, false) && !bSplitTJ
+        tl = TextLayout(a, b, c, d, e, f, text, fontname)
+        push!(heap, tl)
         # Populating the Histogram along the y-axis. Only text with horizontal direction
         # is included.
-        if abs(b) < 0.001 && abs(c) < 0.001
+        if is_horiz(tl)
             iy = div(round(Int,f*100),10)
             v = get(yhist, iy, 0)
             v += length(text)

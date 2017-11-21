@@ -175,7 +175,6 @@ function get_unicode_chars(barr::Vector{UInt8})
     return retarr
 end
 
-# Placeholder only
 function get_encoded_string(s::CosString, cmap::CMap)
     cs = cmap.code_space
     rm = cmap.range_map

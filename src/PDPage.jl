@@ -60,6 +60,13 @@ function pdPageGetContentObjects(page::PDPage)
     return get(page.content_objects)
 end
 
+function pdPageEvalContent(page::PDPage)
+    state = init_graphics_state()
+    state[end][:page] = page
+    evalContent!(pdPageGetContentObjects(page), state)
+    return state
+end
+
 """
 ```
     pdPageExtractText(io::IO, page::PDPage) -> IO
@@ -68,9 +75,7 @@ Extracts the text from the `page`. This extraction works best for tagged PDF fil
 For PDFs not tagged, some line and word breaks will not be extracted properly.
 """
 function pdPageExtractText(io::IO, page::PDPage)
-    state = init_graphics_state()
-    state[end][:page] = page
-    evalContent!(pdPageGetContentObjects(page), state)
+    state = pdPageEvalContent(page)
     show_text_layout!(io, state)
     return io
 end
