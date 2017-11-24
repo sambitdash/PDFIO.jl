@@ -4,10 +4,11 @@ mutable struct PDDocImpl <: PDDoc
     pages::CosObject
     structTreeRoot::CosObject
     isTagged::Symbol #Valid values :tagged, :none and :suspect
+    fonts::Dict{CosObject, PDFont}
     function PDDocImpl(fp::AbstractString)
         cosDoc = cosDocOpen(fp)
         catalog = cosDocGetRoot(cosDoc)
-        new(cosDoc,catalog,CosNull,CosNull,:none)
+        new(cosDoc,catalog,CosNull,CosNull,:none, Dict{CosObject, PDFont}())
     end
 end
 

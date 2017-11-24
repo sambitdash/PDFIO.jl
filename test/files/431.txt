@@ -232,7 +232,7 @@
 
 
 
-           1. Introduction                                                        1      2. Quick Steps − Kernel Compile
+           1. Introduction                                                1      2. Quick Steps − Kernel Compile
 
            This section is written by (The latest version Al Dev (alavoor[AT]yahoo.com) of this document is at
             . You may want to check there for changes). Mirror sites are at"http://www.milkywaygalaxy.freeservers.com"
@@ -282,7 +282,7 @@
                  new kernel tree (may save time, if you want to reuse the old settings).
                3. make clean; make mrproper
 
-           2. Quick Steps − Kernel Compile                                     2                                       The Linux Kernel HOWTO
+           2. Quick Steps − Kernel Compile                      2                                       The Linux Kernel HOWTO
 
                4. make xconfig
                5. make dep
@@ -338,7 +338,7 @@
 
 
 
-           2. Quick Steps − Kernel Compile                                     3                                       The Linux Kernel HOWTO
+           2. Quick Steps − Kernel Compile                      3                                       The Linux Kernel HOWTO
                  NOTE: If you do not have lot of disk space in /usr/src then you can unpack the kernel source package
                  on any partition where you have free disk space (like /home). Because kernel compile needs lot of
                  disk space for object files like *.o. For this reason the /usr/src/linux MUST be a soft link pointing to
@@ -396,7 +396,7 @@
                      ♦ VERY IMPORTANT !!! : Select proper CPU type − Pentium 3, AMD K6, Cyrix, Pentium 4,
 
 
-           2. Quick Steps − Kernel Compile                                     4                                       The Linux Kernel HOWTO
+           2. Quick Steps − Kernel Compile                      4                                       The Linux Kernel HOWTO
 
                       Intel 386, DEC Alpha, PowerPC otherwise kernel compile will fail and even if it compiles, it
                       will not boot!!
@@ -454,7 +454,7 @@
                              bash# less modules.err
 
 
-           2. Quick Steps − Kernel Compile                                     5                                       The Linux Kernel HOWTO
+           2. Quick Steps − Kernel Compile                      5                                       The Linux Kernel HOWTO
 
                              bash# less modules.out
                              If no errors then do:
@@ -510,7 +510,7 @@
 
 
 
-           2. Quick Steps − Kernel Compile                                     6      3. Loadable Modules
+           2. Quick Steps − Kernel Compile                      6      3. Loadable Modules
 
            Loadable kernel modules can save memory and ease configuration. The scope of modules has grown to
            include filesystems, ethernet card drivers, tape drivers, printer drivers, and more.
@@ -563,7 +563,7 @@
 
 
 
-           3. Loadable Modules                                                   7                                       The Linux Kernel HOWTO
+           3. Loadable Modules                                          7                                       The Linux Kernel HOWTO
         3.2. Modules distributed with the kernel
 
            As of version 2.0.30, most of everything is available as a loadable modules. To use them, first make sure that
@@ -617,7 +617,7 @@
            Get familiar with the Makefile which makes the modules. The Makefile has module line like
 
 
-           3. Loadable Modules                                                   8                                       The Linux Kernel HOWTO
+           3. Loadable Modules                                          8                                       The Linux Kernel HOWTO
 
                       modules: $(patsubst %, _mod_%, $(SUBDIRS))
 
@@ -679,7 +679,7 @@
 
 
 
-           3. Loadable Modules                                                   9      4. Cloning of Linux Kernels
+           3. Loadable Modules                                          9      4. Cloning of Linux Kernels
 
            You may want to build a Linux kernel on a system and then you may want to mass deploy to many identical
            hardware PCs. To make it easy to install your newly built kernel on hundreds of other systems, you may want
@@ -738,7 +738,7 @@
 
 
 
-           4. Cloning of Linux Kernels                                         10      5. Important questions and their answers
+           4. Cloning of Linux Kernels                           10      5. Important questions and their answers
 
         5.1. What does the kernel do, anyway?
 
@@ -786,7 +786,7 @@
 
 
 
-           5. Important questions and their answers                          11                                       The Linux Kernel HOWTO
+           5. Important questions and their answers      11                                       The Linux Kernel HOWTO
         5.7. How long does it take?
 
            With newer machines, the compilation takes dramatically less time than older ones; an AMD K6−2/300 with a
@@ -847,7 +847,7 @@
 
 
 
-           5. Important questions and their answers                          12      6. Patching the kernel
+           5. Important questions and their answers      12      6. Patching the kernel
 
         6.1. Applying a patch
 
@@ -897,7 +897,7 @@
            bad idea in the first place).
 
 
-           6. Patching the kernel                                               13                                       The Linux Kernel HOWTO
+           6. Patching the kernel                                    13                                       The Linux Kernel HOWTO
            To back out (unapply) a patch, use `  patch −R ' on the original patch.
 
            The best thing to do when patches really turn out wrong is to start over again with a clean, out−of−the−box
@@ -952,7 +952,7 @@
 
 
 
-           6. Patching the kernel                                               14      7. Tips and tricks
+           6. Patching the kernel                                    14      7. Tips and tricks
 
         7.1. Redirecting output of the make or patch commands
 
@@ -1003,7 +1003,7 @@
 
 
 
-           7. Tips and tricks                                                   15      8. Mount RPMs With FTPFS
+           7. Tips and tricks                                          15      8. Mount RPMs With FTPFS
 
            By this time, your kernel is compiled and running ok. You will have the need to access countless number of
            RPMs which you may need to install in near future. One way is to physically mount the Linux CDROMS, but
@@ -1054,7 +1054,7 @@
 
            Something like cd /mnt/ftpfs/ftp.kernel.org. And guess what? You're there!
 
-           8. Mount RPMs With FTPFS                                            16                                       The Linux Kernel HOWTO
+           8. Mount RPMs With FTPFS                                16                                       The Linux Kernel HOWTO
 
            Normally you will only use this for anonymous ftp since you don't want your user/pass info to show up in the
            /mnt/ftpfs/ tree.
@@ -1109,7 +1109,7 @@
 
            A few words of wisdom:
 
-           8. Mount RPMs With FTPFS                                            17                                       The Linux Kernel HOWTO
+           8. Mount RPMs With FTPFS                                17                                       The Linux Kernel HOWTO
                 • Use −n mount option! I bet you don't want your user/password information listed in mtab.
                 • Don't push it! (pushing it = a dozen processes reading on the mount point)
                 • It works best for one process! While concurrent access (under normal circumstances) shouldn't cause
@@ -1171,7 +1171,7 @@
 
 
 
-           8. Mount RPMs With FTPFS                                            18      9. Linux Kernel Textbooks and Documents
+           8. Mount RPMs With FTPFS                                18      9. Linux Kernel Textbooks and Documents
 
            Check the following books on "The Linux Kernel" at
 
@@ -1227,7 +1227,7 @@
 
 
 
-           9. Linux Kernel Textbooks and Documents                           19      10. Kernel Files Information
+           9. Linux Kernel Textbooks and Documents       19      10. Kernel Files Information
 
            This section gives a "very brief" and "introduction" to some of the Linux Kernel System. If you have time you
            can give one reading.
@@ -1275,7 +1275,7 @@
 
 
 
-           10. Kernel Files Information                                        20                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          20                                       The Linux Kernel HOWTO
         10.5. bzImage
 
            The bzImage is the compressed kernel image created with command 'make bzImage' during kernel compile.
@@ -1329,7 +1329,7 @@
 
 
 
-           10. Kernel Files Information                                        21                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          21                                       The Linux Kernel HOWTO
         10.7. config
 
            Everytime you compile and install the kernel image in /boot, you should also copy the corresponding config
@@ -1383,7 +1383,7 @@
 
 
 
-           10. Kernel Files Information                                        22                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          22                                       The Linux Kernel HOWTO
          10.9.1. System.map
 
            There seems to be a dearth of information about the System.map file. It's really nothing mysterious, and in the
@@ -1437,7 +1437,7 @@
 
 
 
-           10. Kernel Files Information                                        23                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          23                                       The Linux Kernel HOWTO
          10.9.4. What Is The System.map File?
 
            There are 2 files that are used as a symbol table:
@@ -1489,7 +1489,7 @@
            it's really not informative to a kernel developer either. Since a symbol doesn't have a fixed address, c010b860
            can point anywhere.
 
-           10. Kernel Files Information                                        24                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          24                                       The Linux Kernel HOWTO
            To help us use this cryptic oops output, Linux uses a daemon called klogd, the kernel logging daemon. klogd
            intercepts kernel oopses and logs them with syslogd, changing some of the useless information like c010b860
            with information that humans can use. In other words, klogd is a kernel message logger which can perform
@@ -1542,7 +1542,7 @@
                  klogd has been modified to search in /usr/src/linux−version/System.map yet. TODO: Look at the
 
 
-           10. Kernel Files Information                                        25                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          25                                       The Linux Kernel HOWTO
 
                  klogd srouce. If someone beats me to it, please email me and let me know if klogd has been modified
                  to look in the new directory name for the linux source code.
@@ -1596,7 +1596,7 @@
                 • /boot/vmlinuz−2.2.13
 
 
-           10. Kernel Files Information                                        26                                       The Linux Kernel HOWTO
+           10. Kernel Files Information                          26                                       The Linux Kernel HOWTO
 
            Then just rename your map files according to the kernel version and put them in /boot, like:
 
@@ -1657,7 +1657,7 @@
 
 
 
-           10. Kernel Files Information                                        27      11. Advanced Topics − Linux Boot Process
+           10. Kernel Files Information                          27      11. Advanced Topics − Linux Boot Process
 
            This section may not be interesting for 'average Joe home PC user' but will be more directed towards someone
            with computer science background.
@@ -1711,7 +1711,7 @@
                      ♦ Processor, Console, and Memory Initialization : This runs linux/arch/i386/head.S which in
 
 
-           11. Advanced Topics − Linux Boot Process                          28                                       The Linux Kernel HOWTO
+           11. Advanced Topics − Linux Boot Process      28                                       The Linux Kernel HOWTO
                       turn jumps to start_kernel(void) in linux/init/main.c where the interrupts are redefined.
                       linux/kernel/module.c then loads the drivers for the console and pci bus. From this point on
                       the kernel messages are also saved in memory and available using /bin/dmesg. They are then
@@ -1767,7 +1767,7 @@
 
 
 
-           11. Advanced Topics − Linux Boot Process                          29                                       The Linux Kernel HOWTO
+           11. Advanced Topics − Linux Boot Process      29                                       The Linux Kernel HOWTO
         11.1. References for Boot Process
 
            Refer to following resources :
@@ -1828,7 +1828,7 @@
 
 
 
-           11. Advanced Topics − Linux Boot Process                          30      12. Other Formats of this Document
+           11. Advanced Topics − Linux Boot Process      30      12. Other Formats of this Document
 
            This section is written by (at site , "http://www.milkywaygalaxy.freeservers.com" Al Dev mirrors at angelfire
             , Tripodgeocities , 101xs , , 50megs virtualave ) , Fortunecity , Freewebsites
@@ -1879,7 +1879,7 @@
 
 
 
-           12. Other Formats of this Document                                 31                                       The Linux Kernel HOWTO
+           12. Other Formats of this Document                31                                       The Linux Kernel HOWTO
 
                       bash$ man sgml2latex
                       bash$ sgml2latex filename.sgml
@@ -1935,7 +1935,7 @@
 
 
 
-           12. Other Formats of this Document                                 32                                       The Linux Kernel HOWTO
+           12. Other Formats of this Document                32                                       The Linux Kernel HOWTO
         12.4. Reading various formats
 
            In order to view the document in dvi format, use the xdvi program. The xdvi program is located in
@@ -1992,7 +1992,7 @@
 
 
 
-           12. Other Formats of this Document                                 33      13. Appendix A − Creating initrd.img file
+           12. Other Formats of this Document                33      13. Appendix A − Creating initrd.img file
 
            The is the "initial ramdisk". It is enough files stored in a ramdisk to store needed drivers . You need the initrd
            drivers so that the kernel can mount / and kick off init.
@@ -2044,7 +2044,7 @@
            somewhere inside the SCSI partition. However, the kernel is going to be lost without a kernel module [lsqb
 
 
-           13. Appendix A − Creating initrd.img file                         34                                       The Linux Kernel HOWTO
+           13. Appendix A − Creating initrd.img file    34                                       The Linux Kernel HOWTO
 
            ]See Chapter 42. The kernel doesn't support every possible kind of hardware out there all by itself. It is
            actually divided into a main part (the kernel image discussed in this chapter) and hundreds of modules
@@ -2101,7 +2101,7 @@
            Now copy into the initrd/lib/ directory the SCSI modules you require. For example, if we have an Adaptec
            AIC−7850 SCSI adapter, we would require the aic7xxx.o module from /lib/modules/[lcub ]version[rcub
 
-           13. Appendix A − Creating initrd.img file                         35                                       The Linux Kernel HOWTO
+           13. Appendix A − Creating initrd.img file    35                                       The Linux Kernel HOWTO
 
            ]/scsi/aic7xxx.o. Then, place it in the initrd/lib/ directory.
 
@@ -2160,7 +2160,7 @@
                               root = /dev/sda1
                               read−only
 
-           13. Appendix A − Creating initrd.img file                         36                                       The Linux Kernel HOWTO
+           13. Appendix A − Creating initrd.img file    36                                       The Linux Kernel HOWTO
 
 
 
@@ -2223,7 +2223,7 @@
 
 
 
-           13. Appendix A − Creating initrd.img file                         37      14. Appendix B − Sample lilo.conf
+           13. Appendix A − Creating initrd.img file    37      14. Appendix B − Sample lilo.conf
 
            See also file. Section 15
 
@@ -2282,7 +2282,7 @@
 
 
 
-           14. Appendix B − Sample lilo.conf                                  38                                       The Linux Kernel HOWTO
+           14. Appendix B − Sample lilo.conf                 38                                       The Linux Kernel HOWTO
 
 
 
@@ -2346,7 +2346,7 @@
 
 
 
-           14. Appendix B − Sample lilo.conf                                  39      15. Appendix C − GRUB Details And A Sample
+           14. Appendix B − Sample lilo.conf                 39      15. Appendix C − GRUB Details And A Sample
       grub.conf
 
            See
@@ -2404,7 +2404,7 @@
                               initrd /boot/initrd−2.4.18−19.8.0.img
                       title Windows 98
 
-           15. Appendix C − GRUB Details And A Sample grub.conf            40                                       The Linux Kernel HOWTO
+           15. Appendix C − GRUB Details And A Sample grub.conf40                                       The Linux Kernel HOWTO
 
                       hide (hd0,0)
                       hide (hd0,1)
@@ -2468,7 +2468,7 @@
 
 
 
-           15. Appendix C − GRUB Details And A Sample grub.conf            41      16. Appendix D − Post Kernel Building
+           15. Appendix C − GRUB Details And A Sample grub.conf41      16. Appendix D − Post Kernel Building
 
            After successfully building and booting the Linux kernel, you may be required to do these additional steps to
            make some of the devices to work with Linux. (The steps below were tested on Redhat Linux but should work
@@ -2521,7 +2521,7 @@
            Start−>ControlCenter−>SoundServer−>General−>Test Sound'. This should play the test sound. Then click on
            'K Start−>MultiMedia−>SoundMixer−>SoundVolumeSlider' and adjust the sound volume.
 
-           16. Appendix D − Post Kernel Building                             42                                       The Linux Kernel HOWTO
+           16. Appendix D − Post Kernel Building           42                                       The Linux Kernel HOWTO
            Network card configuration: If you are using latest version of Linux (2.4 or later) and inside KDE/GNOME
            desktop click on Start−>"System Settings"−>Network.
 
@@ -2581,7 +2581,7 @@
 
 
 
-           16. Appendix D − Post Kernel Building                             43      17. Appendix E − Troubleshoot Common Mistakes
+           16. Appendix D − Post Kernel Building           43      17. Appendix E − Troubleshoot Common Mistakes
 
         17.1. Compiles OK but does not boot
 
@@ -2632,7 +2632,7 @@
 
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    44                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes44                                       The Linux Kernel HOWTO
         17.4. Lot of Compile Errors
 
            The 'make', 'make bzImage', 'make modules' or 'make modules_install' gives compile problems. You should
@@ -2683,7 +2683,7 @@
                               bash# cd /usr/src/linux
                               bash# make dep
 
-           17. Appendix E − Troubleshoot Common Mistakes                    45                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes45                                       The Linux Kernel HOWTO
 
                               bash# make clean
                               bash# make mrproper
@@ -2736,7 +2736,7 @@
 
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    46                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes46                                       The Linux Kernel HOWTO
         17.10. make clean
 
            If your new kernel does really weird things after a routine kernel upgrade, chances are you forgot to  make
@@ -2786,7 +2786,7 @@
 
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    47                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes47                                       The Linux Kernel HOWTO
         17.14. New version of the kernel doesn't seem to boot
 
            You did not run LILO, or it is not configured correctly. One thing that ``got'' me once was a problem in the
@@ -2838,7 +2838,7 @@
 
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    48                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes48                                       The Linux Kernel HOWTO
         17.16. It says `warning: bdflush not running'
 
            This can be a severe problem. Starting with a kernel release after Linux v1.0 (around 20 Apr 1994), a program
@@ -2887,7 +2887,7 @@
            to make a terminfo entry.
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    49                                       The Linux Kernel HOWTO
+           17. Appendix E − Troubleshoot Common Mistakes49                                       The Linux Kernel HOWTO
         17.21. Can't seem to compile things after kernel upgrade
 
             ) which areThe linux kernel source includes a number of include files (the things that end with  .h
@@ -2944,4 +2944,4 @@
 
 
 
-           17. Appendix E − Troubleshoot Common Mistakes                    50
+           17. Appendix E − Troubleshoot Common Mistakes50

@@ -456,28 +456,42 @@ function get_pdfcontentops(b::Vector{UInt8})
 end
 
 struct TextLayout
-    a::Float32
-    b::Float32
-    c::Float32
-    d::Float32
-    x::Float32
-    y::Float32
+    lbx::Float32
+    lby::Float32
+    rbx::Float32
+    rby::Float32
+    rtx::Float32
+    rty::Float32
+    ltx::Float32
+    lty::Float32
     text::String
     fontname::CosObject
 end
 
-width(tl)    = sqrt(tl.a*tl.a + tl.c*tl.c)
-height(tl)   = sqrt(tl.b*tl.b + tl.d*tl.d)
-is_horiz(tl) = abs(tl.b) < 0.001 && abs(tl.c) < 0.001
+function width(tl)
+    dx = tl.rbx - tl.lbx; dy = tl.rby - tl.lby
+    return sqrt(dx*dx + dy*dy)
+end
+
+function height(tl)
+    dx = tl.ltx - tl.lbx; dy = tl.lty - tl.lby
+    return sqrt(dx*dx + dy*dy)
+end
 
 function isless(tl1::TextLayout, tl2::TextLayout)
-    dy = tl1.y - tl2.y
-    dx = tl1.x - tl2.x
+    y2 = max(tl2.lby, tl2.rby, tl2.rty, tl2.lty)
+    x2 = min(tl2.lbx, tl2.rbx, tl2.rtx, tl2.ltx)
+
+    y1 = max(tl1.lby, tl1.rby, tl1.rty, tl1.lty)
+    x1 = min(tl1.lbx, tl1.rbx, tl1.rtx, tl1.ltx)
+
+    dy = y1 - y2
+    dx = x1 - x2
     # This will ensure superscripts with smaller fonts where baseline
     # shift is less than half the height of the baseline fonts is aligned
     # to current line and not an additional line above
-    ytol1 = tl1.d/2
-    ytol2 = tl2.d/2
+    ytol1 = (tl1.lty - tl1.lby)/2
+    ytol2 = (tl2.lty - tl2.lby)/2
     ytol = abs(ytol1) > abs(ytol2) ? ytol1 : ytol2
     dy < -ytol && return true
     dy >  ytol && return false
@@ -511,43 +525,31 @@ end
 function show_text_layout!(io::IO, state::Vector{Dict})
     #Make sure to deepcopy. Otherwise the data structures will be lost
     heap = deepcopy(state[end][:text_layout])
-    yhist = deepcopy(state[end][:y_layout])
     x = 0.0
     y = -1.0
+    afm = read_afm("Courier")
+    xwidth = get_character_width(cn"X", afm)/1000.0
     while(!isempty(heap))
         tlayout = pop!(heap)
-        #@printf "%f,%f,%f,%f,%f,%f,%s\n" tlayout.a tlayout.b tlayout.c tlayout.d tlayout.x tlayout.y tlayout.text
-
-        w = width(tlayout)
         h = height(tlayout)
-        if !is_horiz(tlayout)
-            y = -1.0
-        end
+        w = xwidth*h
         @assert w > 0.1
         @assert h > 0.1
-        while (y > tlayout.y + h)
+        while (y > tlayout.lty)
             print(io, '\n')
             y -= h
             x = 0.0
         end
-        y = tlayout.y
-        if (x > tlayout.x)
-            x = tlayout.x
+        y = tlayout.lby
+        if (x > tlayout.lbx)
+            x = tlayout.lbx
         end
-        while x < tlayout.x
+        while x < tlayout.lbx
             print(io, ' ')
-            # Assuming word spacing of WX=600
-            # Accurate extraction should depend on the Widths array and
-            # Tw of the page. 
-            x += w*0.6
+            x += w
         end
-        len = length(tlayout.text)
         print(io, tlayout.text)
-        # Without reading the font data this is an approximation for
-        # character width. Courier font metric WX = 600 and Helvetica
-        # for X character WX = 667. This approximation includes an inter
-        # character spacing as well.
-        x += w*len*0.7
+        x += width(tlayout)
     end
 end
 
@@ -561,81 +563,25 @@ end
 function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
     evalContent!(tr.elem, state)
     tfs = get(state[end], :fontsize, 0)
-
-    th = state[end][:Tz]/100.0
-    ts = state[end][:Ts]
-    tc = state[end][:Tc]
-    tw = state[end][:Tw]
-
-    tsm = tfs == 0 ? eye(3) : [tfs*th 0.0 0.0; 0.0 tfs 0.0; 0.0 ts 1.0]
-
-    tm = state[end][:Tm]
+    th  = state[end][:Tz]/100.0
+    ts  = state[end][:Ts]
+    tc  = state[end][:Tc]
+    tw  = state[end][:Tw]
+    tm  = state[end][:Tm]
     ctm = state[end][:CTM]
-    trm = tsm*tm*ctm
+    trm = tm*ctm
 
     fontname, font = get(state[end], :font, (CosNull, CosNull))
     page = get(state[end], :page, CosNull)
 
-    a = trm[1, 1]
-    b = trm[1, 2]
-    c = trm[2, 1]
-    d = trm[2, 2]
-    e = trm[3, 1]
-    f = trm[3, 2]
-
-    text = ""
-    bInsertSpace = false
-
-    bSplitTJ = get(state[end], :split_TJ, false)
-    bHoriz = abs(b) < 0.001 && abs(c) < 0.001
-    heap = state[end][:text_layout]
-    yhist = state[end][:y_layout]
-
-    for s in tr.ss
-        if s isa CosString
-            t = String(get_encoded_string(s, fontname, page))
-            if bInsertSpace && t[1] != ' '
-                text *= " "
-                bInsertSpace = false
-            end
-            if bSplitTJ
-                a = trm[1, 1]
-                b = trm[1, 2]
-                c = trm[2, 1]
-                d = trm[2, 2]
-                e = trm[3, 1]
-                f = trm[3, 2]
-                tl = TextLayout(a, b, c, d, e, f, t, fontname)
-                push!(heap, tl)
-            end
-            text *= t
-        end
-        if s isa CosNumeric
-            v = s |> get |> Float32
-            v = -v/1000
-            bInsertSpace = !bSplitTJ && tr.elem.t == :TJ && bHoriz && v > 0.18
-            if bSplitTJ
-                # Assuming 667 as WX. This is an approximation.
-                #Most base fonts have X-Width as that value.
-                tx = ((0.667 + v)*tfs + tc)*th
-                ty = 0
-                tm = [1.0 0.0 0.0; 0.0 1.0 0.0; tx ty 1.0]*tm
-                trm = tsm*tm*ctm
-            end
-        end
-    end
-
-    if !get(state[end], :in_artifact, false) && !bSplitTJ
-        tl = TextLayout(a, b, c, d, e, f, text, fontname)
+    heap  = state[end][:text_layout]
+    text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
+    tb = [ 0 0 1.0; w 0 1.0; w h 1.0; 0 h 1.0]*trm
+    if !get(state[end], :in_artifact, false)
+        tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
+                        tb[3,1], tb[3,2], tb[4,1], tb[4,2],
+                        text, fontname)
         push!(heap, tl)
-        # Populating the Histogram along the y-axis. Only text with horizontal direction
-        # is included.
-        if is_horiz(tl)
-            iy = div(round(Int,f*100),10)
-            v = get(yhist, iy, 0)
-            v += length(text)
-            yhist[iy] = v
-        end
     end
     return state
 end

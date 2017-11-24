@@ -152,5 +152,3 @@ function pdDocGetNamesDict(doc::PDDoc)
     ref = get(catalog, CosName("Names"))
     obj = cosDocGetObject(doc.cosDoc, ref)
 end
-
-include("PDDocImpl.jl")

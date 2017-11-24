@@ -195,13 +195,17 @@ An array in a PDF file. The objects can be any combination of [`CosObject`](@ref
 invoking get method on it.
 """
 get(o::CosArray, isNative=false) = isNative ? map((x)->get(x),o.val) : o.val
+
+get(o::CosIndirectObject{CosArray}, isNative=false) = get(o.obj, isNative)
 """
 ```
     length(o::CosArray) -> Int
 ```
 Length of the `CosArray`
 """
-length(o::CosArray)=length(o.val)
+length(o::CosArray) = length(o.val)
+
+length(o::CosIndirectObject{CosArray}) = length(o.obj)
 
 """
 ```

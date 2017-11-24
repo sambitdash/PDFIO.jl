@@ -111,6 +111,35 @@ function merge_encoding!(fum::FontUnicodeMapping, cmap::CosIndirectObject{CosStr
     return fum
 end
 
+function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
+    glyph_name_id = Dict{CosName, UInt8}()
+    (cosfont === CosNull) && return glyph_name_id
+    subtype = get(cosfont, cn"Subtype")
+    (subtype === cn"Type0") && return glyph_name_id
+    baseenc = cosDocGetObject(cosdoc, cosfont, cn"BaseEncoding")
+    encoding_mapping =  baseenc == cn"WinAnsiEncoding"   ? GlyphName_to_WINEncoding :
+                        baseenc == cn"MacRomanEncoding"  ? GlyphName_to_MACEncoding :
+                        baseenc == cn"MacExpertEncoding" ? Glyphname_to_MEXEncoding :
+                        GlyphName_to_STDEncoding
+    merge!(glyph_name_id, encoding_mapping)
+
+    diff = cosDocGetObject(cosdoc, cosfont, cn"Differences")
+    diff === CosNull && return glyph_name_id
+    values = get(diff)
+    d = Dict()
+    cid = -1
+    for v in values
+        if v isa CosInt
+            cid = get(v)
+        else
+            @assert cid != -1
+            glyph_name_id[v] = cid
+            cid += 1
+        end
+    end
+    return glyph_name_id
+end
+
 get_encoded_string(s::CosString, fum::Void) = CDTextString(s)
 
 function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
@@ -271,4 +300,99 @@ function read_cmap(stm::BufferedInputStream)
             on_cmap_command!(stm, obj, params, tcmap)
     end
     return tcmap
+end
+
+struct CIDWidth
+    imap::IntervalMap{UInt16, Int}
+    dw::Int
+    CIDWidth(m::IntervalMap{UInt16, Int}, tdw::Int) = new(m, tdw)
+end
+
+CIDWidth(m::IntervalMap{UInt16, Int}) = CIDWidth(m, 1000)
+CIDWidth(tdw::Int) = CIDWidth(IntervalMap{UInt16, Int}(), tdw)
+CIDWidth() = CIDWidth(1000)
+
+mutable struct PDFont
+    doc::PDDoc
+    obj::CosObject
+    widths::Union{AdobeFontMetrics, Vector{Int}, CIDWidth}
+    fum::FontUnicodeMapping
+    glyph_name_id::Dict{CosName, UInt8}
+end
+
+INIT_CODE(::CIDWidth) = 0x0000
+SPACE_CODE(w::CIDWidth) = get_character_code(cn"space", w)
+INIT_CODE(x) = 0x00
+SPACE_CODE(x) = get_character_code(cn"space", x)
+
+function get_character_code(name::CosName, pdfont::PDFont)
+    length(pdfont.glyph_name_id) > 0 &&
+        return get(pdfont.glyph_name_id, name, INIT_CODE(pdfont.widths))
+    return get_character_code(name, pdfont.widths)
+end
+
+get_character_code(name::CosName, w::CIDWidth) =
+    UInt16(get(AGL_Glyph_to_Unicode, name, INIT_CODE(w)))
+
+get_character_code(name::CosName, w) =
+    get(GlyphName_to_STDEncoding, name, INIT_CODE(w))
+
+get_encoded_string(s, pdfont::PDFont) = get_encoded_string(s, pdfont.fum)
+
+function get_char(barr, state, w::CIDWidth)
+    (b1, state) = next(barr, state)
+    (b2, state) = next(barr, state)
+    return (b1*0x0100 + b2, state)
+end
+get_char(barr, state, w) = next(barr, state)
+
+function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
+    totalw = 0.0
+    st = start(barr)
+    while !done(barr, st)
+        c, st = get_char(barr, st, widths)
+        w = get_character_width(c, widths)
+        kw = get_kern_width(pc, c, widths)
+        w = (w - tj)*tfs / 1000.0 + ((c == SPACE_CODE(widths)) ? tc : tw)
+        w += kw
+        pc = c
+        tj = 0.0
+        totalw += w
+    end
+    return totalw
+end
+
+function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
+    pdfont::PDFont, tfs, tc, tw, th)
+    subtype = cosDocGetObject(pdfont.doc.cosDoc, pdfont.obj, cn"Type")
+    totalw = 0.0
+    tj = 0.0
+    spw = 1000.0
+    ccode = get_character_code(cn"space", pdfont)
+    spw = get_character_width(ccode, pdfont.widths)
+    text = ""
+    for s in ss
+        if s isa CosString
+            prev_char = INIT_CODE(pdfont.widths)
+            t = String(get_encoded_string(s, pdfont))
+            if tj > spw && length(t) > 0 && t[1] != ' '
+                text *= " "
+                prev_char = SPACE_CODE(pdfont.widths)
+            end
+            text *= t
+            barr = Vector{UInt8}(s)
+            totalw += get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
+        end
+        if s isa CosNumeric
+            tj = s |> get |> Float32
+        end
+    end
+    totalw *= th
+    return text, totalw, tfs
+end
+
+function get_character_width(cid::UInt16, w::CIDWidth)
+    itv = collect(intersect(w.imap, (cid,cid)))
+    (length(itv) == 0) && return w.dw
+    return value(itv[1])
 end

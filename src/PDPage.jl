@@ -85,9 +85,10 @@ mutable struct PDPageImpl <: PDPage
   cospage::CosObject
   contents::CosObject
   content_objects::Nullable{PDPageObjectGroup}
-  fums::Dict{CosName, FontUnicodeMapping}
+  #fums::Dict{CosName, FontUnicodeMapping}
+  fonts::Dict{CosName, PDFont}
   PDPageImpl(doc,cospage,contents)=
-    new(doc, cospage, contents, Nullable{PDPageObjectGroup}(), Dict())
+    new(doc, cospage, contents, Nullable{PDPageObjectGroup}(), Dict{CosName,PDFont}())
 end
 
 PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage,CosNull)
@@ -158,10 +159,26 @@ function populate_font_encoding(page, font, fontname)
     end
 end
 
+function populate_pd_font(pddoc, cosfont)
+    pdfont = get(pddoc.fonts, cosfont, CosNull)
+    if pdfont === CosNull
+        fum = FontUnicodeMapping()
+        merge_encoding!(fum, pddoc.cosDoc, cosfont)
+        widths = get_font_widths(pddoc.cosDoc, cosfont)
+        glyph_name_id = get_glyph_id_mapping(pddoc.cosDoc, cosfont)
+        pdfont = PDFont(pddoc, cosfont, widths, fum, glyph_name_id)
+        pddoc.fonts[cosfont] = pdfont
+    end
+    return pdfont
+end
+
 function page_find_font(page::PDPageImpl, fontname::CosName)
     font = CosNull
     cosdoc = page.doc.cosDoc
     pgnode = page.cospage
+
+    pdfont = get(page.fonts, fontname, CosNull)
+    pdfont !== CosNull && return pdfont
 
     while font === CosNull && pgnode !== CosNull
         resref = get(pgnode, cn"Resources")
@@ -175,11 +192,12 @@ function page_find_font(page::PDPageImpl, fontname::CosName)
         end
         pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
     end
-    populate_font_encoding(page, font, fontname)
-    return font
+    pdfont = populate_pd_font(page.doc, font)
+    page.fonts[fontname] = pdfont
+    return pdfont
 end
 
 get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) = CDTextString(s)
 
 get_encoded_string(s::CosString, fontname::CosName, page::PDPage) =
-    get_encoded_string(s, get(page.fums, fontname, nothing))
+    get_encoded_string(s, get(page.fonts, fontname, nothing))
