@@ -364,20 +364,16 @@ end
 
 function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
     pdfont::PDFont, tfs, tc, tw, th)
-    subtype = cosDocGetObject(pdfont.doc.cosDoc, pdfont.obj, cn"Type")
     totalw = 0.0
     tj = 0.0
-    spw = 1000.0
-    ccode = get_character_code(cn"space", pdfont)
-    spw = get_character_width(ccode, pdfont.widths)
     text = ""
     for s in ss
         if s isa CosString
             prev_char = INIT_CODE(pdfont.widths)
             t = String(get_encoded_string(s, pdfont))
-            if tj > spw && length(t) > 0 && t[1] != ' '
+            if (-tj) > 180 && length(t) > 0 && t[1] != ' ' &&
+                length(text) > 0 && text[end] != ' '
                 text *= " "
-                prev_char = SPACE_CODE(pdfont.widths)
             end
             text *= t
             barr = Vector{UInt8}(s)
