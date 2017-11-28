@@ -121,6 +121,8 @@ part of any activities related to PDF development from 2003. Hence, this API can
  be considered a clean room development. Usage of words like
  Carousel and Cos are pretty much public knowledge and large number of reference
  to the same can be obtained from industry related websites etc.
+ 
+ The package contains [Adobe Font Metrics (AFM)](http://www.adobe.com/devnet/font.html) for 14 Core Adobe fonts. 
 
 ## Test files
 
