@@ -38,7 +38,7 @@ convert{T <: Number}(::Type{T}, i::CosInt) = T(get(i))
 
 convert{T <: Number}(::Type{T}, f::CosFloat) = T(get(f))
 
-convert(::Type{CDRect}, a::CosArray) = CDRect(a...)
+convert(::Type{CDRect}, a::CosArray) = CDRect(Float32.(a.val)...)
 
 convert{T <: CosString}(::Type{CDDate}, ls::T) = CDDate(CDTextString(ls))
 

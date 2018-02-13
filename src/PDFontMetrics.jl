@@ -166,7 +166,6 @@ get_character_width(n::CosName, afm::AdobeFontMetrics) = get(afm.name_to_wx, n, 
 get_character_width(cid::Int, afm::AdobeFontMetrics) =
     get_character_width(get(afm.cid_to_name, cid, nothing), afm)
 get_character_width(Void, afm::AdobeFontMetrics) = 1000
-#get_character_width(n::CosName, other) = 600
 
 get_kern_width(c1::Int, c2::Int, afm::AdobeFontMetrics) =
     get_kern_width(get(afm.cid_to_name, c1, nothing),

@@ -3,6 +3,8 @@ export PDPage,
        pdPageIsEmpty,
        pdPageGetCosObject,
        pdPageGetContentObjects,
+       pdPageGetMediaBox,
+       pdPageGetCropBox,
        pdPageExtractText
 
 import ..Cos: CosXString
@@ -34,6 +36,20 @@ function pdPageGetContents(page::PDPage)
         page.contents = get_page_contents(page, ref)
     end
     return page.contents
+end
+
+"""
+```
+    pdPageGetMediaBox(page::PDPage) -> CDRect{Float32}
+    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
+```
+    Returns the media box associated with the page.
+"""
+pdPageGetMediaBox(page::PDPage) = CDRect(page_find_attribute(page, cn"MediaBox"))
+function pdPageGetCropBox(page::PDPage)
+    box = page_find_attribute(page, cn"CropBox")
+    box === CosNull && return pdPageGetMediaBox(page)
+    return box
 end
 
 """
@@ -195,6 +211,19 @@ function page_find_font(page::PDPageImpl, fontname::CosName)
     pdfont = populate_pd_font(page.doc, font)
     page.fonts[fontname] = pdfont
     return pdfont
+end
+
+function page_find_attribute(page::PDPageImpl, resname::CosName)
+    res = CosNull
+    cosdoc = page.doc.cosDoc
+    pgnode = page.cospage
+
+    while pgnode !== CosNull
+        res = cosDocGetObject(cosdoc, pgnode, resname)
+        res !== CosNull && break
+        pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
+    end
+    return res
 end
 
 get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) = CDTextString(s)

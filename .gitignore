@@ -2,6 +2,7 @@
 *.jl.*.cov
 *.jl.mem
 *.res
+.vscode/
 docs/build/
 docs/site/
 test/downloads

@@ -507,7 +507,7 @@ function init_graphics_state()
     state[end][:text_layout] = mutable_binary_maxheap(TextLayout)
 
     # Histogram along the y-axis. Not used currently.
-    state[end][:y_layout] = SortedDict{Int,Int}(Base.Reverse)
+    state[end][:h_profile] = Dict{Int,Int}()
 
     # Graphics state
     state[end][:CTM] = eye(3)
@@ -525,31 +525,59 @@ end
 function show_text_layout!(io::IO, state::Vector{Dict})
     #Make sure to deepcopy. Otherwise the data structures will be lost
     heap = deepcopy(state[end][:text_layout])
+    szdict = state[end][:h_profile]
+
     x = 0.0
     y = -1.0
+
+    pairs = sort(collect(szdict), lt=(x,y)->(x[2] > y[2]))
+    length(pairs) == 0 && return io
+    iht, num = pairs[1]
+    ht = Float64(iht)*1.0/10
+
     afm = read_afm("Courier")
-    xwidth = get_character_width(cn"X", afm)/1000.0
+    xw = get_character_width(cn"X", afm)/1000.0*ht
+    ph = 0
+    npc = 0
     while(!isempty(heap))
         tlayout = pop!(heap)
         h = height(tlayout)
-        w = xwidth*h
+        nc = length(tlayout.text)
+        w = width(tlayout)/nc
         @assert w > 0.1
         @assert h > 0.1
-        while (y > tlayout.lty)
-            print(io, '\n')
-            y -= h
-            x = 0.0
+        if (ht > h)
+            while (y > tlayout.lty)
+                print(io, '\n')
+                y -= ht
+                x = 0.0
+            end
+        else
+            while (y > tlayout.lby + ht)
+                print(io, '\n')
+                y -= ht
+                x = 0.0
+            end
+            y = tlayout.lby
         end
         y = tlayout.lby
-        if (x > tlayout.lbx)
-            x = tlayout.lbx
-        end
-        while x < tlayout.lbx
+        # For subscripts and superscripts insert a space on both sides
+        # However, ignore the same for dropcaps.
+        (x > tlayout.lbx - xw) && (ph < h || (ph > h && npc > 1)) && print(io, ' ')
+        while x < tlayout.lbx - xw
             print(io, ' ')
-            x += w
+            x += xw
         end
+        x = tlayout.lbx
         print(io, tlayout.text)
         x += width(tlayout)
+        while x < tlayout.rbx - xw
+            print(io, ' ')
+            x += xw
+        end
+        x = tlayout.rbx
+        ph = h
+        npc = nc
     end
 end
 
@@ -576,6 +604,11 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
 
     heap  = state[end][:text_layout]
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
+
+    d = state[end][:h_profile]
+    ih = round(Int, h*100/10)
+    d[ih] = get(d, ih, 0) + length(text)
+
     tb = [ 0 0 1.0; w 0 1.0; w h 1.0; 0 h 1.0]*trm
     if !get(state[end], :in_artifact, false)
         tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
