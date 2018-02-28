@@ -205,8 +205,9 @@ function parse_dict(ps::BufferedInputStream)
         chomp_space!(ps)
 
         c = peek(ps)
-        if (c == GREATER_THAN)
-            skip(ps,1)
+        (c == SOLIDUS) && continue
+        skip(ps,1)
+        if c == GREATER_THAN
             skipv(ps, GREATER_THAN)
             break
         end
