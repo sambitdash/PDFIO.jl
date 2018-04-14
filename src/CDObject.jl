@@ -24,6 +24,7 @@ translate the `CosString` to `CDTextString`
 const CDTextString = String
 
 using TimeZones
+using Rectangle
 
 """
 ```
@@ -67,9 +68,4 @@ Base.show(io::IO, dt::CDDate) = show(io, dt.d)
 ```
 An `CosArray` representation of a rectangle in the lower left and upper right point format
 """
-struct CDRect{T <: Number}
-    llx::T
-    lly::T
-    urx::T
-    ury::T
-end
+const CDRect = Rect

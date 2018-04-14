@@ -353,7 +353,7 @@ function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
         c, st = get_char(barr, st, widths)
         w = get_character_width(c, widths)
         kw = get_kern_width(pc, c, widths)
-        w = (w - tj)*tfs / 1000.0 + ((c == SPACE_CODE(widths)) ? tc : tw)
+        w = (w - tj)*tfs / 1000.0 + ((c == SPACE_CODE(widths)) ? tw : tc)
         w += kw
         pc = c
         tj = 0.0
@@ -377,7 +377,9 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
             end
             text *= t
             barr = Vector{UInt8}(s)
-            totalw += get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
+            w = get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
+            totalw += w
+            tj = 0.0
         end
         if s isa CosNumeric
             tj = s |> get |> Float32

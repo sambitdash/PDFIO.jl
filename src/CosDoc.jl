@@ -133,18 +133,22 @@ cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 Returns the object referenced inside the `dict` dictionary. `dict` can be a PDF dictionary
 object reference or an indirect object or a direct `CosDict` object.
 """
-function cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName)
-    if dict isa CosIndirectObjectRef
-        dict = cosDocGetObject(doc, dict)
-    end
+cosDocGetObject(doc::CosDoc, dict::CosIndirectObject{CosDict}, key::CosName) =
+    cosDocGetObject(doc, dict.obj, key)
+
+function cosDocGetObject(doc::CosDoc, dict::CosIndirectObjectRef, key::CosName)
+    dict = cosDocGetObject(doc, dict)
     dict === CosNull && return CosNull
     return cosDocGetObject(doc, get(dict, key))
 end
 
+cosDocGetObject(doc::CosDoc, dict::CosDict, key::CosName) =
+    cosDocGetObject(doc, get(dict, key))
+
 function cosDocGetRoot(doc::CosDocImpl)
     root = doc.hasNativeXRefStm ? get(doc.xrefstm[1], CosName("Root")) :
-                                get(doc.trailer[1], CosName("Root"))
-    return cosDocGetObject(doc,root)
+                                  get(doc.trailer[1], CosName("Root"))
+    return cosDocGetObject(doc, root)
 end
 
 cosDocGetObject(doc::CosDocImpl, obj::CosObject) = obj

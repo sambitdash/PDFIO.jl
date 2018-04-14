@@ -6,10 +6,12 @@ export  PDPageObject,
         PDPageMarkedContent,
         PDPageInlineImage,
         PDPage_BeginGroup,
-        PDPage_EndGroup
+        PDPage_EndGroup,
+        GState
 
 using BufferedStreams
-import Base: show, isless
+import Base: get, show, isless, getindex, setindex!, delete!
+import ..Common: CDRect
 
 """
 ```
@@ -468,6 +470,11 @@ struct TextLayout
     fontname::CosObject
 end
 
+CDRect(t::TextLayout) = CDRect(min(t.lbx, t.rbx, t.rtx, t.ltx),
+                               min(t.lby, t.rby, t.rty, t.lty),
+                               max(t.lbx, t.rbx, t.rtx, t.ltx),
+                               max(t.lby, t.rby, t.rty, t.lty))
+
 function width(tl)
     dx = tl.rbx - tl.lbx; dy = tl.rby - tl.lby
     return sqrt(dx*dx + dy*dy)
@@ -500,8 +507,20 @@ end
 
 using DataStructures
 
+mutable struct GState{T}
+    state::Vector{Dict{Symbol, Any}}
+    GState{T}() where T = new(init_graphics_state())
+end
+
+setindex!(gs::GState, v::Any, k::Symbol) = (gs.state[end][k] = v)
+getindex(gs::GState, k::Symbol) = gs.state[end][k]
+get(gs::GState, k::Symbol, defval::Any) = get(gs.state[end], k, defval)
+delete!(gs::GState, k::Symbol) = delete!(gs.state[end], k)
+save!(gs::GState) = (push!(gs.state, copy(gs.state[end])); gs)
+restore!(gs::GState) = (pop!(gs.state); gs)
+
 function init_graphics_state()
-    state = Vector{Dict}()
+    state = Vector{Dict{Symbol, Any}}()
     push!(state, Dict())
 
     state[end][:text_layout] = mutable_binary_maxheap(TextLayout)
@@ -522,10 +541,10 @@ function init_graphics_state()
     return state
 end
 
-function show_text_layout!(io::IO, state::Vector{Dict})
+function show_text_layout!(io::IO, state::GState)
     #Make sure to deepcopy. Otherwise the data structures will be lost
-    heap = deepcopy(state[end][:text_layout])
-    szdict = state[end][:h_profile]
+    heap = deepcopy(state[:text_layout])
+    szdict = state[:h_profile]
 
     x = 0.0
     y = -1.0
@@ -581,36 +600,36 @@ function show_text_layout!(io::IO, state::Vector{Dict})
     end
 end
 
-function evalContent!(grp::PDPageObjectGroup, state::Vector{Dict}=Vector{Dict}())
+function evalContent!(grp::PDPageObjectGroup, state::GState=Vector{Dict}())
     for obj in grp.objs
         evalContent!(obj, state)
     end
     return state
 end
 
-function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
+function evalContent!(tr::PDPageTextRun, state::GState=Vector{Dict}())
     evalContent!(tr.elem, state)
-    tfs = get(state[end], :fontsize, 0)
-    th  = state[end][:Tz]/100.0
-    ts  = state[end][:Ts]
-    tc  = state[end][:Tc]
-    tw  = state[end][:Tw]
-    tm  = state[end][:Tm]
-    ctm = state[end][:CTM]
+    tfs = get(state, :fontsize, 0)
+    th  = state[:Tz]/100.0
+    ts  = state[:Ts]
+    tc  = state[:Tc]
+    tw  = state[:Tw]
+    tm  = state[:Tm]
+    ctm = state[:CTM]
     trm = tm*ctm
 
-    fontname, font = get(state[end], :font, (CosNull, CosNull))
-    page = get(state[end], :page, CosNull)
+    fontname, font = get(state, :font, (CosNull, CosNull))
+    page = get(state, :page, CosNull)
 
-    heap  = state[end][:text_layout]
+    heap  = state[:text_layout]
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
 
-    d = state[end][:h_profile]
+    d = state[:h_profile]
     ih = round(Int, h*100/10)
     d[ih] = get(d, ih, 0) + length(text)
 
     tb = [ 0 0 1.0; w 0 1.0; w h 1.0; 0 h 1.0]*trm
-    if !get(state[end], :in_artifact, false)
+    if !get(state, :in_artifact, false)
         tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
                         tb[3,1], tb[3,2], tb[4,1], tb[4,2],
                         text, fontname)
@@ -619,41 +638,35 @@ function evalContent!(tr::PDPageTextRun, state::Vector{Dict}=Vector{Dict}())
     return state
 end
 
-function evalContent!(pdo::PDPageTextObject, state::Vector{Dict}=Vector{Dict}())
-    state[end][:Tm]  = eye(3)
-    state[end][:Tlm] = eye(3)
-    state[end][:Trm] = eye(3)
+function evalContent!(pdo::PDPageTextObject, state::GState=Vector{Dict}())
+    state[:Tm]  = eye(3)
+    state[:Tlm] = eye(3)
+    state[:Trm] = eye(3)
     evalContent!(pdo.group, state)
-    delete!(state[end], :Tm)
-    delete!(state[end], :Tlm)
-    delete!(state[end], :Trm)
+    delete!(state, :Tm)
+    delete!(state, :Tlm)
+    delete!(state, :Trm)
     return state
 end
 
-function evalContent!(pdo::PDPageMarkedContent, state::Vector{Dict})
+function evalContent!(pdo::PDPageMarkedContent, state::GState)
     tag = pdo.group.objs[1].operands[1] # can be used for XML tagging.
     if tag == cn"Artifact"
-        state[end][:in_artifact] = true
+        state[:in_artifact] = true
         evalContent!(pdo.group, state)
-        delete!(state[end], :in_artifact)
+        delete!(state, :in_artifact)
         return state
     end
     return evalContent!(pdo.group, state)
 end
 
-evalContent!(pdo::PDPageElement{S}, state::Vector{Dict}) where S = state
+evalContent!(pdo::PDPageElement{S}, state::GState) where S = state
 
-function evalContent!(pdo::PDPageElement{:q}, state::Vector{Dict})
-    push!(state, copy(state[end]))
-    return state
-end
+evalContent!(pdo::PDPageElement{:q}, state::GState) = save!(state)
 
-function evalContent!(pdo::PDPageElement{:Q}, state::Vector{Dict})
-    pop!(state)
-    return state
-end
+evalContent!(pdo::PDPageElement{:Q}, state::GState) = restore!(state)
 
-function evalContent!(pdo::PDPageElement{:cm}, state::Vector{Dict})
+function evalContent!(pdo::PDPageElement{:cm}, state::GState)
     a = get(pdo.operands[1])
     b = get(pdo.operands[2])
     c = get(pdo.operands[3])
@@ -661,13 +674,13 @@ function evalContent!(pdo::PDPageElement{:cm}, state::Vector{Dict})
     e = get(pdo.operands[5])
     f = get(pdo.operands[6])
     cm  = [a b 0.0; c d 0.0; e f 1.0]
-    ctm = state[end][:CTM]
+    ctm = state[:CTM]
     ctm = cm*ctm
-    state[end][:CTM] = ctm
+    state[:CTM] = ctm
     return state
 end
 
-function evalContent!(pdo::PDPageElement{:Tm}, state::Vector{Dict})
+function evalContent!(pdo::PDPageElement{:Tm}, state::GState)
     a = get(pdo.operands[1])
     b = get(pdo.operands[2])
     c = get(pdo.operands[3])
@@ -676,70 +689,70 @@ function evalContent!(pdo::PDPageElement{:Tm}, state::Vector{Dict})
     f = get(pdo.operands[6])
     tm  = [a b 0.0; c d 0.0; e f 1.0]
     tlm = [a b 0.0; c d 0.0; e f 1.0]
-    state[end][:Tm]  = tm
-    state[end][:Tlm] = tlm
+    state[:Tm]  = tm
+    state[:Tlm] = tlm
     return state
 end
 
-function evalContent!(pdo::PDPageElement{:Tf}, state::Vector{Dict})
-    page = get(state[end], :page, CosNull)
+function evalContent!(pdo::PDPageElement{:Tf}, state::GState)
+    page = get(state, :page, CosNull)
     page === CosNull && return state
     fontname = pdo.operands[1]
     font = page_find_font(page, fontname)
     font === CosNull && return state
-    state[end][:font] = (fontname, font)
+    state[:font] = (fontname, font)
     fontsize = get(pdo.operands[2])
-    state[end][:fontsize] = fontsize
+    state[:fontsize] = fontsize
     return state
 end
 
 for op in ["Tc", "Tw", "Tz", "TL", "Tr", "Ts"]
-    @eval evalContent!(pdo::PDPageElement{Symbol($op)}, state::Vector{Dict}) =
-        (state[end][Symbol($op)] = get(pdo.operands[1]); state)
+    @eval evalContent!(pdo::PDPageElement{Symbol($op)}, state::GState) =
+        (state[Symbol($op)] = get(pdo.operands[1]); state)
 end
 
-function set_text_pos!(tx, ty, state::Vector{Dict})
+function set_text_pos!(tx, ty, state::GState)
     tmul = [1.0 0.0 0.0; 0.0 1.0 0.0; tx ty 1.0]
-    tlm  = get(state[end], :Tlm, eye(3)) #:TL may be called outside of BT...ET block
+    tlm  = get(state, :Tlm, eye(3)) #:TL may be called outside of BT...ET block
     tm = tlm = tmul*tlm
 
-    state[end][:Tm]  = tm
-    state[end][:Tlm] = tlm
+    state[:Tm]  = tm
+    state[:Tlm] = tlm
     return state
 end
 
-function offset_text_leading!(state::Vector{Dict})
-    tl = state[end][:TL]
+function offset_text_leading!(state::GState)
+    tl = state[:TL]
     return set_text_pos!(0, -tl, state)
 end
 
-function evalContent!(pdo::PDPageElement{:TD}, state::Vector{Dict})
+function evalContent!(pdo::PDPageElement{:TD}, state::GState)
     tx = get(pdo.operands[1])
     ty = get(pdo.operands[2])
 
-    state[end][:TL] = -ty
+    state[:TL] = -ty
     set_text_pos!(tx, ty, state)
 end
 
-function evalContent!(pdo::PDPageElement{:Td}, state::Vector{Dict})
+function evalContent!(pdo::PDPageElement{:Td}, state::GState)
     tx = get(pdo.operands[1])
     ty = get(pdo.operands[2])
 
     set_text_pos!(tx, ty, state)
 end
 
-evalContent!(pdo::PDPageElement{Symbol("T*")}, state::Vector{Dict}) =
+evalContent!(pdo::PDPageElement{Symbol("T*")}, state::GState) =
     offset_text_leading!(state)
 
-evalContent!(pdo::PDPageElement{Symbol("\'")}, state::Vector{Dict}) =
+evalContent!(pdo::PDPageElement{Symbol("\'")}, state::GState) =
     offset_text_leading!(state)
 
-function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::Vector{Dict})
-    state[end][:Tw] = get(pdo.operands[1])
-    state[end][:Tc] = get(pdo.operands[2])
+function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::GState) #"
+    state[:Tw] = get(pdo.operands[1])
+    state[:Tc] = get(pdo.operands[2])
     offset_text_leading!(state)
 end
 
-evalContent!(pdo::PDPageInlineImage, state::Vector{Dict}=Vector{Dict}()) = state
+evalContent!(pdo::PDPageInlineImage, state::GState=GState()) = state
 
-evalContent!(pdo::CosObject, state::Vector{Dict}=Vector{Dict}()) = state
+evalContent!(pdo::CosObject, state::GState=GState()) = state

@@ -88,10 +88,9 @@ pdDocGetCosDoc(doc::PDDoc)= doc.cosDoc
 ```
 Given a document absolute page number, provides the associated page object.
 """
-function pdDocGetPage(doc::PDDoc, num::Int)
-  cosobj = find_page_from_treenode(doc.pages, num)
-  return create_pdpage(doc, cosobj)
-end
+pdDocGetPage
+
+
 """
 ```
     pdDocGetPageRange(doc::PDDoc, nums::Range{Int}) -> Vector{PDPage}

@@ -7,7 +7,7 @@ export PDPage,
        pdPageGetCropBox,
        pdPageExtractText
 
-import ..Cos: CosXString
+using ..Cos
 
 abstract type PDPage end
 
@@ -40,8 +40,8 @@ end
 
 """
 ```
-    pdPageGetMediaBox(page::PDPage) -> CDRect{Float32}
-    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
+    pdPageGetMediaBox(page::PDPage) -> CDRect{T <: Number}
+    pdPageGetCropBox(page::PDPage) -> CDRect{T <: Number}
 ```
     Returns the media box associated with the page.
 """
@@ -76,9 +76,8 @@ function pdPageGetContentObjects(page::PDPage)
     return get(page.content_objects)
 end
 
-function pdPageEvalContent(page::PDPage)
-    state = init_graphics_state()
-    state[end][:page] = page
+function pdPageEvalContent(page::PDPage, state::GState=GState{:PDFIO}())
+    state[:page] = page
     evalContent!(pdPageGetContentObjects(page), state)
     return state
 end
@@ -107,7 +106,7 @@ mutable struct PDPageImpl <: PDPage
     new(doc, cospage, contents, Nullable{PDPageObjectGroup}(), Dict{CosName,PDFont}())
 end
 
-PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage,CosNull)
+PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage, CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default

@@ -2,8 +2,9 @@ import Base:get, length, show
 
 export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
-       CosDict, CosIndirectObjectRef, CosStream, get, set!, @cn_str,
-       createTreeNode, CosTreeNode, CosIndirectObject
+       CosDict, CosIndirectObjectRef, CosStream, set!, @cn_str,
+    createTreeNode, CosTreeNode, CosIndirectObject,
+    CosDictType
 
 """
 ```
@@ -35,7 +36,7 @@ CosIndirectObjectRef                Concrete (only useful when CosDoc is availab
 """
 abstract type CosObject end
 
-@inline get{T<:CosObject}(o::T)=o.val
+get(o::T) where {T <: CosObject} = o.val
 
 """
 ```
@@ -46,7 +47,7 @@ They translate to actual text strings by application of fonts and associated enc
 """
 abstract type CosString <: CosObject end
 
-@inline get{T<:CosString}(o::T) = copy(o.val)
+get(o::T) where {T <: CosString} = copy(o.val)
 """
 ```
     CosNumeric
@@ -215,9 +216,11 @@ Name value pair of a PDF objects. The object is very similar to the `Dict` objec
 has to be of a [`CosName`](@ref) type.
 """
 mutable struct CosDict <: CosObject
-    val::Dict{CosName,CosObject}
-    CosDict()=new(Dict{CosName,CosObject}())
+    val::Dict{CosName, CosObject}
+    CosDict()=new(Dict{CosName, CosObject}())
 end
+
+const CosDictType = Union{CosDict, CosIndirectObject{CosDict}}
 
 """
 ```
@@ -225,7 +228,7 @@ end
 ```
 Returns the value as a [`CosObject`](@ref) for the key `name`
 """
-get(dict::CosDict, name::CosName) = get(dict.val,name,CosNull)
+get(dict::CosDict, name::CosName) = get(dict.val, name, CosNull)
 
 get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
 

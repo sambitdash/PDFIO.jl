@@ -1,4 +1,5 @@
 using ..Common
+using Rectangle
 import Base: convert
 
 function convert(::Type{CDTextString}, xstr::CosXString)
@@ -34,13 +35,17 @@ convert(::Type{Vector{UInt8}}, str::CosLiteralString) = str |> get
 convert(::Type{CDTextString}, lstr::CosLiteralString) =
     CDTextString(PDFEncodingToUnicode(lstr.val))
 
-convert{T <: Number}(::Type{T}, i::CosInt) = T(get(i))
+convert(::Type{T}, i::CosInt) where {T <: Number} = convert(T, get(i))
 
-convert{T <: Number}(::Type{T}, f::CosFloat) = T(get(f))
+convert(::Type{T}, f::CosFloat) where {T <: Number} = convert(T, get(f))
 
-convert(::Type{CDRect}, a::CosArray) = CDRect(Float32.(a.val)...)
+convert(::Type{CosFloat}, i::CosInt) = i |> Float32 |> CosFloat
 
-convert{T <: CosString}(::Type{CDDate}, ls::T) = CDDate(CDTextString(ls))
+promote_rule(::Type{CosFloat}, ::Type{CosInt}) = CosFloat
+
+convert(::Type{CDRect}, a::CosArray) = CDRect(get.(a.val)...)
+
+convert(::Type{CDDate}, ls::T) where {T <: CosString} = CDDate(CDTextString(ls))
 
 convert(::Type{CDTextString}, name::CosName) =
     CDTextString(split(String(name.val), '_'; limit=2)[2])

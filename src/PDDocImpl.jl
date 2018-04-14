@@ -1,6 +1,10 @@
+using ..Cos
+import Base: get
+using ..Cos: CosDocImpl
+
 mutable struct PDDocImpl <: PDDoc
-    cosDoc::CosDoc
-    catalog::CosObject
+    cosDoc::CosDocImpl
+    catalog::CosIndirectObject{CosDict}
     pages::CosObject
     structTreeRoot::CosObject
     isTagged::Symbol #Valid values :tagged, :none and :suspect
@@ -10,6 +14,11 @@ mutable struct PDDocImpl <: PDDoc
         catalog = cosDocGetRoot(cosDoc)
         new(cosDoc,catalog,CosNull,CosNull,:none, Dict{CosObject, PDFont}())
     end
+end
+
+function pdDocGetPage(doc::PDDocImpl, num::Int)
+    cosobj = find_page_from_treenode(doc.pages, num)
+    return create_pdpage(doc, cosobj)
 end
 
 """
@@ -31,7 +40,11 @@ end
 Recursively reads the page object and populates the indirect objects
 Ensures indirect objects are read and updated in the xref Dictionary.
 """
-function populate_doc_pages(doc::PDDocImpl, dict::CosObject)
+
+populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict}) =
+    populate_doc_pages(doc, dict.obj)
+
+function populate_doc_pages(doc::PDDocImpl, dict::CosDict)
     if (cn"Pages" == get(dict, cn"Type"))
         kids = get(dict, cn"Kids")
         arr = get(kids)
@@ -53,10 +66,14 @@ function populate_doc_pages(doc::PDDocImpl, dict::CosObject)
     return nothing
 end
 
+populate_doc_pages(doc::PDDocImpl, dict::CosObject) = nothing
+
 function update_page_tree(doc::PDDocImpl)
-    pagesref = get(doc.catalog, cn"Pages")
-    doc.pages = cosDocGetObject(doc.cosDoc, pagesref)
-    populate_doc_pages(doc, doc.pages)
+    pagesref = get(doc.catalog, cn"Pages")::CosIndirectObjectRef
+    pages = cosDocGetObject(doc.cosDoc, pagesref)::CosIndirectObject{CosDict}
+    populate_doc_pages(doc, pages)
+    doc.pages = pages
+    return nothing
 end
 
 #=
@@ -65,7 +82,7 @@ seemingly non-standard way of computing page count. However, PDF spec does not
 discount the possibility of an intermediate node having page and pages nodes
 in the kids array. Hence, this implementation.
 =#
-function find_page_from_treenode(node::CosObject, pageno::Int)
+function find_page_from_treenode(node::CosObject, pageno::Int)::CosObject
     mytype = get(node, cn"Type")
     #If this is a page object the pageno has to be 1
     if mytype == cn"Page"
@@ -77,7 +94,8 @@ function find_page_from_treenode(node::CosObject, pageno::Int)
     sum = 0
     for kid in kidsarr
         cnt = Cos.get_internal_pagecount(kid)
-        (sum + cnt) >= pageno && return find_page_from_treenode(kid, pageno-sum)
+        (sum + cnt) >= pageno &&
+            return find_page_from_treenode(kid, pageno-sum)::CosObject
         sum += cnt
     end
     throw(ErrorException(E_INVALID_PAGE_NUMBER))
