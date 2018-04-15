@@ -71,7 +71,7 @@ include("debugIO.jl")
             filename="A1947-15.pdf"
             DEBUG && println(filename)
             isfile(filename)||
-                download("http://lawmin.nic.in/ld/P-ACT/1947/A1947-15.pdf",filename)
+                download("http://indiacode.nic.in/bitstream/123456789/1419/1/194715.pdf",filename)
             doc = pdDocOpen(filename)
             resfile, template = testfiles(filename)
             io = util_open(resfile, "w")
@@ -91,7 +91,7 @@ include("debugIO.jl")
             filename="A1947-14.pdf"
             DEBUG && println(filename)
             isfile(filename)||
-                download("http://lawmin.nic.in/ld/P-ACT/1947/A1947-14.pdf",filename)
+                download("http://indiacode.nic.in/bitstream/123456789/2169/1/A1947-14.pdf",filename)
             doc = pdDocOpen(filename)
             try
                 npage= pdDocGetPageCount(doc)
