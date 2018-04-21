@@ -10,7 +10,7 @@ export  PDPageObject,
         GState
 
 using BufferedStreams
-import Base: get, show, isless, getindex, setindex!, delete!
+import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
 
 """
@@ -485,7 +485,9 @@ function height(tl)
     return sqrt(dx*dx + dy*dy)
 end
 
-function isless(tl1::TextLayout, tl2::TextLayout)
+Base.:>(tl1::TextLayout, tl2::TextLayout) = Base.isless(tl2, tl1)
+
+function Base.isless(tl1::TextLayout, tl2::TextLayout)
     y2 = max(tl2.lby, tl2.rby, tl2.rty, tl2.lty)
     x2 = min(tl2.lbx, tl2.rbx, tl2.rtx, tl2.ltx)
 
@@ -505,7 +507,7 @@ function isless(tl1::TextLayout, tl2::TextLayout)
     return dx > 0
 end
 
-using DataStructures
+# using DataStructures
 
 mutable struct GState{T}
     state::Vector{Dict{Symbol, Any}}
@@ -523,7 +525,7 @@ function init_graphics_state()
     state = Vector{Dict{Symbol, Any}}()
     push!(state, Dict())
 
-    state[end][:text_layout] = mutable_binary_maxheap(TextLayout)
+    state[end][:text_layout] = Vector{TextLayout}()
 
     # Histogram along the y-axis. Not used currently.
     state[end][:h_profile] = Dict{Int,Int}()
@@ -544,6 +546,7 @@ end
 function show_text_layout!(io::IO, state::GState)
     #Make sure to deepcopy. Otherwise the data structures will be lost
     heap = deepcopy(state[:text_layout])
+    sort!(heap, lt= > )
     szdict = state[:h_profile]
 
     x = 0.0
@@ -558,8 +561,8 @@ function show_text_layout!(io::IO, state::GState)
     xw = get_character_width(cn"X", afm)/1000.0*ht
     ph = 0
     npc = 0
-    while(!isempty(heap))
-        tlayout = pop!(heap)
+    for i = 1:endof(heap)
+        tlayout = heap[i]
         h = height(tlayout)
         nc = length(tlayout.text)
         w = width(tlayout)/nc
