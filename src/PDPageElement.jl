@@ -514,10 +514,10 @@ mutable struct GState{T}
     GState{T}() where T = new(init_graphics_state())
 end
 
-setindex!(gs::GState, v::Any, k::Symbol) = (gs.state[end][k] = v)
-getindex(gs::GState, k::Symbol) = gs.state[end][k]
-get(gs::GState, k::Symbol, defval::Any) = get(gs.state[end], k, defval)
-delete!(gs::GState, k::Symbol) = delete!(gs.state[end], k)
+Base.setindex!(gs::GState, v::Any, k::Symbol) = (gs.state[end][k] = v)
+Base.getindex(gs::GState, k::Symbol) = gs.state[end][k]
+Base.get(gs::GState, k::Symbol, defval::Any) = get(gs.state[end], k, defval)
+Base.delete!(gs::GState, k::Symbol) = delete!(gs.state[end], k)
 save!(gs::GState) = (push!(gs.state, copy(gs.state[end])); gs)
 restore!(gs::GState) = (pop!(gs.state); gs)
 
