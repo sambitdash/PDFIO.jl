@@ -364,8 +364,8 @@ end
 
 function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
     pdfont::PDFont, tfs, tc, tw, th)
-    totalw = 0.0
-    tj = 0.0
+    totalw = 0f0
+    tj = 0f0
     text = ""
     for s in ss
         if s isa CosString
@@ -377,9 +377,8 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
             end
             text *= t
             barr = Vector{UInt8}(s)
-            w = get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
-            totalw += w
-            tj = 0.0
+            totalw += get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
+            tj = 0f0
         end
         if s isa CosNumeric
             tj = s |> get |> Float32
