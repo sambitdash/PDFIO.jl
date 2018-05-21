@@ -383,5 +383,8 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
     return text, totalw, tfs
 end
 
-get_character_width(cid::UInt16, w::CIDWidth) =
-    get(w.imap, Interval(cid, cid), w.dw)
+function get_character_width(cid::UInt16, w::CIDWidth)
+    itv = intersect(w.imap, Interval(cid, cid))
+    length(itv) == 0 && return w.dw
+    return itv[1][2]
+end
