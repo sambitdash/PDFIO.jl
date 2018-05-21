@@ -1,6 +1,6 @@
 import ..Cos: CosXString
 
-using IntervalTrees
+using Rectangle
 
 #=
 Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory for 8 and
@@ -17,10 +17,10 @@ const endcodespacerange = b"endcodespacerange"
 
 
 mutable struct CMap
-    code_space::IntervalMap{UInt8, Union{CosNullType, IntervalMap{UInt8, CosNullType}}}
-    range_map::IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}
-    CMap() = new(IntervalMap{UInt8, Union{CosNullType, IntervalMap{UInt8, CosNullType}}}(),
-        IntervalMap{UInt8, Union{CosObject, IntervalMap{UInt8, CosObject}}}())
+    code_space::IntervalTree{UInt8, Union{CosNullType, IntervalTree{UInt8, CosNullType}}}
+    range_map::IntervalTree{UInt8, Union{CosObject, IntervalTree{UInt8, CosObject}}}
+    CMap() = new(IntervalTree{UInt8, Union{CosNullType, IntervalTree{UInt8, CosNullType}}}(),
+        IntervalTree{UInt8, Union{CosObject, IntervalTree{UInt8, CosObject}}}())
 end
 
 function show(io::IO, cmap::CMap)
@@ -150,10 +150,9 @@ function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
     return String(carr)
 end
 
-function get_unicode_chars(b::UInt8, itv::IntervalValue)
-    f = first(itv)
-    l = last(itv)
-    v = value(itv)
+function get_unicode_chars(b::UInt8, i::Interval, v::CosObject)
+    f = i.lo
+    l = i.hi
     if v isa CosXString
         bytes = Vector{UInt8}(v)
         carr = get_unicode_chars(bytes)
@@ -215,27 +214,27 @@ function get_encoded_string(s::CosString, cmap::CMap)
     i = 0
     while i < l
         b1 = barr[i+=1]
-        if hasintersection(cs, b1)
-            itree = value(collect(intersect(cs, (b1,b1)))[1])
-            if itree === CosNull
-                itv = collect(intersect(rm, (b1,b1)))
-                if length(itv) > 0
-                    carr = get_unicode_chars(b1, itv[1])
-                else
-                    push!(carr, Char(0))
-                end
+        xs = intersect(cs, Interval(b1, b1))
+        length(xs) == 0 && continue
+        itree = xs[1][2]
+        if itree === CosNull
+            itv = intersect(rm, Interval(b1, b1))
+            if length(itv) > 0
+                carr = get_unicode_chars(b1, itv[1][1], itv[1][2])
             else
-                b2 = barr[i+=1]
-                itree1 = value(collect(intersect(rm, (b1,b1)))[1])
-                itv = collect(intersect(itree1, (b2,b2)))
-                if length(itv) > 0
-                    carr = get_unicode_chars(b2, itv[1])
-                else
-                    push!(carr, Char(0))
-                end
+                push!(carr, Char(0))
             end
-            append!(retarr, carr)
+        else
+            b2 = barr[i+=1]
+            itree1 = rm[Interval(b1, b1)] # CMaps do not have ranges on 1st byte
+            itv = intersect(itree1, Interval(b2, b2))
+            if length(itv) > 0
+                carr = get_unicode_chars(b2, itv[1][1], itv[1][2])
+            else
+                push!(carr, Char(0))
+            end
         end
+        append!(retarr, carr)
     end
     return retarr
 end
@@ -261,24 +260,20 @@ function on_cmap_command!(stm::BufferedInputStream, command::Symbol,
             @assert isa(o3, CosXString) || isa(o3, CosArray)
             l = length(d1)
             if l == 1
-                cmap.range_map[(d1[1],d2[1])] = o3
+                cmap.range_map[Interval(d1[1], d2[1])] = o3
             else
-                if hasintersection(cmap.range_map, d1[1])
-                    imap = value(collect(intersect(cmap.range_map, (d1[1], d2[1])))[1])
-                else
-                    imap = IntervalMap{UInt8, CosObject}()
-                    cmap.range_map[(d1[1],d2[1])] = imap
-                end
-                imap[(d1[2], d2[2])] = o3
+                imap = get!(cmap.range_map, Interval(d1[1], d2[1]),
+                            IntervalTree{UInt8, CosObject}())
+                imap[Interval(d1[2], d2[2])] = o3
             end
         else
             l = length(d1)
             if l == 1
-                cmap.code_space[(d1[1],d2[1])] = CosNull
+                cmap.code_space[Interval(d1[1], d2[1])] = CosNull
             else
-                imap = IntervalMap{UInt8, CosNullType}()
-                imap[(d1[2], d2[2])] = CosNull
-                cmap.code_space[(d1[1],d2[1])] = imap
+                imap = IntervalTree{UInt8, CosNullType}()
+                imap[Interval(d1[2], d2[2])] = CosNull
+                cmap.code_space[Interval(d1[1], d2[1])] = imap
             end
         end
     end
@@ -303,13 +298,13 @@ function read_cmap(stm::BufferedInputStream)
 end
 
 struct CIDWidth
-    imap::IntervalMap{UInt16, Int}
+    imap::IntervalTree{UInt16, Int}
     dw::Int
-    CIDWidth(m::IntervalMap{UInt16, Int}, tdw::Int) = new(m, tdw)
+    CIDWidth(m::IntervalTree{UInt16, Int}, tdw::Int) = new(m, tdw)
 end
 
-CIDWidth(m::IntervalMap{UInt16, Int}) = CIDWidth(m, 1000)
-CIDWidth(tdw::Int) = CIDWidth(IntervalMap{UInt16, Int}(), tdw)
+CIDWidth(m::IntervalTree{UInt16, Int}) = CIDWidth(m, 1000)
+CIDWidth(tdw::Int) = CIDWidth(IntervalTree{UInt16, Int}(), tdw)
 CIDWidth() = CIDWidth(1000)
 
 mutable struct PDFont
@@ -388,8 +383,5 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
     return text, totalw, tfs
 end
 
-function get_character_width(cid::UInt16, w::CIDWidth)
-    itv = collect(intersect(w.imap, (cid,cid)))
-    (length(itv) == 0) && return w.dw
-    return value(itv[1])
-end
+get_character_width(cid::UInt16, w::CIDWidth) =
+    get(w.imap, Interval(cid, cid), w.dw)

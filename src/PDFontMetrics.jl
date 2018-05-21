@@ -1,7 +1,8 @@
 # This file has methods to read font metrics for Base-14 fonts
 #Currently only the width metric is used.
 using ..Cos
-using IntervalTrees
+
+using Rectangle
 
 mutable struct AdobeFontMetrics
     cid_to_name::Dict{Int, CosName}
@@ -130,7 +131,7 @@ end
 get_font_widths(basefonts::CosName) = read_afm(convert(CDTextString, basefonts))
 
 function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
-    m = IntervalMap{UInt16, Int}()
+    m = IntervalTree{UInt16, Int}()
     encoding = cosDocGetObject(cosDoc, font, cn"Encoding")
     desc = cosDocGetObject(cosDoc, font, cn"DescendantFonts") |> get
     w = cosDocGetObject(cosDoc, desc[1], cn"W")
@@ -151,12 +152,12 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
         if ecid isa Vector
             for wdo in ecid
                 width = get(wdo)
-                m[(UInt16(ccid), UInt16(ccid))] = width
+                m[Interval(UInt16(ccid), UInt16(ccid))] = width
                 ccid += 1
             end
         else
             (width, state) = next(w, state)
-            m[(UInt16(bcid), UInt16(ecid))] = width
+            m[Interval(UInt16(bcid), UInt16(ecid))] = width
         end
     end
     return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, get(dw))
