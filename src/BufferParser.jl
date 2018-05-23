@@ -1,26 +1,29 @@
-using BufferedStreams
-
 export  skipv,
         advance!,
         locate_keyword!,
         chomp_space!,
-        chomp_eol!
+chomp_eol!,
+_peekb
 
-@inline chomp_space!(ps::BufferedInputStream) =
-    while !eof(ps) && ispdfspace(peek(ps)) skip(ps,1) end
+import Base: peek
 
-@inline chomp_eol!(ps::BufferedInputStream) =
-    @inbounds while !eof(ps) && is_crorlf(peek(ps)) skip(ps,1) end
+@inline chomp_space!(ps::IO) =
+    while !eof(ps) && ps |> _peekb |> ispdfspace skip(ps,1) end
 
-@inline function skipv(ps::BufferedInputStream, c::UInt8)
+@inline chomp_eol!(ps::IO) =
+    while !eof(ps) && ps |> _peekb |> is_crorlf skip(ps,1) end
+
+@inline function skipv(ps::IO, c::UInt8)
     ch = 0xff
-    !eof(ps) && ((ch = peek(ps)) == c) && return skip(ps,1)
+    !eof(ps) && ((ch = ps |> _peekb) == c) && return skip(ps, 1)
     error("Found '$(UInt8(ch))' Expected '$(Char(c))' here")
 end
 
-@inline skipv(ps::BufferedInputStream, cs::Vector{UInt8}) = for c in cs skipv(ps, c) end
+_peekb(io::IO) = UInt8(peek(io))
 
-@inline advance!(ps::BufferedInputStream) = read(ps,UInt8)
+@inline skipv(ps::IO, cs::Vector{UInt8}) = for c in cs skipv(ps, c) end
+
+@inline advance!(ps::IO) = read(ps, UInt8)
 
 function kmp_preprocess(P)
     m = length(P)
@@ -40,7 +43,7 @@ function kmp_preprocess(P)
 end
 
 # This cannot be called on a marked stream.
-function locate_keyword!(ps::BufferedInputStream, keyword, maxoffset=length(keyword))
+function locate_keyword!(ps::IO, keyword, maxoffset=length(keyword))
     m = length(keyword)
     pi = kmp_preprocess(keyword)
 

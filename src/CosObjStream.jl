@@ -113,7 +113,7 @@ end
 function cosObjectStreamGetObject(stm::CosObjectStream, ref::CosNullType, loc::Int)
     filename = get(stm, CosName("F"))
     io = util_open(String(filename),"r")
-    ps = BufferedInputStream(io)
+    ps = io
     try
         seek(ps, stm.oloc[loc+1])
         obj = parse_value(ps)

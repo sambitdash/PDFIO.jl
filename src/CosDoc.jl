@@ -27,7 +27,7 @@ mutable struct CosDocImpl <: CosDoc
   filepath::String
   size::Int
   io::IOStream
-  ps::BufferedInputStream{IOStream}
+  ps::IOStream
   header::String
   startxref::Int
   version::Tuple{Int,Int}
@@ -40,8 +40,8 @@ mutable struct CosDocImpl <: CosDoc
   function CosDocImpl(fp::AbstractString)
     io = util_open(fp,"r")
     sz = filesize(fp)
-    ps = BufferedInputStream(io)
-    new(fp,sz,io,ps,"",0,(0,0),Dict{CosIndirectObjectRef, CosObjectLoc}(),
+    ps = io
+    new(fp, sz, io, ps, "", 0, (0, 0), Dict{CosIndirectObjectRef, CosObjectLoc}(),
         [], [], [], false, false)
   end
 end
@@ -97,7 +97,7 @@ function cosDocOpen(fp::AbstractString)
     doc.version = (h[1], h[2])
     doc.header = String(h[3])
     doc.isPDF = (doc.header == "PDF")
-    doc_trailer_update(ps,doc)
+    doc_trailer_update(ps, doc)
     return doc
 end
 
@@ -185,7 +185,7 @@ function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
         attach_object(doc, objstm)
     end
     (objstm === CosNull) && return CosNull
-    if (locObj.obj == CosNull)
+    if (locObj.obj === CosNull)
         locObj.obj = cosObjectStreamGetObject(objstm, ref, locObj.loc)
         attach_object(doc, locObj.obj)
     end
@@ -237,7 +237,7 @@ function read_header(ps)
 end
 
 
-function read_trailer(ps::BufferedInputStream, lookahead::Int)
+function read_trailer(ps::IOStream, lookahead::Int)
   if locate_keyword!(ps,TRAILER,lookahead) < 0
       error(E_UNEXPECTED_CHAR)
   end
@@ -255,7 +255,7 @@ end
 #PDF-Version >= 1.5
 @inline may_have_xrefstream(doc::CosDocImpl) = (doc.version[1]>=1) && (doc.version[2]>=5)
 
-function doc_trailer_update(ps::BufferedInputStream, doc::CosDocImpl)
+function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     const TRAILER_REWIND=50
 
     seek(ps, doc.size-TRAILER_REWIND)
@@ -272,7 +272,8 @@ function doc_trailer_update(ps::BufferedInputStream, doc::CosDocImpl)
     if doc.isPDF
         seek(ps, doc.startxref)
         chomp_space!(ps)
-        doc.hasNativeXRefStm = (may_have_xrefstream(doc) && ispdfdigit(peek(ps)))
+        doc.hasNativeXRefStm = (may_have_xrefstream(doc) &&
+                                ps |> _peekb |> ispdfdigit)
         (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) : read_xref_tables(ps, doc)
     end
 end
@@ -286,43 +287,41 @@ attach_object(doc::CosDocImpl, indstm::CosIndirectObject{CosStream})=
   attach_object(doc,indstm.obj)
 
 function attach_object(doc::CosDocImpl, stm::CosStream)
-  tmpfile = get(get(stm,  CosName("F")))
-  push!(doc.tmpfiles, String(tmpfile))
-  return nothing
+    tmpfile = get(get(stm,  CosName("F")))
+    push!(doc.tmpfiles, String(tmpfile))
+    return nothing
 end
 
 function attach_xref_stream(doc::CosDocImpl,
-  xrefstm::CosIndirectObject{CosStream})
-  attach_object(doc, xrefstm)
-  push!(doc.xrefstm, xrefstm)
+                            xrefstm::CosIndirectObject{CosStream})
+    attach_object(doc, xrefstm)
+    push!(doc.xrefstm, xrefstm)
 end
 
-function read_xref_streams(ps::BufferedInputStream, doc::CosDocImpl)
-  found = false
-  while(true)
-    xrefstm = parse_indirect_obj(ps, doc.xref)
+function read_xref_streams(ps::IOStream, doc::CosDocImpl)
+    found = false
+    while(true)
+        xrefstm = parse_indirect_obj(ps, doc.xref)
 
-    if (!found)
-      if (get(xrefstm,  CosName("Root")) == CosNull)
-        error(E_BAD_TRAILER)
-      else
-        attach_xref_stream(doc, xrefstm)
-      end
-      found = true
-    else
-      attach_xref_stream(doc, xrefstm)
-    end
-    read_xref_stream(xrefstm, doc)
+        if (!found)
+            if (get(xrefstm,  CosName("Root")) == CosNull)
+                error(E_BAD_TRAILER)
+            else
+                attach_xref_stream(doc, xrefstm)
+            end
+            found = true
+        else
+            attach_xref_stream(doc, xrefstm)
+        end
+        read_xref_stream(xrefstm, doc)
 
-    prev = get(xrefstm,  CosName("Prev"))
-    if (prev == CosNull)
-      break
+        prev = get(xrefstm,  CosName("Prev"))
+        prev === CosNull && break
+        seek(ps, get(prev))
     end
-    seek(ps, get(prev))
-  end
 end
 
-function read_xref_tables(ps::BufferedInputStream, doc::CosDocImpl)
+function read_xref_tables(ps::IOStream, doc::CosDocImpl)
   found = false
   while(true)
     read_xref_table(ps,doc)
@@ -362,14 +361,13 @@ function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
   return read_xref_stream(xrefstm, doc.xref)
 end
 
-function read_xref_table(ps::BufferedInputStream, doc::CosDocImpl)
+function read_xref_table(ps::IOStream, doc::CosDocImpl)
     skipv(ps, XREF)
     chomp_eol!(ps)
 
     while (true)
-        if !ispdfdigit(peek(ps))
-            break
-        end
+        ps |> _peekb |> ispdfdigit || break
+
         oid = parse_unsignednumber(ps).val
         n_entry = parse_unsignednumber(ps).val
 

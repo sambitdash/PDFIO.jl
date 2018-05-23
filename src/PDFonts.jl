@@ -244,7 +244,7 @@ function cmap_command(b::Vector{UInt8})
     return Symbol(String(b))
 end
 
-function on_cmap_command!(stm::BufferedInputStream, command::Symbol,
+function on_cmap_command!(stm::IO, command::Symbol,
                          params::Vector{CosInt}, cmap::CMap)
     n = get(pop!(params))
     o1, o2, o3 = CosNull, CosNull, CosNull
@@ -280,10 +280,10 @@ function on_cmap_command!(stm::BufferedInputStream, command::Symbol,
     return cmap
 end
 
-on_cmap_command!(stm::BufferedInputStream, command::CosObject,
-                params::Vector{CosInt}, cmap::CMap) = nothing
+on_cmap_command!(stm::IO, command::CosObject,
+                 params::Vector{CosInt}, cmap::CMap) = nothing
 
-function read_cmap(stm::BufferedInputStream)
+function read_cmap(stm::IO)
     tcmap = CMap()
     params = Vector{CosInt}()
     while !eof(stm)
@@ -374,8 +374,7 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
             barr = Vector{UInt8}(s)
             totalw += get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
             tj = 0f0
-        end
-        if s isa CosNumeric
+        elseif s isa CosNumeric
             tj = s |> get |> Float32
         end
     end

@@ -9,7 +9,6 @@ export  PDPageObject,
         PDPage_EndGroup,
         GState
 
-using BufferedStreams
 import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
 
@@ -85,14 +84,14 @@ mutable struct PDPageObjectGroup <: PDPageObject
         new(isEOG,Vector{Union{PDPageObject,CosObject}}())
 end
 
-function load_objects(grp::PDPageObjectGroup, bis::BufferedInputStream)
+function load_objects(grp::PDPageObjectGroup, bis::IO)
     while(!grp.isEOG && !eof(bis))
         obj = parse_value(bis, get_pdfcontentops)
         collect_object(grp, obj, bis)
     end
 end
 
-collect_object(grp::PDPageObjectGroup, obj::CosObject, bis::BufferedInputStream) =
+collect_object(grp::PDPageObjectGroup, obj::CosObject, bis::IO) =
     push!(grp.objs, obj)
 
 function populate_element(grp::PDPageObjectGroup, elem::PDPageElement)
@@ -111,7 +110,7 @@ function populate_element(grp::PDPageObjectGroup, elem::PDPageElement)
 end
 
 function collect_object(grp::PDPageObjectGroup, elem::PDPageElement,
-                        bis::BufferedInputStream)
+                        bis::IO)
     populate_element(grp,elem)
     push!(grp.objs, elem)
     return elem
@@ -169,7 +168,7 @@ mutable struct PDPage_BeginInlineImage <: PDPageObject
 end
 
 function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
-                        bis::BufferedInputStream)
+                        bis::IO)
     newobj=PDPageInlineImage()
 
     while(!newobj.isRead)
@@ -201,7 +200,7 @@ end
 show(io::IO, tr::PDPageTextRun) = show(io, tr.ss)
 
 function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
-                        bis::BufferedInputStream)
+                        bis::IO)
     elem = collect_object(grp, tr.elem, bis)
     for operand in elem.operands
         if isa(operand, CosString)
@@ -218,22 +217,22 @@ function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
 end
 
 function collect_inline_image(img::PDPageInlineImage, name::CosName,
-    bis::BufferedInputStream)
+    bis::IO)
     value = parse_value(bis, get_pdfcontentops)
     set!(img.params, name, value)
 end
 
 function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
-                              bis::BufferedInputStream)
+                              bis::IO)
     if (elem.t == Symbol("ID"))
         while(!img.isRead && !eof(bis))
-            b1 = BufferedStreams.peek(bis)
+            b1 = _peekb(bis)
             if (b1 == LATIN_UPPER_E)
                 mark(bis)
-                skip(bis,1);
-                b2 = BufferedStreams.peek(bis)
+                skip(bis, 1);
+                b2 = _peekb(bis)
                 if (b2 == LATIN_UPPER_I)
-                    skip(bis,1);b3 = BufferedStreams.peek(bis)
+                    skip(bis,1); b3 = _peekb(bis)
                     if (ispdfspace(b3))
                         skip(bis,1)
                         img.isRead=true
@@ -283,7 +282,7 @@ show(io::IO, e::PDPage_BeginGroup) = show(io, e.elem)
 show(io::IO, e::PDPage_EndGroup) = show(io, e.elem)
 
 function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginGroup,
-                        bis::BufferedInputStream)
+                        bis::IO)
     populate_element(grp,beg.elem)
     newobj=beg.objT()
     push!(newobj.group.objs,beg.elem)
@@ -293,7 +292,7 @@ function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginGroup,
 end
 
 function collect_object(grp::PDPageObjectGroup, elem::PDPage_EndGroup,
-                        bis::BufferedInputStream)
+                        bis::IO)
     collect_object(grp,elem.elem,bis)
     grp.isEOG = true
     return grp

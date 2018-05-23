@@ -23,7 +23,8 @@ translate the `CosString` to `CDTextString`
 """
 const CDTextString = String
 
-using TimeZones
+using Base.Dates
+using Base.Dates.CompoundPeriod
 using Rectangle
 
 """
@@ -35,9 +36,15 @@ Internally represented as string objects, these are timezone enabled date and ti
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 """
 struct CDDate
-    d::ZonedDateTime
-    CDDate(d::ZonedDateTime) = new(d)
+    d::DateTime
+    tz::CompoundPeriod
+    ahead::Bool
+    CDDate(d::DateTime, tz::CompoundPeriod, ahead::Bool = true) =
+        new(d, tz, ahead)
 end
+
+const CDDATE_REGEX =
+    r"D\s*:\s*(?<dt>\d{12})\s*(?<ut>[+-Z])\s*((?<tzh>\d{2})'\s*(?<tzm>\d{2}))?"
 
 """
 ```
@@ -45,22 +52,26 @@ end
 ```
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 """
-function CDDate(s::CDTextString)
-    s = ascii(s)
-    if startswith(s, "D:")
-        s = s[3:end]
-    end
-    s = *(split(s,'\'')...)
-    format = "yyyymmddHHMMSS"
-    if endswith(s, 'Z')
-        s = s[1:end-1]
-    else
-        format *= "zzzz"
-    end
-    CDDate(ZonedDateTime(s, format))
+function CDDate(str::CDTextString)
+    m = match(CDDATE_REGEX, str)
+    m === nothing && error("Invalid date format in input")
+    ut, tzh, tzm = m[:ut], m[:tzh], m[:tzm]
+
+    tzhr = tzh === nothing ? Hour(0) : Hour(parse(Int, tzh))
+    tzhm = tzm === nothing ? Minute(0) : Minute(parse(Int, tzm))
+    
+    tz = tzhr + tzhm
+                          
+    ahead = (ut != "-")
+    return CDDate(DateTime(m[:dt], dateformat"yyyymmddHHMMSS"), tz, ahead)
 end
 
-Base.show(io::IO, dt::CDDate) = show(io, dt.d)
+function Base.show(io::IO, dt::CDDate)
+    show(io, dt.d)
+    dt.tz == Minute(0) && return print(io, " UTC")
+    print(io, dt.ahead ? " + " : " - ")
+    print(io, dt.tz)
+end
 
 """
 ```

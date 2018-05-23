@@ -159,7 +159,7 @@ include("debugIO.jl")
         stm=get(obj)
         data=read(stm)
         close(stm)
-        @assert length(data) == 38118
+        @assert length(data) == 38117
         pdDocClose(doc)
         length(utilPrintOpenFiles()) == 0
         end
@@ -273,5 +273,5 @@ include("debugIO.jl")
 end
 
 if isfile("pvt/pvttests.jl")
-    #include("pvt/pvttests.jl")
+    include("pvt/pvttests.jl")
 end
