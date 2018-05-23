@@ -14,19 +14,7 @@ if DEBUG
 import PDFIO.Common: get_tempfilepath,
                      util_open, util_close, utilPrintOpenFiles
 
-using BufferedStreams
-
 import Base: close
-
-function Base.close(stream::BufferedInputStream{IOStream})
-  if !isopen(stream)
-      return
-  end
-  util_close(stream.source)
-  stream.position = 0
-  empty!(stream.buffer)
-  return
-end
 
 IODebug=[0,Vector{Tuple{AbstractString,IOStream}}()]
 
