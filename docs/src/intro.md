@@ -50,15 +50,22 @@ native support in a modern language. Although, one can claim PDF is not the most
 
 ### Common
 
-1. *ParserState* API is still very situational as I was learning Julia. *This is my first genuine application and I am still learning*. I feel it's be better to move to *BufferedStreams* APIs.
-2. Error handling is currently fairly weak with only errors or asserts leading to termination. Ideally, if the PDF is structurally weak, there is no point extracting content from the same. However, not all objects may be well-formed a lenient approach may be taken in the PD layers.
+1. Error handling is currently fairly weak with only errors or asserts leading 
+to termination. Ideally, if the PDF is structurally weak, there is no point 
+extracting content from the same. However, not all objects may be well-formed a
+lenient approach may be taken in the PD layers.
 
 
 ### Cos
-1. Streams have larger number of filter types. Only Flate has been tested to work reasonably.
-2. Filterparms are varied and only PNG filter UP has been tested to some extent as part of ObjectStream. RLE, ACII85, ASCIIHex are tested as well. Multiple filters per stream has been tested as well.
-3. Object stream extends attribute has not been considered. May not be needed for a reader context.
-4. Free indirect objects are ignored in the PDF file as it's not typically a reader requirement.
+1. Streams have larger number of filter types. Only Flate has been tested to 
+work reasonably.
+2. Filterparms are varied and only PNG filter UP has been tested to some extent 
+as part of ObjectStream. RLE, ACII85, ASCIIHex are tested as well. Multiple 
+filters per stream has been tested as well.
+3. Object stream extends attribute has not been considered. May not be needed
+for a reader context.
+4. Free indirect objects are ignored in the PDF file as it's not typically a
+reader requirement.
 5. No security is implemented for encrypted PDFs
 
 ### PD

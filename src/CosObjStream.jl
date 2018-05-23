@@ -1,5 +1,3 @@
-using BufferedStreams
-
 function make_number(data, start, nbytes)
     sum = 0
     for ii = 1:nbytes
@@ -20,16 +18,13 @@ function get_xref_record(data, start, w)
 end
 
 function createObjectStreams(stm::CosStream)
-  objtype = get(stm, CosName("Type"))
-  if (objtype==CosName("ObjStm"))
-    return CosObjectStream(stm)
-  else
+    objtype = get(stm, cn"Type")
+    objtype == cn"ObjStm" && return CosObjectStream(stm)
     return stm
-  end
 end
 
 function read_xref_stream(xrefstm::CosObject,
-    xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+                          xref::Dict{CosIndirectObjectRef, CosObjectLoc})
 
     @assert get(xrefstm, cn"Type") == cn"XRef"
     size = get(xrefstm, cn"Size")
@@ -85,33 +80,40 @@ function read_xref_stream(xrefstm::CosObject,
 end
 
 function read_object_info_from_stm(stm::CosStream,
-  oids::Vector{Int}, oloc::Vector{Int}, n::Int, first::Int)
-  filename = get(stm, CosName("F"))
-  io = util_open(String(filename),"r")
-  try
-    for i = 1:n
-      val = readuntil(io, ' ')
-      oids[i] = parse(Int,val)
-      val = readuntil(io, ' ')
-      oloc[i] = parse(Int,val) + first
+                                   oids::Vector{Int},
+                                   oloc::Vector{Int},
+                                   n::Int, first::Int)
+    filename = get(stm, CosName("F"))
+    io = util_open(String(filename),"r")
+    try
+        for i = 1:n
+            val = readuntil(io, ' ')
+            oids[i] = parse(Int,val)
+            val = readuntil(io, ' ')
+            oloc[i] = parse(Int,val) + first
+        end
+    finally
+        util_close(io)
     end
-  finally
-    util_close(io)
-  end
 end
 
 cosObjectStreamGetObject(stm::CosIndirectObject{CosObjectStream},
-    ref::CosIndirectObjectRef, loc::Int) = cosObjectStreamGetObject(stm.obj, ref, loc)
+                         ref::CosIndirectObjectRef, loc::Int) =
+                             cosObjectStreamGetObject(stm.obj, ref, loc)
 
-function cosObjectStreamGetObject(stm::CosObjectStream, ref::CosIndirectObjectRef, loc::Int)
+function cosObjectStreamGetObject(stm::CosObjectStream,
+                                  ref::CosIndirectObjectRef,
+                                  loc::Int)
     objtuple = get(ref)
     stm.oids[loc+1] != objtuple[1] && return CosNull
     dirobj = cosObjectStreamGetObject(stm, CosNull, loc)
     return CosIndirectObject(objtuple[1], objtuple[2], dirobj)
 end
 
-function cosObjectStreamGetObject(stm::CosObjectStream, ref::CosNullType, loc::Int)
-    filename = get(stm, CosName("F"))
+function cosObjectStreamGetObject(stm::CosObjectStream,
+                                  ref::CosNullType,
+                                  loc::Int)
+    filename = get(stm, cn"F")
     io = util_open(String(filename),"r")
     ps = io
     try

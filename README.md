@@ -45,13 +45,6 @@ The API is segregated into 3 modules:
 3. PD
 
 **Common** module has general system access and file access and parsing APIs.
-The *ParserState* type has been taken from the
-[JuliaIO/JSON.jl](/JuliaIO/JSON.jl). The file headers are not added. Hence,
-author acknowledges the efforts of the developers for the same package and
-expects the same be honored by any person developing any derivative work.
-*Note*-*ParserState* is no longer in use. The parser has been moved to the
-*BufferedStreams* interfaces. Some minor helper methods are ported to the new
-interface.
 
 **Cos** module is the low level file format for PDF. Carousel Object Structure
 was original term proposed inside Adobe which later transformed into Acrobat.
@@ -84,10 +77,7 @@ native support in a modern language. Although, one can claim PDF is not the most
 
 ### Common
 
-1. *ParserState* API is still very situational as I was learning Julia. *This is
- my first genuine application and I am still learning*. I feel it's be better to
- move to *BufferedStreams* APIs.
-2. Error handling is currently fairly weak with only errors or asserts leading
+1. Error handling is currently fairly weak with only errors or asserts leading
 to termination. Ideally, if the PDF is structurally weak, there is no point
 extracting content from the same. However, not all objects may be well-formed
 a linient approach may be taken in the PD layers.

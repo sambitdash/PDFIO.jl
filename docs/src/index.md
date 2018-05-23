@@ -7,13 +7,6 @@ The API is segregated into 3 modules:
 3. PD
 
 **Common** module has general system access and file access and parsing APIs.
-The *ParserState* type has been taken from the
-[JuliaIO/JSON.jl](/JuliaIO/JSON.jl). The file headers are not added. Hence,
-author acknowledges the efforts of the developers for the same package and
-expects the same be honored by any person developing any derivative work.
-*Note*-*ParserState* is no longer in use. The parser has been moved to the
-*BufferedStreams* interfaces. Some minor helper methods are ported to the new
-interface.
 
 **Cos** module is the low level file format for PDF. Carousel Object Structure
 was original term proposed inside Adobe which later transformed into Acrobat.

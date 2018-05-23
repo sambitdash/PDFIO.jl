@@ -22,8 +22,6 @@ end
 
 apply_flate_params(input, parms) = input
 
-using BufferedStreams
-
 decode_asciihex(input::IO, parms) = decode_asciihex(input)
 
 decode_ascii85(input::IO, parms) = decode_ascii85(input)
