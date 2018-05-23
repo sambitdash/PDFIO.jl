@@ -8,6 +8,8 @@ export get_tempdir,
        PDFEncodingToUnicode,
        utilPrintOpenFiles
 
+using Compat
+
 # Non-exported variable that retains the current tempdir location.
 # This shoould be only accessed by get_tempdir() only
 
