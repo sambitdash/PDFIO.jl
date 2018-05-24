@@ -99,14 +99,15 @@ function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc, font::CosObject)
     merge_encoding!(fum, toUnicode, doc, font)
 end
 
-function merge_encoding!(fum::FontUnicodeMapping, cmap::CosIndirectObject{CosStream},
+function merge_encoding!(fum::FontUnicodeMapping,
+                         cmap::CosIndirectObject{CosStream},
                          doc::CosDoc, font::CosObject)
     stm_cmap = get(cmap)
     try
         fum.cmap = read_cmap(stm_cmap)
         fum.hasCMap = true
     finally
-        close(stm_cmap)
+        util_close(stm_cmap)
     end
     return fum
 end

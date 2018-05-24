@@ -46,7 +46,7 @@ function read_xref_stream(xrefstm::CosObject,
 
     input = get(xrefstm)
     data = read(input)
-    close(input)
+    util_close(input)
     datasize = length(data)
 
     w_n = get(w,true) #This size is 3
@@ -121,6 +121,6 @@ function cosObjectStreamGetObject(stm::CosObjectStream,
         obj = parse_value(ps)
         return obj
     finally
-        close(ps)
+        util_close(ps)
     end
 end

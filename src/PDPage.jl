@@ -154,7 +154,7 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
     try
         load_objects(get(page.content_objects), bufstm)
     finally
-        close(bufstm)
+        util_close(bufstm)
     end
     return nothing
 end

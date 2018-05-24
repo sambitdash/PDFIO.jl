@@ -29,7 +29,7 @@ end
 
 get_tempfilepath()=mktemp(get_tempdir())
 util_open(filename, mode)=open(filename, mode)
-util_close(handle::IOStream)=close(handle)
+util_close(handle)=close(handle)
 utilPrintOpenFiles()=[]
 
 import Base: zero

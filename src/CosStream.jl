@@ -1,4 +1,4 @@
-import Base:eof,close
+import Base: eof
 
 export  cosStreamRemoveFilters,
         merge_streams,
@@ -17,6 +17,7 @@ end
 
 function decode_flate(input, parms)
     io = inflate(input)
+    util_close(input)
     return apply_flate_params(io, parms)
 end
 
@@ -46,7 +47,7 @@ function cosStreamRemoveFilters(stm::CosObject)
     if (filters != CosNull)
         bufstm = decode(stm)
         data = read(bufstm)
-        close(bufstm)
+        util_close(bufstm)
         filename = get(stm, CosName("F"))
         write(filename |> get |> String, data)
         set!(stm, CosName("FFilter"), CosNull)
@@ -64,7 +65,7 @@ function merge_streams(stms::CosArray)
         for stm in v
             bufstm = decode(stm)
             data = read(bufstm)
-            close(bufstm)
+            util_close(bufstm)
             write(io, data)
         end
         return ret
@@ -173,6 +174,7 @@ function apply_flate_params(io::IO, pred::Int, col::Int)
         write(iob, curr)
         nline += 1
     end
+    util_close(io)
     return seekstart(iob)
 end
 
@@ -192,6 +194,7 @@ function decode_rle(input::IO)
         end
         b = read(input, UInt8)
     end
+    util_close(input)
     return seekstart(iob)
 end
 
@@ -211,6 +214,7 @@ function decode_asciihex(input::IO)
         end
         k = !k
     end
+    util_close(input)
     resize!(data, j)
     return IOBuffer(data)
 end
@@ -270,6 +274,7 @@ function decode_ascii85(input::IO)
         end
         j += (k - 1)
     end
+    util_close(input)
     resize!(data, j)
     return IOBuffer(data)
 end

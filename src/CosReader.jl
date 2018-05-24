@@ -7,15 +7,15 @@ import Base: peek
 
 #This function is for testing only
 function parse_data(filename)
-  ps=IOStream(util_open(filename,"r"))
-  try
-    while(!eof(ps))
-      println(parse_value(ps))
-      chomp_space!(ps)
+    ps=util_open(filename,"r")
+    try
+        while(!eof(ps))
+            println(parse_value(ps))
+            chomp_space!(ps)
+        end
+    finally
+        util_close(ps)
     end
-  finally
-    close(ps)
-  end
 end
 
 """

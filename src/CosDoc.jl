@@ -1,7 +1,5 @@
 using ..Common
 
-import Base: close
-
 export CosDoc,
        cosDocOpen,
        cosDocClose,
@@ -76,7 +74,7 @@ opened the document by 'cosDocOpen'. Documents opened with `pdDocOpen` do not ne
 this method.
 """
 function cosDocClose(doc::CosDocImpl)
-    close(doc.ps)
+    util_close(doc.ps)
     for path in doc.tmpfiles
         rm(path)
     end
