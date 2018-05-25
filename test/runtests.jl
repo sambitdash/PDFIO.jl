@@ -4,10 +4,28 @@ using PDFIO.Cos
 using PDFIO.Common
 using Base.Test
 
+using PDFIO.Cos: parse_indirect_ref
+
 include("debugIO.jl")
 
 @testset "PDFIO tests" begin
 
+    @testset "Miscellaneous" begin
+        @test string(CDDate("D : 199812231952 - 08' 30 "))==
+            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
+        @test_throws ErrorException skipv(IOBuffer([UInt8(65), UInt8(66)]),
+                                          UInt8(66))
+        @test CDTextString(PDFIO.Cos.CosXString([UInt8('0'), UInt8('0'),
+                                                 UInt8('4'),UInt8('1')]))=="A"
+        @test CosFloat(CosInt(1)) == CosFloat(1f0)
+        @test [CosFloat(1f0), CosInt(2)] == [CosFloat(1f0), CosFloat(2f0)]
+        @test CDRect(CosArray([CosInt(0),
+                               CosInt(0),
+                               CosInt(640),
+                               CosInt(480)])) == CDRect(0, 0, 640, 480)
+        @test parse_indirect_ref(IOBuffer(Vector{UInt8}("10 0 R\n"))) ==
+            CosIndirectObjectRef(10, 0)
+    end
     @testset "Test FlateDecode" begin
         @test begin
             filename="files/1.pdf"

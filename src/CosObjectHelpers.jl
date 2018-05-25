@@ -1,6 +1,6 @@
 using ..Common
 using Rectangle
-import Base: convert
+import Base: convert, promote_rule
 
 function convert(::Type{CDTextString}, xstr::CosXString)
     const feff = [LATIN_F, LATIN_E, LATIN_F, LATIN_F]
