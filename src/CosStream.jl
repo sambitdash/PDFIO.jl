@@ -189,10 +189,11 @@ end
 function decode_rle(input::IO)
     iob = IOBuffer()
     b = read(input, UInt8)
+    a = Vector{UInt8}(256)
     while !eof(input)
         b == 0x80 && break
         if b < 0x80
-            a = Vector{UInt8}(b + 1)
+            resize!(a, b + 1)
             nb = readbytes!(input, a, b + 1)
             resize!(a, nb)
             write(iob, a)
@@ -206,15 +207,24 @@ function decode_rle(input::IO)
     return seekstart(iob)
 end
 
+# This function is very tolerant as a hex2bytes converter
+# It rejects any bytes less than '0' so that control characters
+# are ignored. Any character above '9' it sanitizes to a number
+# under 0xF. PDF Spec also does not mandate the stream to have
+# even number of values. If odd number of hexits are given '0'
+# has to be appended to th end.
+
 function decode_asciihex(input::IO)
     data = read(input)
     nb = length(data)
-    i = j = 0
+    B0 = UInt8('0')
+    B9 = UInt8('9')
+    j = 0
     k = true
-    while i < nb
-        b = data[i+=1]
-        b < UInt8('0') && continue
-        c = b > UInt8('9') ? ((b & 0x07) + 0x9) : (b & 0x0F)
+    for i = 1:nb
+        @inbounds b = data[i]
+        b < B0 && continue
+        c = b > B9 ? ((b & 0x07) + 0x09) : (b & 0x0F)
         if k 
             data[j+=1] = c << 4
         else
