@@ -241,9 +241,9 @@ function _extend_buffer!(data, nb, i, j)
     SLIDE = 1024
     if j + 4 > i
         resize!(data, nb + SLIDE)
-        copy!(data, i + 1 + SLIDE, data, i+1, nb - i)
+        copy!(data, i + 1 + SLIDE, data, i + 1, nb - i)
         nb += SLIDE
-        i += 1
+         i += SLIDE
     end
     return nb, i
 end
@@ -256,6 +256,7 @@ function decode_ascii85(input::IO)
     while i < nb
         b = data[i+=1]
         if b == LATIN_Z
+            k > 0 && error(E_UNEXPECTED_CHAR)
             nb, i = _extend_buffer!(data, nb, i, j)
             for ii=1:4
                 data[j+=1] = 0x0
@@ -265,6 +266,7 @@ function decode_ascii85(input::IO)
             i <= nb && c == GREATER_THAN && break
         elseif ispdfspace(b)
             k = 0
+            n = 0
         elseif BANG <= b <= LATIN_U
             v = b - BANG
             n *= 85

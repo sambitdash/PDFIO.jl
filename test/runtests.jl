@@ -4,7 +4,8 @@ using PDFIO.Cos
 using PDFIO.Common
 using Base.Test
 
-using PDFIO.Cos: parse_indirect_ref
+# Internal methods for testing only
+using PDFIO.Cos: parse_indirect_ref, decode_ascii85 
 
 include("debugIO.jl")
 
@@ -155,7 +156,7 @@ include("debugIO.jl")
             download("http://www.stillhq.com/pdfdb/000325/data.pdf",filename)
         doc = pdDocOpen(filename)
         @assert pdDocGetPageCount(doc) == 1
-        obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(7, 0))
+        obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(7, 0))
         stm=get(obj)
         data=read(stm)
         close(stm)
@@ -166,6 +167,7 @@ include("debugIO.jl")
     end
 
     @testset "Test ASCII85Decode" begin
+        @test take!(decode_ascii85(IOBuffer("zzz!!!~>"))) == fill(0x0, 14)
         @test begin
         filename="388.pdf"
         DEBUG && println(filename)
