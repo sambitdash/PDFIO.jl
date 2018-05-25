@@ -110,3 +110,77 @@ function _zerror(ret::Cint)
     
     error(msg)
 end
+
+init_table(size::Int) =
+    ([(i <= 256) ? [ UInt8(i-1)] :
+      i == 257  ? [ UInt8(0)]   :
+      i == 258  ? [ UInt8(0)] : UInt8[] for i = 1:size], 9, 258)
+@inline function next_number(bin, cl, sy, si)
+    sy -= 1
+    si -= 1
+    n = 0
+    while cl > 0
+        @inbounds b::Int = bin[sy + 1]
+        m = UInt8(0xff) >> si
+        b = b & m
+        cl -= (8 - si)
+        b <<= cl
+        n += b
+        si, sy = 0, sy + 1
+        1 <= cl <= 7 || continue
+        si = cl
+        @inbounds b = bin[sy + 1]
+        m = UInt8(0xff) << (8 - si)
+        b = (b & m) >> (8 - si)
+        n += b
+        cl = 0
+    end
+    return n, sy + 1, si + 1
+end
+
+function decode_lzw(io::IO, earlyChange::Int = 1)
+    bin = read(io)
+    util_close(io)
+    len = length(bin)
+    t, cl, it = init_table(4096)
+    hy, hi = 1, 1
+    iob = IOBuffer()
+    old_set = false
+    s = UInt8[]
+    while hy < len && hi <= 8
+        n, hy, hi = next_number(bin, cl, hy, hi)
+        hy > len && break
+        n == 257 && break
+        if n == 256
+            t, cl, it = init_table(4096)
+            old_set = false
+        else
+            if n < it
+                if !old_set 
+                    old = n
+                    write(iob, t[n+1])
+                    c = t[n + 1][1]
+                    old_set = true
+                    continue
+                end
+                s = t[n + 1]
+            elseif n == it
+                s = copy(t[old + 1])
+                push!(s, c)
+            else
+                error("Data not compressed properly. $n : $it")
+            end
+            write(iob, s)
+            c = s[1]
+            append!(t[it+1], t[old+1])
+            push!(t[it+1], c)
+            old = n
+            it == 4095 && continue
+            if it == ((1 << cl) - 1 - earlyChange)
+                cl += 1
+            end
+            it += 1
+        end
+    end
+    return seekstart(iob)
+end

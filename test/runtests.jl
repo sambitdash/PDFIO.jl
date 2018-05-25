@@ -30,7 +30,7 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
-  end
+    end
 
     @testset "PDF File with ObjectStreams" begin
         @test begin
@@ -165,6 +165,24 @@ include("debugIO.jl")
         end
     end
 
+    @testset "LZWDecode Filter" begin
+        @test begin
+            filename="589.pdf"
+            DEBUG && println(filename)
+            isfile(filename)||
+                download("http://www.stillhq.com/pdfdb/000589/data.pdf",filename)
+            doc = pdDocOpen(filename)
+            obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(70, 0))
+            stm=get(obj)
+            data=read(stm)
+            close(stm)
+            @assert length(data) == 768
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
+    
     @testset "Test read_string" begin
         @test begin
             DEBUG && PDFIO.Cos.parse_data("files/page5.txt")

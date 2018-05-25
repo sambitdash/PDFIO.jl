@@ -11,8 +11,16 @@ include("Inflate.jl")
 """
 Decodes using the LZWDecode compression
 """
-function decode_lzw(stm::CosStream)
-    println("Ready to decode the LZW stream")
+function decode_lzw(input, parms)
+    if parms !== CosNull 
+        earlyChange = get(parms, cn"EarlyChange")
+        early = earlyChange === CosNull ? 1 : get(earlyChange)
+    else
+        early = 1
+    end
+    io = decode_lzw(input, early)
+    util_close(input)
+    return apply_flate_params(io, parms)
 end
 
 function decode_flate(input, parms)
@@ -32,7 +40,7 @@ decode_rle(input::IO, parms) = decode_rle(input)
 const function_map = Dict(
                           cn"ASCIIHexDecode" => decode_asciihex,
                           cn"ASCII85Decode" => decode_ascii85,
-                          cn"LZWDecode" => _not_implemented,
+                          cn"LZWDecode" => decode_lzw,
                           cn"FlateDecode" => decode_flate,
                           cn"RunLengthDecode" => decode_rle,
                           cn"CCITTFaxDecode" => _not_implemented,

@@ -46,11 +46,11 @@ populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict}) =
 
 function populate_doc_pages(doc::PDDocImpl, dict::CosDict)
     if (cn"Pages" == get(dict, cn"Type"))
-        kids = get(dict, cn"Kids")
+        kids = cosDocGetObject(doc.cosDoc, dict, cn"Kids")
         arr = get(kids)
         len = length(arr)
         for i=1:len
-            ref = splice!(arr,1)
+            ref = splice!(arr, 1)
             obj = cosDocGetObject(doc.cosDoc, ref)
             if obj !== CosNull
                 push!(arr, obj)
