@@ -18,6 +18,8 @@ include("debugIO.jl")
                                           UInt8(66))
         @test CDTextString(PDFIO.Cos.CosXString([UInt8('0'), UInt8('0'),
                                                  UInt8('4'),UInt8('1')]))=="A"
+        @test CDTextString(PDFIO.Cos.CosXString([UInt8('4'), UInt8('2'),
+                                                 UInt8('4'),UInt8('1')]))=="BA"
         @test CosFloat(CosInt(1)) == CosFloat(1f0)
         @test [CosFloat(1f0), CosInt(2)] == [CosFloat(1f0), CosFloat(2f0)]
         @test CDRect(CosArray([CosInt(0),
