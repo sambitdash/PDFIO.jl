@@ -5,7 +5,7 @@ using PDFIO.Common
 using Base.Test
 
 # Internal methods for testing only
-using PDFIO.Cos: parse_indirect_ref, decode_ascii85 
+using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
 
 include("debugIO.jl")
 
@@ -16,10 +16,10 @@ include("debugIO.jl")
             "1998-12-23T19:52:00 - 8 hours, 30 minutes"
         @test_throws ErrorException skipv(IOBuffer([UInt8(65), UInt8(66)]),
                                           UInt8(66))
-        @test CDTextString(PDFIO.Cos.CosXString([UInt8('0'), UInt8('0'),
-                                                 UInt8('4'),UInt8('1')]))=="A"
-        @test CDTextString(PDFIO.Cos.CosXString([UInt8('4'), UInt8('2'),
-                                                 UInt8('4'),UInt8('1')]))=="BA"
+        @test CDTextString(CosXString([UInt8('0'), UInt8('0'),
+                                       UInt8('4'),UInt8('1')]))=="A"
+        @test CDTextString(CosXString([UInt8('4'), UInt8('2'),
+                                       UInt8('4'),UInt8('1')]))=="BA"
         @test CosFloat(CosInt(1)) == CosFloat(1f0)
         @test [CosFloat(1f0), CosInt(2)] == [CosFloat(1f0), CosFloat(2f0)]
         @test CDRect(CosArray([CosInt(0),
@@ -259,6 +259,35 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Forms XObjects Test" begin
+        @test begin
+            filename="Graphics-wpf.pdf"
+            result, template_file = testfiles(filename)
+            DEBUG && println(filename)
+            isfile(filename) ||
+                download("http://www.pdfsharp.net/wiki/GetFile.aspx?"*
+                         "File=%2fGraphics-sample%2fGraphics-wpf.pdf",
+                         filename)
+            doc = pdDocOpen(filename)
+            (npage = pdDocGetPageCount(doc)) == 5
+            try
+                open(result, "w") do io
+                    for i=npage:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
+                end
+                @assert files_equal(result, template_file)
+            finally
+                 pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "Inline Image test" begin
         @test begin
             filename="Pratham-Sanskaran.pdf"
@@ -278,7 +307,7 @@ include("debugIO.jl")
                 end
                 @assert files_equal(result, template_file)
             finally
-                pdDocClose(doc)
+                 pdDocClose(doc)
             end
             length(utilPrintOpenFiles()) == 0
         end

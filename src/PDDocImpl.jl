@@ -9,10 +9,12 @@ mutable struct PDDocImpl <: PDDoc
     structTreeRoot::CosObject
     isTagged::Symbol #Valid values :tagged, :none and :suspect
     fonts::Dict{CosObject, PDFont}
+    xobjs::Dict{CosObject, PDXObject}
     function PDDocImpl(fp::AbstractString)
         cosDoc = cosDocOpen(fp)
         catalog = cosDocGetRoot(cosDoc)
-        new(cosDoc,catalog,CosNull,CosNull,:none, Dict{CosObject, PDFont}())
+        new(cosDoc,catalog,CosNull,CosNull,:none,
+            Dict{CosObject, PDFont}(), Dict{CosObject, PDXObject}())
     end
 end
 
@@ -119,3 +121,10 @@ function update_structure_tree!(doc::PDDocImpl)
     doc.structTreeRoot = cosDocGetObject(doc.cosDoc, structTreeRef)
     return nothing
 end
+
+get_pd_font!(doc::PDDocImpl, cosfont::CosObject) =
+    get!(doc.fonts, cosfont, PDFont(doc, cosfont))
+
+get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) = 
+    get!(doc.xobjs, cosxobj, createPDXObject(doc, cosxobj))
+

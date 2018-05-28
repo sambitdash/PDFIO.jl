@@ -37,6 +37,10 @@ decode_ascii85(input::IO, parms) = decode_ascii85(input)
 
 decode_rle(input::IO, parms) = decode_rle(input)
 
+decode_jpg(input::IO, parms) = decode_jpg(input) = input
+
+decode_jpx(input::IO, parms) = decode_jpx(input) = input
+
 const function_map = Dict(
                           cn"ASCIIHexDecode" => decode_asciihex,
                           cn"ASCII85Decode" => decode_ascii85,
@@ -45,8 +49,8 @@ const function_map = Dict(
                           cn"RunLengthDecode" => decode_rle,
                           cn"CCITTFaxDecode" => _not_implemented,
                           cn"JBIG2Decode" => _not_implemented,
-                          cn"DCTDecode" => _not_implemented,
-                          cn"JPXDecode" => _not_implemented,
+                          cn"DCTDecode" => decode_jpg,
+                          cn"JPXDecode" => decode_jpx,
                           cn"Crypt" => _not_implemented
                          )
 

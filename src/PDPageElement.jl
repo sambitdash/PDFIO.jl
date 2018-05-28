@@ -84,6 +84,8 @@ mutable struct PDPageObjectGroup <: PDPageObject
         new(isEOG,Vector{Union{PDPageObject,CosObject}}())
 end
 
+Base.isempty(grp::PDPageObjectGroup) = isempty(grp.objs)
+
 function load_objects(grp::PDPageObjectGroup, bis::IO)
     while(!grp.isEOG && !eof(bis))
         obj = parse_value(bis, get_pdfcontentops)
@@ -626,7 +628,6 @@ end
     trm = tm*ctm
 
     fontname, font = get(state, :font, (CosNull, CosNull))
-    page::PDPage = get(state, :page, CosNull)
 
     heap::Vector{TextLayout} = state[:text_layout]
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
@@ -702,10 +703,10 @@ end
 end
 
 @inline function evalContent!(pdo::PDPageElement{:Tf}, state::GState)
-    page = get(state, :page, CosNull)
-    page === CosNull && return state
+    src = get(state, :source, CosNull)
+    src === CosNull && return state
     fontname = pdo.operands[1]
-    font = page_find_font(page, fontname)
+    font = get_font(src, fontname)
     font === CosNull && return state
     state[:font] = (fontname, font)
     fontsize = get(pdo.operands[2])
@@ -755,10 +756,18 @@ evalContent!(pdo::PDPageElement{Symbol("T*")}, state::GState) =
 evalContent!(pdo::PDPageElement{Symbol("\'")}, state::GState) =
     offset_text_leading!(state)
 
-@inline function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::GState)
+@inline function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::GState)#" 
     state[:Tw] = get(pdo.operands[1])
     state[:Tc] = get(pdo.operands[2])
     offset_text_leading!(state)
+end
+
+function evalContent!(pdo::PDPageElement{:Do}, state::GState)
+    xobjname = pdo.operands[1]
+    src = state[:source]::Union{PDPage, PDXObject}
+    xobj = get_xobject(src, xobjname)
+    xobj === CosNull && return state
+    return Do(xobj, state)
 end
 
 evalContent!(pdo::PDPageInlineImage, state::GState=GState()) = state

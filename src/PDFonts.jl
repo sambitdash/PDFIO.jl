@@ -17,10 +17,17 @@ const endcodespacerange = b"endcodespacerange"
 
 
 mutable struct CMap
-    code_space::IntervalTree{UInt8, Union{CosNullType, IntervalTree{UInt8, CosNullType}}}
-    range_map::IntervalTree{UInt8, Union{CosObject, IntervalTree{UInt8, CosObject}}}
-    CMap() = new(IntervalTree{UInt8, Union{CosNullType, IntervalTree{UInt8, CosNullType}}}(),
-        IntervalTree{UInt8, Union{CosObject, IntervalTree{UInt8, CosObject}}}())
+    code_space::IntervalTree{UInt8,
+                             Union{CosNullType, IntervalTree{UInt8, CosNullType}}}
+    range_map::IntervalTree{UInt8,
+                            Union{CosObject, IntervalTree{UInt8, CosObject}}}
+    function CMap()
+        cs = IntervalTree{UInt8,
+                          Union{CosNullType, IntervalTree{UInt8, CosNullType}}}()
+        rm = IntervalTree{UInt8,
+                          Union{CosObject, IntervalTree{UInt8, CosObject}}}()
+        new(cs, rm)
+    end
 end
 
 function show(io::IO, cmap::CMap)
@@ -118,10 +125,11 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
     subtype = get(cosfont, cn"Subtype")
     (subtype === cn"Type0") && return glyph_name_id
     baseenc = cosDocGetObject(cosdoc, cosfont, cn"BaseEncoding")
-    encoding_mapping =  baseenc == cn"WinAnsiEncoding"   ? GlyphName_to_WINEncoding :
-                        baseenc == cn"MacRomanEncoding"  ? GlyphName_to_MACEncoding :
-                        baseenc == cn"MacExpertEncoding" ? Glyphname_to_MEXEncoding :
-                        GlyphName_to_STDEncoding
+    encoding_mapping =
+        baseenc == cn"WinAnsiEncoding"  ? GlyphName_to_WINEncoding :
+        baseenc == cn"MacRomanEncoding" ? GlyphName_to_MACEncoding :
+        baseenc == cn"MacExpertEncoding"? Glyphname_to_MEXEncoding :
+                                          GlyphName_to_STDEncoding
     merge!(glyph_name_id, encoding_mapping)
 
     diff = cosDocGetObject(cosdoc, cosfont, cn"Differences")
@@ -216,9 +224,17 @@ function get_encoded_string(s::CosString, cmap::CMap)
     while i < l
         b1 = barr[i+=1]
         xs = intersect(cs, Interval(b1, b1))
-        length(xs) == 0 && continue
+        # When byte range is not in code space we should not return NUL.
+        if length(xs) == 0
+            push!(carr, Char(0))
+            continue
+        end
+        # Some cmaps do not call out single byte ranges explicitly in the
+        # code space. So may need to decipher the existence of a single
+        # byte vs 2-byte code from the range map. See `else` below.
         itree = xs[1][2]
-        if itree === CosNull
+        # This case is very clearly a single byte range 
+        if itree === CosNull 
             itv = intersect(rm, Interval(b1, b1))
             if length(itv) > 0
                 carr = get_unicode_chars(b1, itv[1][1], itv[1][2])
@@ -226,13 +242,22 @@ function get_encoded_string(s::CosString, cmap::CMap)
                 push!(carr, Char(0))
             end
         else
-            b2 = barr[i+=1]
-            itree1 = rm[Interval(b1, b1)] # CMaps do not have ranges on 1st byte
-            itv = intersect(itree1, Interval(b2, b2))
-            if length(itv) > 0
-                carr = get_unicode_chars(b2, itv[1][1], itv[1][2])
-            else
+            itree1 = intersect(rm, Interval(b1, b1))
+            if length(itree1) == 0
                 push!(carr, Char(0))
+                continue
+            end
+            # This is a single byte range case
+            if itree1[1][2] isa CosObject
+                carr = get_unicode_chars(b1, itree1[1][1], itree1[1][2])
+            else
+                b2 = barr[i+=1]
+                itv = intersect(itree1[1][2], Interval(b2, b2))
+                if length(itv) > 0
+                    carr = get_unicode_chars(b2, itv[1][1], itv[1][2])
+                else
+                    push!(carr, Char(0))
+                end
             end
         end
         append!(retarr, carr)
@@ -240,10 +265,9 @@ function get_encoded_string(s::CosString, cmap::CMap)
     return retarr
 end
 
-function cmap_command(b::Vector{UInt8})
-    b != beginbfchar && b != beginbfrange && b != begincodespacerange && return nothing
-    return Symbol(String(b))
-end
+cmap_command(b::Vector{UInt8}) = 
+    b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
+        nothing : Symbol(String(b))
 
 function on_cmap_command!(stm::IO, command::Symbol,
                          params::Vector{CosInt}, cmap::CMap)
@@ -292,7 +316,8 @@ function read_cmap(stm::IO)
         if isa(obj, CosInt)
             push!(params, obj)
         end
-        (obj == :beginbfchar || obj == :beginbfrange || obj == :begincodespacerange) &&
+        (obj == :beginbfchar || obj == :beginbfrange ||
+         obj == :begincodespacerange) &&
             on_cmap_command!(stm, obj, params, tcmap)
     end
     return tcmap
@@ -314,6 +339,13 @@ mutable struct PDFont
     widths::Union{AdobeFontMetrics, Vector{Int}, CIDWidth}
     fum::FontUnicodeMapping
     glyph_name_id::Dict{CosName, UInt8}
+    @inline function PDFont(doc::PDDoc, cosfont::CosObject)
+        fum = FontUnicodeMapping()
+        merge_encoding!(fum, doc.cosDoc, cosfont)
+        widths = get_font_widths(doc.cosDoc, cosfont)
+        glyph_name_id = get_glyph_id_mapping(doc.cosDoc, cosfont)
+        return new(doc, cosfont, widths, fum, glyph_name_id)
+    end
 end
 
 INIT_CODE(::CIDWidth) = 0x0000

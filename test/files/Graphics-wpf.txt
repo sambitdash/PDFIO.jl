@@ -1,0 +1,69 @@
+                               Images
+
+          DrawImage (original)                    DrawImage (scaled)
+
+
+
+
+
+
+
+
+
+
+
+
+
+          DrawImage (rotated)                   DrawImage (sheared)
+
+
+
+
+
+
+
+
+
+
+
+
+
+           DrawImage (GIF)                      DrawImage (PNG)
+
+
+
+
+
+
+
+
+
+
+
+
+
+           DrawImage (TIFF)                  DrawImage (Form XObject)
+                                                Lorem mera  enum
+
+                                                Lorem Ipsum… Dolor Sit
+                                                Riurem in ver ilit velisl iuscilla faccum
+                                                It ute modoloreetum veleseq uametueratem dit wisl  
+                                                eugueriusto erostrud do do exerostinim ad delit ad ent.
+                                                Zzriurem dolor am ing exerci tatumsandre
+                                                It loreet ad mincillan hendignim alisl in henit, quamet 
+                                                num venit acinibh et iriure ea conse magna feugait irit adi-
+                                                onse do delis alit irilit hendignim utpatie.
+                                                www.adobe.com/products
+                                                 Tatueril iquat, con hendio
+                                                YourCompanyName 
+                                                123 Everywhere Ave. Suite 000 
+                                                City, ST 00000 
+                                                (555) 555-5555
+                                                Andre ming et, volortio core velisim vel esed magnim quipit ulla conse feugait, veliqui erat loreetue mincing euismod oloreri 
+                                                usciduissit ip erci euis nibh et del in euis non henim quat nulla feummy nibh exero corperc iliscinis nibh eugiam nonum vel 
+                                                dolorti onullao rperilis augueros eu feu faciduissi.
+                                                An utpate ming elessit vel dipsum non verostis euisim do doloboreet lorerostrud tet, sum vero ea augait lore vullandrer 
+                                                augiamcortie eugait acil ut luptatin henit la augiamet dip eu feu feuguero consequis enisismod dolorem volobore essisis ad tat 
+                                                dolortie cortin hendrem zzrillaorero con erilla conulla facilisisi tin et, conulput nismodiat.
+
+ Created with PDFsharp 1.3.1663-w (www.pdfsharp.com)      5

@@ -77,7 +77,7 @@ function pdPageGetContentObjects(page::PDPage)
 end
 
 function pdPageEvalContent(page::PDPage, state::GState=GState{:PDFIO}())
-    state[:page] = page
+    state[:source] = page
     evalContent!(pdPageGetContentObjects(page), state)
     return state
 end
@@ -96,14 +96,17 @@ function pdPageExtractText(io::IO, page::PDPage)
 end
 
 mutable struct PDPageImpl <: PDPage
-  doc::PDDocImpl
-  cospage::CosObject
-  contents::CosObject
-  content_objects::Nullable{PDPageObjectGroup}
-  #fums::Dict{CosName, FontUnicodeMapping}
-  fonts::Dict{CosName, PDFont}
-  PDPageImpl(doc,cospage,contents)=
-    new(doc, cospage, contents, Nullable{PDPageObjectGroup}(), Dict{CosName,PDFont}())
+    doc::PDDocImpl
+    cospage::CosObject
+    contents::CosObject
+    content_objects::Nullable{PDPageObjectGroup}
+    fonts::Dict{CosName, PDFont}
+    xobjs::Dict{CosName, PDXObject}
+    PDPageImpl(doc, cospage, contents) =
+        new(doc, cospage, contents,
+            Nullable{PDPageObjectGroup}(),
+            Dict{CosName,PDFont}(),
+            Dict{CosName,PDXObject}())
 end
 
 PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage, CosNull)
@@ -165,7 +168,6 @@ function load_page_objects(page::PDPageImpl, stms::CosArray)
     return load_page_objects(page, stm)
 end
 
-
 function populate_font_encoding(page, font, fontname)
     if get(page.fums, fontname, CosNull) == CosNull
         fum = FontUnicodeMapping()
@@ -174,43 +176,43 @@ function populate_font_encoding(page, font, fontname)
     end
 end
 
-function populate_pd_font(pddoc, cosfont)
-    pdfont = get(pddoc.fonts, cosfont, CosNull)
-    if pdfont === CosNull
-        fum = FontUnicodeMapping()
-        merge_encoding!(fum, pddoc.cosDoc, cosfont)
-        widths = get_font_widths(pddoc.cosDoc, cosfont)
-        glyph_name_id = get_glyph_id_mapping(pddoc.cosDoc, cosfont)
-        pdfont = PDFont(pddoc, cosfont, widths, fum, glyph_name_id)
-        pddoc.fonts[cosfont] = pdfont
-    end
-    return pdfont
-end
-
-function page_find_font(page::PDPageImpl, fontname::CosName)
-    font = CosNull
+function find_resource(page::PDPageImpl,
+                       restype::CosName,
+                       fontname::CosName)
+    res = CosNull
     cosdoc = page.doc.cosDoc
     pgnode = page.cospage
 
-    pdfont = get(page.fonts, fontname, CosNull)
-    pdfont !== CosNull && return pdfont
-
-    while font === CosNull && pgnode !== CosNull
+    while res === CosNull && pgnode !== CosNull
         resref = get(pgnode, cn"Resources")
-        resources = cosDocGetObject(cosdoc, resref)
-        if resources !== CosNull
-            fonts = cosDocGetObject(cosdoc, resources, cn"Font")
-            if fonts !== CosNull
-                font = cosDocGetObject(cosdoc, fonts, fontname)
-                font !== CosNull && break
-            end
+        if resref === CosNull
+            pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
+            continue
         end
+        resources = cosDocGetObject(cosdoc, resref)
+        if resources === CosNull
+            pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
+            continue
+        end
+        ress = cosDocGetObject(cosdoc, resources, restype)
+        if ress === CosNull 
+            pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
+            continue
+        end
+        res = cosDocGetObject(cosdoc, ress, fontname)
         pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
     end
-    pdfont = populate_pd_font(page.doc, font)
-    page.fonts[fontname] = pdfont
-    return pdfont
+    return res
 end
+
+get_font(page::PDPageImpl, fontname::CosName) = 
+    get!(page.fonts, fontname,
+         get_pd_font!(page.doc, find_resource(page, cn"Font", fontname)))
+    
+
+get_xobject(page::PDPageImpl, xobjname::CosName) = 
+    get!(page.xobjs, xobjname,
+         get_pd_xobject!(page.doc, find_resource(page, cn"XObject", xobjname)))
 
 function page_find_attribute(page::PDPageImpl, resname::CosName)
     res = CosNull
@@ -225,7 +227,8 @@ function page_find_attribute(page::PDPageImpl, resname::CosName)
     return res
 end
 
-get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) = CDTextString(s)
+get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) =
+    CDTextString(s)
 
 get_encoded_string(s::CosString, fontname::CosName, page::PDPage) =
     get_encoded_string(s, get(page.fonts, fontname, nothing))
