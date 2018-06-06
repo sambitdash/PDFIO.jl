@@ -3,11 +3,11 @@ import ..Cos: CosXString
 using Rectangle
 
 #=
-Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory for 8 and
-16-bit toUnicode CMaps.
-
+Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory
+for 8 and 16-bit toUnicode CMaps.
 CMaps can have both 8 and 16 bit ranges in the same CMap file as well.
 =#
+
 const beginbfchar = b"beginbfchar"
 const endbfchar   = b"endbfchar"
 const beginbfrange = b"beginbfrange"
@@ -46,10 +46,11 @@ end
 
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosName,
                          doc::CosDoc, font::CosObject)
-    encoding_mapping =  encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
-                        encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
-                        encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
-                        STDEncoding_to_Unicode
+    encoding_mapping =
+        encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
+        encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
+        encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
+                                            STDEncoding_to_Unicode
     merge!(fum.encoding, encoding_mapping)
     return fum
 end
@@ -57,25 +58,26 @@ end
 # for type 0 use cmap.
 # for symbol and zapfdingbats - use font encoding
 # for others use STD Encoding
-# Reading encoding from the font files in case of Symbolic fonts are not supported.
+# Reading encoding from the font files in case of Symbolic fonts are not
+# supported.
 # Font subset is addressed with font name identification.
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
                         doc::CosDoc, font::CosObject)
     subtype  = cosDocGetObject(doc, font, cn"Subtype")
-    (subtype != cn"Type1") && (subtype != cn"MMType1") && return fum
+    subtype != cn"Type1" && subtype != cn"MMType1" && return fum
     basefont = cosDocGetObject(doc, font, cn"BaseFont")
     basefont_with_subset = CDTextString(basefont)
     basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
-    enc = (basefont_str == "Symbol") ? SYMEncoding_to_Unicode :
-          (basefont_str == "ZapfDingbats") ? ZAPEncoding_to_Unicode :
-          STDEncoding_to_Unicode
+    enc = basefont_str == "Symbol"       ? SYMEncoding_to_Unicode :
+          basefont_str == "ZapfDingbats" ? ZAPEncoding_to_Unicode :
+                                           STDEncoding_to_Unicode
     merge!(fum.encoding, enc)
     return fum
 end
 
 function merge_encoding!(fum::FontUnicodeMapping,
-                        encoding::Union{CosDict, CosIndirectObject{CosDict}},
-                        doc::CosDoc, font::CosObject)
+                         encoding::Union{CosDict, CosIndirectObject{CosDict}},
+                         doc::CosDoc, font::CosObject)
     baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
     merge_encoding!(fum, baseenc, doc, font)
     # Add the Differences
@@ -151,12 +153,13 @@ end
 
 get_encoded_string(s::CosString, fum::Void) = CDTextString(s)
 
-function get_encoded_string(s::CosString, fum::FontUnicodeMapping)
-    v = Vector{UInt8}(s)
+get_encoded_string(s::CosString, fum::FontUnicodeMapping) = 
+    get_encoded_string(Vector{UInt8}(s), fum)
+
+@inline function get_encoded_string(v::Vector{UInt8}, fum::FontUnicodeMapping)
     length(v) == 0 && return ""
-    fum.hasCMap && return get_encoded_string(s, fum.cmap)
-    carr = NativeEncodingToUnicode(Vector{UInt8}(s), fum.encoding)
-    return String(carr)
+    fum.hasCMap && return get_encoded_string(v, fum.cmap)
+    return String(NativeEncodingToUnicode(v, fum.encoding))
 end
 
 function get_unicode_chars(b::UInt8, i::Interval, v::CosObject)
@@ -212,10 +215,12 @@ function get_unicode_chars(barr::Vector{UInt8})
     return retarr
 end
 
-function get_encoded_string(s::CosString, cmap::CMap)
+get_encoded_string(s::CosString, cmap::CMap) =
+    get_encoded_string(Vector{UInt8}(s), cmap::CMap)
+
+function get_encoded_string(barr::Vector{UInt8}, cmap::CMap)
     cs = cmap.code_space
     rm = cmap.range_map
-    barr = Vector{UInt8}(s)
     l = length(barr)
     b1 = b2 = 0x0
     carr = Vector{Char}()
@@ -375,23 +380,24 @@ end
 get_char(barr, state, w) = next(barr, state)
 
 function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
-    totalw = 0.0
+    totalw = 0f0
     st = start(barr)
     while !done(barr, st)
         c, st = get_char(barr, st, widths)
         w = get_character_width(c, widths)
         kw = get_kern_width(pc, c, widths)
-        w = (w - tj)*tfs / 1000.0 + ((c == SPACE_CODE(widths)) ? tw : tc)
+        w = (w - tj)*tfs / 1000f0 + ((c == SPACE_CODE(widths)) ? tw : tc)
         w += kw
         pc = c
-        tj = 0.0
+        tj = 0f0
         totalw += w
     end
     return totalw
 end
 
 function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
-    pdfont::PDFont, tfs, tc, tw, th)
+                     pdfont::PDFont,
+                     tfs, tc, tw, th)
     totalw = 0f0
     tj = 0f0
     text = ""
@@ -405,7 +411,8 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
             end
             text *= t
             barr = Vector{UInt8}(s)
-            totalw += get_string_width(barr, pdfont.widths, prev_char, tfs, tj, tc, tw)
+            totalw += get_string_width(barr, pdfont.widths, prev_char,
+                                       tfs, tj, tc, tw)
             tj = 0f0
         elseif s isa CosNumeric
             tj = s |> get |> Float32

@@ -157,7 +157,7 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
             end
         else
             (width, state) = next(w, state)
-            m[Interval(UInt16(bcid), UInt16(ecid))] = width
+            m[Interval(UInt16(bcid), UInt16(ecid))] = get(width)
         end
     end
     return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, get(dw))
