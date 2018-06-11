@@ -28,7 +28,8 @@ function convert(::Type{CDTextString}, xstr::CosXString)
     return str
 end
 
-convert(::Type{Vector{UInt8}}, xstr::CosXString) = xstr |> get |> String |> hex2bytes
+convert(::Type{Vector{UInt8}}, xstr::CosXString) =
+    xstr |> get |> String |> hex2bytes
 
 convert(::Type{Vector{UInt8}}, str::CosLiteralString) = str |> get
 

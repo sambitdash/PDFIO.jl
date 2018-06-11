@@ -535,12 +535,12 @@ restore!(gs::GState) = (pop!(gs.state); gs)
     state[end][:CTM] = eye(Float32, 3)
 
     # Text states
-    state[end][:Tc] = 0.0
-    state[end][:Tw] = 0.0
-    state[end][:Tz] = 100.0
-    state[end][:TL] = 0.0
+    state[end][:Tc] = 0f0
+    state[end][:Tw] = 0f0
+    state[end][:Tz] = 100f0
+    state[end][:TL] = 0f0
     state[end][:Tr] = 0
-    state[end][:Ts] = 0.0
+    state[end][:Ts] = 0f0
     return state
 end
 
@@ -636,17 +636,19 @@ end
     ih = round(Int, h*10)
     d[ih] = get(d, ih, 0) + length(text)
 
-    tb = [ 0 0 1f0; w 0 1f0; w h 1f0; 0f0 h 1f0]*trm
+    tb = [0f0 0f0 1f0; w 0f0 1f0; w h 1f0; 0f0 h 1f0]*trm
     if !get(state, :in_artifact, false)
         tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
                         tb[3,1], tb[3,2], tb[4,1], tb[4,2],
                         text, fontname)
         push!(heap, tl)
     end
+    offset_text_pos!(w, 0f0, state)    
     return state
 end
 
-@inline function evalContent!(pdo::PDPageTextObject, state::GState=Vector{Dict}())
+@inline function evalContent!(pdo::PDPageTextObject,
+                              state::GState=Vector{Dict}())
     state[:Tm]  = eye(Float32, 3)
     state[:Tlm] = eye(Float32, 3)
     state[:Trm] = eye(Float32, 3)
@@ -695,8 +697,8 @@ end
     d = get(pdo.operands[4])
     e = get(pdo.operands[5])
     f = get(pdo.operands[6])
-    tm  = [a b 0.0; c d 0.0; e f 1.0]
-    tlm = [a b 0.0; c d 0.0; e f 1.0]
+    tm  = [a b 0f0; c d 0f0; e f 1f0]
+    tlm = copy(tm)
     state[:Tm]  = tm
     state[:Tlm] = tlm
     return state
@@ -723,10 +725,21 @@ end
     tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
     #:TL may be called outside of BT...ET block
     tlm::Matrix{Float32}  = get(state, :Tlm, eye(Float32, 3))
-    tm = tlm = tmul*tlm
+    tlm = tmul*tlm
+    tm = copy(tlm)
 
     state[:Tm]  = tm
     state[:Tlm] = tlm
+    return state
+end
+
+# Affects Tm leaves the Tlm intact
+@inline function offset_text_pos!(tx, ty, state::GState)
+    tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
+    #:TL may be called outside of BT...ET block
+    tm::Matrix{Float32}  = get(state, :Tm, eye(Float32, 3))
+    tm = tmul*tm
+    state[:Tm]  = tm
     return state
 end
 

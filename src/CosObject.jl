@@ -76,7 +76,8 @@ struct CosNullType <: CosObject end
 ```
     CosNull
 ```
-PDF representation of a `null` object. Can be applied to [`CosObject`](@ref) of any type.
+PDF representation of a `null` object. Can be applied to [`CosObject`](@ref)
+of any type.
 """
 const CosNull=CosNullType()
 
@@ -87,7 +88,7 @@ const CosNull=CosNullType()
 A numeric float data type.
 """
 struct CosFloat <: CosNumeric
-    val::Float64
+    val::Float32
 end
 
 """
