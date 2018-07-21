@@ -1,3 +1,5 @@
+using Compat
+
 # zlib inflate implementation similar to: https://zlib.net/zpipe.c
 mutable struct z_stream
     next_in::Ptr{UInt8}
@@ -7,31 +9,31 @@ mutable struct z_stream
     avail_out::Cuint
     total_out::Culong
     msg::Ptr{UInt8}
-    state::Ptr{Void}
-    zalloc::Ptr{Void}
-    zfree::Ptr{Void}
-    opaque::Ptr{Void}
+    state::Ptr{Nothing}
+    zalloc::Ptr{Nothing}
+    zfree::Ptr{Nothing}
+    opaque::Ptr{Nothing}
     data_type::Cint
     adler::Culong
     reserved::Culong
 
-   function z_stream()
-       new(
-           C_NULL,  # next_in
-           0,       # avail_in  
-           0,       # total_in  
-           C_NULL,  # next_out  
-           0,       # avail_out 
-           0,       # total_out 
-           C_NULL,  # msg       
-           C_NULL,  # state     
-           C_NULL,  # zalloc    
-           C_NULL,  # zfree     
-           C_NULL,  # opaque    
-           0,       # data_type 
-           0,       # adler     
-           0,       # reserved  
-           )
+    function z_stream()
+        new(
+            C_NULL,  # next_in
+            0,       # avail_in  
+            0,       # total_in  
+            C_NULL,  # next_out  
+            0,       # avail_out 
+            0,       # total_out 
+            C_NULL,  # msg       
+            C_NULL,  # state     
+            C_NULL,  # zalloc    
+            C_NULL,  # zfree     
+            C_NULL,  # opaque    
+            0,       # data_type 
+            0,       # adler     
+            0,       # reserved  
+        )
     end
 end
 
@@ -45,7 +47,7 @@ const Z_MEM_ERROR     = -4
 const Z_BUF_ERROR     = -5
 const Z_VERSION_ERROR = -6
 
-if is_windows()
+@static if Sys.iswindows()
     const libz = "zlib1"
 else
     const libz = "libz"
@@ -54,14 +56,14 @@ end
 _zlibVersion() = ccall((:zlibVersion, libz), Ptr{UInt8}, ())
 
 _inflateInit(stm::z_stream) =
-    ccall((:inflateInit2_, libz), Cint, (Ptr{z_stream}, Cint, Ptr{UInt8}, Cint),
-          &stm, 47, _zlibVersion(), sizeof(z_stream))
+    ccall((:inflateInit2_, libz), Cint, (Ref{z_stream}, Cint, Ptr{UInt8}, Cint),
+          stm, 47, _zlibVersion(), sizeof(z_stream))
 
 _inflateEnd(stm::z_stream) =
-    ccall((:inflateEnd, libz), Cint, (Ptr{z_stream},), &stm)
+    ccall((:inflateEnd, libz), Cint, (Ref{z_stream},), stm)
 
 _inflate(stm::z_stream) =
-    ccall((:inflate, libz), Cint, (Ptr{z_stream}, Cint), &stm, 0)
+    ccall((:inflate, libz), Cint, (Ref{z_stream}, Cint), stm, 0)
 
 function inflate(io::IO)
     CHUNK = 16384
@@ -72,8 +74,8 @@ function inflate(io::IO)
     ret = _inflateInit(strm)
     ret != Z_OK && _zerror(ret)
 
-    inb = Vector{UInt8}(CHUNK)
-    oub = Vector{UInt8}(CHUNK)
+    inb = zeros(UInt8, CHUNK)
+    oub = zeros(UInt8, CHUNK)
 
     while ret != Z_STREAM_END
         strm.avail_in = readbytes!(io, inb, CHUNK)
@@ -146,6 +148,7 @@ function decode_lzw(io::IO, earlyChange::Int = 1)
     hy, hi = 1, 1
     iob = IOBuffer()
     old_set = false
+    old, c = 1, 0x0
     s = UInt8[]
     while hy < len && hi <= 8
         n, hy, hi = next_number(bin, cl, hy, hi)

@@ -83,11 +83,11 @@ end
 
 function testfiles(filename)
     name, ext = splitext(filename)
-    return (name*".res", joinpath(Pkg.dir("PDFIO"), "test", "files", name*".txt"))
+    return (name*".res", joinpath(@__DIR__, "files", name*".txt"))
 end
 
 function local_testfiles(filename)
     name, ext = splitext(filename)
-    return (name*".res", joinpath(Pkg.dir("PDFIO"), "test", "files", name*".txt"),
-            joinpath(Pkg.dir("PDFIO"), "test", "files", filename))
+    return (name*".res", joinpath(@__DIR__, "files", name*".txt"),
+            joinpath(@__DIR__, "files", filename))
 end

@@ -1,11 +1,14 @@
-using ..Common
-
 export CosDoc,
        cosDocOpen,
        cosDocClose,
        cosDocGetRoot,
        cosDocGetObject,
        cosDocGetPageNumbers
+
+using Compat
+using Compat: notnothing
+using ..Common
+
 
 """
 ```
@@ -254,7 +257,7 @@ end
 @inline may_have_xrefstream(doc::CosDocImpl) = (doc.version[1]>=1) && (doc.version[2]>=5)
 
 function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
-    const TRAILER_REWIND=50
+    TRAILER_REWIND = 50
 
     seek(ps, doc.size-TRAILER_REWIND)
 
@@ -390,27 +393,23 @@ function read_xref_table(ps::IOStream, doc::CosDocImpl)
     return doc.xref
 end
 
-function find_ntree{K, R}(fn::Function, doc::CosDoc,
-                         node::CosTreeNode{K}, key::K, refdata::R)
+function find_ntree(fn::Function, doc::CosDoc,
+                    node::CosTreeNode{K}, key::K, refdata::R) where {K, R}
     inrange = 0
-    if (!isnull(node.range))
+    if node.range !== nothing
         inrange = (key < node.range[1]) ? -1 :
                   (key > node.range[2]) ?  1 : 0
     end
     if inrange == 0
-        if isnull(node.kids) # This is the leaf
-            # TBD: look into the values.
-            return fn(doc, get(node.values), key, refdata)
-        end
+        # This is the leaf
+        # TBD: look into the values.
+        node.kids === nothing && return fn(doc, node.values, key, refdata)
         for kid in kids
             kidobj = cosDocGetObject(doc, kid)
             kidnode = createTreeNode(K, kidobj)
             inrange, val = find_ntree(fn, doc, kidnode, key)
-            if inrange == -1
-                break
-            elseif inrange == 0
-                return (inrange,val)
-            end
+            inrange == -1 && break
+            inrange == 0 && return (inrange,val)
         end
     else
         return (inrange, nothing)
@@ -423,30 +422,31 @@ using RomanNumerals
 
 const PDF_PageNumerals = [AlphaNumeral, RomanNumeral, Int]
 
-# This may look non-intuitive but PDF pages can be the same page labels for multiple pages
+# This may look non-intuitive but PDF pages can have the same page labels for
+# multiple pages
 # Table 159 - PDF Spec
 function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
                          key::Int, label::String)
     prev_pageno = 0
     found = false
-    lno = Nullable{LabelNumeral}()
+    lno = nothing
     start = 1
     for (pageno, obj) in values
         if found
-            if isnull(lno)
-                return range(prev_pageno+1, pageno-prev_pageno)
-            else
-                ln = get(lno)
+            if lno !== nothing
+                ln = notnothing(lno)
                 ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
                 found_page = prev_pageno + 1 + ln - start
-                found_page <= pageno && return range(found_page, 1)
+                found_page <= pageno && return range(found_page, length=1)
+            else
+                return range(prev_pageno + 1, length=(pageno - prev_pageno))
             end
             found = false
             prev_pageno = pageno
         end
         plDict = cosDocGetObject(doc, obj)
-        s = get(plDict, cn"S")
-        p = get(plDict, cn"P")
+        s  = get(plDict, cn"S")
+        p  = get(plDict, cn"P")
         st = get(plDict, cn"St")
 
         start = (st === CosNull) ? 1 : get(st)
@@ -463,26 +463,29 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
         else
             try
                 ln = (s == cn"D") ? LabelNumeral(Int, label; prefix=pfx) :
-                     (s == cn"R") ? LabelNumeral(RomanNumeral, label; prefix=pfx) :
-                     (s == cn"r") ? LabelNumeral(RomanNumeral, label; prefix=pfx,
-                                                 caselower=true) :
-                     (s == cn"A") ? LabelNumeral(AlphaNumeral, label; prefix=pfx) :
-                     (s == cn"a") ? LabelNumeral(AlphaNumeral, label; prefix=pfx,
-                                                 caselower=true) :
+                     (s == cn"R") ? LabelNumeral(RomanNumeral, label;
+                                                prefix=pfx) :
+                     (s == cn"r") ? LabelNumeral(RomanNumeral, label;
+                                                 prefix=pfx, caselower=true) :
+                     (s == cn"A") ? LabelNumeral(AlphaNumeral, label;
+                                                 prefix=pfx) :
+                     (s == cn"a") ? LabelNumeral(AlphaNumeral, label;
+                                                 prefix=pfx, caselower=true) :
                      throw(ErrorException(E_INVALID_PAGE_NUMBER))
-                lno = Nullable(ln)
+                lno = ln
                 prev_pageno = pageno
                 found = true
             catch
             end
         end
     end
-    found && isnull(lno) && return range(prev_pageno+1, pageno-prev_pageno)
-    if (found)
-        ln = get(lno)
+    found && lno === nothing &&
+        return range(prev_pageno + 1, length=(pageno - prev_pageno))
+    if found && lno !== nothing
+        ln = notnothing(lno)
         ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
         found_page = prev_pageno + 1 + ln - start
-        return range(found_page, 1)
+        return range(found_page, length=1)
     end
     throw(ErrorException(E_INVALID_PAGE_NUMBER))
 end
@@ -498,11 +501,12 @@ end
 ```
 cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) -> Range{Int}
 ```
-PDF utilizes two pagination schemes. An internal global page number that is maintained
-serially as an integer and `PageLabel` that is shown by the viewers. Given a `label` this
-method returns a `range` of valid page numbers.
+PDF utilizes two pagination schemes. An internal global page number that is
+maintained serially as an integer and `PageLabel` that is shown by the viewers.
+Given a `label` this method returns a `range` of valid page numbers.
 """
-function cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString)
+function cosDocGetPageNumbers(doc::CosDoc,
+                              catalog::CosObject, label::AbstractString)
     ref = get(catalog, cn"PageLabels")
     plroot = cosDocGetObject(doc, ref)
     troot = createTreeNode(Int, plroot)

@@ -42,7 +42,6 @@ end
 Recursively reads the page object and populates the indirect objects
 Ensures indirect objects are read and updated in the xref Dictionary.
 """
-
 populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict}) =
     populate_doc_pages(doc, dict.obj)
 

@@ -6,9 +6,12 @@ export get_tempdir,
        dict_remap,
        NativeEncodingToUnicode,
        PDFEncodingToUnicode,
-       utilPrintOpenFiles
+       utilPrintOpenFiles,
+       to_uint8,
+       to_uint16
 
 using Compat
+using Compat.Pkg
 
 # Non-exported variable that retains the current tempdir location.
 # This shoould be only accessed by get_tempdir() only
@@ -35,13 +38,11 @@ utilPrintOpenFiles()=[]
 import Base: zero
 zero(::Type{Char}) = Char(0x00)
 
-@static if VERSION >= v"0.7-"
-    using DelimitedFiles
-end
+using Compat.DelimitedFiles
 
 function load_data_file(filename)
-    path = joinpath(Pkg.dir("PDFIO"), "data", filename)
-    return readdlm(path, ',', String, '\n')
+    path = joinpath(@__DIR__, "..", "data", filename)
+    return readdlm(path, ',', String, '\n',  comments=true, comment_char='#')
 end
 
 function dict_remap(ab, bc)
@@ -53,12 +54,20 @@ function dict_remap(ab, bc)
     return d
 end
 
+@static if VERSION >= v"0.7-"
+    to_uint16(x) = parse(UInt16, x, base=16)
+    to_uint8(x)  = parse(UInt8,  x, base=8)
+else
+    to_uint16(x) = parse(UInt16, x, 16)
+    to_uint8(x)  = parse(UInt8,  x, 8)
+end
+
 const PDFEncoding_to_Unicode = begin
     d = Dict()
     m = load_data_file("pdf-doc-encoding.txt")
     map(m[:,3], m[:,4]) do x, y
-        e = parse(UInt8, x, 8)
-        u = (y != "") ? Char(parse(UInt, y, 16)) : Char(e)
+        e = to_uint8(x)
+        u = (y != "") ? Char(to_uint16(y)) : Char(e)
         d[e] = u
     end
     d
@@ -66,7 +75,7 @@ end
 
 function NativeEncodingToUnicode(barr::Vector{UInt8}, mapping::Dict)
     l = length(barr)
-    carr = Vector{Char}(l)
+    carr = similar(barr, Char)
     for i = 1:l
         carr[i] = get(mapping, barr[i], zero(Char))
     end

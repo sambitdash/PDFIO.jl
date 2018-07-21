@@ -6,6 +6,8 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
     createTreeNode, CosTreeNode, CosIndirectObject,
     CosDictType
 
+using Compat
+
 """
 ```
     CosObject
@@ -147,8 +149,8 @@ end
 ```
     CosXString
 ```
-Concrete representation of a [`CosString`](@ref) object. The underlying data is represented
-as hexadecimal characters in ASCII.
+Concrete representation of a [`CosString`](@ref) object. The underlying data is
+represented as hexadecimal characters in ASCII.
 """
 struct CosXString <: CosString
   val::Vector{UInt8}
@@ -159,15 +161,21 @@ end
 ```
     CosLiteralString
 ```
-Concrete representation of a [`CosString`](@ref) object. The underlying data is represented
-by byte representations without any encoding.
+Concrete representation of a [`CosString`](@ref) object. The underlying data is
+represented by byte representations without any encoding.
 """
 struct CosLiteralString <: CosString
     val::Vector{UInt8}
-    CosLiteralString(arr::Vector{UInt8})=new(arr)
+    CosLiteralString(arr::Vector{UInt8}) = new(arr)
 end
 
-CosLiteralString(str::AbstractString)=CosLiteralString(transcode(UInt8,str))
+function CosLiteralString(str::AbstractString)
+    buf = IOBuffer()
+    for c in str
+        print(buf, Char(c))
+    end
+    CosLiteralString(take!(buf))
+end
 
 """
 ```
@@ -191,12 +199,13 @@ end
 ```
     get(o::CosArray, isNative=false) -> Vector{CosObject}
 ```
-An array in a PDF file. The objects can be any combination of [`CosObject`](@ref).
+An array in a PDF file. The objects can be any combination of
+[`CosObject`](@ref).
 
-`isNative = true` will return the underlying native object inside the `CosArray` by
-invoking get method on it.
+`isNative = true` will return the underlying native object inside the `CosArray`
+by invoking get method on it.
 """
-get(o::CosArray, isNative=false) = isNative ? map((x)->get(x),o.val) : o.val
+get(o::CosArray, isNative=false) = isNative ? map((x)->get(x), o.val) : o.val
 
 get(o::CosIndirectObject{CosArray}, isNative=false) = get(o.obj, isNative)
 """
@@ -213,8 +222,8 @@ length(o::CosIndirectObject{CosArray}) = length(o.obj)
 ```
     CosDict
 ```
-Name value pair of a PDF objects. The object is very similar to the `Dict` object. The `key`
-has to be of a [`CosName`](@ref) type.
+Name value pair of a PDF objects. The object is very similar to the `Dict`
+object. The `key` has to be of a [`CosName`](@ref) type.
 """
 mutable struct CosDict <: CosObject
     val::Dict{CosName, CosObject}
@@ -237,8 +246,8 @@ get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
 ```
     set!(dict::CosDict, name::CosName, obj::CosObject) -> CosObject
 ```
-Sets the value on a dictionary object. Setting a `CosNull` object deletes the object from
-the dictionary.
+Sets the value on a dictionary object. Setting a `CosNull` object deletes the
+object from the dictionary.
 """
 function set!(dict::CosDict, name::CosName, obj::CosObject)
     if (obj === CosNull)
@@ -249,30 +258,31 @@ function set!(dict::CosDict, name::CosName, obj::CosObject)
     return dict
 end
 
-set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) = set!(o.obj, name, obj)
+set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
+    set!(o.obj, name, obj)
 
 """
 ```
     CosStream
 ```
-A stream object in a PDF. Stream objects have an `extends` disctionary, followed by binary
-data.
+A stream object in a PDF. Stream objects have an `extends` disctionary, followed
+by binary data.
 """
 mutable struct CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
-    CosStream(d::CosDict,isInternal::Bool=true)=new(d,isInternal)
+    CosStream(d::CosDict,isInternal::Bool=true) = new(d, isInternal)
 end
 
 get(stm::CosStream, name::CosName) = get(stm.extent, name)
 
-get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj,name)
+get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj, name)
 
 set!(stm::CosStream, name::CosName, obj::CosObject)=
     set!(stm.extent, name, obj)
 
-set!(o::CosIndirectObject{CosStream}, name::CosName, obj::CosObject)=
-    set!(o.obj,name,obj)
+set!(o::CosIndirectObject{CosStream}, name::CosName, obj::CosObject) =
+    set!(o.obj, name, obj)
 
 """
 Decodes the stream and provides output as an BufferedInputStream.
@@ -285,24 +295,24 @@ get(stm::CosStream) = decode(stm)
 ```
 """
 mutable struct CosObjectStream <: CosObject
-  stm::CosStream
-  n::Int
-  first::Int
-  oids::Vector{Int}
-  oloc::Vector{Int}
-  function CosObjectStream(s::CosStream)
-    n = get(s, CosName("N"))
-    @assert n != CosNull
-    first = get(s, CosName("First"))
-    @assert first != CosNull
-    cosStreamRemoveFilters(s)
-    n_n = get(n)
-    first_n = get(first)
-    oids = Vector{Int}(n_n)
-    oloc = Vector{Int}(n_n)
-    read_object_info_from_stm(s, oids, oloc, n_n, first_n)
-    new(s, n_n, first_n,oids, oloc)
-  end
+    stm::CosStream
+    n::Int
+    first::Int
+    oids::Vector{Int}
+    oloc::Vector{Int}
+    function CosObjectStream(s::CosStream)
+        n = get(s, CosName("N"))
+        @assert n != CosNull
+        first = get(s, CosName("First"))
+        @assert first != CosNull
+        cosStreamRemoveFilters(s)
+        n_n = get(n)
+        first_n = get(first)
+        oids = zeros(Int, n_n)
+        oloc = zeros(Int, n_n)
+        read_object_info_from_stm(s, oids, oloc, n_n, first_n)
+        new(s, n_n, first_n,oids, oloc)
+    end
 end
 
 get(os::CosObjectStream, name::CosName) = get(os.stm, name)
@@ -325,8 +335,8 @@ get(os::CosObjectStream) = get(os.stm)
 mutable struct CosXRefStream<: CosObject
   stm::CosStream
   isDecoded::Bool
-  function CosXRefStream(s::CosStream,isDecoded::Bool=false)
-    new(s,isDecoded)
+  function CosXRefStream(s::CosStream, isDecoded::Bool=false)
+      new(s, isDecoded)
   end
 end
 
@@ -349,32 +359,29 @@ Can be a Number Tree or a Name Tree.
 `range`: is `null` in case of a root node
 `values`: is `null` in case of an intermediate node
 
-Intent: faster loookup without needing to load the complete tree structure. Hence, the tree
-will not be loaded on full scan.
+Intent: faster loookup without needing to load the complete tree structure.
+Hence, the tree will not be loaded on full scan.
 """
 mutable struct CosTreeNode{K <: Union{Int, String}}
-    values::Nullable{Vector{Tuple{K,CosObject}}}
-    kids::Nullable{Vector{CosIndirectObjectRef}}
-    range::Nullable{Tuple{K,K}}
+    values::Union{Nothing, Vector{Tuple{K, CosObject}}}
+    kids::Union{Nothing, Vector{CosIndirectObjectRef}}
+    range::Union{Nothing, Tuple{K, K}}
     function CosTreeNode{K}() where {K <: Union{Int, String}}
-        new(Nullable{Vector{Tuple{K,CosObject}}}(),
-            Nullable{Vector{CosIndirectObjectRef}}(),
-            Nullable{Tuple{K,K}}())
+        new(nothing, nothing, nothing)
     end
 end
 
 # If K is Int, it's a number tree else it's a String which is a name tree
-function createTreeNode{K}(::Type{K}, dict::CosObject)
+function createTreeNode(::Type{K}, dict::CosObject) where K
     range = get(dict, CosName("Limits"))
     kids  = get(dict, CosName("Kids"))
     node = CosTreeNode{K}()
     if (range !== CosNull)
         r = get(range, true)
-        node.range = Nullable((r[1],r[2]))
+        node.range = (r[1], r[2])
     end
     if (kids !== CosNull)
-        ks = get(kids)
-        node.kids = Nullable(ks)
+        node.kids = get(kids)
     end
     return populate_values(node, dict)
 end
@@ -383,8 +390,8 @@ function populate_values(node::CosTreeNode{Int}, dict::CosObject)
     nums = get(dict, CosName("Nums"))
     if (nums !== CosNull)
         v = get(nums)
-        values = [(get(v[2i-1]),v[2i]) for i=1:div(length(v),2)]
-        node.values = Nullable(values)
+        values = [(get(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]
+        node.values = values
     end
     return node
 end
@@ -393,8 +400,8 @@ function populate_values(node::CosTreeNode{String}, dict::CosObject)
     names = get(dict, CosName("Names"))
     if (names !== CosNull)
         v = get(names, true)
-        values = [(get(v[2i-1]),v[2i]) for i=1:div(length(v),2)]
-        node.values = Nullable(values)
+        values = [(get(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]
+        node.values = values
     end
     return node
 end
@@ -407,11 +414,11 @@ showref(io::IO, o::CosObject) = show(io, o)
 
 show(io::IO, o::CosNullType) = print(io, "null")
 
-show(io::IO, o::CosName) = @printf io "/%s" String(o)
+show(io::IO, o::CosName) = print(io, "/", String(o))
 
-show(io::IO, o::CosXString) =  @printf io "%s" "<"*String(copy(o.val))*">"
+show(io::IO, o::CosXString) =  print(io, "<", String(copy(o.val)), ">")
 
-show(io::IO, o::CosLiteralString) = @printf io "%s" "("*String(copy(o.val))*")"
+show(io::IO, o::CosLiteralString) = print(io, "(", String(copy(o.val)), ")")
 
 function show(io::IO, o::CosArray)
   print(io, '[')
@@ -439,9 +446,13 @@ show(io::IO, stm::CosStream) =
 
 show(io::IO, os::CosObjectStream) = show(io, os.stm)
 
-show(io::IO, o::CosIndirectObjectRef) = @printf io "%d %d R" o.val[1] o.val[2]
+show(io::IO, o::CosIndirectObjectRef) = print(io, o.val[1], ' ', o.val[2], " R")
 
-showref(io::IO, o::CosIndirectObject) = @printf io "%d %d R" o.num o.gen
+showref(io::IO, o::CosIndirectObject) = print(io, o.num, ' ', o.gen, " R")
 
-show(io::IO, o::CosIndirectObject) =
-  (@printf io "\n%d %d obj\n" o.num o.gen; show(io, o.obj); println(io, "\nendobj\n"))
+function show(io::IO, o::CosIndirectObject)
+    println(io, "")
+    println(io, o.num, ' ', o.gen, " obj")
+    print(io, o.obj)
+    println(io, "\nendobj\n")
+end

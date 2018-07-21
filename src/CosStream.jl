@@ -3,6 +3,7 @@ import Base: eof
 export  cosStreamRemoveFilters,
         merge_streams,
         decode
+using Compat
 
 _not_implemented(input, params) = error(E_NOT_IMPLEMENTED)
 
@@ -147,7 +148,7 @@ end
 
 @inline function png_predictor_rule(curr, prev, n, row, rule)
     if rule == 0
-        copy!(curr, 1, row, 2, n)
+        copyto!(curr, 1, row, 2, n)
     elseif rule == 1
         curr[1] = row[2]
         for i=2:n
@@ -181,7 +182,7 @@ function apply_flate_params(io::IO, pred::Int, col::Int)
     while !eof(io)
         row = read(io, incol)
         @assert (pred != 5) && (row[1] == pred)
-        nline >= 1 && copy!(prev, curr)
+        nline >= 1 && copyto!(prev, curr)
         png_predictor_rule(curr, prev, col, row, row[1])
         write(iob, curr)
         nline += 1
@@ -193,7 +194,7 @@ end
 function decode_rle(input::IO)
     iob = IOBuffer()
     b = read(input, UInt8)
-    a = Vector{UInt8}(256)
+    a = Vector{UInt8}(undef, 256)
     while !eof(input)
         b == 0x80 && break
         if b < 0x80
@@ -245,7 +246,7 @@ function _extend_buffer!(data, nb, i, j)
     SLIDE = 1024
     if j + 4 > i
         resize!(data, nb + SLIDE)
-        copy!(data, i + 1 + SLIDE, data, i + 1, nb - i)
+        copyto!(data, i + 1 + SLIDE, data, i + 1, nb - i)
         nb += SLIDE
          i += SLIDE
     end

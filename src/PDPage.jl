@@ -8,6 +8,7 @@ export PDPage,
        pdPageExtractText
 
 using ..Cos
+using Compat
 
 abstract type PDPage end
 
@@ -66,14 +67,12 @@ end
 ```
     pdPageGetContentObjects(page::PDPage) -> CosObject
 ```
-Page rendering objects are normally stored in a `CosStream` object in a PDF file. This
-method provides access to the stream object.
+Page rendering objects are normally stored in a `CosStream` object in a PDF file.
+This method provides access to the stream object.
 """
 function pdPageGetContentObjects(page::PDPage)
-    if (isnull(page.content_objects))
-        load_page_objects(page)
-    end
-    return get(page.content_objects)
+    page.content_objects === nothing && load_page_objects(page)
+    return page.content_objects
 end
 
 function pdPageEvalContent(page::PDPage, state::GState=GState{:PDFIO}())
@@ -86,7 +85,8 @@ end
 ```
     pdPageExtractText(io::IO, page::PDPage) -> IO
 ```
-Extracts the text from the `page`. This extraction works best for tagged PDF files.
+Extracts the text from the `page`. This extraction works best for tagged PDF
+files.
 For PDFs not tagged, some line and word breaks will not be extracted properly.
 """
 function pdPageExtractText(io::IO, page::PDPage)
@@ -99,12 +99,12 @@ mutable struct PDPageImpl <: PDPage
     doc::PDDocImpl
     cospage::CosObject
     contents::CosObject
-    content_objects::Nullable{PDPageObjectGroup}
+    content_objects::Union{Nothing, PDPageObjectGroup}
     fonts::Dict{CosName, PDFont}
     xobjs::Dict{CosName, PDXObject}
     PDPageImpl(doc, cospage, contents) =
         new(doc, cospage, contents,
-            Nullable{PDPageObjectGroup}(),
+            nothing,
             Dict{CosName,PDFont}(),
             Dict{CosName,PDXObject}())
 end
@@ -144,9 +144,8 @@ get_page_contents(page::PDPage, obj::CosObject) = obj
 
 function load_page_objects(page::PDPageImpl)
     contents = pdPageGetContents(page)
-    if (isnull(page.content_objects))
-        page.content_objects = Nullable(PDPageObjectGroup())
-    end
+    page.content_objects === nothing &&
+        (page.content_objects = PDPageObjectGroup())
     return load_page_objects(page, contents)
 end
 
@@ -155,7 +154,7 @@ load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
 function load_page_objects(page::PDPageImpl, stm::CosObject)
     bufstm = decode(stm)
     try
-        load_objects(get(page.content_objects), bufstm)
+        load_objects(page.content_objects, bufstm)
     finally
         util_close(bufstm)
     end

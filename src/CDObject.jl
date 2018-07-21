@@ -23,8 +23,9 @@ translate the `CosString` to `CDTextString`
 """
 const CDTextString = String
 
-using Base.Dates
-using Base.Dates.CompoundPeriod
+using Compat
+using Compat.Dates
+using Compat.Dates: CompoundPeriod
 using Rectangle
 
 """

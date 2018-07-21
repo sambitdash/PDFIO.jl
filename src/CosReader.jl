@@ -29,7 +29,8 @@ function parse_value(ps::IO, fparse_more::Function=do_nothing)
     byte == LESS_THAN  ? parse_xstring(ps) :
     byte == PERCENT    ? parse_comment(ps) :
     byte == SOLIDUS    ? parse_name(ps) :
-    byte == MINUS_SIGN || byte == PLUS_SIGN || byte == PERIOD ? parse_number(ps) :
+    byte == MINUS_SIGN ||
+        byte == PLUS_SIGN || byte == PERIOD ? parse_number(ps) :
     ispdfdigit(byte)   ? try_parse_indirect_reference(ps) :
     byte == LEFT_SB    ? parse_array(ps) :
     parse_pdfOpsOrConst(ps, fparse_more)
@@ -237,34 +238,34 @@ The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 """
 function read_internal_stream_data(ps::IO, extent::CosDict, len::Int)
-  if get(extent, CosName("F")) != CosNull
-    return false
-  end
+    if get(extent, CosName("F")) != CosNull
+        return false
+    end
 
-  (path,io) = get_tempfilepath()
-  try
-    data = read(ps,len)
-    write(io, data)
-  finally
-    util_close(io)
-  end
+    (path,io) = get_tempfilepath()
+    try
+        data = read(ps,len)
+        write(io, data)
+    finally
+        util_close(io)
+    end
 
-  #Ensuring all the data is written to a file
-  set!(extent, CosName("F"), CosLiteralString(path))
+    #Ensuring all the data is written to a file
+    set!(extent, CosName("F"), CosLiteralString(path))
 
-  filter = get(extent, CosName("Filter"))
-  if (filter != CosNull)
-    set!(extent, CosName("FFilter"), filter)
-    set!(extent, CosName("Filter"), CosNull)
-  end
+    filter = get(extent, CosName("Filter"))
+    if (filter != CosNull)
+        set!(extent, CosName("FFilter"), filter)
+        set!(extent, CosName("Filter"), CosNull)
+    end
 
-  parms = get(extent, CosName("DecodeParms"))
-  if (parms != CosNull)
-    set!(extent, CosName("FDecodeParms"), parms)
-    set!(extent, CosName("DecodeParms"),CosNull)
-  end
+    parms = get(extent, CosName("DecodeParms"))
+    if (parms != CosNull)
+        set!(extent, CosName("FDecodeParms"), parms)
+        set!(extent, CosName("DecodeParms"),CosNull)
+    end
 
-  return true
+    return true
 end
 
 
@@ -399,18 +400,15 @@ end
 Parse a float from the given bytes vector, starting at `from` and ending at the
 byte before `to`. Bytes enclosed should all be ASCII characters.
 """
-function float_from_bytes(bytes::Vector{UInt8}, from::Int, to::Int)
-    # The ccall is not ideal (Base.tryparse would be better), but it actually
-    # makes an 2× difference to performance
-    ccall(:jl_try_substrtod, Nullable{Float64},
-            (Ptr{UInt8}, Csize_t, Csize_t), bytes, from - 1, to - from + 1)
-end
+float_from_bytes(bytes::Vector{UInt8}) = tryparse(Float64, String(bytes))
 
 """
 Parse an integer from the given bytes vector, starting at `from` and ending at
 the byte before `to`. Bytes enclosed should all be ASCII characters.
 """
-function int_from_bytes(bytes::Vector{UInt8}, from::Int, to::Int)
+function int_from_bytes(bytes::Vector{UInt8})
+    from = 1
+    to = length(bytes)
     @inbounds isnegative = bytes[from] == MINUS_SIGN ? (from += 1; true) : false
     num = Int(0)
     @inbounds for i in from:to
@@ -419,28 +417,19 @@ function int_from_bytes(bytes::Vector{UInt8}, from::Int, to::Int)
     return ifelse(isnegative, -num, num)
 end
 
-function number_from_bytes(ps::IO, isint::Bool,
-                           bytes::Vector{UInt8}, from::Int, to::Int)
-    #=
-    @inbounds if hasleadingzero(bytes, from, to)
-        _error(E_LEADING_ZERO, ps)
-    end
-=#
-
+function number_from_bytes(ps::IO, isint::Bool, bytes::Vector{UInt8})
+    from = 1
+    to = length(bytes)
     if isint
         @inbounds if to == from && bytes[from] == MINUS_SIGN
             _error(E_BAD_NUMBER, ps)
         end
-        num = int_from_bytes(bytes, from, to)
+        num = int_from_bytes(bytes)
         return CosInt(num)
-
     else
-        res = float_from_bytes(bytes, from, to)
-        if isnull(res)
-            _error(E_BAD_NUMBER, ps)
-        else
-            return CosFloat(get(res))
-        end
+        res = float_from_bytes(bytes)
+        res === nothing && _error(E_BAD_NUMBER, ps)
+        return CosFloat(res)
     end
 end
 
@@ -457,7 +446,7 @@ function parse_unsignednumber(ps::IO)
         skip(ps,1)
     end
     chomp_space!(ps)
-    return number_from_bytes(ps, isint, number, 1, length(number))
+    return number_from_bytes(ps, isint, number)
 end
 
 
@@ -481,5 +470,5 @@ function parse_number(ps::IO)
         skip(ps, 1)
     end
     chomp_space!(ps)
-    return number_from_bytes(ps, isint, number, 1, length(number))
+    return number_from_bytes(ps, isint, number)
 end
