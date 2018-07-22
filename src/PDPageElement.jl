@@ -469,6 +469,7 @@ struct TextLayout
     lty::Float32
     text::String
     fontname::CosObject
+    fontflags::UInt32
 end
 
 CDRect(t::TextLayout) = CDRect(min(t.lbx, t.rbx, t.rtx, t.ltx),
@@ -640,7 +641,7 @@ end
     if !get(state, :in_artifact, false)
         tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
                         tb[3,1], tb[3,2], tb[4,1], tb[4,2],
-                        text, fontname)
+                        text, fontname, font.flags)
         push!(heap, tl)
     end
     offset_text_pos!(w, 0f0, state)    

@@ -1,6 +1,9 @@
 import ..Cos: CosXString
 
+export isBold, isItalic, isFixedW, isAllCap, isSmallCap
+
 using Rectangle
+
 
 #=
 Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory
@@ -344,12 +347,14 @@ mutable struct PDFont
     widths::Union{AdobeFontMetrics, Vector{Int}, CIDWidth}
     fum::FontUnicodeMapping
     glyph_name_id::Dict{CosName, UInt8}
+    flags::UInt32
     @inline function PDFont(doc::PDDoc, cosfont::CosObject)
         fum = FontUnicodeMapping()
         merge_encoding!(fum, doc.cosDoc, cosfont)
         widths = get_font_widths(doc.cosDoc, cosfont)
         glyph_name_id = get_glyph_id_mapping(doc.cosDoc, cosfont)
-        return new(doc, cosfont, widths, fum, glyph_name_id)
+        flags = get_font_flags(doc, cosfont, widths)
+        return new(doc, cosfont, widths, fum, glyph_name_id, flags)
     end
 end
 
@@ -357,6 +362,25 @@ INIT_CODE(::CIDWidth) = 0x0000
 SPACE_CODE(w::CIDWidth) = get_character_code(cn"space", w)
 INIT_CODE(x) = 0x00
 SPACE_CODE(x) = get_character_code(cn"space", x)
+
+isBold(pdfont::PDFont)     = (pdfonts.flags & 0x80000000) > 0
+isItalic(pdfont::PDFont)   = (pdfonts.flags & 0x00000040) > 0
+isFixedW(pdfont::PDFont)   = (pdfonts.flags & 0x00000001) > 0
+isAllCap(pdfont::PDFont)   = (pdfonts.flags & 0x00010000) > 0
+isSmallCap(pdfont::PDFont) = (pdfonts.flags & 0x00020000) > 0
+
+# Not supported FD attribute in CIDFonts
+@inline function get_font_flags(doc::PDDoc, cosfont::CosObject, widths)
+    flags = 0x00000000
+    refdesc = get(cosfont, cn"FontDescriptor")
+    refdesc === CosNull && return get_font_flags(widths)
+    cosflags = cosDocGetObject(doc.cosDoc, refdesc, cn"Flags")
+    cfweight = cosDocGetObject(doc.cosDoc, refdesc, cn"FontWeight")
+    cfweight !== CosNull && get(cfweight) > 700 && (flags += 0x80000000)
+    cosflags !== CosNull && (flags += UInt32(get(cosflags)))
+    return flags
+end
+get_font_flags(x) = 0x00000000
 
 function get_character_code(name::CosName, pdfont::PDFont)
     length(pdfont.glyph_name_id) > 0 &&

@@ -10,12 +10,28 @@ mutable struct AdobeFontMetrics
     name_to_b::Dict{CosName, Vector{Int}}
     kern_pairs::Dict{Tuple{CosName, CosName}, Tuple{Int, Int}}
     has_kerning::Bool
+    italicAngle::Int
+    isFixedPitch::Bool
+    weight::Symbol
+    
     AdobeFontMetrics() = new(Dict{Int, CosName}(),
                              Dict{CosName, Int}(),
                              Dict{CosName, Vector{Int}}(),
                              Dict{Tuple{CosName, CosName}, Tuple{Int, Int}}(),
-                             false)
+                             false,
+                             0,
+                             false,
+                             :Medium
+                             )
 end
+
+isBold(afm::AdobeFontMetrics)   = afm.weight === :Bold
+isItalic(afm::AdobeFontMetrics) = afm.italicAngle != 0
+isFixedW(afm::AdobeFontMetrics) = afm.isFixedPitch
+
+get_font_flags(afm::AdobeFontMetrics) =
+    isItalic(afm) ? 0x00000040 : 0x00000000 +
+    isFixedW(afm) ? 0x00000001 : 0x00000000
 
 function interpret_metric_line(line::AbstractString)
     tokens = split(line, ';'; keep=false)
@@ -89,18 +105,29 @@ function read_afm(fontname::AbstractString)
     state = start(lines)
     while !done(lines, state)
         (line, state) = next(lines, state)
-        bStartCharMetrics = startswith(line, "StartCharMetrics")
-        bReadKernPairs = startswith(line, "StartKernPairs")
-        if bStartCharMetrics || bReadKernPairs
+        if startswith(line, "ItalicAngle")
             v = split(line)
-            n = parse(Int, v[2])
-            if bStartCharMetrics
-                populate_char_metrics(lines, state, afm, n)
-                bStartCharMetrics = false
-            end
-            if bReadKernPairs
-                populate_kern_pairs(lines, state, afm, n)
-                bReadKernPairs = false
+            afm.italicAngle = parse(Int, v[2])
+        elseif startswith(line, "IsFixedPitch")
+            v = split(line)
+            afm.isFixedPitch = parse(Bool, v[2])
+        elseif startswith(line, "Weight")
+            v = split(line)
+            afm.weight = Symbol(v[2])
+        else
+            bStartCharMetrics = startswith(line, "StartCharMetrics")
+            bReadKernPairs = startswith(line, "StartKernPairs")
+            if bStartCharMetrics || bReadKernPairs
+                v = split(line)
+                n = parse(Int, v[2])
+                if bStartCharMetrics
+                    populate_char_metrics(lines, state, afm, n)
+                    bStartCharMetrics = false
+                end
+                if bReadKernPairs
+                    populate_kern_pairs(lines, state, afm, n)
+                    bReadKernPairs = false
+                end
             end
         end
     end
