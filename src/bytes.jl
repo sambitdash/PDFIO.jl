@@ -6,7 +6,7 @@ export BACKSPACE, NULL,TAB, LINE_FEED,NEWLINE, FORM_FEED, RETURN,
        LATIN_UPPER_A, LATIN_UPPER_F, LATIN_UPPER_I, BACKSLASH, LATIN_A, LATIN_B,LATIN_E,
        LATIN_F, LATIN_I, LATIN_L, LATIN_N, LATIN_R, LATIN_S, LATIN_T, LATIN_U,LATIN_Z,
        OBJECT_BEGIN, OBJECT_END, ESCAPES, REVERSE_ESCAPES,
-       ESCAPED_ARRAY, LEFT_PAREN, RIGHT_PAREN, LESS_THAN,
+       LEFT_PAREN, RIGHT_PAREN, LESS_THAN,
        GREATER_THAN, LEFT_CB, RIGHT_CB, LEFT_SB, RIGHT_SB,
        PERCENT,PERIOD, NUMBER_SIGN, BANG, TILDE, LATIN_UPPER_D,STREAM,ENDSTREAM,
        LATIN_UPPER_E,LATIN_UPPER_F, LATIN_UPPER_O, LATIN_UPPER_P,
@@ -93,21 +93,24 @@ const ESCAPES = Dict(
     LATIN_R      => RETURN,
     LATIN_T      => TAB)
 
+#=
 const REVERSE_ESCAPES = Dict(map(reverse, ESCAPES))
 const ESCAPED_ARRAY = Vector{Vector{UInt8}}(256)
 for c in 0x00:0xFF
-    ESCAPED_ARRAY[c + 1] = if c == SOLIDUS
-        [SOLIDUS]  # don't escape this one
-    elseif c ≥ 0x80
-        [c]  # UTF-8 character copied verbatim
-    elseif haskey(REVERSE_ESCAPES, c)
-        [BACKSLASH, REVERSE_ESCAPES[c]]
-    elseif iscntrl(@compat Char(c)) || !isprint(@compat Char(c))
-        UInt8[BACKSLASH, LATIN_U, hex(c, 4)...]
-    else
-        [c]
-    end
+    ESCAPED_ARRAY[c + 1] =
+        if c == SOLIDUS
+            [SOLIDUS]  # don't escape this one
+        elseif c ≥ 0x80
+            [c]  # UTF-8 character copied verbatim
+        elseif haskey(REVERSE_ESCAPES, c)
+            [BACKSLASH, REVERSE_ESCAPES[c]]
+        elseif iscntrl(@compat Char(c)) || !isprint(@compat Char(c))
+            UInt8[BACKSLASH, LATIN_U, hex(c, 4)...]
+        else
+            [c]
+        end
 end
+=#
 
 const XREF     =[LATIN_X,LATIN_R,LATIN_E,LATIN_F]
 const TRAILER  =[LATIN_T,LATIN_R,LATIN_A,LATIN_I,LATIN_L,LATIN_E,LATIN_R]

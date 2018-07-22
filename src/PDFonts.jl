@@ -131,10 +131,10 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
     (subtype === cn"Type0") && return glyph_name_id
     baseenc = cosDocGetObject(cosdoc, cosfont, cn"BaseEncoding")
     encoding_mapping =
-        baseenc == cn"WinAnsiEncoding"  ? GlyphName_to_WINEncoding :
-        baseenc == cn"MacRomanEncoding" ? GlyphName_to_MACEncoding :
-        baseenc == cn"MacExpertEncoding"? Glyphname_to_MEXEncoding :
-                                          GlyphName_to_STDEncoding
+        baseenc == cn"WinAnsiEncoding"   ? GlyphName_to_WINEncoding :
+        baseenc == cn"MacRomanEncoding"  ? GlyphName_to_MACEncoding :
+        baseenc == cn"MacExpertEncoding" ? Glyphname_to_MEXEncoding :
+                                           GlyphName_to_STDEncoding
     merge!(glyph_name_id, encoding_mapping)
 
     diff = cosDocGetObject(cosdoc, cosfont, cn"Differences")
@@ -154,7 +154,7 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
     return glyph_name_id
 end
 
-get_encoded_string(s::CosString, fum::Void) = CDTextString(s)
+get_encoded_string(s::CosString, fum::Nothing) = CDTextString(s)
 
 get_encoded_string(s::CosString, fum::FontUnicodeMapping) = 
     get_encoded_string(Vector{UInt8}(s), fum)

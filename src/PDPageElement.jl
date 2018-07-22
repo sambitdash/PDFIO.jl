@@ -12,6 +12,8 @@ export  PDPageObject,
 import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
 
+using Compat
+using Compat.LinearAlgebra
 """
 ```
     PDPageObject
@@ -101,12 +103,12 @@ function populate_element(grp::PDPageObjectGroup, elem::PDPageElement)
     if (elem.noperand >= 0)
         for i=1:elem.noperand
             operand=pop!(grp.objs)
-            unshift!(elem.operands,operand)
+            pushfirst!(elem.operands,operand)
         end
     else
         while(isa(grp.objs[end],CosObject))
             operand=pop!(grp.objs)
-            unshift!(elem.operands,operand)
+            pushfirst!(elem.operands,operand)
         end
     end
 end
@@ -533,7 +535,7 @@ restore!(gs::GState) = (pop!(gs.state); gs)
     state[end][:h_profile] = Dict{Int,Int}()
 
     # Graphics state
-    state[end][:CTM] = eye(Float32, 3)
+    state[end][:CTM] = Matrix{Float32}(I, 3, 3)
 
     # Text states
     state[end][:Tc] = 0f0
@@ -563,7 +565,7 @@ function show_text_layout!(io::IO, state::GState)
     xwr = get_character_width(cn"X", afm)/1000f0
     ph = 0f0
     npc = 0
-    for i = 1:endof(heap)
+    for i = 1:lastindex(heap)
         tlayout = heap[i]
         h = height(tlayout)
         if h > 7f0*ht
@@ -650,9 +652,9 @@ end
 
 @inline function evalContent!(pdo::PDPageTextObject,
                               state::GState=Vector{Dict}())
-    state[:Tm]  = eye(Float32, 3)
-    state[:Tlm] = eye(Float32, 3)
-    state[:Trm] = eye(Float32, 3)
+    state[:Tm]  = Matrix{Float32}(I, 3, 3)
+    state[:Tlm] = Matrix{Float32}(I, 3, 3)
+    state[:Trm] = Matrix{Float32}(I, 3, 3)
     evalContent!(pdo.group, state)
     delete!(state, :Tm)
     delete!(state, :Tlm)
@@ -725,7 +727,7 @@ end
 @inline function set_text_pos!(tx, ty, state::GState)
     tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
     #:TL may be called outside of BT...ET block
-    tlm::Matrix{Float32}  = get(state, :Tlm, eye(Float32, 3))
+    tlm::Matrix{Float32}  = get(state, :Tlm, Matrix{Float32}(I, 3, 3))
     tlm = tmul*tlm
     tm = copy(tlm)
 
@@ -738,7 +740,7 @@ end
 @inline function offset_text_pos!(tx, ty, state::GState)
     tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
     #:TL may be called outside of BT...ET block
-    tm::Matrix{Float32}  = get(state, :Tm, eye(Float32, 3))
+    tm::Matrix{Float32} = get(state, :Tm, Matrix{Float32}(I, 3, 3))
     tm = tmul*tm
     state[:Tm]  = tm
     return state

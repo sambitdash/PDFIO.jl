@@ -1,3 +1,4 @@
+using Compat
 using ..Cos
 using ..Common
 
@@ -8,7 +9,7 @@ function get_latin_charset_dict(col)
     m = latin_charset_encoding()
     map(m[:,1], m[:,col]) do x, y
         if y != "-"
-            v = parse(UInt8, y, 8)
+            v = to_uint8(y)
             dict[v] = CosName(strip(x))
         end
     end
@@ -47,7 +48,7 @@ function get_charset_dict(f::Function)
     dict = Dict{UInt8,CosName}()
     m = f()
     map(m[:,2], m[:,3]) do x, y
-        v = parse(UInt8, y, 8)
+        v = to_uint8(y)
         dict[v] = CosName(strip(x))
     end
     return dict

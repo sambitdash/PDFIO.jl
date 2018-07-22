@@ -6,6 +6,7 @@ chomp_eol!,
 _peekb
 
 import Base: peek
+using Compat
 
 @inline chomp_space!(ps::IO) =
     while !eof(ps) && ps |> _peekb |> ispdfspace skip(ps,1) end
@@ -27,7 +28,7 @@ _peekb(io::IO) = UInt8(peek(io))
 
 function kmp_preprocess(P)
     m = length(P)
-    pi = Vector{Int}(m)
+    pi = zeros(Int, m)
     pi[1] = 0
     k = 0
     for q = 2:m

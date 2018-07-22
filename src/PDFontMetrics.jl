@@ -2,6 +2,7 @@
 #Currently only the width metric is used.
 using ..Cos
 
+using Compat
 using Rectangle
 
 mutable struct AdobeFontMetrics
@@ -34,7 +35,7 @@ get_font_flags(afm::AdobeFontMetrics) =
     isFixedW(afm) ? 0x00000001 : 0x00000000
 
 function interpret_metric_line(line::AbstractString)
-    tokens = split(line, ';'; keep=false)
+    tokens = split(line, ';'; keepempty=false)
     cid = -1; wx = 1000; n = "null"; bb = [0,0,0,0]
     for token in tokens
         v = split(strip(token), ' '; limit = 2)
@@ -84,7 +85,7 @@ function populate_kern_pairs(lines, state, afm, nLines)
     (line, state) = next(lines, state)
     while nLineRead < nLines
         n1, n2, x, y = interpret_kerpair_line(line)
-        afm.kern_pairs[(CosName(n1), CosName(n2))] = (x, y)
+        afm.kern_pairs[(n1, n2)] = (x, y)
         nLineRead += 1
         (line, state) = next(lines, state)
     end
@@ -95,7 +96,7 @@ function read_afm(fontname::AbstractString)
     d_name_w = Dict{CosName, Int}()
     d_cid_w = Dict{Int, Int}()
     filename = fontname * ".afm"
-    path = joinpath(Pkg.dir("PDFIO"), "data", "fonts", filename)
+    path = joinpath(@__DIR__, "..", "data", "fonts", filename)
     lines = readlines(path)
     bStartCharMetrics = false
     bReadKernPairs = false
@@ -190,10 +191,11 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
     return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, get(dw))
 end
 
-get_character_width(n::CosName, afm::AdobeFontMetrics) = get(afm.name_to_wx, n, 1000)
-get_character_width(cid::Int, afm::AdobeFontMetrics) =
+get_character_width(n::CosName, afm::AdobeFontMetrics) =
+    get(afm.name_to_wx, n, 1000)
+get_character_width(cid::UInt8, afm::AdobeFontMetrics) =
     get_character_width(get(afm.cid_to_name, cid, nothing), afm)
-get_character_width(Void, afm::AdobeFontMetrics) = 1000
+get_character_width(::Nothing, afm::AdobeFontMetrics) = 1000
 
 get_kern_width(c1::Int, c2::Int, afm::AdobeFontMetrics) =
     get_kern_width(get(afm.cid_to_name, c1, nothing),
@@ -201,9 +203,9 @@ get_kern_width(c1::Int, c2::Int, afm::AdobeFontMetrics) =
                    afm)
 get_kern_width(n1::CosName, n2::CosName, afm::AdobeFontMetrics) =
     get(afm.kern_pairs, (n1, n2), (0, 0))[1]
-get_kern_width(c1, ::Void, other) = 0
-get_kern_width(::Void, c2, other) = 0
-get_kern_width(::Void, ::Void, ::Any) = 0
+get_kern_width(c1, ::Nothing, other) = 0
+get_kern_width(::Nothing, c2, other) = 0
+get_kern_width(::Nothing, ::Nothing, ::Any) = 0
 get_kern_width(c1, c2, other) = 0
 
 get_character_width(cid::UInt8, widths::Vector) =

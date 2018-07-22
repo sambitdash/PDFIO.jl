@@ -1,8 +1,9 @@
+using Compat
 using PDFIO
 using PDFIO.PD
 using PDFIO.Cos
 using PDFIO.Common
-using Base.Test
+using Test
 
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
@@ -10,7 +11,6 @@ using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
 include("debugIO.jl")
 
 @testset "PDFIO tests" begin
-
     @testset "Miscellaneous" begin
         @test string(CDDate("D : 199812231952 - 08' 30 "))==
             "1998-12-23T19:52:00 - 8 hours, 30 minutes"
@@ -26,7 +26,7 @@ include("debugIO.jl")
                                CosInt(0),
                                CosInt(640),
                                CosInt(480)])) == CDRect(0, 0, 640, 480)
-        @test parse_indirect_ref(IOBuffer(Vector{UInt8}("10 0 R\n"))) ==
+        @test parse_indirect_ref(IOBuffer(b"10 0 R\n")) ==
             CosIndirectObjectRef(10, 0)
     end
     @testset "Test FlateDecode" begin
@@ -92,7 +92,7 @@ include("debugIO.jl")
             filename="A1947-15.pdf"
             DEBUG && println(filename)
             isfile(filename)||
-                download("http://indiacode.nic.in/bitstream/123456789/1419/1/194715.pdf",filename)
+                download("https://indiacode.nic.in/bitstream/123456789/1419/1/A1947-15.pdf", filename)
             doc = pdDocOpen(filename)
             resfile, template = testfiles(filename)
             io = util_open(resfile, "w")
@@ -203,7 +203,6 @@ include("debugIO.jl")
             length(utilPrintOpenFiles()) == 0
         end
     end
-
     
     @testset "Test read_string" begin
         @test begin
@@ -221,11 +220,11 @@ include("debugIO.jl")
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 54
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") ==
-                range(1,1)
+                range(1, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") ==
-                range(3,1)
+                range(3, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "42") ==
-                range(46,1)
+                range(46, length=1)
             pdDocGetPageRange(doc, "iii")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
@@ -337,6 +336,7 @@ include("debugIO.jl")
             length(utilPrintOpenFiles()) == 0
         end
     end
+
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end
