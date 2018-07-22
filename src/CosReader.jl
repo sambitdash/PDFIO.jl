@@ -400,7 +400,13 @@ end
 Parse a float from the given bytes vector, starting at `from` and ending at the
 byte before `to`. Bytes enclosed should all be ASCII characters.
 """
-float_from_bytes(bytes::Vector{UInt8}) = tryparse(Float64, String(bytes))
+function float_from_bytes(bytes::Vector{UInt8})
+    res = tryparse(Float64, String(bytes))
+    res === nothing && return res
+    res isa Float64 && return res
+    isnull(res) && return nothing
+    return get(res)
+end
 
 """
 Parse an integer from the given bytes vector, starting at `from` and ending at

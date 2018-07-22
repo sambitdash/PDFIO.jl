@@ -1,9 +1,9 @@
 using Compat
+using Compat.Test
 using PDFIO
 using PDFIO.PD
 using PDFIO.Cos
 using PDFIO.Common
-using Test
 
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
@@ -220,11 +220,11 @@ include("debugIO.jl")
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 54
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") ==
-                range(1, length=1)
+                Compat.range(1, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") ==
-                range(3, length=1)
+                Compat.range(3, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "42") ==
-                range(46, length=1)
+                Compat.range(46, length=1)
             pdDocGetPageRange(doc, "iii")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0

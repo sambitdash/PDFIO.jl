@@ -11,7 +11,7 @@ mutable struct AdobeFontMetrics
     name_to_b::Dict{CosName, Vector{Int}}
     kern_pairs::Dict{Tuple{CosName, CosName}, Tuple{Int, Int}}
     has_kerning::Bool
-    italicAngle::Int
+    italicAngle::Float32
     isFixedPitch::Bool
     weight::Symbol
     
@@ -30,12 +30,15 @@ isBold(afm::AdobeFontMetrics)   = afm.weight === :Bold
 isItalic(afm::AdobeFontMetrics) = afm.italicAngle != 0
 isFixedW(afm::AdobeFontMetrics) = afm.isFixedPitch
 
-get_font_flags(afm::AdobeFontMetrics) =
-    isItalic(afm) ? 0x00000040 : 0x00000000 +
-    isFixedW(afm) ? 0x00000001 : 0x00000000
+function get_font_flags(afm::AdobeFontMetrics)
+    res = 0x00000000
+    isItalic(afm) && (res += 0x00000040)
+    isFixedW(afm) && (res += 0x00000001)
+    return res
+end
 
 function interpret_metric_line(line::AbstractString)
-    tokens = split(line, ';'; keepempty=false)
+    tokens = Compat.split(line, ';'; keepempty=false) 
     cid = -1; wx = 1000; n = "null"; bb = [0,0,0,0]
     for token in tokens
         v = split(strip(token), ' '; limit = 2)
@@ -108,7 +111,7 @@ function read_afm(fontname::AbstractString)
         (line, state) = next(lines, state)
         if startswith(line, "ItalicAngle")
             v = split(line)
-            afm.italicAngle = parse(Int, v[2])
+            afm.italicAngle = parse(Float32, v[2])
         elseif startswith(line, "IsFixedPitch")
             v = split(line)
             afm.isFixedPitch = parse(Bool, v[2])
