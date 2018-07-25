@@ -14,13 +14,15 @@ using ..Common
 ```
     CosDoc
 ```
-PDF document format is developed in two layers. A logical PDF document information is
-represented over a physical file structure called COS. `CosDoc` is an access object to the
-physical file structure of the PDF document. To be used for accessing PDF internal objects
-from document structure when no direct API is available.
+PDF document format is developed in two layers. A logical PDF document
+information is represented over a physical file structure called COS. `CosDoc` is
+an access object to the physical file structure of the PDF document. To be used
+for accessing PDF internal objects from document structure when no direct API is
+available.
 
-One can access any aspect of PDF using the COS level APIs alone. However, they may require
-you to know the PDF specification in details and they are not the most intuititive.
+One can access any aspect of PDF using the COS level APIs alone. However, they
+may require you to know the PDF specification in details and they are not the
+most intuititive.
 """
 abstract type CosDoc end
 
@@ -51,8 +53,8 @@ end
 ```
     show(io::IO, doc::CosDoc)
 ```
-Prints the CosDoc. The intent is to print lesser information from the structure as default
-can be overwhelming flooding the REPL.
+Prints the CosDoc. The intent is to print lesser information from the structure
+as default can be overwhelming flooding the REPL.
 """
 function show(io::IO, doc::CosDoc)
     print(io, "\nCosDoc ==>\n")
@@ -71,10 +73,10 @@ end
 ```
     cosDocClose(doc::CosDoc)
 ```
-Reclaims all system resources consumed by the `CosDoc`. The `CosDoc` should not be used
-after this method is called. `cosDocClose` only needs to be explicitly called if you have
-opened the document by 'cosDocOpen'. Documents opened with `pdDocOpen` do not need to use
-this method.
+Reclaims all system resources consumed by the `CosDoc`. The `CosDoc` should not
+be used after this method is called. `cosDocClose` only needs to be explicitly
+called if you have opened the document by 'cosDocOpen'. Documents opened with
+`pdDocOpen` do not need to use this method.
 """
 function cosDocClose(doc::CosDocImpl)
     util_close(doc.ps)
@@ -87,9 +89,10 @@ end
 ```
     cosDocOpen(filepath::AbstractString) -> CosDoc
 ```
-Provides the access to the physical file and file structure of the PDF document. Returns a
-`CosDoc` which can be subsequently used for all query into the PDF files. Remember to
-release the document with `cosDocClose`, once the object is used.
+Provides the access to the physical file and file structure of the PDF document.
+Returns a `CosDoc` which can be subsequently used for all query into the PDF
+files. Remember to release the document with `cosDocClose`, once the object is
+used.
 """
 function cosDocOpen(fp::AbstractString)
     doc = CosDocImpl(abspath(fp));
@@ -106,9 +109,10 @@ end
 ```
     cosDocGetRoot(doc::CosDoc) -> CosDoc
 ```
-The structural starting point of a PDF document. Also known as document root dictionary.
-This provides details of object locations and document access methodology. This should not
-be confused with the `catalog` object of the PDF document.
+The structural starting point of a PDF document. Also known as document root
+dictionary. This provides details of object locations and document access
+methodology. This should not be confused with the `catalog` object of the PDF
+document.
 """
 cosDocGetRoot(doc::CosDoc) = CosNull
 
@@ -116,14 +120,15 @@ cosDocGetRoot(doc::CosDoc) = CosNull
 ```
     cosDocGetObject(doc::CosDoc, obj::CosObject) -> CosObject
 ```
-PDF objects are distributed in the file and can be cross referenced from one location to
-another. This is called as indirect object referencing. However, to extract actual
-information one needs access to the complete object (direct object). This method provides
-access to the direct object after searching for the object in the document structure. If an
-indirect object reference is passed as an `obj` parameter the complete `indirect object`
-(reference as well as all content of the object) are returned. A `direct object` passed to
-the method is returned as is without any translation. This ensures the user does not have
-to go through checking the type of the objects before accessing the contents.
+PDF objects are distributed in the file and can be cross referenced from one
+location to another. This is called as indirect object referencing. However, to
+extract actual information one needs access to the complete object (direct
+object). This method provides access to the direct object after searching for the
+object in the document structure. If an indirect object reference is passed as
+`obj` parameter the complete `indirect object` (reference as well as all content
+of the object) are returned. A `direct object` passed to the method is returned
+as is without any translation. This ensures the user does not have to go through
+checking the type of the objects before accessing the contents.
 """
 cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 
@@ -131,20 +136,32 @@ cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 ```
     cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName) -> CosObject
 ```
-Returns the object referenced inside the `dict` dictionary. `dict` can be a PDF dictionary
-object reference or an indirect object or a direct `CosDict` object.
+Returns the object referenced inside the `dict` dictionary. `dict` can be a PDF
+dictionary object reference or an indirect object or a direct `CosDict` object.
 """
-cosDocGetObject(doc::CosDoc, dict::CosIndirectObject{CosDict}, key::CosName) =
+cosDocGetObject(doc::CosDoc,
+                dict::CosIndirectObject{CosDict},
+                key::Union{CosName, CosNullType}) =
     cosDocGetObject(doc, dict.obj, key)
 
-function cosDocGetObject(doc::CosDoc, dict::CosIndirectObjectRef, key::CosName)
-    dict = cosDocGetObject(doc, dict)
-    dict === CosNull && return CosNull
-    return cosDocGetObject(doc, get(dict, key))
+function cosDocGetObject(doc::CosDoc,
+                         dict::CosIndirectObjectRef,
+                         key::Union{CosName, CosNullType})
+    dictd = cosDocGetObject(doc, dict)
+    dictd === CosNull && return CosNull
+    return cosDocGetObject(doc, dictd, key)
 end
 
 cosDocGetObject(doc::CosDoc, dict::CosDict, key::CosName) =
     cosDocGetObject(doc, get(dict, key))
+
+function cosDocGetObject(doc::CosDoc, dict::CosDict, key::CosNullType)
+    dres = CosDict()
+    for (k, v) in dict.val
+        set!(dres, k, cosDocGetObject(doc, v))
+    end
+    return dres
+end
 
 function cosDocGetRoot(doc::CosDocImpl)
     root = doc.hasNativeXRefStm ? get(doc.xrefstm[1], CosName("Root")) :
@@ -174,13 +191,12 @@ function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
                          ref::CosIndirectObjectRef, locObj::CosObjectLoc)
     objstm = cosDocGetObject(doc, stmref)
     if (objstm === CosNull)
-        #= This is not really needed but PDF specification is kind of equivocal if
-           object streams should be referenced in the XRef stream.
-
-           An object stream itself, like any stream, shall be an indirect object, and
-           therefore, there shall be an entry for it in a cross-reference table or
-           cross-reference stream (see 7.5.8, "Cross-Reference Streams"), although there
-           might not be any references to it (of the form 243 0 R).
+        #= This is not really needed but PDF specification is kind of
+        equivocal if object streams should be referenced in the XRef stream.
+        An object stream itself, like any stream, shall be an indirect object,
+        and therefore, there shall be an entry for it in a cross-reference table
+        or cross-reference stream (see 7.5.8, "Cross-Reference Streams"),
+        although there might not be any references to it (of the form 243 0 R).
         =#
         objstm = scan_object_stream(doc, stmref)
         attach_object(doc, objstm)
@@ -254,7 +270,8 @@ function read_trailer(ps::IOStream, lookahead::Int)
 end
 
 #PDF-Version >= 1.5
-@inline may_have_xrefstream(doc::CosDocImpl) = (doc.version[1]>=1) && (doc.version[2]>=5)
+@inline may_have_xrefstream(doc::CosDocImpl) =
+    (doc.version[1]>=1) && (doc.version[2]>=5)
 
 function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     TRAILER_REWIND = 50
@@ -262,7 +279,8 @@ function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     seek(ps, doc.size-TRAILER_REWIND)
 
     if (doc.isPDF)
-        locate_keyword!(ps,STARTXREF,TRAILER_REWIND) < 0 && error(E_UNEXPECTED_CHAR)
+        locate_keyword!(ps,STARTXREF,TRAILER_REWIND) < 0 &&
+            error(E_UNEXPECTED_CHAR)
         chomp_space!(ps)
         doc.startxref = parse_number(ps).val
         chomp_space!(ps)
@@ -275,11 +293,12 @@ function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
         chomp_space!(ps)
         doc.hasNativeXRefStm = (may_have_xrefstream(doc) &&
                                 ps |> _peekb |> ispdfdigit)
-        (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) : read_xref_tables(ps, doc)
+        (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) :
+                                 read_xref_tables(ps, doc)
     end
 end
 
-attach_object(doc::CosDocImpl, obj::CosObject)=nothing
+attach_object(doc::CosDocImpl, obj::CosObject) = nothing
 
 attach_object(doc::CosDocImpl, objstm::CosIndirectObject{CosObjectStream})=
   attach_object(doc,objstm.obj.stm)
@@ -357,7 +376,7 @@ function read_xref_tables(ps::IOStream, doc::CosDocImpl)
 end
 
 # The xref stream may be accessed later. There is no point encrypting this data
-#Ideal will be to remove the filter.
+# Ideal will be to remove the filter.
 function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
   return read_xref_stream(xrefstm, doc.xref)
 end

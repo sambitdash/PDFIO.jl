@@ -1,11 +1,12 @@
 export PDPage,
-       pdPageGetContents,
-       pdPageIsEmpty,
-       pdPageGetCosObject,
-       pdPageGetContentObjects,
-       pdPageGetMediaBox,
-       pdPageGetCropBox,
-       pdPageExtractText
+    pdPageGetContents,
+    pdPageIsEmpty,
+    pdPageGetCosObject,
+    pdPageGetContentObjects,
+    pdPageGetFonts,
+    pdPageGetMediaBox,
+    pdPageGetCropBox,
+    pdPageExtractText
 
 using ..Cos
 using Compat
@@ -16,9 +17,9 @@ abstract type PDPage end
 ```
     pdPageGetCosObject(page::PDPage) -> CosObject
 ```
-PDF document format is developed in two layers. A logical PDF document information is
-represented over a physical file structure called COS. This method provides the internal
-COS object associated with the page object.
+PDF document format is developed in two layers. A logical PDF document
+information is represented over a physical file structure called COS. This method
+provides the internal COS object associated with the page object.
 """
 pdPageGetCosObject(page::PDPage) = page.cospage
 
@@ -26,8 +27,8 @@ pdPageGetCosObject(page::PDPage) = page.cospage
 ```
     pdPageGetContents(page::PDPage) -> CosObject
 ```
-Page rendering objects are normally stored in a `CosStream` object in a PDF file. This
-method provides access to the stream object.
+Page rendering objects are normally stored in a `CosStream` object in a PDF file.
+This method provides access to the stream object.
 
 Please refer to the PDF specification for further details.
 """
@@ -75,6 +76,22 @@ function pdPageGetContentObjects(page::PDPage)
     return page.content_objects
 end
 
+
+"""
+```
+    pdPageGetFonts(page::PDPage) -> Dict{CosName, PDFont}()
+```
+Returns a dictionary of fonts in the page.
+"""
+function pdPageGetFonts(page::PDPage)
+    cosfonts = find_resource(page, cn"Font", CosNull)
+    dres = Dict{CosName, PDFont}()
+    for (name, val) in cosfonts.val
+        dres[name] = PDFont(page.doc, val)
+    end
+    return dres
+end
+
 function pdPageEvalContent(page::PDPage, state::GState=GState{:PDFIO}())
     state[:source] = page
     evalContent!(pdPageGetContentObjects(page), state)
@@ -109,7 +126,8 @@ mutable struct PDPageImpl <: PDPage
             Dict{CosName,PDXObject}())
 end
 
-PDPageImpl(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage, CosNull)
+PDPageImpl(doc::PDDocImpl, cospage::CosObject) =
+    PDPageImpl(doc, cospage, CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default
@@ -168,7 +186,7 @@ function load_page_objects(page::PDPageImpl, stms::CosArray)
 end
 
 function populate_font_encoding(page, font, fontname)
-    if get(page.fums, fontname, CosNull) == CosNull
+    if get(page.fums, fontname, CosNull) === CosNull
         fum = FontUnicodeMapping()
         merge_encoding!(fum, page.doc.cosDoc, font)
         page.fums[fontname] = fum
@@ -177,12 +195,14 @@ end
 
 function find_resource(page::PDPageImpl,
                        restype::CosName,
-                       fontname::CosName)
+                       fontname::Union{CosName, CosNullType})
     res = CosNull
     cosdoc = page.doc.cosDoc
     pgnode = page.cospage
 
-    while res === CosNull && pgnode !== CosNull
+    while ((fontname !== CosNull && res === CosNull) ||
+           (fontname === CosNull)) && pgnode !== CosNull
+
         resref = get(pgnode, cn"Resources")
         if resref === CosNull
             pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
@@ -198,7 +218,15 @@ function find_resource(page::PDPageImpl,
             pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
             continue
         end
-        res = cosDocGetObject(cosdoc, ress, fontname)
+        if fontname !== CosNull
+            res = cosDocGetObject(cosdoc, ress, fontname)
+        else
+            resdict = cosDocGetObject(cosdoc, ress, fontname)
+            res === CosNull && (res = CosDict())
+            for (k, v) in resdict.val
+                set!(res, k, v)
+            end
+        end
         pgnode = cosDocGetObject(cosdoc, pgnode, cn"Parent")
     end
     return res
@@ -208,10 +236,10 @@ get_font(page::PDPageImpl, fontname::CosName) =
     get!(page.fonts, fontname,
          get_pd_font!(page.doc, find_resource(page, cn"Font", fontname)))
     
-
 get_xobject(page::PDPageImpl, xobjname::CosName) = 
     get!(page.xobjs, xobjname,
-         get_pd_xobject!(page.doc, find_resource(page, cn"XObject", xobjname)))
+         get_pd_xobject!(page.doc,
+                         find_resource(page, cn"XObject", xobjname)))
 
 function page_find_attribute(page::PDPageImpl, resname::CosName)
     res = CosNull

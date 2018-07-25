@@ -61,7 +61,8 @@ get_font(xobj::PDXObject, fontname::CosName) =
 
 get_xobject(xobj::PDXObject, xobjname::CosName) = 
     get!(xobj.xobjs, xobjname,
-         get_pd_xobject!(xobj.doc, find_resource(xobj, cn"XObject", xobjname)))
+         get_pd_xobject!(xobj.doc,
+                         find_resource(xobj, cn"XObject", xobjname)))
 
 function load_content_objects(xobj::PDFormXObject)
     stm = xobj.cosXObj

@@ -1,6 +1,10 @@
 import ..Cos: CosXString
 
-export isBold, isItalic, isFixedW, isAllCap, isSmallCap
+export pdFontIsBold,
+    pdFontIsItalic,
+    pdFontIsFixedW,
+    pdFontIsAllCap,
+    pdFontIsSmallCap
 
 using Rectangle
 
@@ -363,11 +367,11 @@ SPACE_CODE(w::CIDWidth) = get_character_code(cn"space", w)
 INIT_CODE(x) = 0x00
 SPACE_CODE(x) = get_character_code(cn"space", x)
 
-isBold(pdfont::PDFont)     = (pdfont.flags & 0x80000000) > 0
-isItalic(pdfont::PDFont)   = (pdfont.flags & 0x00000040) > 0
-isFixedW(pdfont::PDFont)   = (pdfont.flags & 0x00000001) > 0
-isAllCap(pdfont::PDFont)   = (pdfont.flags & 0x00010000) > 0
-isSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
+pdFontIsBold(pdfont::PDFont)     = (pdfont.flags & 0x80000000) > 0
+pdFontIsItalic(pdfont::PDFont)   = (pdfont.flags & 0x00000040) > 0
+pdFontIsFixedW(pdfont::PDFont)   = (pdfont.flags & 0x00000001) > 0
+pdFontIsAllCap(pdfont::PDFont)   = (pdfont.flags & 0x00010000) > 0
+pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
 
 # Not supported FD attribute in CIDFonts
 @inline function get_font_flags(doc::PDDoc, cosfont::CosObject, widths)
