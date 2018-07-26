@@ -91,10 +91,9 @@ include("debugIO.jl")
         @test begin
             filename="A1947-15.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("https://indiacode.nic.in/bitstream/123456789/1419/1/A1947-15.pdf", filename)
             doc = pdDocOpen(filename)
-            resfile, template = testfiles(filename)
+            resfile, template = local_testfiles(filename)
+            println(resfile, template)
             io = util_open(resfile, "w")
             try
                 extract_text(io, doc)
@@ -109,10 +108,8 @@ include("debugIO.jl")
 
     @testset "Corrupt File" begin
         @test begin
-            filename="A1947-14.pdf"
+            filename="files/A1947-14.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://indiacode.nic.in/bitstream/123456789/2169/1/A1947-14.pdf",filename)
             doc = pdDocOpen(filename)
             try
                 npage= pdDocGetPageCount(doc)
