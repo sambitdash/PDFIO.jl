@@ -91,9 +91,8 @@ include("debugIO.jl")
         @test begin
             filename="A1947-15.pdf"
             DEBUG && println(filename)
+            resfile, template, filename = local_testfiles(filename)
             doc = pdDocOpen(filename)
-            resfile, template = local_testfiles(filename)
-            println(resfile, template)
             io = util_open(resfile, "w")
             try
                 extract_text(io, doc)
