@@ -128,8 +128,7 @@ mandatory. Hence, all information needed may not be available in a document.
 Please refer to the PDF specification for further details.
 """
 function pdDocGetInfo(doc::PDDoc)
-    ref = get(doc.cosDoc.trailer[1], CosName("Info"))
-    obj = cosDocGetObject(doc.cosDoc, ref)
+    obj = cosDocGetInfo(doc.cosDoc)
     dInfo = Dict{CDTextString, Union{CDTextString, CDDate}}()
     for (key, val) in get(obj)
         skey = CDTextString(key)

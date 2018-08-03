@@ -6,6 +6,8 @@ export pdFontIsBold,
     pdFontIsAllCap,
     pdFontIsSmallCap
 
+using Compat
+
 using Rectangle
 
 
@@ -352,13 +354,15 @@ mutable struct PDFont
     fum::FontUnicodeMapping
     glyph_name_id::Dict{CosName, UInt8}
     flags::UInt32
+    fontname::CosName
     @inline function PDFont(doc::PDDoc, cosfont::CosObject)
         fum = FontUnicodeMapping()
         merge_encoding!(fum, doc.cosDoc, cosfont)
         widths = get_font_widths(doc.cosDoc, cosfont)
         glyph_name_id = get_glyph_id_mapping(doc.cosDoc, cosfont)
         flags = get_font_flags(doc, cosfont, widths)
-        return new(doc, cosfont, widths, fum, glyph_name_id, flags)
+        fontname = get_font_name(doc, cosfont, widths)
+        return new(doc, cosfont, widths, fum, glyph_name_id, flags, fontname)
     end
 end
 
@@ -380,11 +384,25 @@ pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
     refdesc === CosNull && return get_font_flags(widths)
     cosflags = cosDocGetObject(doc.cosDoc, refdesc, cn"Flags")
     cfweight = cosDocGetObject(doc.cosDoc, refdesc, cn"FontWeight")
-    cfweight !== CosNull && get(cfweight) > 700 && (flags += 0x80000000)
+    cfname   = cosDocGetObject(doc.cosDoc, refdesc, cn"FontName")
+    cfweight !== CosNull && get(cfweight) >= 700 && (flags |= 0x80000000)
+    cfname   !== CosNull &&
+        (occursin("Bold", string(cfname)) ||
+         occursin("bold", string(cfname))) &&
+        (flags |= 0x80000000)
     cosflags !== CosNull && (flags += UInt32(get(cosflags)))
     return flags
 end
 get_font_flags(x) = 0x00000000
+
+@inline function get_font_name(doc::PDDoc, cosfont::CosObject, widths)
+    refdesc = get(cosfont, cn"FontDescriptor")
+    refdesc === CosNull && return get_font_name(widths)    
+    return cosDocGetObject(doc.cosDoc, refdesc, cn"FontName")
+end
+#Not implemented for CIDFonts
+get_font_name(::CIDWidth) = cn"" 
+get_font_name(x) = error("Non-standard 14 fonts having no font descriptor")
 
 function get_character_code(name::CosName, pdfont::PDFont)
     length(pdfont.glyph_name_id) > 0 &&

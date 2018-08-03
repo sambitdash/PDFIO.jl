@@ -2,6 +2,7 @@ export CosDoc,
        cosDocOpen,
        cosDocClose,
        cosDocGetRoot,
+       cosDocGetInfo,
        cosDocGetObject,
        cosDocGetPageNumbers
 
@@ -169,6 +170,12 @@ function cosDocGetRoot(doc::CosDocImpl)
     return cosDocGetObject(doc, root)
 end
 
+function cosDocGetInfo(doc::CosDocImpl)
+    info = doc.hasNativeXRefStm ? get(doc.xrefstm[1], cn"Info") :
+        get(doc.trailer[1], cn"Info")
+    return cosDocGetObject(doc, info)
+end 
+
 cosDocGetObject(doc::CosDocImpl, obj::CosObject) = obj
 
 function cosDocGetObject(doc::CosDocImpl, ref::CosIndirectObjectRef)
@@ -291,8 +298,7 @@ function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     if doc.isPDF
         seek(ps, doc.startxref)
         chomp_space!(ps)
-        doc.hasNativeXRefStm = (may_have_xrefstream(doc) &&
-                                ps |> _peekb |> ispdfdigit)
+        doc.hasNativeXRefStm = ps |> _peekb |> ispdfdigit
         (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) :
                                  read_xref_tables(ps, doc)
     end

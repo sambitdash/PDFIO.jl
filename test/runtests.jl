@@ -254,6 +254,29 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Font Flags test" begin
+        @test begin
+            filename="files/pdf-sample.pdf"
+            doc = pdDocOpen(filename)
+            (npage = pdDocGetPageCount(doc)) == 1
+            page = pdDocGetPage(doc, 1)
+            fonts = pdPageGetFonts(page)
+            d = Dict{CosName, Tuple}()
+            for (k, v) in fonts
+                d[k] = (pdFontIsAllCap(v), pdFontIsBold(v),
+                        pdFontIsFixedW(v), pdFontIsItalic(v),
+                        pdFontIsSmallCap(v))
+            end
+            @assert d[cn"F2"]  == (false, false, false, false, false)
+            @assert d[cn"TT2"] == (false, true,  false, false, false)
+            @assert d[cn"TT8"] == (false, true,  false, true,  false)
+            @assert d[cn"TT6"] == (false, false, false, false, false)
+            @assert d[cn"TT4"] == (false, false, false, false, false)
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end    
+    end
+
     @testset "Forms XObjects Test" begin
         @test begin
             filename="Graphics-wpf.pdf"
@@ -264,7 +287,7 @@ include("debugIO.jl")
                          "File=%2fGraphics-sample%2fGraphics-wpf.pdf",
                          filename)
             doc = pdDocOpen(filename)
-            (npage = pdDocGetPageCount(doc)) == 5
+            @assert (npage = pdDocGetPageCount(doc)) == 5
             try
                 open(result, "w") do io
                     for i=npage:npage

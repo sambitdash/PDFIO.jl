@@ -14,6 +14,7 @@ mutable struct AdobeFontMetrics
     italicAngle::Float32
     isFixedPitch::Bool
     weight::Symbol
+    fontname::CosName
     
     AdobeFontMetrics() = new(Dict{Int, CosName}(),
                              Dict{CosName, Int}(),
@@ -22,13 +23,16 @@ mutable struct AdobeFontMetrics
                              false,
                              0,
                              false,
-                             :Medium
+                             :Medium,
+                             cn""
                              )
 end
 
 isBold(afm::AdobeFontMetrics)   = afm.weight === :Bold
 isItalic(afm::AdobeFontMetrics) = afm.italicAngle != 0
 isFixedW(afm::AdobeFontMetrics) = afm.isFixedPitch
+
+get_font_name(afm::AdobeFontMetrics) = afm.fontname
 
 function get_font_flags(afm::AdobeFontMetrics)
     res = 0x00000000
@@ -115,6 +119,9 @@ function read_afm(fontname::AbstractString)
         elseif startswith(line, "IsFixedPitch")
             v = split(line)
             afm.isFixedPitch = parse(Bool, v[2])
+        elseif startswith(line, "FontName")
+            v = split(line)
+            afm.fontname = CosName(v[2])
         elseif startswith(line, "Weight")
             v = split(line)
             afm.weight = Symbol(v[2])
