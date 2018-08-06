@@ -221,6 +221,18 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
+        @test begin
+            filename="339.pdf"
+            DEBUG && println(filename)
+            isfile(filename)||
+                download("http://www.stillhq.com/pdfdb/000339/data.pdf",filename)
+            doc = pdDocOpen(filename)
+            stm = get(cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(4, 0)))
+            buf = read(stm)
+            @assert length(buf) == 6636
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end        
     end
     
     @testset "Test read_string" begin

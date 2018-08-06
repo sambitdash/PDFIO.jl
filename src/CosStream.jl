@@ -13,11 +13,10 @@ include("Inflate.jl")
 Decodes using the LZWDecode compression
 """
 function decode_lzw(input, parms)
+    early = 1
     if parms !== CosNull 
         earlyChange = get(parms, cn"EarlyChange")
         early = earlyChange === CosNull ? 1 : get(earlyChange)
-    else
-        early = 1
     end
     io = decode_lzw(input, early)
     util_close(input)
