@@ -236,49 +236,35 @@ function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
 end
 
 function read_header(ps)
-  skipv(ps,PERCENT)
-  b = UInt8[]
-  c = advance!(ps)
-  while(c != MINUS_SIGN)
-    push!(b,c)
-    c=advance!(ps)
-  end
-  major = advance!(ps)
-  if ispdfdigit(major)
-      major -= DIGIT_ZERO
-  else
-      error(E_BAD_HEADER)
-  end
-  skipv(ps,PERIOD)
-  minor = advance!(ps)
-
-  if ispdfdigit(minor)
-      minor -= DIGIT_ZERO
-  else
-      error(E_BAD_HEADER)
-  end
-  return [major,minor,b]
+    skipv(ps, PERCENT)
+    b = UInt8[]
+    c = advance!(ps)
+    while(c != MINUS_SIGN)
+        push!(b, c)
+        c=advance!(ps)
+    end
+    major = advance!(ps)
+    !ispdfdigit(major) && error(E_BAD_HEADER)
+    major -= DIGIT_ZERO
+    skipv(ps, PERIOD)
+    minor = advance!(ps)
+    !ispdfdigit(minor) && error(E_BAD_HEADER)
+    minor -= DIGIT_ZERO
+    return [major, minor, b]
 end
 
 
 function read_trailer(ps::IOStream, lookahead::Int)
-  if locate_keyword!(ps,TRAILER,lookahead) < 0
-      error(E_UNEXPECTED_CHAR)
-  end
-  #Check for EOL
-  chomp_eol!(ps)
-  skipv(ps,LESS_THAN)
-  skipv(ps,LESS_THAN)
+    locate_keyword!(ps,TRAILER,lookahead) < 0 && error(E_UNEXPECTED_CHAR)
+    #Check for EOL
+    chomp_eol!(ps)
+    skipv(ps,LESS_THAN)
+    skipv(ps,LESS_THAN)
 
-  dict = parse_dict(ps)
-  chomp_space!(ps)
-
-  return dict
+    dict = parse_dict(ps)
+    chomp_space!(ps)
+    return dict
 end
-
-#PDF-Version >= 1.5
-@inline may_have_xrefstream(doc::CosDocImpl) =
-    (doc.version[1]>=1) && (doc.version[2]>=5)
 
 function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     TRAILER_REWIND = 50
@@ -330,11 +316,8 @@ function read_xref_streams(ps::IOStream, doc::CosDocImpl)
         xrefstm = parse_indirect_obj(ps, doc.xref)
 
         if (!found)
-            if (get(xrefstm,  CosName("Root")) == CosNull)
-                error(E_BAD_TRAILER)
-            else
-                attach_xref_stream(doc, xrefstm)
-            end
+            get(xrefstm,  CosName("Root")) == CosNull && error(E_BAD_TRAILER)
+            attach_xref_stream(doc, xrefstm)
             found = true
         else
             attach_xref_stream(doc, xrefstm)
@@ -348,44 +331,36 @@ function read_xref_streams(ps::IOStream, doc::CosDocImpl)
 end
 
 function read_xref_tables(ps::IOStream, doc::CosDocImpl)
-  found = false
-  while(true)
-    read_xref_table(ps,doc)
-    trailer = read_trailer(ps, length(TRAILER))
+    found = false
+    while(true)
+        read_xref_table(ps,doc)
+        trailer = read_trailer(ps, length(TRAILER))
 
-    if (!found)
-      if (get(trailer,  CosName("Root")) == CosNull)
-        error(E_BAD_TRAILER)
-      else
-        push!(doc.trailer, trailer)
-      end
-      found = true
-    else
-      push!(doc.trailer, trailer)
+        if (!found)
+            get(trailer,  CosName("Root")) == CosNull && error(E_BAD_TRAILER)
+            push!(doc.trailer, trailer)
+            found = true
+        else
+            push!(doc.trailer, trailer)
+        end
+        #Hybrid case
+        loc = get(trailer,  CosName("XRefStm"))
+        if (loc != CosNull)
+            seek(ps, get(loc))
+            xrefstm = parse_indirect_obj(ps, doc.xref)
+            attach_object(doc, xrefstm)
+            read_xref_stream(xrefstm,doc)
+        end
+        prev = get(trailer, CosName("Prev"))
+        prev == CosNull && break
+        seek(ps, get(prev))
     end
-    #Hybrid case
-    loc = get(trailer,  CosName("XRefStm"))
-    if (loc != CosNull)
-      seek(ps, get(loc))
-      xrefstm = parse_indirect_obj(ps, doc.xref)
-      attach_object(doc, xrefstm)
-      read_xref_stream(xrefstm,doc)
-    end
-
-
-    prev = get(trailer, CosName("Prev"))
-    if (prev == CosNull)
-      break
-    end
-    seek(ps, get(prev))
-  end
 end
 
 # The xref stream may be accessed later. There is no point encrypting this data
 # Ideal will be to remove the filter.
-function read_xref_stream(xrefstm::CosObject, doc::CosDocImpl)
-  return read_xref_stream(xrefstm, doc.xref)
-end
+read_xref_stream(xrefstm::CosObject, doc::CosDocImpl) =
+    read_xref_stream(xrefstm, doc.xref)
 
 function read_xref_table(ps::IOStream, doc::CosDocImpl)
     skipv(ps, XREF)
