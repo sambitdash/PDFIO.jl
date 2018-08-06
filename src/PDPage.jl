@@ -51,7 +51,7 @@ pdPageGetMediaBox(page::PDPage) = CDRect(page_find_attribute(page, cn"MediaBox")
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
-    return box
+    return CDRect(box)
 end
 
 """

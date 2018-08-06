@@ -41,6 +41,7 @@ include("debugIO.jl")
             @assert info["Producer"] == "LibreOffice 5.3" && info["Creator"] == "Writer"
             @assert pdDocGetPageCount(doc) == 2
             page = pdDocGetPage(doc, 1)
+            @assert pdPageGetMediaBox(page) == pdPageGetCropBox(page)
             @assert pdPageIsEmpty(page) == false
             contents = pdPageGetContents(page)
             bufstm = get(contents)
@@ -60,6 +61,10 @@ include("debugIO.jl")
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 1
             page = pdDocGetPage(doc, 1)
+            rm = pdPageGetMediaBox(page)
+            rc = pdPageGetCropBox(page)
+            @assert rm == CDRect(0, 0, 612, 792)
+            @assert rc == CDRect(0, 0, 612, 792)
             @assert pdPageIsEmpty(page) == false
             contents = pdPageGetContents(page)
             bufstm = get(contents)
