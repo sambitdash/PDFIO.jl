@@ -397,12 +397,17 @@ get_font_flags(x) = 0x00000000
 
 @inline function get_font_name(doc::PDDoc, cosfont::CosObject, widths)
     refdesc = get(cosfont, cn"FontDescriptor")
-    refdesc === CosNull && return get_font_name(widths)    
+    refdesc === CosNull && return get_font_name(cosfont, widths)    
     return cosDocGetObject(doc.cosDoc, refdesc, cn"FontName")
 end
 #Not implemented for CIDFonts
-get_font_name(::CIDWidth) = cn"" 
-get_font_name(x) = error("Non-standard 14 fonts having no font descriptor")
+get_font_name(cosfont::CosObject, ::CIDWidth) = cn"" 
+function get_font_name(cosfont::CosObject, x)
+    basefname = get(cosfont, cn"BaseFont")
+    basefname === CosNull &&
+        error("Non-standard 14 fonts having no font descriptor")
+    return basefname
+end
 
 function get_character_code(name::CosName, pdfont::PDFont)
     length(pdfont.glyph_name_id) > 0 &&

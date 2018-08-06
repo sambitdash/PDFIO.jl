@@ -34,7 +34,7 @@ end
 
 function createPDXObject(doc::PDDoc, cosstm::CosObject)
     otype = get(cosstm, cn"Type")
-    @assert otype === cn"XObject" || otype === cosNull
+    @assert otype === cn"XObject" || otype === CosNull
     subtype = get(cosstm, cn"Subtype")
     subtype === cn"Form"  && return PDFormXObject(doc, cosstm)
     subtype === cn"Image" && return PDImageXObject(doc, cosstm)

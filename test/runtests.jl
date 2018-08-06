@@ -110,6 +110,24 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Non-standard CMap" begin
+        @test begin
+            filename="16-969_o7jp.pdf"
+            DEBUG && println(filename)
+            resfile, template, filename = local_testfiles(filename)
+            doc = pdDocOpen(filename)
+            io = util_open(resfile, "w")
+            try
+                extract_text(io, doc)
+            finally
+                util_close(io)
+                pdDocClose(doc)
+            end
+            @assert files_equal(resfile, template)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+    
     @testset "Corrupt File" begin
         @test begin
             filename="files/A1947-14.pdf"

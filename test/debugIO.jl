@@ -77,6 +77,7 @@ function extract_text(io, doc)
         if pdPageIsEmpty(page) == false
             pdPageGetContentObjects(page)
             pdPageExtractText(io, page)
+            println(io)
         end
     end
 end
