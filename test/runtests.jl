@@ -379,6 +379,17 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Attachment PDF" begin
+        filename = "fileAttachment.pdf"
+        result, template_file, src = local_testfiles(filename)
+        DEBUG && println(src)
+        doc = pdDocOpen(src)
+        @test string(pdDocGetNamesDict(doc)) ==
+            "\n33 0 obj\n<<\n\t/EmbeddedFiles\t34 0 R\n\t/JavaScript\t35 0 R\n>>\nendobj\n\n"
+        pdDocClose(doc)
+        @test length(utilPrintOpenFiles()) == 0
+    end
+
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end
