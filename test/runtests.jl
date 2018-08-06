@@ -384,8 +384,9 @@ include("debugIO.jl")
         result, template_file, src = local_testfiles(filename)
         DEBUG && println(src)
         doc = pdDocOpen(src)
-        @test string(pdDocGetNamesDict(doc)) ==
-            "\n33 0 obj\n<<\n\t/EmbeddedFiles\t34 0 R\n\t/JavaScript\t35 0 R\n>>\nendobj\n\n"
+        val = string(pdDocGetNamesDict(doc))
+        @test val == "\n33 0 obj\n<<\n\t/EmbeddedFiles\t34 0 R\n\t/JavaScript\t35 0 R\n>>\nendobj\n\n" ||
+            val == "\n33 0 obj\n<<\n\t/JavaScript\t35 0 R\n\t/EmbeddedFiles\t34 0 R\n>>\nendobj\n\n"
         pdDocClose(doc)
         @test length(utilPrintOpenFiles()) == 0
     end
