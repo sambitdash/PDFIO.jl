@@ -148,11 +148,10 @@ function get_page_contents(page::PDPageImpl, contents::CosArray)
     for i = 1:len
         ref = splice!(arr, 1)
         cosstm = get_page_contents(page, ref)
-        if (cosstm !== CosNull)
-            push!(arr, cosstm)
-        end
+        cosstm !== CosNull && push!(arr, cosstm)
     end
-    return merge_streams(contents)
+    stm = merge_streams(page.doc.cosDoc, contents)
+    return stm
 end
 
 get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef) =
@@ -180,7 +179,7 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
 end
 
 function load_page_objects(page::PDPageImpl, stms::CosArray)
-    stm = merge_streams(stms)
+    stm = merge_streams(page.doc.cosDoc, stms)
     page.contents = stm
     return load_page_objects(page, stm)
 end

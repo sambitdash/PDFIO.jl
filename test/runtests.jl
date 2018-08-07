@@ -229,12 +229,31 @@ include("debugIO.jl")
             doc = pdDocOpen(filename)
             stm = get(cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(4, 0)))
             buf = read(stm)
+            util_close(stm)
             @assert length(buf) == 6636
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end        
     end
-    
+
+    @testset "Content Array" begin
+        @test begin
+            filename="504.pdf"
+            DEBUG && println(filename)
+            isfile(filename)||
+                download("http://www.stillhq.com/pdfdb/000504/data.pdf",filename)
+            doc = pdDocOpen(filename)
+            page = pdDocGetPage(doc, 1)
+            contents = pdPageGetContents(page)
+            stm = get(contents)
+            buf = read(stm)
+            util_close(stm)
+            @assert length(buf) == 5574
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "Test read_string" begin
         @test begin
             DEBUG && PDFIO.Cos.parse_data("files/page5.txt")
@@ -402,7 +421,6 @@ include("debugIO.jl")
         pdDocClose(doc)
         @test length(utilPrintOpenFiles()) == 0
     end
-
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end

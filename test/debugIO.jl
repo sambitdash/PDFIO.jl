@@ -16,13 +16,13 @@ import PDFIO.Common: get_tempfilepath,
 
 import Base: close
 
-IODebug=[0,Vector{Tuple{AbstractString,IO}}()]
+IODebug=[0, Vector{Tuple{AbstractString, IO}}()]
 
 function get_tempfilepath()
     global IODebug
-    IODebug[1]+=1
+    IODebug[1] += 1
     path = joinpath(get_tempdir(), string(IODebug[1]))
-    return (path, util_open(path,"w"))
+    return (path, util_open(path, "w"))
 end
 
 function util_open(filename, mode)
@@ -48,7 +48,7 @@ function util_close(handle::IOStream)
     error("IO handle not found")
 end
 
-util_close(handle::IOBuffer)=close(handle)
+util_close(handle::IOBuffer) = close(handle)
 
 function utilPrintOpenFiles()
     global IODebug

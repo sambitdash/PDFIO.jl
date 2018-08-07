@@ -1,7 +1,6 @@
 import Base: eof
 
 export  cosStreamRemoveFilters,
-        merge_streams,
         decode
 using Compat
 
@@ -19,7 +18,6 @@ function decode_lzw(input, parms)
         early = earlyChange === CosNull ? 1 : get(earlyChange)
     end
     io = decode_lzw(input, early)
-    util_close(input)
     return apply_flate_params(io, parms)
 end
 
@@ -65,26 +63,6 @@ function cosStreamRemoveFilters(stm::CosObject)
         set!(stm, CosName("FFilter"), CosNull)
     end
     return stm
-end
-
-function merge_streams(stms::CosArray)
-    (path,io) = get_tempfilepath()
-    try
-        dict = CosDict()
-        set!(dict, cn"F", CosLiteralString(path))
-        ret = CosStream(dict, false)
-        v = get(stms)
-        for stm in v
-            bufstm = decode(stm)
-            data = read(bufstm)
-            util_close(bufstm)
-            write(io, data)
-        end
-        return ret
-    finally
-        util_close(io)
-    end
-    return CosNull
 end
 
 """

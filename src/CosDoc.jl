@@ -4,7 +4,8 @@ export CosDoc,
        cosDocGetRoot,
        cosDocGetInfo,
        cosDocGetObject,
-       cosDocGetPageNumbers
+       cosDocGetPageNumbers,
+       merge_streams
 
 using Compat
 using Compat: notnothing
@@ -512,4 +513,25 @@ function cosDocGetPageNumbers(doc::CosDoc,
     plroot = cosDocGetObject(doc, ref)
     troot = createTreeNode(Int, plroot)
     return find_ntree(find_page_label, doc, troot, -1, label)
+end
+
+function merge_streams(cosdoc::CosDoc, stms::CosArray)
+    (path,io) = get_tempfilepath()
+    try
+        dict = CosDict()
+        set!(dict, cn"F", CosLiteralString(path))
+        ret = CosStream(dict, false)
+        v = get(stms)
+        for stm in v
+            bufstm = decode(stm)
+            data = read(bufstm)
+            util_close(bufstm)
+            write(io, data)
+        end
+        attach_object(cosdoc, ret)
+        return ret
+    finally
+        util_close(io)
+    end
+    return CosNull
 end
