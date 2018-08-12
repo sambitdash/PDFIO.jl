@@ -6,8 +6,6 @@ export pdFontIsBold,
     pdFontIsAllCap,
     pdFontIsSmallCap
 
-using Compat
-
 using Rectangle
 
 
@@ -423,18 +421,34 @@ get_character_code(name::CosName, w) =
 
 get_encoded_string(s, pdfont::PDFont) = get_encoded_string(s, pdfont.fum)
 
-function get_char(barr, state, w::CIDWidth)
-    (b1, state) = next(barr, state)
-    (b2, state) = next(barr, state)
-    return (b1*0x0100 + b2, state)
+
+get_char(barr, w) = iterate(barr)
+function get_char(barr, w::CIDWidth)
+    next = iterate(barr)
+    next === nothing && return nothing
+    (b1, state) = next
+    next = iterate(barr, state)
+    @assert next !== nothing "Error in obtaining character data"
+    (b2, state) = next
+    return (UInt16(b1*0x0100 + b2), state)
 end
-get_char(barr, state, w) = next(barr, state)
+
+function get_char(barr, state, w::CIDWidth)
+    next = iterate(barr, state)
+    next === nothing && return nothing
+    (b1, state) = next
+    next = iterate(barr, state)
+    @assert next !== nothing "Error in obtaining character data"
+    (b2, state) = next
+    return (UInt16(b1*0x0100 + b2), state)
+end
+get_char(barr, state, w) = iterate(barr, state)
 
 function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
     totalw = 0f0
-    st = start(barr)
-    while !done(barr, st)
-        c, st = get_char(barr, st, widths)
+    next = get_char(barr, widths)
+    while next !== nothing
+        c, st = next
         w = get_character_width(c, widths)
         kw = get_kern_width(pc, c, widths)
         w = (w - tj)*tfs / 1000f0 + ((c == SPACE_CODE(widths)) ? tw : tc)
@@ -442,6 +456,7 @@ function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
         pc = c
         tj = 0f0
         totalw += w
+        next = get_char(barr, st, widths)
     end
     return totalw
 end

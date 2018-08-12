@@ -2,7 +2,6 @@
 #Currently only the width metric is used.
 using ..Cos
 
-using Compat
 using Rectangle
 
 mutable struct AdobeFontMetrics
@@ -42,7 +41,7 @@ function get_font_flags(afm::AdobeFontMetrics)
 end
 
 function interpret_metric_line(line::AbstractString)
-    tokens = Compat.split(line, ';'; keepempty=false) 
+    tokens = split(line, ';'; keepempty=false) 
     cid = -1; wx = 1000; n = "null"; bb = [0,0,0,0]
     for token in tokens
         v = split(strip(token), ' '; limit = 2)
@@ -67,7 +66,7 @@ end
 
 function populate_char_metrics(lines, state, afm, nLines)
     nLineRead = 0
-    (line, state) = next(lines, state)
+    (line, state) = iterate(lines, state)
     while nLineRead < nLines
         cid, wx, n, b = interpret_metric_line(line)
         if cid > -1
@@ -76,7 +75,7 @@ function populate_char_metrics(lines, state, afm, nLines)
         afm.name_to_wx[n] = wx
         afm.name_to_b[n] = b
         nLineRead += 1
-        (line, state) = next(lines, state)
+        (line, state) = iterate(lines, state)
     end
 end
 
@@ -89,12 +88,12 @@ end
 
 function populate_kern_pairs(lines, state, afm, nLines)
     nLineRead = 0
-    (line, state) = next(lines, state)
+    (line, state) = iterate(lines, state)
     while nLineRead < nLines
         n1, n2, x, y = interpret_kerpair_line(line)
         afm.kern_pairs[(n1, n2)] = (x, y)
         nLineRead += 1
-        (line, state) = next(lines, state)
+        (line, state) = iterate(lines, state)
     end
     afm.has_kerning = true
 end
@@ -110,9 +109,9 @@ function read_afm(fontname::AbstractString)
     nMetrics = 0
     nLineRead = 0
     afm = AdobeFontMetrics()
-    state = start(lines)
-    while !done(lines, state)
-        (line, state) = next(lines, state)
+    next = iterate(lines)
+    while next !== nothing
+        (line, state) = next
         if startswith(line, "ItalicAngle")
             v = split(line)
             afm.italicAngle = parse(Float32, v[2])
@@ -141,6 +140,7 @@ function read_afm(fontname::AbstractString)
                 end
             end
         end
+        next = iterate(lines, state)
     end
     return afm
 end
@@ -180,11 +180,12 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
         return (dw === CosNull) ? CIDWidth() : CIDWidth(get(dw))
     end
     w = get(w)
-    state = start(w)
-    while !done(w, state)
-        (i, state) = next(w, state)
+    next = iterate(w)
+    while next !== nothing
+        (i, state) = next
         bcid = get(i)
-        (i, state) = next(w, state)
+        next = iterate(w, state)
+        (i, state) = next
         ecid = get(i)
         ccid = bcid
         if ecid isa Vector
@@ -194,9 +195,10 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
                 ccid += 1
             end
         else
-            (width, state) = next(w, state)
+            (width, state) = iterate(w, state)
             m[Interval(UInt16(bcid), UInt16(ecid))] = get(width)
         end
+        next = iterate(w, state)
     end
     return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, get(dw))
 end

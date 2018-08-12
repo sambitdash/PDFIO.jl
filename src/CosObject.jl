@@ -6,8 +6,6 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
     createTreeNode, CosTreeNode, CosIndirectObject,
     CosDictType
 
-using Compat
-
 """
 ```
     CosObject

@@ -12,8 +12,7 @@ export  PDPageObject,
 import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
 
-using Compat
-using Compat.LinearAlgebra
+using LinearAlgebra
 """
 ```
     PDPageObject

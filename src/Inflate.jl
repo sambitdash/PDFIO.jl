@@ -1,5 +1,3 @@
-using Compat
-
 # zlib inflate implementation similar to: https://zlib.net/zpipe.c
 mutable struct z_stream
     next_in::Ptr{UInt8}
@@ -47,7 +45,7 @@ const Z_MEM_ERROR     = -4
 const Z_BUF_ERROR     = -5
 const Z_VERSION_ERROR = -6
 
-@static if Compat.Sys.iswindows()
+@static if Sys.iswindows()
     const libz = "zlib1"
 else
     const libz = "libz"

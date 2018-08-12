@@ -10,8 +10,7 @@ export get_tempdir,
        to_uint8,
        to_uint16
 
-using Compat
-using Compat.Pkg
+using Pkg
 
 # Non-exported variable that retains the current tempdir location.
 # This shoould be only accessed by get_tempdir() only
@@ -38,7 +37,7 @@ utilPrintOpenFiles()=[]
 import Base: zero
 zero(::Type{Char}) = Char(0x00)
 
-using Compat.DelimitedFiles
+using DelimitedFiles
 
 function load_data_file(filename)
     path = joinpath(@__DIR__, "..", "data", filename)

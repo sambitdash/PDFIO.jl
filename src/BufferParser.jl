@@ -6,7 +6,6 @@ chomp_eol!,
 _peekb
 
 import Base: peek
-using Compat
 
 @inline chomp_space!(ps::IO) =
     while !eof(ps) && ps |> _peekb |> ispdfspace skip(ps,1) end

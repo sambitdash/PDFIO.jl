@@ -7,8 +7,7 @@ export CosDoc,
        cosDocGetPageNumbers,
        merge_streams
 
-using Compat
-using Compat: notnothing
+using Base: notnothing
 using ..Common
 
 
@@ -438,10 +437,9 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
                 ln = notnothing(lno)
                 ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
                 found_page = prev_pageno + 1 + ln - start
-                found_page <= pageno && return Compat.range(found_page, length=1)
+                found_page <= pageno && return range(found_page, length=1)
             else
-                return Compat.range(prev_pageno + 1,
-                                    length=(pageno - prev_pageno))
+                return range(prev_pageno + 1, length=(pageno - prev_pageno))
             end
             found = false
             prev_pageno = pageno
@@ -482,12 +480,12 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
         end
     end
     found && lno === nothing &&
-        return Compat.range(prev_pageno + 1, length=(pageno - prev_pageno))
+        return range(prev_pageno + 1, length=(pageno - prev_pageno))
     if found && lno !== nothing
         ln = notnothing(lno)
         ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
         found_page = prev_pageno + 1 + ln - start
-        return Compat.range(found_page, length=1)
+        return range(found_page, length=1)
     end
     throw(ErrorException(E_INVALID_PAGE_NUMBER))
 end

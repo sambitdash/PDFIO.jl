@@ -2,7 +2,6 @@ import Base: eof
 
 export  cosStreamRemoveFilters,
         decode
-using Compat
 
 _not_implemented(input, params) = error(E_NOT_IMPLEMENTED)
 

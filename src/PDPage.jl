@@ -9,7 +9,6 @@ export PDPage,
     pdPageExtractText
 
 using ..Cos
-using Compat
 
 abstract type PDPage end
 

@@ -1,7 +1,6 @@
-julia 0.6
-Compat
+julia 1.0
 Documenter
-LabelNumerals
-RomanNumerals
-AdobeGlyphList
+LabelNumerals 
+RomanNumerals 0.3.1
+AdobeGlyphList 
 Rectangle

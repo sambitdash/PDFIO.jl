@@ -7,8 +7,6 @@ module Cos
 
 using ..Common
 
-using Compat
-
 include("CosObject.jl")
 include("CosObjectHelpers.jl")
 include("CosStream.jl")
