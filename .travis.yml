@@ -4,8 +4,7 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
-  - 0.7
+  - 1
   - nightly
 notifications:
   email: false
@@ -32,10 +31,8 @@ env:
 #script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("PDFIO"); Pkg.test("PDFIO"; coverage=true)'
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("PDFIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("PDFIO")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'import PDFIO; cd(joinpath(dirname(pathof(PDFIO)), "..")); using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
   # push documentation from gh-pages
   - julia -e 'Pkg.add("Documenter")'
   - julia -e 'cd(Pkg.dir("PDFIO")); include(joinpath("docs", "make.jl"))'
