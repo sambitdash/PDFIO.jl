@@ -1,6 +1,6 @@
 julia 1.0
 Documenter
-LabelNumerals 
+LabelNumerals 0.1.0
 RomanNumerals 0.3.1
-AdobeGlyphList 
-Rectangle
+AdobeGlyphList 0.1.0
+Rectangle 0.1.0
