@@ -8,6 +8,7 @@ import Rectangle: Rect
 function convert(::Type{CDTextString}, xstr::CosXString)
     feff = [LATIN_F, LATIN_E, LATIN_F, LATIN_F]
     FEFF = [LATIN_UPPER_F, LATIN_UPPER_E, LATIN_UPPER_F, LATIN_UPPER_F]
+    length(xstr.val) < 4 && return CDTextString("")
     prefix = xstr.val[1:4]
     hasPrefix = (prefix == feff || prefix == FEFF)
     isUTF16   = hasPrefix || prefix[1:2] == UInt8[0x30, 0x30]
@@ -65,4 +66,3 @@ convert(::Type{CDTextString}, name::CosName) =
     CDTextString(split(String(name.val), '_'; limit=2)[2])
 
 String(name::CosName) = convert(String, name)
-
