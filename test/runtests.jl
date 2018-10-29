@@ -156,6 +156,8 @@ include("debugIO.jl")
             isfile(filename)||
                 download("http://www.stillhq.com/pdfdb/000582/data.pdf",filename)
             doc = pdDocOpen(filename)
+            info = pdDocGetInfo(doc)
+            @assert info["Trapped"] == cn"False"
             @assert pdDocGetPageCount(doc) == 12
             obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc,
                                           PDFIO.Cos.CosIndirectObjectRef(177, 0))
