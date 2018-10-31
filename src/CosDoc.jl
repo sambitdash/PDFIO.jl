@@ -170,7 +170,9 @@ function cosDocGetRoot(doc::CosDocImpl)
     return cosDocGetObject(doc, root)
 end
 
-function cosDocGetInfo(doc::CosDocImpl)
+function cosDocGetInfo(doc::CosDocImpl)::Union{CosNullType,
+                                               CosDict,
+                                               CosIndirectObject{CosDict}}
     info = doc.hasNativeXRefStm ? get(doc.xrefstm[1], cn"Info") :
         get(doc.trailer[1], cn"Info")
     return cosDocGetObject(doc, info)
