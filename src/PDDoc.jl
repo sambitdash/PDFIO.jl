@@ -124,11 +124,13 @@ Given a PDF document provides the document information available in the `Documen
 Info` dictionary. The information typically includes *creation date, modification
 date, author, creator* used etc. However, all information content are not
 mandatory. Hence, all information needed may not be available in a document.
+If document does not have Info dictionary at all this method returns `nothing`.
 
 Please refer to the PDF specification for further details.
 """
 function pdDocGetInfo(doc::PDDoc)
     obj = cosDocGetInfo(doc.cosDoc)
+    obj === CosNull && return nothing
     dInfo = Dict{CDTextString, Union{CDTextString, CDDate, CosObject}}()
     for (key, val) in get(obj)
         skey = CDTextString(key)

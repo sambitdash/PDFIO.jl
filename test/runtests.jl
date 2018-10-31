@@ -31,11 +31,11 @@ include("debugIO.jl")
     @testset "Test FlateDecode" begin
         @test begin
             filename="files/1.pdf"
-            println(filename)
+            DEBUG && println(filename)
             doc = pdDocOpen(filename)
-            println(pdDocGetCatalog(doc))
+            DEBUG && println(pdDocGetCatalog(doc))
             cosDoc = pdDocGetCosDoc(doc)
-            map(println, cosDoc.trailer)
+            DEBUG && map(println, cosDoc.trailer)
             info = pdDocGetInfo(doc)
             @assert info["Producer"] == "LibreOffice 5.3" && info["Creator"] == "Writer"
             @assert pdDocGetPageCount(doc) == 2
@@ -48,6 +48,20 @@ include("debugIO.jl")
             close(bufstm)
             @assert length(buf) == 18669
             @assert length(pdPageGetContentObjects(page).objs)==190
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+    @testset "Document without Info" begin
+        @test begin
+            filename="files/1_noinfo.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            DEBUG && println(pdDocGetCatalog(doc))
+            cosDoc = pdDocGetCosDoc(doc)
+            DEBUG && map(println, cosDoc.trailer)
+            info = pdDocGetInfo(doc)
+            @assert info === nothing
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
@@ -126,7 +140,7 @@ include("debugIO.jl")
             length(utilPrintOpenFiles()) == 0
         end
     end
-    
+
     @testset "Corrupt File" begin
         @test begin
             filename="files/A1947-14.pdf"
@@ -234,7 +248,7 @@ include("debugIO.jl")
             @assert length(buf) == 6636
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
-        end        
+        end
     end
 
     @testset "Content Array" begin
@@ -329,7 +343,7 @@ include("debugIO.jl")
             @assert d[cn"TT4"] == (false, false, false, false, false)
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
-        end    
+        end
     end
 
     @testset "Forms XObjects Test" begin
