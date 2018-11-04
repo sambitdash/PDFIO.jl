@@ -238,27 +238,48 @@ function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
 end
 
 function read_header(ps)
-    skipv(ps, PERCENT)
+    major = minor = 0x0
     b = UInt8[]
-    c = advance!(ps)
-    while(c != MINUS_SIGN)
-        push!(b, c)
-        c=advance!(ps)
+    while !eof(ps)
+        c = _peekb(ps)
+        if c != PERCENT
+            readline(ps)
+            continue
+        end
+        cnt = 1
+        skipv(ps, PERCENT)
+        empty!(b)
+        c = advance!(ps)
+        while c != MINUS_SIGN && !is_crorlf(c) && !eof(ps)
+            cnt += 1
+            push!(b, c)
+            c = advance!(ps)
+        end
+        if eof(ps)
+            empty!(b)
+            break
+        end
+        if cnt == 4 && c == MINUS_SIGN       
+            major = advance!(ps)
+            !ispdfdigit(major) && error(E_BAD_HEADER)
+            major -= DIGIT_ZERO
+            skipv(ps, PERIOD)
+            minor = advance!(ps)
+            !ispdfdigit(minor) && error(E_BAD_HEADER)
+            minor -= DIGIT_ZERO
+            break
+        else
+            readline(ps)
+            continue
+        end
     end
-    major = advance!(ps)
-    !ispdfdigit(major) && error(E_BAD_HEADER)
-    major -= DIGIT_ZERO
-    skipv(ps, PERIOD)
-    minor = advance!(ps)
-    !ispdfdigit(minor) && error(E_BAD_HEADER)
-    minor -= DIGIT_ZERO
     return [major, minor, b]
 end
 
 
 function read_trailer(ps::IOStream, lookahead::Int)
+    chomp_space!(ps)
     locate_keyword!(ps,TRAILER,lookahead) < 0 && error(E_UNEXPECTED_CHAR)
-    #Check for EOL
     chomp_eol!(ps)
     skipv(ps,LESS_THAN)
     skipv(ps,LESS_THAN)
