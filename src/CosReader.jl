@@ -278,59 +278,65 @@ end
 
 process_stream_length(stmlen::CosInt,
                       ps::IO,
+                      hoffset::Int,
                       xref::Dict{CosIndirectObjectRef, CosObjectLoc})=stmlen
 
 function process_stream_length(stmlen::CosIndirectObjectRef,
                                ps::IO,
+                               hoffset::Int,
                                xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-  cosObjectLoc = xref[stmlen]
-  if (cosObjectLoc.obj === CosNull)
-    seek(ps,cosObjectLoc.loc)
-    lenobj = parse_indirect_obj(ps,xref)
-    if (lenobj != CosNull)
-      cosObjectLoc.obj = lenobj
+    cosObjectLoc = xref[stmlen]
+    if (cosObjectLoc.obj === CosNull)
+        seek(ps, cosObjectLoc.loc + hoffset)
+        lenobj = parse_indirect_obj(ps, hoffset, xref)
+        if (lenobj != CosNull)
+            cosObjectLoc.obj = lenobj
+        end
     end
-  end
-  return cosObjectLoc.obj
+    return cosObjectLoc.obj
 end
 
-function postprocess_indirect_object(ps::IO, obj::CosDict,
-                              xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-  if locate_keyword!(ps,STREAM) == 0
-    ensure_line_feed_eol(ps)
-    pos = position(ps)
+function postprocess_indirect_object(ps::IO, hoffset::Int, obj::CosDict,
+                                     xref::Dict{CosIndirectObjectRef,
+                                                CosObjectLoc})
+    if locate_keyword!(ps,STREAM) == 0
+        ensure_line_feed_eol(ps)
+        pos = position(ps)
+        
+        stmlen = get(obj, CosName("Length"))
 
-    stmlen = get(obj, CosName("Length"))
+        lenobj = process_stream_length(stmlen, ps, hoffset, xref)
 
-    lenobj = process_stream_length(stmlen, ps, xref)
+        len = get(lenobj)
 
-    len = get(lenobj)
+        if (lenobj != stmlen)
+            set!(obj, CosName("Length"), lenobj)
+        end
 
-    if (lenobj != stmlen)
-      set!(obj, CosName("Length"), lenobj)
+        seek(ps, pos)
+
+        # Here you can make sure file data is decoded into a file
+        # later it can be made into a memory based on size etc.
+        #Since, these are temporary files the spec is system file only
+        isInternal = read_internal_stream_data(ps, obj, len)
+
+        obj = CosStream(obj, isInternal)
+
+        #Now eat away the ENDSTREAM token
+        chomp_space!(ps)
+        skipv(ps,ENDSTREAM)
+        obj = createObjectStreams(obj)
     end
-
-    seek(ps,pos)
-
-    # Here you can make sure file data is decoded into a file
-    # later it can be made into a memory based on size etc.
-    #Since, these are temporary files the spec is system file only
-    isInternal = read_internal_stream_data(ps,obj,len)
-
-    obj = CosStream(obj, isInternal)
-
-    #Now eat away the ENDSTREAM token
-    chomp_space!(ps)
-    skipv(ps,ENDSTREAM)
-    obj = createObjectStreams(obj)
-  end
-  return obj
+    return obj
 end
 
-postprocess_indirect_object(ps::IO, obj::CosObject,
-                            xref::Dict{CosIndirectObjectRef, CosObjectLoc})=obj
+postprocess_indirect_object(ps::IO,
+                            hoffset::Int,
+                            obj::CosObject,
+                            xref::Dict{CosIndirectObjectRef, CosObjectLoc}) = obj
 
 function parse_indirect_obj(ps::IO,
+                            hoffset::Int,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
@@ -339,7 +345,7 @@ function parse_indirect_obj(ps::IO,
     skipv(ps, OBJ)
     obj = parse_value(ps)
     chomp_space!(ps)
-    obj = postprocess_indirect_object(ps, obj, xref)
+    obj = postprocess_indirect_object(ps, hoffset, obj, xref)
     chomp_space!(ps)
     skipv(ps,ENDOBJ)
     return CosIndirectObject(objn, genn, obj)

@@ -28,27 +28,31 @@ most intuititive.
 abstract type CosDoc end
 
 mutable struct CosDocImpl <: CosDoc
-  filepath::String
-  size::Int
-  io::IOStream
-  ps::IOStream
-  header::String
-  startxref::Int
-  version::Tuple{Int,Int}
-  xref::Dict{CosIndirectObjectRef, CosObjectLoc}
-  trailer::Vector{CosDict}
-  xrefstm::Vector{CosIndirectObject{CosStream}}
-  tmpfiles::Vector{AbstractString}
-  isPDF::Bool
-  hasNativeXRefStm::Bool
-  function CosDocImpl(fp::AbstractString)
-    io = util_open(fp,"r")
-    sz = filesize(fp)
-    ps = io
-    new(fp, sz, io, ps, "", 0, (0, 0), Dict{CosIndirectObjectRef, CosObjectLoc}(),
-        [], [], [], false, false)
-  end
+    filepath::String
+    size::Int
+    io::IOStream
+    ps::IOStream
+    hoffset::Int
+    header::String
+    startxref::Int
+    version::Tuple{Int,Int}
+    xref::Dict{CosIndirectObjectRef, CosObjectLoc}
+    trailer::Vector{CosDict}
+    xrefstm::Vector{CosIndirectObject{CosStream}}
+    tmpfiles::Vector{AbstractString}
+    isPDF::Bool
+    hasNativeXRefStm::Bool
+    function CosDocImpl(fp::AbstractString)
+        io = util_open(fp,"r")
+        sz = filesize(fp)
+        ps = io
+        new(fp, sz, io, ps, 0, "", 0, (0, 0),
+            Dict{CosIndirectObjectRef, CosObjectLoc}(),
+            [], [], [], false, false)
+    end
 end
+
+Base.seek(doc::CosDoc, loc::Int) = seek(doc.ps, loc + doc.hoffset)
 
 """
 ```
@@ -101,6 +105,7 @@ function cosDocOpen(fp::AbstractString)
     h = read_header(ps)
     doc.version = (h[1], h[2])
     doc.header = String(h[3])
+    doc.hoffset = h[4]
     doc.isPDF = (doc.header == "PDF")
     doc_trailer_update(ps, doc)
     return doc
@@ -187,13 +192,13 @@ function cosDocGetObject(doc::CosDocImpl, ref::CosIndirectObjectRef)
 end
 
 function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
-  ref::CosIndirectObjectRef, locObj::CosObjectLoc)
-  if (locObj.obj == CosNull)
-    seek(doc.ps,locObj.loc)
-    locObj.obj = parse_indirect_obj(doc.ps, doc.xref)
-    attach_object(doc, locObj.obj)
-  end
-  return locObj.obj
+                         ref::CosIndirectObjectRef, locObj::CosObjectLoc)
+    if (locObj.obj == CosNull)
+        seek(doc, locObj.loc)
+        locObj.obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref)
+        attach_object(doc, locObj.obj)
+    end
+    return locObj.obj
 end
 
 function cosDocGetObject(doc::CosDocImpl, stmref::CosIndirectObjectRef,
@@ -224,14 +229,14 @@ function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
     if loc < 0
         loc = 0
     end
-    seek(doc.ps, loc)
+    seek(doc, loc)
     look_ahead = doc.startxref - loc
     ref = get(stmref)
     keyword = "$(ref[1]) $(ref[2]) obj"
     loc1 = locate_keyword!(doc.ps, transcode(UInt8, keyword), look_ahead)
     loc1 < 0 && return CosNull
-    seek(doc.ps, loc + loc1)
-    obj = parse_indirect_obj(doc.ps, doc.xref)
+    seek(doc, loc + loc1)
+    obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref)
     obj === CosNull && return CosNull
     doc.xref[stmref] = CosObjectLoc(loc + loc1, CosNull, obj)
     return obj
@@ -240,6 +245,7 @@ end
 function read_header(ps)
     major = minor = 0x0
     b = UInt8[]
+    pos = 0
     while !eof(ps)
         c = _peekb(ps)
         if c != PERCENT
@@ -248,6 +254,7 @@ function read_header(ps)
         end
         cnt = 1
         skipv(ps, PERCENT)
+        pos = position(ps) - 1
         empty!(b)
         c = advance!(ps)
         while c != MINUS_SIGN && !is_crorlf(c) && !eof(ps)
@@ -261,19 +268,24 @@ function read_header(ps)
         end
         if cnt == 4 && c == MINUS_SIGN       
             major = advance!(ps)
-            !ispdfdigit(major) && error(E_BAD_HEADER)
+            if !ispdfdigit(major)
+                readline(ps)
+                continue
+            end
             major -= DIGIT_ZERO
             skipv(ps, PERIOD)
             minor = advance!(ps)
-            !ispdfdigit(minor) && error(E_BAD_HEADER)
+            if !ispdfdigit(minor)
+                readline(ps)
+                continue
+            end                
             minor -= DIGIT_ZERO
             break
-        else
-            readline(ps)
-            continue
         end
+        pos = 0
+        readline(ps)
     end
-    return [major, minor, b]
+    return [major, minor, b, pos]
 end
 
 
@@ -305,7 +317,7 @@ function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
     end
 
     if doc.isPDF
-        seek(ps, doc.startxref)
+        seek(doc, doc.startxref)
         chomp_space!(ps)
         doc.hasNativeXRefStm = ps |> _peekb |> ispdfdigit
         (doc.hasNativeXRefStm) ? read_xref_streams(ps, doc) :
@@ -336,7 +348,7 @@ end
 function read_xref_streams(ps::IOStream, doc::CosDocImpl)
     found = false
     while(true)
-        xrefstm = parse_indirect_obj(ps, doc.xref)
+        xrefstm = parse_indirect_obj(ps, doc.hoffset, doc.xref)
 
         if (!found)
             get(xrefstm,  CosName("Root")) == CosNull && error(E_BAD_TRAILER)
@@ -349,7 +361,7 @@ function read_xref_streams(ps::IOStream, doc::CosDocImpl)
 
         prev = get(xrefstm,  CosName("Prev"))
         prev === CosNull && break
-        seek(ps, get(prev))
+        seek(doc, get(prev))
     end
 end
 
@@ -369,14 +381,14 @@ function read_xref_tables(ps::IOStream, doc::CosDocImpl)
         #Hybrid case
         loc = get(trailer,  CosName("XRefStm"))
         if (loc != CosNull)
-            seek(ps, get(loc))
-            xrefstm = parse_indirect_obj(ps, doc.xref)
+            seek(doc, get(loc))
+            xrefstm = parse_indirect_obj(ps, doc.hoffset, doc.xref)
             attach_object(doc, xrefstm)
             read_xref_stream(xrefstm,doc)
         end
         prev = get(trailer, CosName("Prev"))
         prev == CosNull && break
-        seek(ps, get(prev))
+        seek(doc, get(prev))
     end
 end
 

@@ -427,6 +427,31 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Text before header test" begin
+        @test begin
+            filename="spec-2c.pdf"
+            result, template_file, src = local_testfiles(filename)
+            DEBUG && println(src)
+            doc = pdDocOpen(src)
+            @assert (npage = pdDocGetPageCount(doc)) == 1
+            try
+                open(result, "w") do io
+                    for i=1:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
+                end
+                @assert files_equal(result, template_file)
+            finally
+                pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "Attachment PDF" begin
         filename = "fileAttachment.pdf"
         result, template_file, src = local_testfiles(filename)
