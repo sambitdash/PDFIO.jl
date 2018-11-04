@@ -11,6 +11,7 @@ export  PDPageObject,
 
 import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
+using ..Cos: CosComment
 
 using LinearAlgebra
 """
@@ -80,9 +81,9 @@ A representation of a content object that encloses other content objects. See
 """
 mutable struct PDPageObjectGroup <: PDPageObject
     isEOG::Bool
-    objs::Vector{Union{PDPageObject,CosObject}}
+    objs::Vector{Union{PDPageObject, CosObject}}
     PDPageObjectGroup(isEOG::Bool=false) =
-        new(isEOG,Vector{Union{PDPageObject,CosObject}}())
+        new(isEOG, Vector{Union{PDPageObject, CosObject}}())
 end
 
 Base.isempty(grp::PDPageObjectGroup) = isempty(grp.objs)
@@ -93,6 +94,9 @@ function load_objects(grp::PDPageObjectGroup, bis::IO)
         collect_object(grp, obj, bis)
     end
 end
+
+# Ignore comments in content stream
+collect_object(grp::PDPageObjectGroup, obj::CosComment, bis::IO) = nothing
 
 collect_object(grp::PDPageObjectGroup, obj::CosObject, bis::IO) =
     push!(grp.objs, obj)
@@ -114,7 +118,7 @@ end
 
 function collect_object(grp::PDPageObjectGroup, elem::PDPageElement,
                         bis::IO)
-    populate_element(grp,elem)
+    populate_element(grp, elem)
     push!(grp.objs, elem)
     return elem
 end
@@ -175,7 +179,7 @@ function collect_object(grp::PDPageObjectGroup, beg::PDPage_BeginInlineImage,
     newobj=PDPageInlineImage()
 
     while(!newobj.isRead)
-        value=parse_value(bis, get_pdfcontentops)
+        value = parse_value(bis, get_pdfcontentops)
         collect_inline_image(newobj, value, bis)
     end
     push!(grp.objs, newobj)
@@ -455,7 +459,7 @@ const PD_CONTENT_OPERATORS = Dict(
 
 function get_pdfcontentops(b::Vector{UInt8})
     arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
-    (arr == CosNull) && return CosNull
+    (arr === CosNull) && return CosNull
     return eval(Expr(:call, arr...))
 end
 

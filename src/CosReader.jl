@@ -47,7 +47,7 @@ function parse_comment(ps::IO)
         push!(b, c)
     end
     chomp_space!(ps)
-    return b
+    return CosComment(b)
 end
 
 function parse_name(ps::IO)
@@ -83,7 +83,7 @@ function parse_pdfOpsOrConst(ps::IO, fparse_more::Function)
       if ispdfspace(c) || ispdfdelimiter(c)
           break
       end
-      skip(ps,1)
+      skip(ps, 1)
       push!(b, c)
   end
   chomp_space!(ps)

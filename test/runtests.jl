@@ -5,7 +5,7 @@ using PDFIO.Cos
 using PDFIO.Common
 
 # Internal methods for testing only
-using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
+using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 
 include("debugIO.jl")
 
@@ -27,6 +27,8 @@ include("debugIO.jl")
                                CosInt(480)])) == CDRect(0, 0, 640, 480)
         @test parse_indirect_ref(IOBuffer(b"10 0 R\n")) ==
             CosIndirectObjectRef(10, 0)
+        @test string(parse_value(IOBuffer("% This is a comment\r\n"))) ==
+                     "% This is a comment"
     end
     @testset "Test FlateDecode" begin
         @test begin
