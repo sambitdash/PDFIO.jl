@@ -44,7 +44,8 @@ struct CDDate
 end
 
 const CDDATE_REGEX =
-    r"D\s*:\s*(?<dt>\d{12})\s*(?<ut>[+-Z])\s*((?<tzh>\d{2})'\s*(?<tzm>\d{2}))?"
+    r"D\s*:\s*(?<dt>\d{4}(\d\d)?(\d\d)?(\d\d)?(\d\d)?(\d\d)?)\s*(?<ut>[-+Z])?\s*(?<tzh>\d\d)?(\s*'\s*(?<tzm>\d\d))?"
+#                   YYYY  MM     DD     HH     mm     SS         O               HH              '    mm
 
 """
 ```
@@ -64,6 +65,22 @@ function CDDate(str::CDTextString)
                           
     ahead = (ut != "-")
     return CDDate(DateTime(m[:dt], dateformat"yyyymmddHHMMSS"), tz, ahead)
+end
+
+import Base.==
+function (==)(d1::CDDate, d2::CDDate)
+    d1.ahead == d2.ahead && d1.tz == d2.tz && return d1.d == d2.d
+    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
+    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
+    d1ut == d2ut
+end
+
+import Base.isless
+function Base.isless(d1::CDDate, d2::CDDate)
+    d1.ahead == d2.ahead && d1.tz == d2.tz && return isless(d1.d, d2.d)
+    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
+    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
+    isless(d1ut, d2ut)
 end
 
 function Base.show(io::IO, dt::CDDate)

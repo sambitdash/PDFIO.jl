@@ -11,8 +11,6 @@ include("debugIO.jl")
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
-        @test string(CDDate("D : 199812231952 - 08' 30 "))==
-            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
         @test_throws ErrorException skipv(IOBuffer([UInt8(65), UInt8(66)]),
                                           UInt8(66))
         @test CDTextString(CosXString([UInt8('0'), UInt8('0'),
@@ -30,6 +28,22 @@ include("debugIO.jl")
         @test string(parse_value(IOBuffer("% This is a comment\r\n"))) ==
                      "% This is a comment"
     end
+
+    @testset "CDDate" begin
+        @test string(CDDate("D : 199812231952 - 08' 30 "))==
+            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
+        @test CDDate("D:2009") == CDDate("D:20090101000000Z")
+        @test CDDate("D:200902") == CDDate("D:20090201000000+00")
+        @test CDDate("D:20090202") == CDDate("D:20090202000000-00")
+        @test CDDate("D:2009020201") == CDDate("D:20090202010000+00'00")
+        @test CDDate("D:200902020102") == CDDate("D:20090202010200+00'00")
+        @test CDDate("D:20090202010203") == CDDate("D:20090202010203+00'00")
+        @test CDDate("D:20090202010203-00'01") < CDDate("D:20090202010203") < CDDate("D:20090202010203+00'01")
+        @test CDDate("D:20090202+01'01") > CDDate("D:20090202+00'01") > CDDate("D:20090202-00'01") > CDDate("D:20090202-01'01")
+        @test isless(CDDate("D:2009020208-06"), CDDate("D:2009020204-01"))
+        @test isequal(CDDate("D:2009020208-06"), CDDate("D:2009020204-02"))
+    end
+
     @testset "Test FlateDecode" begin
         @test begin
             filename="files/1.pdf"
