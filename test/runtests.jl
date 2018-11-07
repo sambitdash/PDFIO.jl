@@ -30,15 +30,17 @@ include("debugIO.jl")
     end
 
     @testset "CDDate" begin
-        @test string(CDDate("D : 199812231952 - 08' 30 "))==
+        @test string(CDDate("D:199812231952-08'30 "))==
             "1998-12-23T19:52:00 - 8 hours, 30 minutes"
+        @test_throws ErrorException CDDate("not a date")
+        @test_throws ErrorException CDDate("D:209")
         @test CDDate("D:2009") == CDDate("D:20090101000000Z")
         @test CDDate("D:200902") == CDDate("D:20090201000000+00")
         @test CDDate("D:20090202") == CDDate("D:20090202000000-00")
         @test CDDate("D:2009020201") == CDDate("D:20090202010000+00'00")
         @test CDDate("D:200902020102") == CDDate("D:20090202010200+00'00")
         @test CDDate("D:20090202010203") == CDDate("D:20090202010203+00'00")
-        @test CDDate("D:20090202010203-00'01") < CDDate("D:20090202010203") < CDDate("D:20090202010203+00'01")
+        @test CDDate("D:20090202010203-00'01") < CDDate("D:20090202010202") < CDDate("D:20090202010203") < CDDate("D:20090202010203+00'01")
         @test CDDate("D:20090202+01'01") > CDDate("D:20090202+00'01") > CDDate("D:20090202-00'01") > CDDate("D:20090202-01'01")
         @test isless(CDDate("D:2009020208-06"), CDDate("D:2009020204-01"))
         @test isequal(CDDate("D:2009020208-06"), CDDate("D:2009020204-02"))

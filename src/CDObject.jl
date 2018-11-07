@@ -44,8 +44,7 @@ struct CDDate
 end
 
 const CDDATE_REGEX =
-    r"D\s*:\s*(?<dt>\d{4}(\d\d)?(\d\d)?(\d\d)?(\d\d)?(\d\d)?)\s*(?<ut>[-+Z])?\s*(?<tzh>\d\d)?(\s*'\s*(?<tzm>\d\d))?"
-#                   YYYY  MM     DD     HH     mm     SS         O               HH              '    mm
+    r"D:(?<dt>(\d\d){2,7})(?<tz>((?<ahead>[+-])(?<tzh>\d\d)('(?<tzm>\d\d))?|Z))?"
 
 """
 ```
@@ -56,14 +55,13 @@ PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 function CDDate(str::CDTextString)
     m = match(CDDATE_REGEX, str)
     m === nothing && error("Invalid date format in input")
-    ut, tzh, tzm = m[:ut], m[:tzh], m[:tzm]
+    ut, tzh, tzm = m[:ahead], m[:tzh], m[:tzm]
 
     tzhr = tzh === nothing ? Hour(0) : Hour(parse(Int, tzh))
     tzhm = tzm === nothing ? Minute(0) : Minute(parse(Int, tzm))
-    
     tz = tzhr + tzhm
-                          
-    ahead = (ut != "-")
+
+    ahead = !(ut == "-")
     return CDDate(DateTime(m[:dt], dateformat"yyyymmddHHMMSS"), tz, ahead)
 end
 
