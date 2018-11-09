@@ -39,11 +39,12 @@ struct CDDate
     d::DateTime
     tz::CompoundPeriod
     ahead::Bool
-    CDDate(d::DateTime, tz::CompoundPeriod, ahead::Bool = true) = new(d, tz, ahead)
+    CDDate(d::DateTime, tz::CompoundPeriod, ahead::Bool = true) =
+        new(d, tz, ahead)
 end
 
 const CDDATE_REGEX =
-    r"D:(?<dt>(\d\d){2,7})(?<tz>((?<ahead>[+-])(?<tzh>\d\d)('(?<tzm>\d\d))?|Z))?"
+    r"D\s*:\s*(?<dt>\d{12})\s*(?<ut>[+-Z])\s*((?<tzh>\d{2})'\s*(?<tzm>\d{2}))?"
 
 """
 ```
@@ -54,30 +55,15 @@ PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
 function CDDate(str::CDTextString)
     m = match(CDDATE_REGEX, str)
     m === nothing && error("Invalid date format in input")
-    ut, tzh, tzm = m[:ahead], m[:tzh], m[:tzm]
+    ut, tzh, tzm = m[:ut], m[:tzh], m[:tzm]
 
     tzhr = tzh === nothing ? Hour(0) : Hour(parse(Int, tzh))
     tzhm = tzm === nothing ? Minute(0) : Minute(parse(Int, tzm))
+    
     tz = tzhr + tzhm
-
-    ahead = !(ut == "-")
+                          
+    ahead = (ut != "-")
     return CDDate(DateTime(m[:dt], dateformat"yyyymmddHHMMSS"), tz, ahead)
-end
-
-import Base.==
-function (==)(d1::CDDate, d2::CDDate)
-    d1.ahead == d2.ahead && d1.tz == d2.tz && return d1.d == d2.d
-    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
-    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    return d1ut == d2ut
-end
-
-import Base.isless
-function Base.isless(d1::CDDate, d2::CDDate)
-    d1.ahead == d2.ahead && d1.tz == d2.tz && return isless(d1.d, d2.d)
-    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
-    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    return isless(d1ut, d2ut)
 end
 
 function Base.show(io::IO, dt::CDDate)
