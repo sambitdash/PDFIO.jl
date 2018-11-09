@@ -39,8 +39,7 @@ struct CDDate
     d::DateTime
     tz::CompoundPeriod
     ahead::Bool
-    CDDate(d::DateTime, tz::CompoundPeriod, ahead::Bool = true) =
-        new(d, tz, ahead)
+    CDDate(d::DateTime, tz::CompoundPeriod, ahead::Bool = true) = new(d, tz, ahead)
 end
 
 const CDDATE_REGEX =
@@ -70,7 +69,7 @@ function (==)(d1::CDDate, d2::CDDate)
     d1.ahead == d2.ahead && d1.tz == d2.tz && return d1.d == d2.d
     d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
     d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    d1ut == d2ut
+    return d1ut == d2ut
 end
 
 import Base.isless
@@ -78,7 +77,7 @@ function Base.isless(d1::CDDate, d2::CDDate)
     d1.ahead == d2.ahead && d1.tz == d2.tz && return isless(d1.d, d2.d)
     d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
     d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    isless(d1ut, d2ut)
+    return isless(d1ut, d2ut)
 end
 
 function Base.show(io::IO, dt::CDDate)
