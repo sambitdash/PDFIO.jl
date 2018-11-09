@@ -65,4 +65,3 @@ convert(::Type{CDTextString}, name::CosName) =
     CDTextString(split(String(name.val), '_'; limit=2)[2])
 
 String(name::CosName) = convert(String, name)
-
