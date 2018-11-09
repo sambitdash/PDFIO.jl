@@ -5,14 +5,12 @@ using PDFIO.Cos
 using PDFIO.Common
 
 # Internal methods for testing only
-using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString
+using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 
 include("debugIO.jl")
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
-        @test string(CDDate("D : 199812231952 - 08' 30 "))==
-            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
         @test_throws ErrorException skipv(IOBuffer([UInt8(65), UInt8(66)]),
                                           UInt8(66))
         @test CDTextString(CosXString([UInt8('0'), UInt8('0'),
@@ -27,15 +25,35 @@ include("debugIO.jl")
                                CosInt(480)])) == CDRect(0, 0, 640, 480)
         @test parse_indirect_ref(IOBuffer(b"10 0 R\n")) ==
             CosIndirectObjectRef(10, 0)
+        @test string(parse_value(IOBuffer("% This is a comment\r\n"))) ==
+                     "% This is a comment"
     end
+
+    @testset "CDDate" begin
+        @test string(CDDate("D:199812231952-08'30 "))==
+            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
+        @test_throws ErrorException CDDate("not a date")
+        @test_throws ErrorException CDDate("D:209")
+        @test CDDate("D:2009") == CDDate("D:20090101000000Z")
+        @test CDDate("D:200902") == CDDate("D:20090201000000+00")
+        @test CDDate("D:20090202") == CDDate("D:20090202000000-00")
+        @test CDDate("D:2009020201") == CDDate("D:20090202010000+00'00")
+        @test CDDate("D:200902020102") == CDDate("D:20090202010200+00'00")
+        @test CDDate("D:20090202010203") == CDDate("D:20090202010203+00'00")
+        @test CDDate("D:20090202010203-00'01") < CDDate("D:20090202010202") < CDDate("D:20090202010203") < CDDate("D:20090202010203+00'01")
+        @test CDDate("D:20090202+01'01") > CDDate("D:20090202+00'01") > CDDate("D:20090202-00'01") > CDDate("D:20090202-01'01")
+        @test isless(CDDate("D:2009020208-06"), CDDate("D:2009020204-01"))
+        @test isequal(CDDate("D:2009020208-06"), CDDate("D:2009020204-02"))
+    end
+
     @testset "Test FlateDecode" begin
         @test begin
             filename="files/1.pdf"
-            println(filename)
+            DEBUG && println(filename)
             doc = pdDocOpen(filename)
-            println(pdDocGetCatalog(doc))
+            DEBUG && println(pdDocGetCatalog(doc))
             cosDoc = pdDocGetCosDoc(doc)
-            map(println, cosDoc.trailer)
+            DEBUG && map(println, cosDoc.trailer)
             info = pdDocGetInfo(doc)
             @assert info["Producer"] == "LibreOffice 5.3" && info["Creator"] == "Writer"
             @assert pdDocGetPageCount(doc) == 2
@@ -48,6 +66,20 @@ include("debugIO.jl")
             close(bufstm)
             @assert length(buf) == 18669
             @assert length(pdPageGetContentObjects(page).objs)==190
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+    @testset "Document without Info" begin
+        @test begin
+            filename="files/1_noinfo.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            DEBUG && println(pdDocGetCatalog(doc))
+            cosDoc = pdDocGetCosDoc(doc)
+            DEBUG && map(println, cosDoc.trailer)
+            info = pdDocGetInfo(doc)
+            @assert info === nothing
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
@@ -126,7 +158,7 @@ include("debugIO.jl")
             length(utilPrintOpenFiles()) == 0
         end
     end
-    
+
     @testset "Corrupt File" begin
         @test begin
             filename="files/A1947-14.pdf"
@@ -156,6 +188,8 @@ include("debugIO.jl")
             isfile(filename)||
                 download("http://www.stillhq.com/pdfdb/000582/data.pdf",filename)
             doc = pdDocOpen(filename)
+            info = pdDocGetInfo(doc)
+            @assert info["Trapped"] == cn"False"
             @assert pdDocGetPageCount(doc) == 12
             obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc,
                                           PDFIO.Cos.CosIndirectObjectRef(177, 0))
@@ -232,7 +266,7 @@ include("debugIO.jl")
             @assert length(buf) == 6636
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
-        end        
+        end
     end
 
     @testset "Content Array" begin
@@ -327,7 +361,7 @@ include("debugIO.jl")
             @assert d[cn"TT4"] == (false, false, false, false, false)
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
-        end    
+        end
     end
 
     @testset "Forms XObjects Test" begin
@@ -387,6 +421,31 @@ include("debugIO.jl")
     @testset "MacRomanEncoding Fonts test" begin
         @test begin
             filename="spec-2.pdf"
+            result, template_file, src = local_testfiles(filename)
+            DEBUG && println(src)
+            doc = pdDocOpen(src)
+            @assert (npage = pdDocGetPageCount(doc)) == 1
+            try
+                open(result, "w") do io
+                    for i=1:npage
+                        page = pdDocGetPage(doc, i)
+                        if pdPageIsEmpty(page) == false
+                            pdPageGetContentObjects(page)
+                            pdPageExtractText(io, page)
+                        end
+                    end
+                end
+                @assert files_equal(result, template_file)
+            finally
+                pdDocClose(doc)
+            end
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
+    @testset "Text before header test" begin
+        @test begin
+            filename="spec-2c.pdf"
             result, template_file, src = local_testfiles(filename)
             DEBUG && println(src)
             doc = pdDocOpen(src)

@@ -454,3 +454,17 @@ function show(io::IO, o::CosIndirectObject)
     print(io, o.obj)
     println(io, "\nendobj\n")
 end
+
+"""
+```
+    CosComment
+```
+A comment object in PDF which is normally ignored as a whitespace. 
+"""
+struct CosComment <: CosObject
+    val::String
+end
+
+CosComment(barr::Vector{UInt8}) = CosComment(String(Char.(barr)))
+
+show(io::IO, os::CosComment) = print(io, '%', os.val)

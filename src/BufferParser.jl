@@ -16,7 +16,7 @@ import Base: peek
 @inline function skipv(ps::IO, c::UInt8)
     ch = 0xff
     !eof(ps) && ((ch = ps |> _peekb) == c) && return skip(ps, 1)
-    error("Found '$(UInt8(ch))' Expected '$(Char(c))' here")
+    error("Found '$(Char(ch))($(UInt(ch)))' Expected '$(Char(c))' here")
 end
 
 _peekb(io::IO) = UInt8(peek(io))
