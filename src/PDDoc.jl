@@ -131,19 +131,12 @@ Please refer to the PDF specification for further details.
 function pdDocGetInfo(doc::PDDoc)
     obj = cosDocGetInfo(doc.cosDoc)
     obj === CosNull && return nothing
-    dInfo = Dict{CDTextString, Union{CDTextString, CDDate, CosName, CosNullType}}()
-    if obj !== CosNull
-        for (key, val) in get(obj)
-            skey = CDTextString(key)
-            retval = CosNull
-            try
-                retval = (skey == "CreationDate") ||
-                         (skey == "ModDate") ? CDDate(val) :
-                         (skey == "Trapped") ? val : CDTextString(val)
-            catch
-            end
-            dInfo[skey] = retval
-        end
+    dInfo = Dict{CDTextString, Union{CDTextString, CDDate, CosObject}}()
+    for (key, val) in get(obj)
+        skey = CDTextString(key)
+        dInfo[skey] = (skey == "CreationDate") ||
+                      (skey == "ModDate") ? CDDate(val) :
+                      (skey == "Trapped") ? val : CDTextString(val)
     end
     return dInfo
 end
