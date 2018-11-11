@@ -134,9 +134,13 @@ function pdDocGetInfo(doc::PDDoc)
     dInfo = Dict{CDTextString, Union{CDTextString, CDDate, CosObject}}()
     for (key, val) in get(obj)
         skey = CDTextString(key)
-        dInfo[skey] = (skey == "CreationDate") ||
-                      (skey == "ModDate") ? CDDate(val) :
-                      (skey == "Trapped") ? val : CDTextString(val)
+        try
+            dInfo[skey] = (skey == "CreationDate") ||
+                          (skey == "ModDate") ? CDDate(val) :
+                          (skey == "Trapped") ? val : CDTextString(val)
+        catch
+            # no op: we skipp the key that cannot be properly decoded
+        end
     end
     return dInfo
 end
