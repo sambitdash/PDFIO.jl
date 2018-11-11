@@ -67,6 +67,26 @@ include("debugIO.jl")
         end
     end
 
+    @testset "Document with empty property" begin
+        @test begin
+            filename="files/empty_property.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            DEBUG && println(pdDocGetCatalog(doc))
+            cosDoc = pdDocGetCosDoc(doc)
+            DEBUG && map(println, cosDoc.trailer)
+            info = pdDocGetInfo(doc)
+            @assert info == Dict(
+                "Producer" => "Scribus PDF Library 1.3.3.13",
+                "CreationDate" => CDDate("D:20090807192622"),
+                "ModDate" => CDDate("D:20090807192622"),
+                "Creator" => "Scribus 1.3.3.13",
+                "Trapped" => cn"False")
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "PDF File with ObjectStreams" begin
         @test begin
             filename="files/pdf-17.pdf"
