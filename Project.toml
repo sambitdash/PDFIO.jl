@@ -1,6 +1,6 @@
 name = "PDFIO"
 uuid = "4d0d745f-9d9a-592e-8d18-1ad8a0f42b92"
-authors = ["sambitdash "]
+authors = ["Sambit Kumar Dash<sambitdash@gmail.com> "]
 version = "0.1.1"
 
 [deps]
@@ -14,4 +14,13 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Rectangle = "9a9db56c-8f71-5460-add5-cb450131785e"
 RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
+WinRPM = "c17dfb99-b4f7-5aad-8812-456da1ad7187"
+
+[compat]
+julia = "1.0"
+
+[extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
