@@ -45,11 +45,10 @@ const Z_MEM_ERROR     = -4
 const Z_BUF_ERROR     = -5
 const Z_VERSION_ERROR = -6
 
-@static if Sys.iswindows()
-    const libz = "zlib1"
-else
-    const libz = "libz"
-end
+@static isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl")) ||
+        error("PDFIO not properly installed. Please run Pkg.build(\"PDFIO\")")
+
+include("../deps/deps.jl")
 
 _zlibVersion() = ccall((:zlibVersion, libz), Ptr{UInt8}, ())
 
