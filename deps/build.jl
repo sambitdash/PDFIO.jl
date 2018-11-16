@@ -10,7 +10,7 @@ if !Sys.iswindows()
 else
     using WinRPM
     libz = library_dependency("zlib1")
-    provides(WinRPM.RPM, "zlib1", libz, os=:Windows)
+    provides(WinRPM.RPM, "zlib1", libz)
 end
 
 @BinDeps.install Dict([:libz => :libz])
