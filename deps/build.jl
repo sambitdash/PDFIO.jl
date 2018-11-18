@@ -2,7 +2,7 @@ using BinDeps
 
 @BinDeps.setup
 
-libz = library_dependency("libz", alias=["libz", "zlib1"])
+libz = library_dependency("libz", aliases=["libz", "libzlib", "zlib1"])
 
 if !Sys.iswindows()
     provides(AptGet, Dict("zlib" => libz, "zlib1g" => libz))
@@ -14,5 +14,3 @@ else
 end
 
 @BinDeps.install Dict([:libz => :libz])
-
-
