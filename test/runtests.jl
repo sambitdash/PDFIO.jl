@@ -332,6 +332,14 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
+        @test begin
+            filename="files/1.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            @assert length(pdDocGetPageRange(doc, "1")) >= 1
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
     end
 
     @testset "Symbol Fonts test" begin

@@ -438,11 +438,11 @@ function find_ntree(fn::Function, doc::CosDoc,
     if inrange == 0
         # This is the leaf
         # TBD: look into the values.
-        node.kids === nothing && return fn(doc, node.values, key, refdata)
+        node.kids === nothing && return (0, fn(doc, node.values, key, refdata))
         for kid in kids
             kidobj = cosDocGetObject(doc, kid)
             kidnode = createTreeNode(K, kidobj)
-            inrange, val = find_ntree(fn, doc, kidnode, key)
+            inrange, val = find_ntree(fn, doc, kidnode, key, refdata)
             inrange == -1 && break
             inrange == 0 && return (inrange,val)
         end
@@ -543,9 +543,14 @@ Given a `label` this method returns a `range` of valid page numbers.
 function cosDocGetPageNumbers(doc::CosDoc,
                               catalog::CosObject, label::AbstractString)
     ref = get(catalog, cn"PageLabels")
+    if ref === CosNull
+        pgnum = tryparse(Int, label)
+        pgnum !== nothing && return range(pgnum, length=1)
+        throw(ErrorException(E_INVALID_PAGE_NUMBER))
+    end
     plroot = cosDocGetObject(doc, ref)
     troot = createTreeNode(Int, plroot)
-    return find_ntree(find_page_label, doc, troot, -1, label)
+    return find_ntree(find_page_label, doc, troot, -1, label)[2]
 end
 
 function merge_streams(cosdoc::CosDoc, stms::CosArray)
