@@ -7,7 +7,8 @@ export PDDoc,
        pdDocGetCosDoc,
        pdDocGetPage,
        pdDocGetPageCount,
-       pdDocGetPageRange
+       pdDocGetPageRange,
+       pdDocHasPageLabels
 
 using ..Common
 
@@ -101,6 +102,7 @@ pdDocGetPage
 ```
 Given a range of page numbers or a label returns an array of pages associated
 with it.
+Use second method if `pdDocHasPageLabels` returns `true`.
 """
 function pdDocGetPageRange(doc::PDDoc, nums::AbstractRange{Int})
     pages = []
@@ -114,6 +116,19 @@ function pdDocGetPageRange(doc::PDDoc, label::AbstractString)
     catalog = pdDocGetCatalog(doc)
     pr = cosDocGetPageNumbers(doc.cosDoc, catalog, label)
     return pdDocGetPageRange(doc, pr)
+end
+
+"""
+```
+    pdDocHasPageLabels(doc::PDDoc) -> Bool
+```
+Returns information weather document has custom page labels.
+Page labels are some other characters like 'i', 'ii' displayed in place of page numebrs.
+If document has page labels, displayed page number may be different than absolute page number.
+"""
+function pdDocHasPageLabels(doc::PDDoc)
+    catalog = pdDocGetCatalog(doc)
+    return get(catalog, cn"PageLabels") !== CosNull
 end
 
 """

@@ -470,7 +470,7 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
         if found
             if lno !== nothing
                 ln = notnothing(lno)
-                ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
+                ln < start && throw(ErrorException(E_INVALID_PAGE_LABEL))
                 found_page = prev_pageno + 1 + ln - start
                 found_page <= pageno && return range(found_page, length=1)
             else
@@ -506,7 +506,7 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
                                                  prefix=pfx) :
                      (s == cn"a") ? LabelNumeral(AlphaNumeral, label;
                                                  prefix=pfx, caselower=true) :
-                     throw(ErrorException(E_INVALID_PAGE_NUMBER))
+                     throw(ErrorException(E_INVALID_PAGE_LABEL))
                 lno = ln
                 prev_pageno = pageno
                 found = true
@@ -518,11 +518,11 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
         return range(prev_pageno + 1, length=(pageno - prev_pageno))
     if found && lno !== nothing
         ln = notnothing(lno)
-        ln < start && throw(ErrorException(E_INVALID_PAGE_NUMBER))
+        ln < start && throw(ErrorException(E_INVALID_PAGE_LABEL))
         found_page = prev_pageno + 1 + ln - start
         return range(found_page, length=1)
     end
-    throw(ErrorException(E_INVALID_PAGE_NUMBER))
+    throw(ErrorException(E_INVALID_PAGE_LABEL))
 end
 
 function get_internal_pagecount(dict::CosObject)
@@ -543,11 +543,7 @@ Given a `label` this method returns a `range` of valid page numbers.
 function cosDocGetPageNumbers(doc::CosDoc,
                               catalog::CosObject, label::AbstractString)
     ref = get(catalog, cn"PageLabels")
-    if ref === CosNull
-        pgnum = tryparse(Int, label)
-        pgnum !== nothing && return range(pgnum, length=1)
-        throw(ErrorException(E_INVALID_PAGE_NUMBER))
-    end
+    ref === CosNull && throw(ErrorException(E_INVALID_PAGE_LABEL))
     plroot = cosDocGetObject(doc, ref)
     troot = createTreeNode(Int, plroot)
     return find_ntree(find_page_label, doc, troot, -1, label)[2]

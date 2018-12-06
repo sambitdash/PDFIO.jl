@@ -322,6 +322,7 @@ include("debugIO.jl")
                 download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 54
+            @assert pdDocHasPageLabels(doc)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") ==
                 range(1, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") ==
@@ -332,14 +333,8 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
-        @test begin
-            filename="files/1.pdf"
-            DEBUG && println(filename)
-            doc = pdDocOpen(filename)
-            @assert length(pdDocGetPageRange(doc, "1")) >= 1
-            pdDocClose(doc)
-            length(utilPrintOpenFiles()) == 0
-        end
+        @test pdDocHasPageLabels(pdDocOpen("files/1.pdf")) == false
+        @test_throws ErrorException(E_INVALID_PAGE_LABEL) pdDocGetPageRange(pdDocOpen("files/1.pdf"), "1")
     end
 
     @testset "Symbol Fonts test" begin
