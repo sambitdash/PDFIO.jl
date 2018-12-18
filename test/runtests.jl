@@ -105,6 +105,17 @@ include("debugIO.jl")
         end
     end
 
+    @testset "LaTeX Document" begin
+        @test begin
+            filename="files/outline.pdf"
+            DEBUG && println(filename)
+            doc = pdDocOpen(filename)
+            @assert doc !== nothing
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
     @testset "PDF File with ObjectStreams" begin
         @test begin
             filename="files/pdf-17.pdf"
