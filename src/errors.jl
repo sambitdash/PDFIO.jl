@@ -18,5 +18,5 @@ const E_NOT_IMPLEMENTED = "Not Implemented"
 
 const E_INVALID_OBJECT  = "Invalid Object Found"
 const E_INVALID_PAGE_NUMBER = "Page number is invalid"
-const E_INVALID_PAGE_LABEL  = "Page label is invalid or page labels are not present in document"
+const E_INVALID_PAGE_LABEL  = "Page label is invalid or page label definitions are not present in the document (Table 28 PDF Specification 1.7)"
 const E_NOT_TAGGED_PDF = "PDF file is not tagged"
