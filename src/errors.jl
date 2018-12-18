@@ -1,6 +1,7 @@
 export  E_EXPECTED_EOF, E_UNEXPECTED_EOF, E_UNEXPECTED_CHAR, E_BAD_KEY,
         E_BAD_ESCAPE, E_BAD_CONTROL, E_LEADING_ZERO, E_BAD_NUMBER, E_BAD_HEADER,
-        E_BAD_TRAILER, E_NOT_IMPLEMENTED, E_INVALID_OBJECT, E_INVALID_PAGE_NUMBER,
+        E_BAD_TRAILER, E_NOT_IMPLEMENTED,
+        E_INVALID_OBJECT, E_INVALID_PAGE_NUMBER, E_INVALID_PAGE_LABEL,
         E_NOT_TAGGED_PDF
 
 # The following errors may be thrown by the reader
@@ -17,4 +18,5 @@ const E_NOT_IMPLEMENTED = "Not Implemented"
 
 const E_INVALID_OBJECT  = "Invalid Object Found"
 const E_INVALID_PAGE_NUMBER = "Page number is invalid"
+const E_INVALID_PAGE_LABEL  = "Page label is invalid or page label definitions are not present in the document (Table 28 PDF Specification 1.7)"
 const E_NOT_TAGGED_PDF = "PDF file is not tagged"
