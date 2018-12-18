@@ -102,7 +102,7 @@ pdDocGetPage
 ```
 Given a range of page numbers or a label returns an array of pages associated
 with it.
-Use second method if `pdDocHasPageLabels` returns `true`.
+For a detailed explanation on page labels, refer to the method `pdDocHasPageLabels`.
 """
 function pdDocGetPageRange(doc::PDDoc, nums::AbstractRange{Int})
     pages = []
@@ -122,9 +122,13 @@ end
 ```
     pdDocHasPageLabels(doc::PDDoc) -> Bool
 ```
-Returns information weather document has custom page labels.
-Page labels are some other characters like 'i', 'ii' displayed in place of page numebrs.
-If document has page labels, displayed page number may be different than absolute page number.
+Returns `true` if the document has page labels defined.  
+
+As per PDF Specification 1.7 Section 12.4.2, a document may optionally define page 
+labels (PDF 1.3) to identifyeach page visually on the screen or in print. Page labels 
+and page indices need not coincide: the indices shallbe fixed, running consecutively 
+through the document starting from 0 for the first page, but the labels may be
+specified in any way that is appropriate for the particular document.
 """
 function pdDocHasPageLabels(doc::PDDoc)
     catalog = pdDocGetCatalog(doc)
