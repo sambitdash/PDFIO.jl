@@ -87,8 +87,8 @@ function read_object_info_from_stm(stm::CosStream,
     io = util_open(String(filename),"r")
     try
         for i = 1:n
-            oids[i] = convert(Int, parse_number(io))
-            oloc[i] = convert(Int, parse_number(io)) + first
+            oids[i] = convert(Int, parse_unsignednumber(io))
+            oloc[i] = convert(Int, parse_unsignednumber(io)) + first
         end
     finally
         util_close(io)
