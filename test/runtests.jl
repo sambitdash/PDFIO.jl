@@ -333,8 +333,10 @@ include("debugIO.jl")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
-        @test pdDocHasPageLabels(pdDocOpen("files/1.pdf")) == false
-        @test_throws ErrorException(E_INVALID_PAGE_LABEL) pdDocGetPageRange(pdDocOpen("files/1.pdf"), "1")
+        doc = pdDocOpen("files/1.pdf")
+        @test pdDocHasPageLabels(doc) == false
+        @test_throws ErrorException(E_INVALID_PAGE_LABEL) pdDocGetPageRange(doc, "1")
+        pdDocClose(doc)
     end
 
     @testset "Symbol Fonts test" begin
