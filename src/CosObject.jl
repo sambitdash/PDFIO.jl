@@ -376,7 +376,7 @@ function createTreeNode(::Type{K}, dict::CosObject) where K
     node = CosTreeNode{K}()
     if (range !== CosNull)
         r = get(range, true)
-        node.range = (r[1], r[2])
+        node.range = (K(r[1]), K(r[2]))
     end
     if (kids !== CosNull)
         node.kids = get(kids)
@@ -397,8 +397,8 @@ end
 function populate_values(node::CosTreeNode{String}, dict::CosObject)
     names = get(dict, CosName("Names"))
     if (names !== CosNull)
-        v = get(names, true)
-        values = [(get(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]
+        v = get(names, false) #true => v[2i] is Tuple{Int} => error
+        values = [(String(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]
         node.values = values
     end
     return node
@@ -459,7 +459,7 @@ end
 ```
     CosComment
 ```
-A comment object in PDF which is normally ignored as a whitespace. 
+A comment object in PDF which is normally ignored as a whitespace.
 """
 struct CosComment <: CosObject
     val::String

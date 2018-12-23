@@ -105,15 +105,128 @@ include("debugIO.jl")
         end
     end
 
-    @testset "LaTeX Document" begin
+    @testset "Outlines" begin
         @test begin
-            filename="files/outline.pdf"
+            # This file has label catalog and usees /Dest outline entry (12.3.3 Document Outline)
+            filename="431.pdf"
             DEBUG && println(filename)
+            isfile(filename) ||
+                download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
             doc = pdDocOpen(filename)
-            @assert doc !== nothing
+            outline = pdDocGetOutline(doc)
+            @assert outline !== nothing
+            @assert length(outline) >= 20
+            @assert outline[1][:Title] == "Table of Contents"
+            @assert string(outline[1][:PageLabel]) == "i"
+            @assert string(outline[1][:PageRef]) == "449 0 R"
+            @assert outline[1][:PageNo] == 2
+            @assert item_level(outline[1]) == 1
+            @assert string(outline[19:20]) == """
+11. Advanced Topics - Linux Boot Process | PageLabel=>28 | PageRef=>509 0 R | PageNo=>32 | Expanded=>false
+  11.1. References for Boot Process | PageLabel=>30 | PageRef=>513 0 R | PageNo=>34
+"""
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
+        # This file created by LaTeX usees /A outline entry (12.3.3 Document Outline)
+        filename="files/outline.pdf"
+        DEBUG && println(filename)
+        doc = pdDocOpen(filename)
+        @test begin
+            outline = pdDocGetOutline(doc, add_index = true)
+            @assert outline !== nothing
+            @assert string(outline[1:2]) == """
+[1]: Chapter AA! | PageLabel=>2 | PageRef=>102 0 R | PageNo=>4 | Expanded=>false
+[2][1]: Section AA.aa! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][2][1]: SubSection AA.aa.a! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][2][2][1]: SubSubSection AA.aa.a.a! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][2][2][2][1]: Paragraph AA.aa.a.a.a! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][2][2][2][2][1]: SubParagraph AA.aa.a.a.a.a! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5
+[2][3]: Section AA.bb! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][4][1]: SubSection AA.bb.a! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+[2][4][2][1]: SubSubSection AA.bb.a.a! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6 | Expanded=>false
+[2][4][2][2][1]: Paragraph AA.bb.a.a.a! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6 | Expanded=>false
+[2][4][2][2][2][1]: SubParagraph AA.bb.a.a.a.a! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6
+[2][4][2][2][3]: Paragraph AA.bb.a.a.b! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6 | Expanded=>false
+[2][4][2][2][4][1]: SubParagraph AA.bb.a.a.b.a! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6
+[2][4][2][2][5]: Paragraph AA.bb.a.a.c! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6 | Expanded=>false
+[2][4][2][2][6][1]: SubParagraph AA.bb.a.a.c.a! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6
+[2][4][2][2][6][2]: SubParagraph AA.bb.a.a.c.b! | PageLabel=>4 | PageRef=>110 0 R | PageNo=>6
+"""
+            @assert items_count(outline[1:2]) == 16
+
+            # Test iterator
+            @assert items_count(outline) == length(items(outline)) == 18
+            item = PDOutlineItem()
+            for oi in items(outline)
+                item = oi
+                occursin("AA.bb.a.a.a!", oi[:Title]) && break
+            end
+            @assert string(item) == "Paragraph AA.bb.a.a.a! | PageLabel=>4 | PageRef=>110 0 R | Index=>(2, 4, 2, 2, 1) | PageNo=>6 | Expanded=>false"
+            @assert item === outline[2][4][2][2][1]
+            @assert item_level(item) == 5
+
+            # Test if PageNo, PageLabel and PageRef refers to the same page
+            item_pg = pdDocGetPage(doc, item[:PageNo])
+            item_obj = pdPageGetCosObject(item_pg)
+            @assert cosDocGetObject(pdDocGetCosDoc(doc), item[:PageRef]) == item_obj
+            @assert item_obj in map(p->pdPageGetCosObject(p), pdDocGetPageRange(doc, string(item[:PageLabel])))
+
+            # Test if PageNo is the right page
+            buf = IOBuffer()
+            pdPageExtractText(buf, item_pg)
+            item_text = String(take!(buf))
+            @assert occursin(item[:Title], item_text)
+            true
+        end
+        @test begin
+            outline = pdDocGetOutline(doc, depth = 1)
+            @assert outline !== nothing
+            @assert string(outline) == """
+Chapter AA! | PageLabel=>2 | PageRef=>102 0 R | PageNo=>4 | Expanded=>false
+  Section AA.aa! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+  Section AA.bb! | PageLabel=>3 | PageRef=>106 0 R | PageNo=>5 | Expanded=>false
+Chapter BB! | PageLabel=>5 | PageRef=>114 0 R | PageNo=>7 | Expanded=>false
+  Section BB.aa! | PageLabel=>5 | PageRef=>114 0 R | PageNo=>7
+"""
+            @assert items_count(outline) == 5
+            @assert items_count(outline, depth = 1) - items_count(outline, depth = 0) == 3
+            @assert items_count(outline[1]) == 1
+            @assert items_count(outline[1:2]) == 3
+            true
+        end
+        @test begin
+            outline = pdDocGetOutline(doc, compact = true)
+            @assert outline !== nothing
+            @assert string(outline) == """
+Chapter AA!
+  Section AA.aa!
+    SubSection AA.aa.a!
+      SubSubSection AA.aa.a.a!
+        Paragraph AA.aa.a.a.a!
+          SubParagraph AA.aa.a.a.a.a!
+  Section AA.bb!
+    SubSection AA.bb.a!
+      SubSubSection AA.bb.a.a!
+        Paragraph AA.bb.a.a.a!
+          SubParagraph AA.bb.a.a.a.a!
+        Paragraph AA.bb.a.a.b!
+          SubParagraph AA.bb.a.a.b.a!
+        Paragraph AA.bb.a.a.c!
+          SubParagraph AA.bb.a.a.c.a!
+          SubParagraph AA.bb.a.a.c.b!
+Chapter BB!
+  Section BB.aa!
+"""
+            item = outline[2][2][1]
+            @assert item[:Title] == "SubSection AA.aa.a!"
+            @assert item_level(item) == 3
+            @assert item ∈ items(outline, depth = 2)
+            @assert item ∉ items(outline, depth = 1)
+            true
+        end
+        pdDocClose(doc)
+        length(utilPrintOpenFiles()) == 0
     end
 
     @testset "PDF File with ObjectStreams" begin

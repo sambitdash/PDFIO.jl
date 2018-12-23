@@ -8,7 +8,8 @@ export PDDoc,
        pdDocGetPage,
        pdDocGetPageCount,
        pdDocGetPageRange,
-       pdDocHasPageLabels
+       pdDocHasPageLabels,
+       pdDocGetOutline
 
 using ..Common
 
@@ -122,11 +123,11 @@ end
 ```
     pdDocHasPageLabels(doc::PDDoc) -> Bool
 ```
-Returns `true` if the document has page labels defined.  
+Returns `true` if the document has page labels defined.
 
-As per PDF Specification 1.7 Section 12.4.2, a document may optionally define page 
-labels (PDF 1.3) to identifyeach page visually on the screen or in print. Page labels 
-and page indices need not coincide: the indices shallbe fixed, running consecutively 
+As per PDF Specification 1.7 Section 12.4.2, a document may optionally define page
+labels (PDF 1.3) to identifyeach page visually on the screen or in print. Page labels
+and page indices need not coincide: the indices shallbe fixed, running consecutively
 through the document starting from 0 for the first page, but the labels may be
 specified in any way that is appropriate for the particular document.
 """
@@ -180,4 +181,56 @@ function pdDocGetNamesDict(doc::PDDoc)
     catalog = pdDocGetCatalog(doc)
     ref = get(catalog, CosName("Names"))
     obj = cosDocGetObject(doc.cosDoc, ref)
+end
+
+"""
+```
+    pdDocGetOutline(doc::PDDoc; depth::Number = Inf, compact::Bool = false, add_index::Bool = false) -> PDOutline
+```
+Given a PDF document provides the document Outline (Table of Contents)
+available in the `Document Catalog` dictionary.
+Returned object is an array of either `PDOutlineItem` or `PDOutline` items.
+Nested `PDOutline` is allways preceded by `PDOutlineItem` and contain its sub-sections.
+First element of `PDOutline` array is allways `PDOutlineItem`.
+
+`PDOutlineItem` represent outline item and is a dictionairy object with following keys:
+- `:Title` - outline displayed title (`CDTextString`), always present
+- `:Level` - nesting level of the item (`Int`), optional, not present in level 1 items or if `:Index` key is present
+- `:Index` - inxedes of the item in Outline structure (`NTuple`), optional, not present if `:Level` key is present.
+             If index is (a,b,c) the item can be referred as outline[a][b][c], where outline is a object returned by this function.
+- `:Expanded` - weather child items should be expanded by the GUI viewer by default (`Bool`), optional
+- `:Style` - the style which should be applied to item by the GUI viewer (`Int`) - refer to PDF specification, optional.
+- `:PageRef` - indirect reference to respective page (`CosIndirectObjectRef`) - use with other API functions eg. `cosDocGetObject`, present if not in compact mode
+- `:PageNo` - absulute number of respective page (`Int`), present if not in compact mode
+- `:PageLabel` - displayable label of respective page (`LabelNumeral` - can be casted to `String`), optional.
+
+Optional, named parameters:
+- `depth` - limits retrieved items to certain nesting level (0 for root chapters), default: no limit
+- `compact` - if `true`, only `:Title` and `:Level` or `:Index` are retrived - works substantially faster, default: `false`
+- `add_index` - if `true`, `:Index` key is placed instead of `:Level` - with minimal overhead, default: `false`
+
+If document does not have Outline, this method returns `nothing`.
+
+Note: This method extracts most important information from PDF Outline entry.
+There are more information stored in those PDF structures. Use low level functions of this library to extract them if necessary.
+"""
+function pdDocGetOutline(doc::PDDoc;
+        depth::Number = Inf,
+        compact::Bool = false,
+        add_index::Bool = false
+        )
+    catalog = pdDocGetCatalog(doc)
+    cosDoc = pdDocGetCosDoc(doc)
+    toc_ref = get(catalog, cn"Outlines")
+    toc_ref === CosNull && return nothing
+    toc = cosDocGetObject(cosDoc, toc_ref)
+    toc_first_ref = get(toc, cn"First")
+    toc_last_ref = get(toc, cn"Last")
+    index = add_index ? [1] : Vector{Int}()
+    if compact
+        PD.get_outline_node_compact(cosDoc, toc_first_ref, toc_last_ref, 0, depth, index)
+    else
+        pgmap = PD.get_pageref_to_pageno_map(doc)
+        PD.get_outline_node_full(cosDoc, toc_first_ref, toc_last_ref, 0, depth, index, pgmap)
+    end
 end

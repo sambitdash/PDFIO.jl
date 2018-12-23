@@ -124,6 +124,36 @@ end
 get_pd_font!(doc::PDDocImpl, cosfont::CosObject) =
     get!(doc.fonts, cosfont, PDFont(doc, cosfont))
 
-get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) = 
+get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) =
     get!(doc.xobjs, cosxobj, createPDXObject(doc, cosxobj))
 
+function iterate_treenode!(pgmap::Dict{CosIndirectObjectRef, Int}, node::CosIndirectObject, currpageno::Int)::Int
+    mytype = get(node, cn"Type")
+    if mytype == cn"Page"
+        pgmap[CosIndirectObjectRef(node.num, node.gen)] = currpageno
+        return currpageno + 1
+    elseif mytype == cn"Pages"
+        kids = get(node, cn"Kids")
+        @assert kids isa CosArray
+        kidsarr = get(kids)
+        for kid in kidsarr
+            currpageno = iterate_treenode!(pgmap, kid, currpageno)
+        end
+        return currpageno
+    end
+    throw(ErrorException(E_BAD_TYPE)) # PDF 32000-1:2008 / 7.7.3.1
+end
+
+function get_pageref_to_pageno_map(doc::PDDocImpl)::Dict{CosIndirectObjectRef, Int}
+    node = doc.pages
+    @assert get(node, cn"Type") == cn"Pages" # PDF 32000-1:2008 / 7.7.3.1
+    kids = get(node, cn"Kids")
+    @assert kids isa CosArray
+    kidsarr = get(kids)
+    currpageno = 1
+    themap = Dict{CosIndirectObjectRef, Int}()
+    for kid in kidsarr
+        currpageno = iterate_treenode!(themap, kid, currpageno)
+    end
+    return themap
+end

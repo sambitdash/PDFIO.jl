@@ -14,7 +14,7 @@ mutable struct AdobeFontMetrics
     isFixedPitch::Bool
     weight::Symbol
     fontname::CosName
-    
+
     AdobeFontMetrics() = new(Dict{Int, CosName}(),
                              Dict{CosName, Int}(),
                              Dict{CosName, Vector{Int}}(),
@@ -41,7 +41,7 @@ function get_font_flags(afm::AdobeFontMetrics)
 end
 
 function interpret_metric_line(line::AbstractString)
-    tokens = split(line, ';'; keepempty=false) 
+    tokens = split(line, ';'; keepempty=false)
     cid = -1; wx = 1000; n = "null"; bb = [0,0,0,0]
     for token in tokens
         v = split(strip(token), ' '; limit = 2)
@@ -161,7 +161,7 @@ function get_font_widths(cosdoc::CosDoc, font::CosObject)
     widths = get(widths_obj, true)
     for i = firstchar:lastchar
         ix = i - firstchar + 1
-        d[i+1] = widths[ix]
+        d[i+1] = round(Int,widths[ix])
     end
     return d
 end

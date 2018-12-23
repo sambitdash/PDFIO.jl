@@ -22,6 +22,7 @@ export  PDDoc,
             pdDocGetPage,
             pdDocGetPageCount,
             pdDocGetPageRange,
+            pdDocGetOutline,
         PDPage,
             pdPageGetContents,
             pdPageIsEmpty,
@@ -44,7 +45,11 @@ export  PDDoc,
             pdFontIsItalic,
             pdFontIsFixedW,
             pdFontIsAllCap,
-            pdFontIsSmallCap
+            pdFontIsSmallCap,
+        PDOutline,
+            items_count, items,
+            PDOutlineItem,
+                item_level
 
 using .Cos
 export  CosDoc,
