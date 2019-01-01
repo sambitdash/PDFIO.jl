@@ -111,6 +111,10 @@ include("debugIO.jl")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             @assert doc !== nothing
+            # Following two lines will be extended to more sensible test in the future
+            # For now this is the test for issue #44 - without respective fix pdPageExtractText() crashes
+            item_pg = pdDocGetPage(doc, 1)
+            pdPageExtractText(IOBuffer(), item_pg)
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
