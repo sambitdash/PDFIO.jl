@@ -161,7 +161,7 @@ function get_font_widths(cosdoc::CosDoc, font::CosObject)
     widths = get(widths_obj, true)
     for i = firstchar:lastchar
         ix = i - firstchar + 1
-        d[i+1] = round(Int,widths[ix])
+        d[i+1] = round(Int, widths[ix])
     end
     return d
 end

@@ -31,7 +31,7 @@ include("debugIO.jl")
 
     @testset "CDDate" begin
         @test string(CDDate("D:199812231952-08'30 "))==
-            "1998-12-23T19:52:00 - 8 hours, 30 minutes"
+            "D:19981223195200-08'30"
         @test_throws ErrorException CDDate("not a date")
         @test_throws ErrorException CDDate("D:209")
         @test CDDate("D:2009") == CDDate("D:20090101000000Z")

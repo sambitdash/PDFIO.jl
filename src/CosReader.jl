@@ -3,8 +3,6 @@ get_pdfcontentops
 
 import Base: peek
 
-@inline do_nothing(b) = nothing
-
 #This function is for testing only
 function parse_data(filename)
     ps=util_open(filename,"r")
@@ -22,7 +20,7 @@ end
 Given a `IOStream`, after possibly any amount of whitespace, return the next
 parseable value.
 """
-function parse_value(ps::IO, fparse_more::Function=do_nothing)
+function parse_value(ps::IO, fparse_more=x->nothing)
     chomp_space!(ps)
     byte = UInt8(peek(ps))
     byte == LEFT_PAREN ? parse_string(ps) :

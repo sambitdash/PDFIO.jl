@@ -26,6 +26,7 @@ const CDTextString = String
 using Dates
 using Dates: CompoundPeriod
 using Rectangle
+using Printf
 
 """
 ```
@@ -81,10 +82,14 @@ function Base.isless(d1::CDDate, d2::CDDate)
 end
 
 function Base.show(io::IO, dt::CDDate)
-    show(io, dt.d)
-    dt.tz == Minute(0) && return print(io, " UTC")
-    print(io, dt.ahead ? " + " : " - ")
-    print(io, dt.tz)
+    print(io, "D:")
+    Dates.format(io, dt.d, dateformat"YYYYmmddHHMMSS")
+    dt.tz == Minute(0) && return print(io, "Z")
+    print(io, dt.ahead ? "+" : "-")
+    tzh = dt.tz.periods[1].value
+    tzm = dt.tz.periods[2].value
+    tzs = @sprintf "%02d'%02d" tzh tzm
+    print(io, tzs)
 end
 
 """
