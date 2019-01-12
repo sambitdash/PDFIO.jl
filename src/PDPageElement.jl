@@ -521,6 +521,8 @@ mutable struct GState{T}
     GState{T}() where T = new(init_graphics_state())
 end
 
+new_gstate(state::GState{T}) where {T} = GState{T}()
+
 Base.setindex!(gs::GState, v::Any, k::Symbol) = (gs.state[end][k] = v)
 Base.getindex(gs::GState, k::Symbol) = gs.state[end][k]
 Base.get(gs::GState, k::Symbol, defval::Any) = get(gs.state[end], k, defval)
@@ -615,14 +617,14 @@ function show_text_layout!(io::IO, state::GState)
     return io
 end
 
-@inline function evalContent!(grp::PDPageObjectGroup, state::GState=Vector{Dict}())
+@inline function evalContent!(grp::PDPageObjectGroup, state::GState)
     for obj in grp.objs
         evalContent!(obj, state)
     end
     return state
 end
 
-@inline function evalContent!(tr::PDPageTextRun, state::GState=Vector{Dict}())
+@inline function evalContent!(tr::PDPageTextRun, state::GState)
     evalContent!(tr.elem, state)
     tfs::Float32 = get(state, :fontsize, 0f0)
     th::Float32  = state[:Tz]/100f0
@@ -654,7 +656,7 @@ end
 end
 
 @inline function evalContent!(pdo::PDPageTextObject,
-                              state::GState=Vector{Dict}())
+                              state::GState)
     state[:Tm]  = Matrix{Float32}(I, 3, 3)
     state[:Tlm] = Matrix{Float32}(I, 3, 3)
     state[:Trm] = Matrix{Float32}(I, 3, 3)

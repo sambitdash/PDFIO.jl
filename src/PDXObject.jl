@@ -82,7 +82,7 @@ Do(xobj::PDImageXObject, state::GState) = nothing
 function Do(xobj::PDFormXObject, state::GState)
     isempty(xobj.content_objects) && load_content_objects(xobj)
     isempty(xobj.content_objects) && return state
-    xstate = GState{:PDFIO}()
+    xstate = new_gstate(state)
     ctm = state[:CTM]
     nctm = xobj.matrix*ctm
     xstate[:CTM] = nctm
