@@ -71,7 +71,7 @@ end
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
                         doc::CosDoc, font::CosObject)
     subtype  = cosDocGetObject(doc, font, cn"Subtype")
-    subtype != cn"Type1" && subtype != cn"MMType1" && return fum
+    subtype !== cn"Type1" && subtype !== cn"MMType1" && return fum
     basefont = cosDocGetObject(doc, font, cn"BaseFont")
     basefont_with_subset = CDTextString(basefont)
     basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
@@ -130,18 +130,22 @@ end
 
 function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
     glyph_name_id = Dict{CosName, UInt8}()
-    (cosfont === CosNull) && return glyph_name_id
+    cosfont === CosNull && return glyph_name_id
     subtype = get(cosfont, cn"Subtype")
-    (subtype === cn"Type0") && return glyph_name_id
-    baseenc = cosDocGetObject(cosdoc, cosfont, cn"BaseEncoding")
+    subtype === cn"Type0" && return glyph_name_id
+    encoding = cosDocGetObject(cosdoc, cosfont, cn"Encoding")
+    encoding === CosNull && return glyph_name_id
+    
+    baseenc = typeof(encoding) === CosName ? encoding :
+        cosDocGetObject(cosdoc, encoding, cn"BaseEncoding")
     encoding_mapping =
         baseenc == cn"WinAnsiEncoding"   ? GlyphName_to_WINEncoding :
         baseenc == cn"MacRomanEncoding"  ? GlyphName_to_MACEncoding :
         baseenc == cn"MacExpertEncoding" ? Glyphname_to_MEXEncoding :
                                            GlyphName_to_STDEncoding
-    merge!(glyph_name_id, encoding_mapping)
-
-    diff = cosDocGetObject(cosdoc, cosfont, cn"Differences")
+    subtype !== cn"Type3" && merge!(glyph_name_id, encoding_mapping)
+    typeof(encoding) === CosName && return glyph_name_id
+    diff = cosDocGetObject(cosdoc, encoding, cn"Differences")
     diff === CosNull && return glyph_name_id
     values = get(diff)
     d = Dict()
