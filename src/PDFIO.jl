@@ -49,7 +49,7 @@ export  PDDoc,
         PDOutline,
             items_count, items,
             PDOutlineItem,
-                item_level
+                hasproperty
 
 using .Cos
 export  CosDoc,

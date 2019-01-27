@@ -192,17 +192,19 @@ available in the `Document Catalog` dictionary.
 Returned object is an array of either `PDOutlineItem` or `PDOutline` items.
 Nested `PDOutline` is allways preceded by `PDOutlineItem` and contain its sub-sections.
 First element of `PDOutline` array is allways `PDOutlineItem`.
+Both `PDOutline` and `PDOutlineItem` are not modificable.
 
-`PDOutlineItem` represent outline item and is a dictionairy object with following keys:
-- `:Title` - outline displayed title (`CDTextString`), always present
-- `:Level` - nesting level of the item (`Int`), optional, not present in level 1 items or if `:Index` key is present
-- `:Index` - inxedes of the item in Outline structure (`NTuple`), optional, not present if `:Level` key is present.
-             If index is (a,b,c) the item can be referred as outline[a][b][c], where outline is a object returned by this function.
-- `:Expanded` - weather child items should be expanded by the GUI viewer by default (`Bool`), optional
-- `:Style` - the style which should be applied to item by the GUI viewer (`Int`) - refer to PDF specification, optional.
-- `:PageRef` - indirect reference to respective page (`CosIndirectObjectRef`) - use with other API functions eg. `cosDocGetObject`, present if not in compact mode
-- `:PageNo` - absulute number of respective page (`Int`), present if not in compact mode
-- `:PageLabel` - displayable label of respective page (`LabelNumeral` - can be casted to `String`), optional.
+`PDOutlineItem` represent outline item and is an object with following properties:
+- `Title` - outline displayed title (`CDTextString`), always present
+- `Level` - nesting level of the item (`Int`), optional, not present in level 1 items or if `:Index` key is present
+- `Index` - inxedes of the item in Outline structure (`NTuple`), optional, not present if `:Level` key is present.
+            If index is (a,b,c) the item can be referred as outline[a][b][c], where outline is a object returned by this function.
+- `Expanded` - weather child items should be expanded by the GUI viewer by default (`Bool`), optional
+- `Style` - the style which should be applied to item by the GUI viewer (`Int`) - refer to PDF specification, optional.
+- `PageRef` - indirect reference to respective page (`CosIndirectObjectRef`) - use with other API functions eg. `cosDocGetObject`, present if not in compact mode
+- `PageNo` - absulute number of respective page (`Int`), present if not in compact mode
+Properties can be obtained using dot notation: e.g. `item.Title` (where item is of `PDOutlineItem` type).
+Refering to not-existing property returns `missing` value.
 
 Optional, named parameters:
 - `depth` - limits retrieved items to certain nesting level (0 for root chapters), default: no limit

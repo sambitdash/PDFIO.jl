@@ -1,9 +1,9 @@
 export PDOutline,
+        items_count,
+        items,
     PDOutlineItem,
-    PDOutlineIter,
-    item_level,
-    items_count,
-    items
+        hasproperty,
+    PDOutlineIter
 
 using LabelNumerals
 using RomanNumerals
@@ -17,13 +17,50 @@ using ..Cos
 ```
 Representation of PDF document Outline item.
 
-It is currently defined as `Dict{Symbol, Any}`.
+It is currently defined as subtype of `AbstractDict{Symbol, Any}`.
 Check description of function `pdDocGetOutline` for more information.
 
 Methods which operate on this structure:
-- `item_level(item::PDOutlineItem)` - return nesting level of item inside whole Outline.
+- `propertynames(::PDOutlineItem; private = false) -> Set{Symbol}` - return properties present in this item.
+- `hasproperty(::PDOutlineItem, s::Symbol) -> Bool` - return weather item has given property.
 """
-PDOutlineItem = Dict{Symbol, Any}
+struct PDOutlineItem <: AbstractDict{Symbol, Any}
+    props::Dict{Symbol, Any}
+    function PDOutlineItem()
+        new(Dict{Symbol, Any}())
+    end
+    function PDOutlineItem(p::Dict{Symbol, Any})
+        new(p)
+    end
+end
+Base.length(i::PDOutlineItem) = length(getfield(i, :props))
+Base.keys(i::PDOutlineItem) = keys(getfield(i, :props))
+Base.get(i::PDOutlineItem, k::Symbol, def) = get(getfield(i, :props), k, def)
+Base.get(i::PDOutlineItem, k::Integer, def) = throw(KeyError(string(k)))
+Base.iterate(i::PDOutlineItem) = iterate(getfield(i, :props))
+Base.iterate(i::PDOutlineItem, s::Int) = iterate(getfield(i, :props), s)
+
+function Base.getproperty(i::PDOutlineItem, s::Symbol)
+    try
+        s == :props && return getfield(i, :props)
+        if s == :Level
+            haskey(getfield(i, :props), :Level) && return getfield(i, :props)[:Level]
+            haskey(getfield(i, :props), :Index) && return length(getfield(i, :props)[:Index])
+            return 1
+        else
+            return getfield(i, :props)[s]
+        end
+    catch KeyError
+        return missing
+    end
+end
+function Base.propertynames(i::PDOutlineItem; private = false)
+    private && return union(keys(getfield(i, :props)), (:Level, :props))
+    return union(keys(getfield(i, :props)), (:Level,))
+end
+hasproperty(i::PDOutlineItem, s::Symbol) = (s == :Level || haskey(getfield(i, :props), s))
+# There is no setindex! and setproperty implementation on purpose.
+# This object should not be modified by user.
 
 """
 ```
@@ -31,14 +68,30 @@ PDOutlineItem = Dict{Symbol, Any}
 ```
 Representation of PDF document Outline (Table of Contents).
 
-It is currently defined as `Vector{Union{PDOutlineItem, Vector}}`.
+It is currently defined as subtype of `AbstractVector{Union{PDOutlineItem, AbstractVector}}`,
+which is actually `AbstractVector{Union{PDOutlineItem, PDOutline}}`.
 Check description of function `pdDocGetOutline` for more information.
 
 Methods which operate on this structure:
 - `items_count(o::PDOutline; depth::Number = Inf)` - return number of items inside Outline.
-- `items(o::PDOutline; depth::Number = Inf)` - return iterator thru Outline items.
+- `items(o::PDOutline; depth::Number = Inf)` - return iterator of Outline items.
 """
-PDOutline = Vector{Union{PDOutlineItem, Vector}}
+struct PDOutline <: AbstractVector{Union{PDOutlineItem, AbstractVector}}
+    items::Vector{Union{PDOutlineItem, AbstractVector}}
+    function PDOutline()
+        new(Vector{Union{PDOutlineItem, AbstractVector}}())
+    end
+    function PDOutline(i::Vector{Union{PDOutlineItem, AbstractVector}})
+        new(i)
+    end
+end
+_conv(i::PDOutlineItem) = i
+_conv(i::Vector{Union{PDOutlineItem, AbstractVector}}) = PDOutline(i)
+_conv(o::PDOutline) = o
+Base.size(o::PDOutline) = size(o.items)
+Base.getindex(o::PDOutline, I...) = _conv(getindex(o.items, I...))
+# setindex! is intentionally not implelented - Outline object is of informative nature,
+# I do not see ane use case in which this object would have to be changed by user.
 
 ####################################################################################
 ## Reading Outline from PDF
@@ -49,7 +102,7 @@ function get_outline_node_compact(
             curr_depth::Int,
             max_depth::Number,
             index::Vector{Int})
-    arr = PDOutline()
+    outl = PDOutline()
     support_index = length(index) > 0
     curr_ref = first_ref
     while true
@@ -59,18 +112,18 @@ function get_outline_node_compact(
         if title !== CosNull
             item = PDOutlineItem()
             title isa CosIndirectObject && (title = title.obj)
-            item[:Title] = convert(CDTextString, title)
+            item.props[:Title] = convert(CDTextString, title)
             if support_index
-                item[:Index] = tuple(index...)
+                item.props[:Index] = tuple(index...)
                 index[end] = index[end] + 1
             elseif curr_depth > 0
-                item[:Level] = curr_depth + 1
+                item.props[:Level] = curr_depth + 1
             end
-            push!(arr, item)
+            push!(outl.items, item)
             ref_nest = get(obj, cn"First")
             if ref_nest !== CosNull && curr_depth < max_depth
                 support_index && push!(index, 1)
-                push!(arr, get_outline_node_compact(cosDoc, ref_nest, get(obj, cn"Last"), curr_depth + 1, max_depth, index))
+                push!(outl.items, get_outline_node_compact(cosDoc, ref_nest, get(obj, cn"Last"), curr_depth + 1, max_depth, index))
                 if support_index
                     pop!(index)
                     index[end] = index[end] + 1
@@ -81,7 +134,7 @@ function get_outline_node_compact(
         curr_ref = get(obj, cn"Next")
         curr_ref === CosNull && break
     end
-    return arr
+    return outl
 end
 
 get_outline_node_compact(
@@ -91,45 +144,6 @@ get_outline_node_compact(
             ::Int,
             ::Number,
             ::Vector{Int}) = nothing
-
-## Refers to PDF 32000-1:2008 / 12.4.2
-function find_label_for_page(cosDoc::CosDoc, values::Vector{Tuple{Int,CosObject}},
-                             pgnum::Int, ::String)
-    # @show values
-    curobj = nothing
-    curpg = 0
-    for (pageno, obj) in values
-        pageno > pgnum && break
-        curobj = obj
-        curpg = pageno
-    end
-    curobj === nothing && return nothing
-
-    dict = cosDocGetObject(cosDoc, curobj)
-    dict_s  = get(dict, cn"S")
-    dict_p  = get(dict, cn"P")
-    dict_st = get(dict, cn"St")
-    pref  = dict_p  === CosNull ? "" : String(dict_p)
-    start = dict_st === CosNull ? 1 : convert(Int, get(dict_st))
-    labelpgnum = start + pgnum - curpg - 1
-
-    dict_s == cn"D" && return LabelNumeral(Int, labelpgnum; prefix = pref)
-    dict_s == cn"R" && return LabelNumeral(RomanNumeral, labelpgnum; prefix = pref)
-    dict_s == cn"r" && return LabelNumeral(RomanNumeral, labelpgnum; prefix = pref, caselower=true)
-    dict_s == cn"A" && return LabelNumeral(AlphaNumeral, labelpgnum; prefix = pref)
-    dict_s == cn"a" && return LabelNumeral(AlphaNumeral, labelpgnum; prefix = pref, caselower=true)
-    return pref
-end
-
-# Candidate for API function
-function get_page_label(cosDoc::CosDoc, pgnum::Int)
-    catalog = cosDocGetRoot(cosDoc)
-    ref = get(catalog, cn"PageLabels")
-    ref === CosNull && return nothing
-    plroot = cosDocGetObject(cosDoc, ref)
-    troot = Cos.createTreeNode(Int, plroot)
-    return Cos.find_ntree(find_label_for_page, cosDoc, troot, pgnum, "")[2]
-end
 
 function find_named_dest_in_vector(::CosDoc, values::Vector{Tuple{String,CosObject}},
                                    dest_name::String, refdata::String)
@@ -165,12 +179,6 @@ function get_outline_node_full(
             index::Vector{Int},
             pgmap::Dict{CosIndirectObjectRef, Int})
     catalog = cosDocGetRoot(cosDoc)
-    ref = get(catalog, cn"PageLabels")
-    plroot = nothing
-    if ref !== CosNull
-        obj = cosDocGetObject(cosDoc, ref)
-        plroot = Cos.createTreeNode(Int, obj)
-    end
     ref = get(catalog, cn"Names")
     destroot = nothing
     if ref !== CosNull
@@ -183,7 +191,7 @@ function get_outline_node_full(
     end
 
     curr_ref = first_ref
-    arr = PDOutline()
+    outl = PDOutline()
     support_index = length(index) > 0
     while true
         obj = cosDocGetObject(cosDoc, curr_ref)
@@ -192,27 +200,27 @@ function get_outline_node_full(
         if title !== CosNull
             item = PDOutlineItem()
             title isa CosIndirectObject && (title = title.obj)
-            item[:Title] = convert(CDTextString, title)
+            item.props[:Title] = convert(CDTextString, title)
             if support_index
-                item[:Index] = tuple(index...)
+                item.props[:Index] = tuple(index...)
                 index[end] = index[end] + 1
             elseif curr_depth > 0
-                item[:Level] = curr_depth + 1
+                item.props[:Level] = curr_depth + 1
             end
             ref = get(obj, cn"Count")
             if ref != CosNull
-                item[:Expanded] = convert(Int, ref) > 0
+                item.props[:Expanded] = convert(Int, ref) > 0
             end
             ref = get(obj, cn"F")
             if ref != CosNull
-                item[:Style] = convert(Int, ref)
+                item.props[:Style] = convert(Int, ref)
             end
             ref = get(obj, cn"Dest")
             if ref != CosNull && ref isa CosArray
                 pg = get(ref)[1]
-                item[:PageRef] = pg
+                item.props[:PageRef] = pg
                 try
-                    item[:PageNo] = pgmap[pg]
+                    item.props[:PageNo] = pgmap[pg]
                 catch KeyError
                     throw(ErrorException(E_INVALID_OBJECT))
                 end
@@ -223,9 +231,9 @@ function get_outline_node_full(
                 if action isa Dict && action[cn"S"] == cn"GoTo"
                     # Refers to PDF 32000-1:2008 / 12.6.4.2
                     if action[cn"D"] isa CosIndirectObjectRef
-                        item[:PageRef] = action[cn"D"]
+                        item.props[:PageRef] = action[cn"D"]
                         try
-                            item[:PageNo] = pgmap[action[cn"D"]]
+                            item.props[:PageNo] = pgmap[action[cn"D"]]
                         catch KeyError
                             throw(ErrorException(E_INVALID_OBJECT))
                         end
@@ -240,9 +248,9 @@ function get_outline_node_full(
                                 end
                                 if dest_obj != CosNull && dest_obj isa CosArray
                                     pg = get(dest_obj)[1]
-                                    item[:PageRef] = pg
+                                    item.props[:PageRef] = pg
                                     try
-                                        item[:PageNo] = pgmap[pg]
+                                        item.props[:PageNo] = pgmap[pg]
                                     catch KeyError
                                         throw(ErrorException(E_INVALID_OBJECT))
                                     end
@@ -258,16 +266,11 @@ function get_outline_node_full(
                 throw(ErrorException(E_NOT_IMPLEMENTED))
             end
 
-            if plroot !== nothing && haskey(item, :PageNo)
-                label = Cos.find_ntree(find_label_for_page, cosDoc, plroot, item[:PageNo], "")[2]
-                label !== nothing && (item[:PageLabel] = label)
-            end
-
-            push!(arr, item)
+            push!(outl.items, item)
             ref_nest = get(obj, cn"First")
             if ref_nest !== CosNull && curr_depth < max_depth
                 support_index && push!(index, 1)
-                push!(arr, get_outline_node_full(cosDoc, ref_nest, get(obj, cn"Last"), curr_depth + 1, max_depth, index, pgmap))
+                push!(outl.items, get_outline_node_full(cosDoc, ref_nest, get(obj, cn"Last"), curr_depth + 1, max_depth, index, pgmap))
                 if support_index
                     pop!(index)
                     index[end] = index[end] + 1
@@ -278,7 +281,7 @@ function get_outline_node_full(
         curr_ref = get(obj, cn"Next")
         curr_ref === CosNull && break
     end
-    return arr
+    return outl
 end
 
 get_outline_node_full(
@@ -289,18 +292,6 @@ get_outline_node_full(
             ::Number,
             ::Vector{Int},
             ::Dict) = nothing
-
-"""
-```
-    item_level(item::PDOutlineItem) -> Int
-```
-Return nesting level of item inside whole Outline.
-"""
-function item_level(item::PDOutlineItem)
-    haskey(item, :Level) && return item[:Level]
-    haskey(item, :Index) && return length(item[:Index])
-    return 1
-end
 
 ####################################################################################
 ## Support for iteraring thru Outline
@@ -360,7 +351,7 @@ function Base.iterate(oi::PDOutlineIter, state)
         return iterate(oi, (state[1], it[2], state[3])) # try next position from current vector
     end
     @assert itn[1] isa PDOutlineItem # first item in group should be an outline item
-    if item_level(itn[1]) - 1 > oi.max_depth
+    if itn[1].Level::Int - 1 > oi.max_depth
         return iterate(oi, (state[1], it[2], state[3])) # try next position from current vector
     end
     return (itn[1], (it[1], itn[2], (state[1], it[2], state[3]))) # it[1] must be a vector, nest into
@@ -377,7 +368,7 @@ function Base.show(io::IO, item::PDOutlineItem; indent::Bool = false)
             print(io, "  " ^ (item[:Level] - 1))
         end
     end
-    :Title in keys(item) && print(io, item[:Title])
+    :Title ∈ keys(item) && print(io, item[:Title])
     for (k, v) in item
         k == :Title && continue
         indent && k ∈ (:Level, :Index) && continue
@@ -393,10 +384,25 @@ function Base.show(io::IO, ::MIME"text/plain", item::PDOutlineItem; indent::Bool
     show(io, item; indent = indent)
 end
 
+function Base.summary(io::IO, o::PDOutline; depth::Number = Inf)
+    cnt = items_count(o, depth = depth)
+    print(io, "$cnt-element ")
+    Base.showarg(io, o, true)
+end
+
 function Base.show(io::IO, o::PDOutline; depth::Number = Inf)
-    for item in items(o, depth = depth)
+    limit::Bool = get(io, :limit, false)
+    if limit
+        rows = displaysize(io)[1] - 3
+        rows < 2 && (print(io, " …"); return)
+    else
+        rows = typemax(Int)
+    end
+    len = length(items(o, depth = depth))
+    for (i, item) in enumerate(items(o, depth = depth))
+        i > 1 && print(io, '\n')
+        i == rows < len && (print(io, " ⋮"); break)
         show(io, item, indent = true)
-        print(io, '\n')
     end
 end
 function Base.show(io::IO, ::MIME"text/plain", o::PDOutline; depth::Number = Inf)
