@@ -401,9 +401,15 @@ end
 #Not implemented for CIDFonts
 get_font_name(cosfont::CosObject, ::CIDWidth) = cn"" 
 function get_font_name(cosfont::CosObject, x)
+    subtype   = get(cosfont, cn"Subtype")
+    if subtype === cn"Type3"
+        name = get(cosfont, cn"Name")
+        name === CosNull && return cn"Type3"
+        return name
+    end
     basefname = get(cosfont, cn"BaseFont")
     basefname === CosNull &&
-        error("Non-standard 14 fonts having no font descriptor")
+        error("Non-standard 14 fonts having no BaseFont")
     return basefname
 end
 
