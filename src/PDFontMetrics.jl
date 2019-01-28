@@ -8,7 +8,7 @@ mutable struct AdobeFontMetrics
     cid_to_name::Dict{Int, CosName}
     name_to_wx::Dict{CosName, Int}
     name_to_b::Dict{CosName, Vector{Int}}
-    kern_pairs::Dict{Tuple{CosName, CosName}, Tuple{Int, Int}}
+    kern_pairs::Dict{Tuple{CosName, CosName}, Tuple{Float32, Float32}}
     has_kerning::Bool
     italicAngle::Float32
     isFixedPitch::Bool
@@ -18,7 +18,8 @@ mutable struct AdobeFontMetrics
     AdobeFontMetrics() = new(Dict{Int, CosName}(),
                              Dict{CosName, Int}(),
                              Dict{CosName, Vector{Int}}(),
-                             Dict{Tuple{CosName, CosName}, Tuple{Int, Int}}(),
+                             Dict{Tuple{CosName, CosName},
+                                  Tuple{Float32, Float32}}(),
                              false,
                              0,
                              false,
@@ -82,8 +83,11 @@ end
 function interpret_kerpair_line(line::AbstractString)
     tokens = split(line)
     key = tokens[1]
-    return CosName(tokens[2]), CosName(tokens[3]), parse(Int,tokens[4]),
-            (key == "KP") || (key == "KPH") ? parse(Int, tokens[5]) : 0
+    a = CosName(tokens[2])
+    b = CosName(tokens[3])
+    x = key in ("KP", "KPH", "KPX") ? parse(Float32, tokens[4]) : 0f0
+    y = key in ("KP", "KPH", "KPY") ? parse(Float32, tokens[5]) : 0f0
+    return a, b, x, y
 end
 
 function populate_kern_pairs(lines, state, afm, nLines)
@@ -145,10 +149,10 @@ function read_afm(fontname::AbstractString)
     return afm
 end
 
-get_font_widths(cosdoc::CosDoc, font::CosNullType) = zeros(Int, 256)
+get_font_widths(cosdoc::CosDoc, font::CosNullType) = zeros(Float32, 256)
 
 function get_font_widths(cosdoc::CosDoc, font::CosObject)
-    d = zeros(Int, 256)
+    d = zeros(Float32, 256)
     @assert get(font, cn"Type") === cn"Font"
     subtype = get(font, cn"Subtype")
     (subtype === cn"Type0") && return get_cid_font_widths(cosdoc, font)
@@ -204,21 +208,21 @@ function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
 end
 
 get_character_width(n::CosName, afm::AdobeFontMetrics) =
-    get(afm.name_to_wx, n, 1000)
+    get(afm.name_to_wx, n, 1000f0)
 get_character_width(cid::UInt8, afm::AdobeFontMetrics) =
     get_character_width(get(afm.cid_to_name, cid, nothing), afm)
-get_character_width(::Nothing, afm::AdobeFontMetrics) = 1000
+get_character_width(::Nothing, afm::AdobeFontMetrics) = 1000f0
 
 get_kern_width(c1::Int, c2::Int, afm::AdobeFontMetrics) =
     get_kern_width(get(afm.cid_to_name, c1, nothing),
                    get(afm.cid_to_name, c2, nothing),
                    afm)
 get_kern_width(n1::CosName, n2::CosName, afm::AdobeFontMetrics) =
-    get(afm.kern_pairs, (n1, n2), (0, 0))[1]
-get_kern_width(c1, ::Nothing, other) = 0
-get_kern_width(::Nothing, c2, other) = 0
-get_kern_width(::Nothing, ::Nothing, ::Any) = 0
-get_kern_width(c1, c2, other) = 0
+    get(afm.kern_pairs, (n1, n2), (0f0, 0f0))[1]
+get_kern_width(c1, ::Nothing, other) = 0f0
+get_kern_width(::Nothing, c2, other) = 0f0
+get_kern_width(::Nothing, ::Nothing, ::Any) = 0f0
+get_kern_width(c1, c2, other) = 0f0
 
 get_character_width(cid::UInt8, widths::Vector) =
-    (widths[Int(cid+1)] == 0) ? 1000 : widths[Int(cid+1)]
+    (widths[Int(cid+1)] == 0) ? 1000f0 : widths[Int(cid+1)]

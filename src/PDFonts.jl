@@ -129,24 +129,32 @@ function merge_encoding!(fum::FontUnicodeMapping,
 end
 
 function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
-    glyph_name_id = Dict{CosName, UInt8}()
-    cosfont === CosNull && return glyph_name_id
+    glyph_name_to_cid, cid_to_glyph_name =
+        Dict{CosName, UInt8}(), Dict{UInt8, CosName}()
+    cosfont === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     subtype = get(cosfont, cn"Subtype")
-    subtype === cn"Type0" && return glyph_name_id
+    subtype === cn"Type0" && return glyph_name_to_cid, cid_to_glyph_name
     encoding = cosDocGetObject(cosdoc, cosfont, cn"Encoding")
-    encoding === CosNull && return glyph_name_id
+    encoding === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     
     baseenc = typeof(encoding) === CosName ? encoding :
         cosDocGetObject(cosdoc, encoding, cn"BaseEncoding")
-    encoding_mapping =
-        baseenc == cn"WinAnsiEncoding"   ? GlyphName_to_WINEncoding :
-        baseenc == cn"MacRomanEncoding"  ? GlyphName_to_MACEncoding :
-        baseenc == cn"MacExpertEncoding" ? Glyphname_to_MEXEncoding :
-                                           GlyphName_to_STDEncoding
-    subtype !== cn"Type3" && merge!(glyph_name_id, encoding_mapping)
-    typeof(encoding) === CosName && return glyph_name_id
+    gn2cid, cid2gn =
+        baseenc == cn"WinAnsiEncoding"   ?
+        (GlyphName_to_WINEncoding, WINEncoding_to_GlyphName) :
+        baseenc == cn"MacRomanEncoding"  ?
+        (GlyphName_to_MACEncoding, MACEncoding_to_GlyphName) :
+        baseenc == cn"MacExpertEncoding" ?
+        (Glyphname_to_MEXEncoding, MEXEncoding_to_GlyphName) :
+        (GlyphName_to_STDEncoding, STDEncoding_to_GlyphName)
+
+    if subtype !== cn"Type3"
+        merge!(glyph_name_to_cid, gn2cid)
+        merge!(cid_to_glyph_name, cid2gn)
+    end
+    typeof(encoding) === CosName && return glyph_name_to_cid, cid_to_glyph_name
     diff = cosDocGetObject(cosdoc, encoding, cn"Differences")
-    diff === CosNull && return glyph_name_id
+    diff === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     values = get(diff)
     d = Dict()
     cid = -1
@@ -155,11 +163,12 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
             cid = get(v)
         else
             @assert cid != -1
-            glyph_name_id[v] = cid
+            glyph_name_to_cid[v] = cid
+            cid_to_glyph_name[cid] = v
             cid += 1
         end
     end
-    return glyph_name_id
+    return glyph_name_to_cid, cid_to_glyph_name
 end
 
 get_encoded_string(s::CosString, fum::Nothing) = CDTextString(s)
@@ -352,19 +361,22 @@ CIDWidth() = CIDWidth(1000)
 mutable struct PDFont
     doc::PDDoc
     obj::CosObject
-    widths::Union{AdobeFontMetrics, Vector{Int}, CIDWidth}
+    widths::Union{AdobeFontMetrics, Vector{Float32}, CIDWidth}
     fum::FontUnicodeMapping
-    glyph_name_id::Dict{CosName, UInt8}
+    glyph_name_to_cid::Dict{CosName, UInt8}
+    cid_to_glyph_name::Dict{UInt8, CosName}
     flags::UInt32
     fontname::CosName
     @inline function PDFont(doc::PDDoc, cosfont::CosObject)
         fum = FontUnicodeMapping()
         merge_encoding!(fum, doc.cosDoc, cosfont)
         widths = get_font_widths(doc.cosDoc, cosfont)
-        glyph_name_id = get_glyph_id_mapping(doc.cosDoc, cosfont)
+        glyph_name_to_cid, cid_to_glyph_name =
+            get_glyph_id_mapping(doc.cosDoc, cosfont)
         flags = get_font_flags(doc, cosfont, widths)
         fontname = get_font_name(doc, cosfont, widths)
-        return new(doc, cosfont, widths, fum, glyph_name_id, flags, fontname)
+        return new(doc, cosfont, widths, fum, glyph_name_to_cid,
+                   cid_to_glyph_name, flags, fontname)
     end
 end
 
@@ -418,8 +430,8 @@ function get_font_name(cosfont::CosObject, x)
 end
 
 function get_character_code(name::CosName, pdfont::PDFont)
-    length(pdfont.glyph_name_id) > 0 &&
-        return get(pdfont.glyph_name_id, name, INIT_CODE(pdfont.widths))
+    length(pdfont.glyph_name_to_cid) > 0 &&
+        return get(pdfont.glyph_name_to_cid, name, INIT_CODE(pdfont.widths))
     return get_character_code(name, pdfont.widths)
 end
 
@@ -430,7 +442,6 @@ get_character_code(name::CosName, w) =
     get(GlyphName_to_STDEncoding, name, INIT_CODE(w))
 
 get_encoded_string(s, pdfont::PDFont) = get_encoded_string(s, pdfont.fum)
-
 
 get_char(barr, w) = iterate(barr)
 function get_char(barr, w::CIDWidth)
