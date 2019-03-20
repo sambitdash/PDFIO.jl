@@ -4,6 +4,12 @@ using ..Cos
 
 using Rectangle
 
+const ADOBE_STD_14 = Set(
+["Times-Roman",      "Helvetica",             "Courier",         "Symbol",
+ "Times-Bold",       "Helvetica-Bold",        "Courier-Bold",    "ZapfDingbats",
+ "Times-Italic",     "Helvetica-Oblique",     "Courier-Oblique",
+ "Times-BoldItalic", "Helvetica-BoldOblique", "Courier-BoldOblique"])
+
 mutable struct AdobeFontMetrics
     cid_to_name::Dict{Int, CosName}
     name_to_wx::Dict{CosName, Int}

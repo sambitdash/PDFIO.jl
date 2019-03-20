@@ -41,16 +41,20 @@ end
 
 """
 ```
-    pdPageGetMediaBox(page::PDPage) -> CDRect{T <: Number}
-    pdPageGetCropBox(page::PDPage) -> CDRect{T <: Number}
+    pdPageGetMediaBox(page::PDPage) -> CDRect{Float32}
+    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
 ```
     Returns the media box associated with the page.
 """
-pdPageGetMediaBox(page::PDPage) = CDRect(page_find_attribute(page, cn"MediaBox"))
+function pdPageGetMediaBox(page::PDPage)
+    arr = page_find_attribute(page, cn"MediaBox")::CosArray
+    return CDRect{Float32}(CDRect(arr))
+end
+
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
-    return CDRect(box)
+    return CDRect{Float32}(CDRect(box))
 end
 
 """

@@ -128,12 +128,31 @@ function merge_encoding!(fum::FontUnicodeMapping,
     return fum
 end
 
+function update_glyph_id_std_14(cosfont, glyph_name_to_cid, cid_to_glyph_name)
+    basefont = get(cosfont, cn"BaseFont")
+    basefont === CosNull && return false
+    String(basefont) in ADOBE_STD_14 || return false
+    gn2cid, cid2gn =
+        basefont === cn"Symbol" ?
+        (GlyphName_to_SYMEncoding, SYMEncoding_to_GlyphName) :
+        basefont === cn"ZapfDingbats" ?
+        (GlyphName_to_ZAPEncoding, ZAPEncoding_to_GlyphName) :
+        (GlyphName_to_STDEncoding, STDEncoding_to_GlyphName)
+    merge!(glyph_name_to_cid, gn2cid)
+    merge!(cid_to_glyph_name, cid2gn)
+    return true
+end
+
 function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
     glyph_name_to_cid, cid_to_glyph_name =
         Dict{CosName, UInt8}(), Dict{UInt8, CosName}()
     cosfont === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     subtype = get(cosfont, cn"Subtype")
     subtype === cn"Type0" && return glyph_name_to_cid, cid_to_glyph_name
+
+    update_glyph_id_std_14(cosfont, glyph_name_to_cid, cid_to_glyph_name) &&
+        return glyph_name_to_cid, cid_to_glyph_name
+
     encoding = cosDocGetObject(cosdoc, cosfont, cn"Encoding")
     encoding === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     

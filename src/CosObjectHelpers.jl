@@ -53,7 +53,7 @@ convert(::Type{CosFloat}, i::CosInt) = i.val |> Float32 |> CosFloat
 
 promote_rule(::Type{CosFloat}, ::Type{CosInt}) = CosFloat
 
-convert(::Type{CDRect}, a::CosArray) = CDRect(get.(a.val)...)
+convert(::Type{CDRect}, a::CosArray) = CDRect(map(get, a.val)...)
 
 Rect(a::CosArray) = convert(Rect, a)
 
