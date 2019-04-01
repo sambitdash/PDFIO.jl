@@ -181,7 +181,9 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
     return nothing
 end
 
-function load_page_objects(page::PDPageImpl, stms::CosArray)
+function load_page_objects(page::PDPageImpl,
+                           stms::Union{CosArray,
+                                       CosIndirectObject{CosArray}})
     stm = merge_streams(page.doc.cosDoc, stms)
     page.contents = stm
     return load_page_objects(page, stm)

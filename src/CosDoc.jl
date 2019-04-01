@@ -549,14 +549,16 @@ function cosDocGetPageNumbers(doc::CosDoc,
     return find_ntree(find_page_label, doc, troot, -1, label)[2]
 end
 
-function merge_streams(cosdoc::CosDoc, stms::CosArray)
+function merge_streams(cosdoc::CosDoc,
+                       stms::Union{CosArray, CosIndirectObject{CosArray}})
     (path,io) = get_tempfilepath()
     try
         dict = CosDict()
         set!(dict, cn"F", CosLiteralString(path))
         ret = CosStream(dict, false)
         v = get(stms)
-        for stm in v
+        for stmind in v
+            stm = cosDocGetObject(cosdoc, stmind)
             bufstm = decode(stm)
             data = read(bufstm)
             util_close(bufstm)
