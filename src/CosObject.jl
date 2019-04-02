@@ -4,7 +4,7 @@ export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
        CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
        CosDict, CosIndirectObjectRef, CosStream, set!, @cn_str,
     createTreeNode, CosTreeNode, CosIndirectObject,
-    CosDictType
+    CosDictType, IDD, IDDRef, IDDN, IDDNRef
 
 """
 ```
@@ -110,17 +110,29 @@ This has no meaning without a associated CosDoc. When a reference object is hit
 the object should be searched from the CosDoc and returned.
 """
 struct CosIndirectObjectRef <: CosObject
-  val::Tuple{Int,Int}
-  CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
+    val::Tuple{Int,Int}
+    CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
 end
 
 mutable struct CosIndirectObject{T <: CosObject} <: CosObject
-  num::Int
-  gen::Int
-  obj::T
+    num::Int
+    gen::Int
+    obj::T
 end
 
 get(o::CosIndirectObject) = get(o.obj)
+
+# Aliases for certain commonly used Union types
+# IDD     = Indirect and Direct
+# IDDRef  = Indirect, Direct and Reference
+# IDDN    = Indirect, Direct, Null
+# IDDNRef = Indirect, Direct, Null, Refence
+
+const IDD{X}     = Union{X, CosIndirectObject{X}}
+const IDDRef{X}  = Union{X, CosIndirectObject{X}, CosIndirectObjectRef}
+const IDDN{X}    = Union{X, CosIndirectObject{X}, CosNullType}
+const IDDNRef{X} = Union{X, CosIndirectObject{X}, CosNullType,
+                         CosIndirectObjectRef}
 
 """
 ```
@@ -370,7 +382,7 @@ mutable struct CosTreeNode{K <: Union{Int, String}}
 end
 
 # If K is Int, it's a number tree else it's a String which is a name tree
-function createTreeNode(::Type{K}, dict::CosObject) where K
+function createTreeNode(::Type{K}, dict::IDD{CosDict}) where K
     range = get(dict, CosName("Limits"))
     kids  = get(dict, CosName("Kids"))
     node = CosTreeNode{K}()
@@ -384,7 +396,7 @@ function createTreeNode(::Type{K}, dict::CosObject) where K
     return populate_values(node, dict)
 end
 
-function populate_values(node::CosTreeNode{Int}, dict::CosObject)
+function populate_values(node::CosTreeNode{Int}, dict::IDD{CosDict})
     nums = get(dict, CosName("Nums"))
     if (nums !== CosNull)
         v = get(nums)
@@ -394,7 +406,7 @@ function populate_values(node::CosTreeNode{Int}, dict::CosObject)
     return node
 end
 
-function populate_values(node::CosTreeNode{String}, dict::CosObject)
+function populate_values(node::CosTreeNode{String}, dict::IDD{CosDict})
     names = get(dict, CosName("Names"))
     if (names !== CosNull)
         v = get(names, true)
@@ -468,3 +480,4 @@ end
 CosComment(barr::Vector{UInt8}) = CosComment(String(Char.(barr)))
 
 show(io::IO, os::CosComment) = print(io, '%', os.val)
+

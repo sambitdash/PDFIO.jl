@@ -268,10 +268,10 @@ end
 
 
 mutable struct CosObjectLoc
-  loc::Int
-  stm::CosObject
-  obj::CosObject
-  CosObjectLoc(l,s=CosNull,o=CosNull)=new(l,s,o)
+    loc::Int
+    stm::IDDNRef{CosObjectStream}
+    obj::CosObject
+    CosObjectLoc(l, s=CosNull, o=CosNull) = new(l, s, o)
 end
 
 process_stream_length(stmlen::CosInt,

@@ -52,7 +52,7 @@ mutable struct FontUnicodeMapping
 end
 
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosName,
-                         doc::CosDoc, font::CosObject)
+                         doc::CosDoc, font::IDDRef{CosDict})
     encoding_mapping =
         encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
         encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
@@ -69,7 +69,7 @@ end
 # supported.
 # Font subset is addressed with font name identification.
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
-                        doc::CosDoc, font::CosObject)
+                        doc::CosDoc, font::IDDRef{CosDict})
     subtype  = cosDocGetObject(doc, font, cn"Subtype")
     subtype !== cn"Type1" && subtype !== cn"MMType1" && return fum
     basefont = cosDocGetObject(doc, font, cn"BaseFont")
@@ -83,8 +83,8 @@ function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
 end
 
 function merge_encoding!(fum::FontUnicodeMapping,
-                         encoding::Union{CosDict, CosIndirectObject{CosDict}},
-                         doc::CosDoc, font::CosObject)
+                         encoding::IDD{CosDict},
+                         doc::CosDoc, font::IDDRef{CosDict})
     baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
     merge_encoding!(fum, baseenc, doc, font)
     # Add the Differences
@@ -107,7 +107,8 @@ function merge_encoding!(fum::FontUnicodeMapping,
     return fum
 end
 
-function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc, font::CosObject)
+function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc,
+                         font::IDDRef{CosDict})
     encoding = cosDocGetObject(doc, font, cn"Encoding")
     merge_encoding!(fum, encoding, doc, font)
     toUnicode = cosDocGetObject(doc, font, cn"ToUnicode")
@@ -117,7 +118,7 @@ end
 
 function merge_encoding!(fum::FontUnicodeMapping,
                          cmap::CosIndirectObject{CosStream},
-                         doc::CosDoc, font::CosObject)
+                         doc::CosDoc, font::IDDRef{CosDict})
     stm_cmap = get(cmap)
     try
         fum.cmap = read_cmap(stm_cmap)
@@ -143,7 +144,7 @@ function update_glyph_id_std_14(cosfont, glyph_name_to_cid, cid_to_glyph_name)
     return true
 end
 
-function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::CosObject)
+function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
     glyph_name_to_cid, cid_to_glyph_name =
         Dict{CosName, UInt8}(), Dict{UInt8, CosName}()
     cosfont === CosNull && return glyph_name_to_cid, cid_to_glyph_name
@@ -201,7 +202,7 @@ get_encoded_string(s::CosString, fum::FontUnicodeMapping) =
     return String(NativeEncodingToUnicode(v, fum.encoding))
 end
 
-function get_unicode_chars(b::UInt8, i::Interval, v::CosObject)
+function get_unicode_chars(b::UInt8, i::Interval, v::Union{CosXString, CosArray})
     f = i.lo
     l = i.hi
     if v isa CosXString
@@ -215,8 +216,6 @@ function get_unicode_chars(b::UInt8, i::Interval, v::CosObject)
         @assert xstr isa CosXString
         bytes = Vector{UInt8}(xstr)
         carr = get_unicode_chars(bytes)
-    else
-        @assert 1 == 0
     end
     return carr
 end
@@ -379,14 +378,14 @@ CIDWidth() = CIDWidth(1000)
 
 mutable struct PDFont
     doc::PDDoc
-    obj::CosObject
+    obj::IDD{CosDict}
     widths::Union{AdobeFontMetrics, Vector{Float32}, CIDWidth}
     fum::FontUnicodeMapping
     glyph_name_to_cid::Dict{CosName, UInt8}
     cid_to_glyph_name::Dict{UInt8, CosName}
     flags::UInt32
     fontname::CosName
-    @inline function PDFont(doc::PDDoc, cosfont::CosObject)
+    @inline function PDFont(doc::PDDoc, cosfont::IDD{CosDict})
         fum = FontUnicodeMapping()
         merge_encoding!(fum, doc.cosDoc, cosfont)
         widths = get_font_widths(doc.cosDoc, cosfont)
@@ -411,7 +410,7 @@ pdFontIsAllCap(pdfont::PDFont)   = (pdfont.flags & 0x00010000) > 0
 pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
 
 # Not supported FD attribute in CIDFonts
-@inline function get_font_flags(doc::PDDoc, cosfont::CosObject, widths)
+@inline function get_font_flags(doc::PDDoc, cosfont::IDD{CosDict}, widths)
     flags = 0x00000000
     refdesc = get(cosfont, cn"FontDescriptor")
     refdesc === CosNull && return get_font_flags(widths)
@@ -428,14 +427,14 @@ pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
 end
 get_font_flags(x) = 0x00000000
 
-@inline function get_font_name(doc::PDDoc, cosfont::CosObject, widths)
+@inline function get_font_name(doc::PDDoc, cosfont::IDD{CosDict}, widths)
     refdesc = get(cosfont, cn"FontDescriptor")
     refdesc === CosNull && return get_font_name(cosfont, widths)    
     return cosDocGetObject(doc.cosDoc, refdesc, cn"FontName")
 end
 #Not implemented for CIDFonts
-get_font_name(cosfont::CosObject, ::CIDWidth) = cn"" 
-function get_font_name(cosfont::CosObject, x)
+get_font_name(cosfont::IDD{CosDict}, ::CIDWidth) = cn"" 
+function get_font_name(cosfont::IDD{CosDict}, x)
     subtype   = get(cosfont, cn"Subtype")
     if subtype === cn"Type3"
         name = get(cosfont, cn"Name")

@@ -23,7 +23,7 @@ function createObjectStreams(stm::CosStream)
     return stm
 end
 
-function read_xref_stream(xrefstm::CosObject,
+function read_xref_stream(xrefstm::IDD{CosStream},
                           xref::Dict{CosIndirectObjectRef, CosObjectLoc})
 
     @assert get(xrefstm, cn"Type") == cn"XRef"

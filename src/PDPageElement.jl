@@ -473,7 +473,7 @@ struct TextLayout
     ltx::Float32
     lty::Float32
     text::String
-    fontname::CosObject
+    fontname::CosName
     fontflags::UInt32
 end
 
@@ -635,7 +635,7 @@ end
     ctm::Matrix{Float32} = state[:CTM]
     trm = tm*ctm
 
-    fontname, font = get(state, :font, (CosNull, CosNull))
+    fontname, font = get(state, :font, (cn"", CosNull))
 
     heap::Vector{TextLayout} = state[:text_layout]
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)

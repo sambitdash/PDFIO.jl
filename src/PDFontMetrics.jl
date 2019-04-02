@@ -157,7 +157,7 @@ end
 
 get_font_widths(cosdoc::CosDoc, font::CosNullType) = zeros(Float32, 256)
 
-function get_font_widths(cosdoc::CosDoc, font::CosObject)
+function get_font_widths(cosdoc::CosDoc, font::IDD{CosDict})
     d = zeros(Float32, 256)
     @assert get(font, cn"Type") === cn"Font"
     subtype = get(font, cn"Subtype")
@@ -178,7 +178,7 @@ end
 
 get_font_widths(basefonts::CosName) = read_afm(convert(CDTextString, basefonts))
 
-function get_cid_font_widths(cosDoc::CosDoc, font::CosObject)
+function get_cid_font_widths(cosDoc::CosDoc, font::IDDRef{CosDict})
     m = IntervalTree{UInt16, Int}()
     encoding = cosDocGetObject(cosDoc, font, cn"Encoding")
     desc = cosDocGetObject(cosDoc, font, cn"DescendantFonts") |> get

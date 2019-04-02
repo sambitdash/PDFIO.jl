@@ -117,7 +117,7 @@ end
 
 mutable struct PDPageImpl <: PDPage
     doc::PDDocImpl
-    cospage::CosObject
+    cospage::IDD{CosDict}
     contents::CosObject
     content_objects::Union{Nothing, PDPageObjectGroup}
     fonts::Dict{CosName, PDFont}
@@ -129,14 +129,14 @@ mutable struct PDPageImpl <: PDPage
             Dict{CosName,PDXObject}())
 end
 
-PDPageImpl(doc::PDDocImpl, cospage::CosObject) =
+PDPageImpl(doc::PDDocImpl, cospage::IDD{CosDict}) =
     PDPageImpl(doc, cospage, CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default
 values.
 =#
-create_pdpage(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage)
+create_pdpage(doc::PDDocImpl, cospage::IDD{CosDict}) = PDPageImpl(doc, cospage)
 create_pdpage(doc::PDDocImpl, cospage::CosNullType) =
     throw(ErorException(E_INVALID_OBJECT))
 #=
@@ -171,7 +171,7 @@ end
 
 load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
 
-function load_page_objects(page::PDPageImpl, stm::CosObject)
+function load_page_objects(page::PDPageImpl, stm::IDD{CosStream})
     bufstm = decode(stm)
     try
         load_objects(page.content_objects, bufstm)
@@ -181,9 +181,7 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
     return nothing
 end
 
-function load_page_objects(page::PDPageImpl,
-                           stms::Union{CosArray,
-                                       CosIndirectObject{CosArray}})
+function load_page_objects(page::PDPageImpl, stms::IDD{CosArray})
     stm = merge_streams(page.doc.cosDoc, stms)
     page.contents = stm
     return load_page_objects(page, stm)
