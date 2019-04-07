@@ -53,9 +53,11 @@ convert(::Type{CosFloat}, i::CosInt) = i.val |> Float32 |> CosFloat
 
 promote_rule(::Type{CosFloat}, ::Type{CosInt}) = CosFloat
 
-convert(::Type{CDRect}, a::CosArray) = CDRect(map(get, a.val)...)
-
-Rect(a::CosArray) = convert(Rect, a)
+function Rect(a::CosArray)
+    v = promote(get(a, true)...)
+    @assert length(v) == 4
+    return Rect{typeof(v[1])}(v...)
+end
 
 convert(::Type{CDDate}, ls::T) where {T <: CosString} = CDDate(CDTextString(ls))
 

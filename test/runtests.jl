@@ -42,7 +42,8 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
                                        UInt8('4'),UInt8('1')]))=="BA"
         @test CosFloat(CosInt(1)) == CosFloat(1f0)
         @test [CosFloat(1f0), CosInt(2)] == [CosFloat(1f0), CosFloat(2f0)]
-        @test CDRect(CosArray([CosInt(0),
+        @test CDRect(CosArray(CosObject[
+                               CosInt(0),
                                CosInt(0),
                                CosInt(640),
                                CosInt(480)])) == CDRect(0, 0, 640, 480)

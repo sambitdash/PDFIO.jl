@@ -85,12 +85,12 @@ function Do(xobj::PDFormXObject, state::GState)
     isempty(xobj.content_objects) && load_content_objects(xobj)
     isempty(xobj.content_objects) && return state
     xstate = new_gstate(state)
-    ctm = state[:CTM]
+    ctm = get(state, :CTM, Matrix{Float32})
     nctm = xobj.matrix*ctm
     xstate[:CTM] = nctm
     xstate[:source] = xobj
-    xstate[:text_layout] = state[:text_layout]
-    xstate[:h_profile] = state[:h_profile]
+    xstate[:text_layout] = get(state, :text_layout, Any)
+    xstate[:h_profile] = get(state, :h_profile, Any)
     evalContent!(xobj.content_objects, xstate)
     return state
 end

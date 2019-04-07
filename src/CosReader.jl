@@ -98,11 +98,11 @@ function get_pdfconstant(b::Vector{UInt8})
 end
 
 function parse_array(ps::IO)
-    result=CosArray()
+    result = CosArray()
     @inbounds skip(ps,1)  # Skip over opening '['
     chomp_space!(ps)
     if ps |> _peekb != RIGHT_SB  # special case for empty array
-        @inbounds while true
+        while true
             push!(result.val, parse_value(ps))
             chomp_space!(ps)
             b = ps |> _peekb
@@ -355,13 +355,18 @@ function parse_indirect_ref(ps::IO)
     genn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     skipv(ps, LATIN_UPPER_R)
+    # There has to be a PDF delimiter or space after this.
+    # This may fail the content parser due to the RG operator
+    b = ps |> _peekb
+    ispdfdelimiter(b) || ispdfspace(b) ||
+        error("CosIndirectObjectRef is not delimited properly")
     chomp_space!(ps)
     return CosIndirectObjectRef(objn, genn)
 end
 
 function try_parse_indirect_reference(ps::IO)
     nobj = parse_number(ps)
-    if isa(nobj,CosFloat)
+    if isa(nobj, CosFloat)
         return nobj
     end
     chomp_space!(ps)
@@ -371,14 +376,23 @@ function try_parse_indirect_reference(ps::IO)
         genn = parse_unsignednumber(ps).val
         chomp_space!(ps)
         if (ps |> _peekb == LATIN_UPPER_R)
-          unmark(ps)
-          skip(ps,1)
-          chomp_space!(ps)
-          return CosIndirectObjectRef(objn, genn)
+            skip(ps, 1)
+            # There has to be a PDF delimiter or space after this.
+            # This may fail the content parser due to the RG operator
+            b = ps |> _peekb
+            if ispdfdelimiter(b) || ispdfspace(b)
+                unmark(ps)
+                chomp_space!(ps)
+                return CosIndirectObjectRef(objn, genn)
+            else
+                reset(ps)
+                chomp_space!(ps)
+                return nobj
+            end
         else
-          reset(ps)
-          chomp_space!(ps)
-          return nobj
+            reset(ps)
+            chomp_space!(ps)
+            return nobj
         end
     else
         unmark(ps)

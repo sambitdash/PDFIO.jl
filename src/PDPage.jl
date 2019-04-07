@@ -48,13 +48,13 @@ end
 """
 function pdPageGetMediaBox(page::PDPage)
     arr = page_find_attribute(page, cn"MediaBox")::CosArray
-    return CDRect{Float32}(CDRect(arr))
+    return CDRect{Float32}(CDRect(arr))::CDRect{Float32}
 end
 
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
-    return CDRect{Float32}(CDRect(box))
+    return CDRect{Float32}(CDRect(box))::CDRect{Float32}
 end
 
 """

@@ -195,14 +195,8 @@ An array in a PDF file. The objects can be any combination of [`CosObject`](@ref
 """
 mutable struct CosArray <: CosObject
     val::Vector{CosObject}
-    function CosArray(arr::Vector{T} where {T<:CosObject})
-      val = Vector{CosObject}()
-      for v in arr
-        push!(val,v)
-      end
-      new(val)
-    end
-    CosArray()=new(Vector{CosObject}())
+    CosArray(arr::Vector{CosObject}) = new(arr)
+    CosArray() = new(Vector{CosObject}())
 end
 
 """
@@ -215,7 +209,7 @@ An array in a PDF file. The objects can be any combination of
 `isNative = true` will return the underlying native object inside the `CosArray`
 by invoking get method on it.
 """
-get(o::CosArray, isNative=false) = isNative ? map((x)->get(x), o.val) : o.val
+get(o::CosArray, isNative=false) = isNative ? map(get, o.val) : o.val
 
 get(o::CosIndirectObject{CosArray}, isNative=false) = get(o.obj, isNative)
 """

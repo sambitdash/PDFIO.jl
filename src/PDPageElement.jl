@@ -521,11 +521,13 @@ mutable struct GState{T}
     GState{T}() where T = new(init_graphics_state())
 end
 
-new_gstate(state::GState{T}) where {T} = GState{T}()
-
-Base.setindex!(gs::GState, v::Any, k::Symbol) = (gs.state[end][k] = v)
-Base.getindex(gs::GState, k::Symbol) = gs.state[end][k]
-Base.get(gs::GState, k::Symbol, defval::Any) = get(gs.state[end], k, defval)
+new_gstate(state::GState{T}) where T = GState{T}()
+Base.setindex!(gs::GState, v::V, k::Symbol) where V = (gs.state[end][k] = v)
+Base.get(gs::GState, k::Symbol, R::Type) = gs.state[end][k]::R
+Base.get(gs::GState, k::Symbol, defval::S, R::Type=S) where S  =
+    get(gs.state[end], k, defval)::Union{R, S}
+Base.get!(gs::GState, k::Symbol, defval::S, R::Type=S) where S =
+    get!(gs.state[end], k, defval)::Union{R, S}
 Base.delete!(gs::GState, k::Symbol) = delete!(gs.state[end], k)
 save!(gs::GState) = (push!(gs.state, copy(gs.state[end])); gs)
 restore!(gs::GState) = (pop!(gs.state); gs)
@@ -554,9 +556,9 @@ end
 
 function show_text_layout!(io::IO, state::GState)
     #Make sure to deepcopy. Otherwise the data structures will be lost
-    heap::Vector{TextLayout} = deepcopy(state[:text_layout])
+    heap = deepcopy(get(state, :text_layout, Vector{TextLayout}))
     sort!(heap, lt= > )
-    szdict::Dict{Int, Int} = state[:h_profile]
+    szdict = get(state, :h_profile, Dict{Int, Int})
 
     x = 0f0
     y = -1f0
@@ -626,21 +628,23 @@ end
 
 @inline function evalContent!(tr::PDPageTextRun, state::GState)
     evalContent!(tr.elem, state)
-    tfs::Float32 = get(state, :fontsize, 0f0)
-    th::Float32  = state[:Tz]/100f0
-    ts::Float32  = state[:Ts]
-    tc::Float32  = state[:Tc]
-    tw::Float32  = state[:Tw]
-    tm::Matrix{Float32}  = state[:Tm]
-    ctm::Matrix{Float32} = state[:CTM]
+    tfs = get(state, :fontsize, 0f0)
+    th  = get(state, :Tz, Float32)/100f0
+    ts  = get(state, :Ts, Float32)
+    tc  = get(state, :Tc, Float32)
+    tw  = get(state, :Tw, Float32)
+    tm  = get(state, :Tm, Matrix{Float32})
+    ctm = get(state, :CTM, Matrix{Float32})
     trm = tm*ctm
 
-    fontname, font = get(state, :font, (cn"", CosNull))
+    (fontname, font) = get(state, :font,
+                           (cn"", CosNull),
+                           Tuple{CosName, PDFont})
 
-    heap::Vector{TextLayout} = state[:text_layout]
+    heap = get(state, :text_layout, Vector{TextLayout})
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
 
-    d::Dict{Int, Int} = state[:h_profile]
+    d = get(state, :h_profile, Dict{Int, Int})
     ih = round(Int, h*10)
     d[ih] = get(d, ih, 0) + length(text)
 
@@ -692,7 +696,7 @@ evalContent!(pdo::PDPageElement{:Q}, state::GState) = restore!(state)
     e = get(pdo.operands[5])
     f = get(pdo.operands[6])
     cm  = [a b 0f0; c d 0f0; e f 1f0]
-    ctm = state[:CTM]
+    ctm = get(state, :CTM, Matrix{Float32})
     ctm = cm*ctm
     state[:CTM] = ctm
     return state
@@ -713,26 +717,27 @@ end
 end
 
 @inline function evalContent!(pdo::PDPageElement{:Tf}, state::GState)
-    src = get(state, :source, CosNull)
-    src === CosNull && return state
+    src = get(state, :source, Union{PDPage, PDXObject})
     fontname = pdo.operands[1]
     font = get_font(src, fontname)
     font === CosNull && return state
     state[:font] = (fontname, font)
     fontsize = get(pdo.operands[2])
-    state[:fontsize] = fontsize
+    # PDF Spec expects any number so better to standardize to Float32
+    state[:fontsize] = Float32(fontsize)
     return state
 end
 
+# PDF Spec expects any number so better to standardize to Float32
 for op in ["Tc", "Tw", "Tz", "TL", "Tr", "Ts"]
     @eval evalContent!(pdo::PDPageElement{Symbol($op)}, state::GState) =
-        (state[Symbol($op)] = get(pdo.operands[1]); state)
+        (state[Symbol($op)] = Float32(get(pdo.operands[1])); state)
 end
 
 @inline function set_text_pos!(tx, ty, state::GState)
     tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
     #:TL may be called outside of BT...ET block
-    tlm::Matrix{Float32}  = get(state, :Tlm, Matrix{Float32}(I, 3, 3))
+    tlm = get(state, :Tlm, Matrix{Float32}(I, 3, 3))
     tlm = tmul*tlm
     tm = copy(tlm)
 
@@ -745,28 +750,28 @@ end
 @inline function offset_text_pos!(tx, ty, state::GState)
     tmul = [1f0 0f0 0f0; 0f0 1f0 0f0; tx ty 1f0]
     #:TL may be called outside of BT...ET block
-    tm::Matrix{Float32} = get(state, :Tm, Matrix{Float32}(I, 3, 3))
+    tm = get(state, :Tm, Matrix{Float32}(I, 3, 3))
     tm = tmul*tm
     state[:Tm]  = tm
     return state
 end
 
 @inline function offset_text_leading!(state::GState)
-    tl = state[:TL]
+    tl = get(state, :TL, Float32)
     return set_text_pos!(0f0, -tl, state)
 end
 
 @inline function evalContent!(pdo::PDPageElement{:TD}, state::GState)
-    tx = get(pdo.operands[1])
-    ty = get(pdo.operands[2])
+    tx = Float32(get(pdo.operands[1]))
+    ty = Float32(get(pdo.operands[2]))
 
     state[:TL] = -ty
     set_text_pos!(tx, ty, state)
 end
 
 @inline function evalContent!(pdo::PDPageElement{:Td}, state::GState)
-    tx = get(pdo.operands[1])
-    ty = get(pdo.operands[2])
+    tx = Float32(get(pdo.operands[1]))
+    ty = Float32(get(pdo.operands[2]))
 
     set_text_pos!(tx, ty, state)
 end
@@ -778,14 +783,14 @@ evalContent!(pdo::PDPageElement{Symbol("\'")}, state::GState) =
     offset_text_leading!(state)
 
 @inline function evalContent!(pdo::PDPageElement{Symbol("\"")}, state::GState)#" 
-    state[:Tw] = get(pdo.operands[1])
-    state[:Tc] = get(pdo.operands[2])
+    state[:Tw] = Float32(get(pdo.operands[1]))
+    state[:Tc] = Float32(get(pdo.operands[2]))
     offset_text_leading!(state)
 end
 
 function evalContent!(pdo::PDPageElement{:Do}, state::GState)
     xobjname = pdo.operands[1]
-    src = state[:source]::Union{PDPage, PDXObject}
+    src = get(state, :source, Union{PDPage, PDXObject})
     xobj = get_xobject(src, xobjname)
     xobj === CosNull && return state
     return Do(xobj, state)
