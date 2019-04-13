@@ -3,11 +3,36 @@ using PDFIO
 using PDFIO.PD
 using PDFIO.Cos
 using PDFIO.Common
+using ZipFile
+
+@test [] == detect_ambiguities(Base, Core, PDFIO)
 
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 
 include("debugIO.jl")
+
+pdftest_ver  = "0.0.1"
+pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
+
+zipfile = "pdftest-"*pdftest_ver
+pdftest_link *= ".zip"
+zipfile *= ".zip"
+
+isfile(zipfile) || download(pdftest_link, zipfile)
+r = ZipFile.Reader(zipfile)
+buf = Vector{UInt8}(undef, 64*1024)
+for f in r.files
+    println("Filename: $(f.name)")
+    if f.method == ZipFile.Store
+        isdir(f.name) || mkdir(f.name)
+    elseif f.method == ZipFile.Deflate
+        isfile(f.name) ||
+            write(f.name, read(f, Vector{UInt8}(undef, f.uncompressedsize)))
+    end
+end
+close(r)
+pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
@@ -19,7 +44,8 @@ include("debugIO.jl")
                                        UInt8('4'),UInt8('1')]))=="BA"
         @test CosFloat(CosInt(1)) == CosFloat(1f0)
         @test [CosFloat(1f0), CosInt(2)] == [CosFloat(1f0), CosFloat(2f0)]
-        @test CDRect(CosArray([CosInt(0),
+        @test CDRect(CosArray(CosObject[
+                               CosInt(0),
                                CosInt(0),
                                CosInt(640),
                                CosInt(480)])) == CDRect(0, 0, 640, 480)
@@ -253,10 +279,9 @@ Chapter BB!
 
     @testset "General File Opening 3" begin
         @test begin
-            filename="3.pdf"
+            filename=pdftest_dir*"stillhq/3.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://www.stillhq.com/pdfdb/000003/data.pdf",filename)
+            @assert isfile(filename)
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 30
             page = pdDocGetPage(doc, 1)
@@ -326,10 +351,9 @@ Chapter BB!
 
     @testset "Test RunLengthDecode" begin
         @test begin
-            filename="582.pdf"
+            filename=pdftest_dir*"stillhq/582.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://www.stillhq.com/pdfdb/000582/data.pdf",filename)
+            @assert isfile(filename)
             doc = pdDocOpen(filename)
             info = pdDocGetInfo(doc)
             @assert info["Trapped"] == cn"False"
@@ -347,47 +371,44 @@ Chapter BB!
 
     @testset "Test ASCIIHexDecode" begin
         @test begin
-        filename="325.pdf"
-        DEBUG && println(filename)
-        isfile(filename)||
-            download("http://www.stillhq.com/pdfdb/000325/data.pdf",filename)
-        doc = pdDocOpen(filename)
-        @assert pdDocGetPageCount(doc) == 1
-        obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(7, 0))
-        stm=get(obj)
-        data=read(stm)
-        close(stm)
-        @assert length(data) == 121203
-        pdDocClose(doc)
-        length(utilPrintOpenFiles()) == 0
+            filename=pdftest_dir*"stillhq/325.pdf"
+            DEBUG && println(filename)
+            @assert isfile(filename)
+            doc = pdDocOpen(filename)
+            @assert pdDocGetPageCount(doc) == 1
+            obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(7, 0))
+            stm=get(obj)
+            data=read(stm)
+            close(stm)
+            @assert length(data) == 121203
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
     @testset "Test ASCII85Decode" begin
         @test take!(decode_ascii85(IOBuffer("zzz!!!~>"))) == fill(0x0, 14)
         @test begin
-        filename="388.pdf"
-        DEBUG && println(filename)
-        isfile(filename)||
-            download("http://www.stillhq.com/pdfdb/000388/data.pdf",filename)
-        doc = pdDocOpen(filename)
-        @assert pdDocGetPageCount(doc) == 1
-        obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(9, 0))
-        stm=get(obj)
-        data=read(stm)
-        close(stm)
-        @assert length(data) == 38117
-        pdDocClose(doc)
-        length(utilPrintOpenFiles()) == 0
+            filename=pdftest_dir*"stillhq/388.pdf"
+            DEBUG && println(filename)
+            @assert isfile(filename)
+            doc = pdDocOpen(filename)
+            @assert pdDocGetPageCount(doc) == 1
+            obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(9, 0))
+            stm=get(obj)
+            data=read(stm)
+            close(stm)
+            @assert length(data) == 38117
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
         end
     end
 
     @testset "LZWDecode Filter" begin
         @test begin
-            filename="589.pdf"
+            filename=pdftest_dir*"stillhq/589.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://www.stillhq.com/pdfdb/000589/data.pdf",filename)
+            @assert isfile(filename)
             doc = pdDocOpen(filename)
             obj=PDFIO.Cos.cosDocGetObject(doc.cosDoc, PDFIO.Cos.CosIndirectObjectRef(70, 0))
             stm=get(obj)
@@ -398,10 +419,9 @@ Chapter BB!
             length(utilPrintOpenFiles()) == 0
         end
         @test begin
-            filename="339.pdf"
+            filename=pdftest_dir*"stillhq/339.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://www.stillhq.com/pdfdb/000339/data.pdf",filename)
+            @assert isfile(filename)
             doc = pdDocOpen(filename)
             stm = get(cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(4, 0)))
             buf = read(stm)
@@ -414,10 +434,9 @@ Chapter BB!
 
     @testset "Content Array" begin
         @test begin
-            filename="504.pdf"
+            filename=pdftest_dir*"stillhq/504.pdf"
             DEBUG && println(filename)
-            isfile(filename)||
-                download("http://www.stillhq.com/pdfdb/000504/data.pdf",filename)
+            @assert isfile(filename)
             doc = pdDocOpen(filename)
             page = pdDocGetPage(doc, 1)
             contents = pdPageGetContents(page)
@@ -439,10 +458,9 @@ Chapter BB!
 
     @testset "Page label test" begin
         @test begin
-            filename="431.pdf"
+            filename=pdftest_dir*"stillhq/431.pdf"
             DEBUG && println(filename)
-            isfile(filename) ||
-                download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
+            @assert isfile(filename) 
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 54
             @assert pdDocHasPageLabels(doc)
@@ -467,9 +485,8 @@ Chapter BB!
             filename="431.pdf"
             result, template_file = local_testfiles(filename)
             DEBUG && println(filename)
-            isfile(filename) ||
-                download("http://www.stillhq.com/pdfdb/000431/data.pdf",filename)
-            doc = pdDocOpen(filename)
+            @assert isfile(pdftest_dir*"stillhq/"*filename)
+            doc = pdDocOpen(pdftest_dir*"stillhq/"*filename)
             (npage = pdDocGetPageCount(doc)) == 54
             try
                 open(result, "w") do io

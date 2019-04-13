@@ -23,12 +23,12 @@ function createObjectStreams(stm::CosStream)
     return stm
 end
 
-function read_xref_stream(xrefstm::CosObject,
+function read_xref_stream(xrefstm::IDD{CosStream},
                           xref::Dict{CosIndirectObjectRef, CosObjectLoc})
 
     @assert get(xrefstm, cn"Type") == cn"XRef"
     size = get(xrefstm, cn"Size")
-    @assert size !=CosNull
+    @assert size != CosNull
 
     w = get(xrefstm, cn"W")
     @assert w != CosNull
@@ -37,7 +37,7 @@ function read_xref_stream(xrefstm::CosObject,
     index = get(xrefstm, cn"Index")
 
     if (index == CosNull)
-        index = CosArray([CosInt(0),size])
+        index = CosArray(CosObject[CosInt(0), size])
     end
 
     # The xref stream may be accessed later. There is no point encrypting this data

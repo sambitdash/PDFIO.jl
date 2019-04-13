@@ -525,7 +525,7 @@ function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
     throw(ErrorException(E_INVALID_PAGE_LABEL))
 end
 
-function get_internal_pagecount(dict::CosObject)
+function get_internal_pagecount(dict::IDD{CosDict})
     mytype = get(dict, cn"Type")
     isequal(mytype, cn"Pages") && return get(get(dict, cn"Count"))
     isequal(mytype, cn"Page" ) && return 1
@@ -541,7 +541,7 @@ maintained serially as an integer and `PageLabel` that is shown by the viewers.
 Given a `label` this method returns a `range` of valid page numbers.
 """
 function cosDocGetPageNumbers(doc::CosDoc,
-                              catalog::CosObject, label::AbstractString)
+                              catalog::IDD{CosDict}, label::AbstractString)
     ref = get(catalog, cn"PageLabels")
     ref === CosNull && throw(ErrorException(E_INVALID_PAGE_LABEL))
     plroot = cosDocGetObject(doc, ref)
@@ -549,14 +549,18 @@ function cosDocGetPageNumbers(doc::CosDoc,
     return find_ntree(find_page_for_label, doc, troot, -1, label)[2]
 end
 
-function merge_streams(cosdoc::CosDoc, stms::CosArray)
+cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) =
+    error("Invalid document catalog")
+
+function merge_streams(cosdoc::CosDoc, stms::IDD{CosArray})
     (path,io) = get_tempfilepath()
     try
         dict = CosDict()
         set!(dict, cn"F", CosLiteralString(path))
         ret = CosStream(dict, false)
         v = get(stms)
-        for stm in v
+        for stmind in v
+            stm = cosDocGetObject(cosdoc, stmind)
             bufstm = decode(stm)
             data = read(bufstm)
             util_close(bufstm)

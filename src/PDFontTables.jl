@@ -1,12 +1,12 @@
 using ..Cos
 using ..Common
 
-latin_charset_encoding() = load_data_file("latin-charset-encoding.txt")
+latin_charset_encoding() = load_data_file("latin-charset-encoding.txt")::Matrix{String}
 
 function get_latin_charset_dict(col)
-    dict = Dict{UInt8,CosName}()
+    dict = Dict{UInt8, CosName}()
     m = latin_charset_encoding()
-    map(m[:,1], m[:,col]) do x, y
+    map((@view m[:,1]), (@view m[:,col])) do x, y
         if y != "-"
             v = to_uint8(y)
             dict[v] = CosName(strip(x))
@@ -26,8 +26,8 @@ WINEncoding_to_GlyphName[0xA0] = cn"colon"
 
 MACEncoding_to_GlyphName[0xCA] = cn"colon"
 
-function reverse_dict(dict)
-    rdict = Dict()
+function reverse_dict(dict::Dict{K, V}) where {K, V}
+    rdict = Dict{V, K}()
     for (x, y) in dict
         rdict[y] = x
     end
@@ -44,9 +44,9 @@ symbols_charset_encoding() = load_data_file("symbols-encoding.txt")
 zapf_charset_encoding()    = load_data_file("zapfdingbats-encoding.txt")
 
 function get_charset_dict(f::Function)
-    dict = Dict{UInt8,CosName}()
+    dict = Dict{UInt8, CosName}()
     m = f()
-    map(m[:,2], m[:,3]) do x, y
+    map((@view m[:,2]), (@view m[:,3])) do x, y
         v = to_uint8(y)
         dict[v] = CosName(strip(x))
     end
@@ -65,7 +65,7 @@ using AdobeGlyphList
 
 function agl_mapping_to_dict(m)
     dict = Dict{CosName, Char}()
-    map(m[:,1], m[:,2]) do x, y
+    map((@view m[:,1]), (@view m[:,2])) do x, y
         dict[CosName(strip(x))] = y
     end
     return dict

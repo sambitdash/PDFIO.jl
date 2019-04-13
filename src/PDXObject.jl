@@ -29,16 +29,18 @@ end
 
 mutable struct PDDefaultXObject <: PDXObject
     doc::PDDoc
-    obj::CosObject
+    obj::IDD{CosDict}
 end
 
-function createPDXObject(doc::PDDoc, cosstm::CosObject)
-    otype = get(cosstm, cn"Type")
+function createPDXObject(doc::PDDoc,
+                         cossd::Union{CosIndirectObject{CosStream},
+                                      IDD{CosDict}})
+    otype = get(cossd, cn"Type")
     @assert otype === cn"XObject" || otype === CosNull
-    subtype = get(cosstm, cn"Subtype")
-    subtype === cn"Form"  && return PDFormXObject(doc, cosstm)
-    subtype === cn"Image" && return PDImageXObject(doc, cosstm)
-    return PDDefaultXObject(doc, cosobj)
+    subtype = get(cossd, cn"Subtype")
+    subtype === cn"Form"  && return PDFormXObject(doc, cossd)
+    subtype === cn"Image" && return PDImageXObject(doc, cossd)
+    return PDDefaultXObject(doc, cossd)
 end
 
 function find_resource(xobj::PDFormXObject,
@@ -82,13 +84,13 @@ Do(xobj::PDImageXObject, state::GState) = nothing
 function Do(xobj::PDFormXObject, state::GState)
     isempty(xobj.content_objects) && load_content_objects(xobj)
     isempty(xobj.content_objects) && return state
-    xstate = GState{:PDFIO}()
-    ctm = state[:CTM]
+    xstate = new_gstate(state)
+    ctm = get(state, :CTM, Matrix{Float32})
     nctm = xobj.matrix*ctm
     xstate[:CTM] = nctm
     xstate[:source] = xobj
-    xstate[:text_layout] = state[:text_layout]
-    xstate[:h_profile] = state[:h_profile]
+    xstate[:text_layout] = get(state, :text_layout, Any)
+    xstate[:h_profile] = get(state, :h_profile, Any)
     evalContent!(xobj.content_objects, xstate)
     return state
 end

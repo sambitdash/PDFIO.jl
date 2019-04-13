@@ -41,16 +41,20 @@ end
 
 """
 ```
-    pdPageGetMediaBox(page::PDPage) -> CDRect{T <: Number}
-    pdPageGetCropBox(page::PDPage) -> CDRect{T <: Number}
+    pdPageGetMediaBox(page::PDPage) -> CDRect{Float32}
+    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
 ```
     Returns the media box associated with the page.
 """
-pdPageGetMediaBox(page::PDPage) = CDRect(page_find_attribute(page, cn"MediaBox"))
+function pdPageGetMediaBox(page::PDPage)
+    arr = page_find_attribute(page, cn"MediaBox")::CosArray
+    return CDRect{Float32}(CDRect(arr))::CDRect{Float32}
+end
+
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
-    return CDRect(box)
+    return CDRect{Float32}(CDRect(box))::CDRect{Float32}
 end
 
 """
@@ -113,7 +117,7 @@ end
 
 mutable struct PDPageImpl <: PDPage
     doc::PDDocImpl
-    cospage::CosObject
+    cospage::IDD{CosDict}
     contents::CosObject
     content_objects::Union{Nothing, PDPageObjectGroup}
     fonts::Dict{CosName, PDFont}
@@ -125,14 +129,14 @@ mutable struct PDPageImpl <: PDPage
             Dict{CosName,PDXObject}())
 end
 
-PDPageImpl(doc::PDDocImpl, cospage::CosObject) =
+PDPageImpl(doc::PDDocImpl, cospage::IDD{CosDict}) =
     PDPageImpl(doc, cospage, CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default
 values.
 =#
-create_pdpage(doc::PDDocImpl, cospage::CosObject) = PDPageImpl(doc, cospage)
+create_pdpage(doc::PDDocImpl, cospage::IDD{CosDict}) = PDPageImpl(doc, cospage)
 create_pdpage(doc::PDDocImpl, cospage::CosNullType) =
     throw(ErorException(E_INVALID_OBJECT))
 #=
@@ -156,9 +160,9 @@ end
 get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef) =
     cosDocGetObject(page.doc.cosDoc, contents)
 
-get_page_contents(page::PDPage, obj::CosObject) = obj
+get_page_contents(page::PDPage, obj::IDD{CosStream}) = obj
 
-function load_page_objects(page::PDPageImpl)
+@inline function load_page_objects(page::PDPageImpl)
     contents = pdPageGetContents(page)
     page.content_objects === nothing &&
         (page.content_objects = PDPageObjectGroup())
@@ -167,7 +171,7 @@ end
 
 load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
 
-function load_page_objects(page::PDPageImpl, stm::CosObject)
+@inline function load_page_objects(page::PDPageImpl, stm::IDD{CosStream})
     bufstm = decode(stm)
     try
         load_objects(page.content_objects, bufstm)
@@ -177,7 +181,7 @@ function load_page_objects(page::PDPageImpl, stm::CosObject)
     return nothing
 end
 
-function load_page_objects(page::PDPageImpl, stms::CosArray)
+@inline function load_page_objects(page::PDPageImpl, stms::IDD{CosArray})
     stm = merge_streams(page.doc.cosDoc, stms)
     page.contents = stm
     return load_page_objects(page, stm)

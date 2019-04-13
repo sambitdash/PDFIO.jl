@@ -44,27 +44,22 @@ function load_data_file(filename)
     return readdlm(path, ',', String, '\n',  comments=true, comment_char='#')
 end
 
-function dict_remap(ab, bc)
-    d = Dict()
+function dict_remap(ab::Dict{A, B}, bc::Dict{B, C}) where {A, B, C}
+    d = Dict{A, C}()
     for (a, b) in ab
-        c = get(bc, b, zero(valtype(bc)))
+        c = get(bc, b, zero(C))
         d[a] = c
     end
     return d
 end
 
-@static if VERSION >= v"0.7-"
-    to_uint16(x) = parse(UInt16, x, base=16)
-    to_uint8(x)  = parse(UInt8,  x, base=8)
-else
-    to_uint16(x) = parse(UInt16, x, 16)
-    to_uint8(x)  = parse(UInt8,  x, 8)
-end
+to_uint16(x) = parse(UInt16, x, base=16)
+to_uint8(x)  = parse(UInt8,  x, base=8)
 
 const PDFEncoding_to_Unicode = begin
-    d = Dict()
-    m = load_data_file("pdf-doc-encoding.txt")
-    map(m[:,3], m[:,4]) do x, y
+    d = Dict{UInt8, Char}()
+    m = load_data_file("pdf-doc-encoding.txt")::Matrix{String}
+    map((@view m[:,3]), (@view m[:,4])) do x, y
         e = to_uint8(x)
         u = (y != "") ? Char(to_uint16(y)) : Char(e)
         d[e] = u
@@ -73,9 +68,8 @@ const PDFEncoding_to_Unicode = begin
 end
 
 function NativeEncodingToUnicode(barr::Vector{UInt8}, mapping::Dict)
-    l = length(barr)
     carr = similar(barr, Char)
-    for i = 1:l
+    for i = 1:lastindex(barr)
         carr[i] = get(mapping, barr[i], zero(Char))
     end
     return carr

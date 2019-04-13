@@ -51,7 +51,7 @@ const function_map = Dict(
                           cn"Crypt" => _not_implemented
                          )
 
-function cosStreamRemoveFilters(stm::CosObject)
+function cosStreamRemoveFilters(stm::IDD{CosStream})
     filters = get(stm, CosName("FFilter"))
     if (filters != CosNull)
         bufstm = decode(stm)
@@ -67,7 +67,7 @@ end
 """
 Reads the filter data and decodes the stream.
 """
-function decode(stm::CosObject)
+function decode(stm::IDD{CosStream})
     filename = get(stm, cn"F")
     filters =  get(stm, cn"FFilter")
     parms =    get(stm, cn"FDecodeParms")

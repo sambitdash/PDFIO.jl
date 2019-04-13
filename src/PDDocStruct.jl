@@ -28,7 +28,7 @@ function get_structure_tree_root(obj::CosObject)
     ptreeobj = get(obj, cn"ParentTree")
     idtreeobj = get(obj, cn"IDTree")
     prtNext = get(obj, cn"ParentTreeNextKey")
-    parentTreeNext = (prtNext === CosNull)? -1 : get(prtNext)
+    parentTreeNext = (prtNext === CosNull) ? -1 : get(prtNext)
 
     parentTree = ptreeobj === CosNull ? Nullable{CosTreeNode{Int}}() :
                                         Nullable(createTreeNode(Int, ptreeobj))

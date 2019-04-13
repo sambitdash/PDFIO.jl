@@ -5,8 +5,8 @@ using ..Cos: CosDocImpl
 mutable struct PDDocImpl <: PDDoc
     cosDoc::CosDocImpl
     catalog::CosIndirectObject{CosDict}
-    pages::CosObject
-    structTreeRoot::CosObject
+    pages::IDDN{CosDict}
+    structTreeRoot::IDDN{CosDict}
     isTagged::Symbol #Valid values :tagged, :none and :suspect
     fonts::Dict{CosObject, PDFont}
     xobjs::Dict{CosObject, PDXObject}
@@ -69,7 +69,7 @@ end
 
 populate_doc_pages(doc::PDDocImpl, dict::CosObject) = nothing
 
-function update_page_tree(doc::PDDocImpl)
+@inline function update_page_tree(doc::PDDocImpl)
     pagesref = get(doc.catalog, cn"Pages")::CosIndirectObjectRef
     pages = cosDocGetObject(doc.cosDoc, pagesref)::CosIndirectObject{CosDict}
     populate_doc_pages(doc, pages)
@@ -83,7 +83,7 @@ seemingly non-standard way of computing page count. However, PDF spec does not
 discount the possibility of an intermediate node having page and pages nodes
 in the kids array. Hence, this implementation.
 =#
-function find_page_from_treenode(node::CosObject, pageno::Int)::CosObject
+function find_page_from_treenode(node::IDD{CosDict}, pageno::Int)
     mytype = get(node, cn"Type")
     #If this is a page object the pageno has to be 1
     if mytype == cn"Page"
@@ -96,7 +96,7 @@ function find_page_from_treenode(node::CosObject, pageno::Int)::CosObject
     for kid in kidsarr
         cnt = Cos.get_internal_pagecount(kid)
         (sum + cnt) >= pageno &&
-            return find_page_from_treenode(kid, pageno-sum)::CosObject
+            return find_page_from_treenode(kid, pageno-sum)
         sum += cnt
     end
     throw(ErrorException(E_INVALID_PAGE_NUMBER))
@@ -105,12 +105,12 @@ end
 # The structure tree is not fully loaded but the object linkages are established for future
 # correlations during text extraction.
 
-function update_structure_tree!(doc::PDDocImpl)
+@inline function update_structure_tree!(doc::PDDocImpl)
     catalog = pdDocGetCatalog(doc)
     marking = get(catalog, cn"MarkInfo")
 
     if (marking !== CosNull)
-        tagged = get(marking, cn"Marked")
+        tagged  = get(marking, cn"Marked")
         suspect = get(marking, cn"Suspect")
         doc.isTagged = (suspect === CosTrue) ? (:suspect) :
                        (tagged  === CosTrue) ? (:tagged)  : (:none)
@@ -121,7 +121,7 @@ function update_structure_tree!(doc::PDDocImpl)
     return nothing
 end
 
-get_pd_font!(doc::PDDocImpl, cosfont::CosObject) =
+get_pd_font!(doc::PDDocImpl, cosfont::IDD{CosDict}) =
     get!(doc.fonts, cosfont, PDFont(doc, cosfont))
 
 get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) =
