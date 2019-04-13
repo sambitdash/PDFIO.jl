@@ -198,10 +198,11 @@ word or sentence.
 `PDPageTextRun` is a composition implementation of [`PDPageElement`](@ref).
 """
 mutable struct PDPageTextRun <: PDPageObject
-    ss::Vector{Union{CosString, CosNumeric}}
+    ss::Vector{Union{CosXString, CosLiteralString, CosInt, CosFloat}}
     elem::PDPageElement
     PDPageTextRun(ts::AbstractString,ver::Tuple{Int,Int},nop::Int=0) =
-        new(Vector{Union{CosString, CosNumeric}}(), PDPageElement(ts, ver, nop))
+        new(Vector{Union{CosXString, CosLiteralString, CosInt, CosFloat}}(),
+            PDPageElement(ts, ver, nop))
 end
 
 show(io::IO, tr::PDPageTextRun) = show(io, tr.ss)
@@ -534,7 +535,7 @@ restore!(gs::GState) = (pop!(gs.state); gs)
 
 @inline function init_graphics_state()
     state = Vector{Dict{Symbol, Any}}()
-    push!(state, Dict())
+    push!(state, Dict{Symbol, Any}())
 
     state[end][:text_layout] = Vector{TextLayout}()
 

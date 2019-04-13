@@ -45,10 +45,10 @@ function show(io::IO, cmap::CMap)
 end
 
 mutable struct FontUnicodeMapping
-    encoding::Dict
+    encoding::Dict{UInt8, Char}
     cmap::CMap
     hasCMap::Bool
-    FontUnicodeMapping() = new(Dict(), CMap(), false)
+    FontUnicodeMapping() = new(Dict{UInt8, Char}(), CMap(), false)
 end
 
 function merge_encoding!(fum::FontUnicodeMapping, encoding::CosName,
@@ -91,13 +91,12 @@ function merge_encoding!(fum::FontUnicodeMapping,
     diff = cosDocGetObject(doc, encoding, cn"Differences")
     diff === CosNull && return fum
     values = get(diff)
-    d = Dict()
-    cid = -1
+    d = Dict{UInt8, CosName}()
+    cid = 0xff
     for v in values
         if v isa CosInt
-            cid = get(v)
+            cid = UInt8(get(v))
         else
-            @assert cid != -1
             d[cid] = v
             cid += 1
         end
@@ -176,13 +175,11 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
     diff = cosDocGetObject(cosdoc, encoding, cn"Differences")
     diff === CosNull && return glyph_name_to_cid, cid_to_glyph_name
     values = get(diff)
-    d = Dict()
-    cid = -1
+    cid = 0x00
     for v in values
         if v isa CosInt
-            cid = get(v)
+            cid = UInt8(get(v))
         else
-            @assert cid != -1
             glyph_name_to_cid[v] = cid
             cid_to_glyph_name[cid] = v
             cid += 1
@@ -500,14 +497,15 @@ function get_string_width(barr::Vector{UInt8}, widths, pc, tfs, tj, tc, tw)
     return totalw
 end
 
-function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
+function get_TextBox(ss::Vector{Union{CosXString, CosLiteralString,
+                                      CosFloat, CosInt}},
                      pdfont::PDFont,
                      tfs, tc, tw, th)
     totalw = 0f0
     tj = 0f0
     text = ""
     for s in ss
-        if s isa CosString
+        if s isa CosXString || s isa CosLiteralString
             prev_char = INIT_CODE(pdfont.widths)
             t = String(get_encoded_string(s, pdfont))
             if (-tj) > 180 && length(t) > 0 && t[1] != ' ' &&
@@ -519,7 +517,7 @@ function get_TextBox(ss::Vector{Union{CosString,CosNumeric}},
             totalw += get_string_width(barr, pdfont.widths, prev_char,
                                        tfs, tj, tc, tw)
             tj = 0f0
-        elseif s isa CosNumeric
+        elseif s isa CosFloat || s isa CosInt
             tj = s |> get |> Float32
         end
     end

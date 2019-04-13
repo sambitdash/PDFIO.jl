@@ -16,6 +16,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Rectangle = "9a9db56c-8f71-5460-add5-cb450131785e"
 RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
 WinRPM = "c17dfb99-b4f7-5aad-8812-456da1ad7187"
+ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 [compat]
 julia = "1.0"
@@ -25,4 +26,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
 
 [targets]
-test=["Test", "ZipFile"]
+test = ["Test", "ZipFile"]

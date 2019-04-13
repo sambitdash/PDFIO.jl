@@ -1,9 +1,9 @@
 import Base:get, length, show
 
-export CosDict, CosString, CosNumeric, CosBoolean, CosTrue, CosFalse,
-       CosObject, CosNull, CosNullType,CosFloat, CosInt, CosArray, CosName,
-       CosDict, CosIndirectObjectRef, CosStream, set!, @cn_str,
-    createTreeNode, CosTreeNode, CosIndirectObject,
+export CosDict, CosString, CosXString, CosLiteralString, CosNumeric,
+    CosBoolean, CosTrue, CosFalse, CosObject, CosNull, CosNullType,
+    CosFloat, CosInt, CosArray, CosName, CosDict, CosIndirectObjectRef,
+    CosStream, set!, @cn_str, createTreeNode, CosTreeNode, CosIndirectObject,
     CosDictType, IDD, IDDRef, IDDN, IDDNRef
 
 """
@@ -234,7 +234,7 @@ mutable struct CosDict <: CosObject
     CosDict()=new(Dict{CosName, CosObject}())
 end
 
-const CosDictType = Union{CosDict, CosIndirectObject{CosDict}}
+const CosDictType = IDD{CosDict}
 
 """
 ```
@@ -242,9 +242,11 @@ const CosDictType = Union{CosDict, CosIndirectObject{CosDict}}
 ```
 Returns the value as a [`CosObject`](@ref) for the key `name`
 """
-get(dict::CosDict, name::CosName) = get(dict.val, name, CosNull)
+get(dict::CosDict, name::CosName, defval::T = CosNull) where T =
+    get(dict.val, name, defval)
 
-get(o::CosIndirectObject{CosDict}, name::CosName) = get(o.obj, name)
+get(o::CosIndirectObject{CosDict}, name::CosName, defval::T = CosNull) where T =
+    get(o.obj, name, defval)
 
 """
 ```

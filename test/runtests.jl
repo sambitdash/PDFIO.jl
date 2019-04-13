@@ -5,6 +5,8 @@ using PDFIO.Cos
 using PDFIO.Common
 using ZipFile
 
+@test [] == detect_ambiguities(Base, Core, PDFIO)
+
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 

@@ -6,7 +6,7 @@ mutable struct PDDocImpl <: PDDoc
     cosDoc::CosDocImpl
     catalog::CosIndirectObject{CosDict}
     pages::IDDN{CosDict}
-    structTreeRoot::CosObject
+    structTreeRoot::IDDN{CosDict}
     isTagged::Symbol #Valid values :tagged, :none and :suspect
     fonts::Dict{CosObject, PDFont}
     xobjs::Dict{CosObject, PDXObject}
@@ -69,7 +69,7 @@ end
 
 populate_doc_pages(doc::PDDocImpl, dict::CosObject) = nothing
 
-function update_page_tree(doc::PDDocImpl)
+@inline function update_page_tree(doc::PDDocImpl)
     pagesref = get(doc.catalog, cn"Pages")::CosIndirectObjectRef
     pages = cosDocGetObject(doc.cosDoc, pagesref)::CosIndirectObject{CosDict}
     populate_doc_pages(doc, pages)
@@ -105,12 +105,12 @@ end
 # The structure tree is not fully loaded but the object linkages are established for future
 # correlations during text extraction.
 
-function update_structure_tree!(doc::PDDocImpl)
+@inline function update_structure_tree!(doc::PDDocImpl)
     catalog = pdDocGetCatalog(doc)
     marking = get(catalog, cn"MarkInfo")
 
     if (marking !== CosNull)
-        tagged = get(marking, cn"Marked")
+        tagged  = get(marking, cn"Marked")
         suspect = get(marking, cn"Suspect")
         doc.isTagged = (suspect === CosTrue) ? (:suspect) :
                        (tagged  === CosTrue) ? (:tagged)  : (:none)

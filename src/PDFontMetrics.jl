@@ -12,7 +12,7 @@ const ADOBE_STD_14 = Set(
 
 mutable struct AdobeFontMetrics
     cid_to_name::Dict{Int, CosName}
-    name_to_wx::Dict{CosName, Int}
+    name_to_wx::Dict{CosName, Float32}
     name_to_b::Dict{CosName, Vector{Int}}
     kern_pairs::Dict{Tuple{CosName, CosName}, Tuple{Float32, Float32}}
     has_kerning::Bool
@@ -79,7 +79,7 @@ function populate_char_metrics(lines, state, afm, nLines)
         if cid > -1
             afm.cid_to_name[cid] = n
         end
-        afm.name_to_wx[n] = wx
+        afm.name_to_wx[n] = Float32(wx)
         afm.name_to_b[n] = b
         nLineRead += 1
         (line, state) = iterate(lines, state)

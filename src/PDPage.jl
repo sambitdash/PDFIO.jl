@@ -160,9 +160,9 @@ end
 get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef) =
     cosDocGetObject(page.doc.cosDoc, contents)
 
-get_page_contents(page::PDPage, obj::CosObject) = obj
+get_page_contents(page::PDPage, obj::IDD{CosStream}) = obj
 
-function load_page_objects(page::PDPageImpl)
+@inline function load_page_objects(page::PDPageImpl)
     contents = pdPageGetContents(page)
     page.content_objects === nothing &&
         (page.content_objects = PDPageObjectGroup())
@@ -171,7 +171,7 @@ end
 
 load_page_objects(page::PDPageImpl, stm::CosNullType) = nothing
 
-function load_page_objects(page::PDPageImpl, stm::IDD{CosStream})
+@inline function load_page_objects(page::PDPageImpl, stm::IDD{CosStream})
     bufstm = decode(stm)
     try
         load_objects(page.content_objects, bufstm)
@@ -181,7 +181,7 @@ function load_page_objects(page::PDPageImpl, stm::IDD{CosStream})
     return nothing
 end
 
-function load_page_objects(page::PDPageImpl, stms::IDD{CosArray})
+@inline function load_page_objects(page::PDPageImpl, stms::IDD{CosArray})
     stm = merge_streams(page.doc.cosDoc, stms)
     page.contents = stm
     return load_page_objects(page, stm)
