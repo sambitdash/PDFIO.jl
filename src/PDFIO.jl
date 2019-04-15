@@ -47,9 +47,7 @@ export  PDDoc,
             pdFontIsAllCap,
             pdFontIsSmallCap,
         PDOutline,
-            items_count, items,
-            PDOutlineItem,
-                hasproperty
+            PDOutlineItem
 
 using .Cos
 export  CosDoc,

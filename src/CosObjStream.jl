@@ -79,21 +79,6 @@ function read_xref_stream(xrefstm::IDD{CosStream},
     return xref
 end
 
-# Modified code from julia/base/io.jl
-import Base:readuntil
-function readuntil(s::IO, delim::NTuple{N, AbstractChar}; keep::Bool=false) where N
-    out = IOBuffer()
-    while !eof(s)
-        c = read(s, Char)
-        if c ∈ delim
-            keep && write(out, c)
-            break
-        end
-        write(out, c)
-    end
-    return String(take!(out))
-end
-
 function read_object_info_from_stm(stm::CosStream,
                                    oids::Vector{Int},
                                    oloc::Vector{Int},

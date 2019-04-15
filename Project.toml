@@ -4,6 +4,7 @@ authors = ["Sambit Kumar Dash<sambitdash@gmail.com> "]
 version = "0.1.1"
 
 [deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 AdobeGlyphList = "715cd884-8f22-55db-b077-449d1f7eef73"
 BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"

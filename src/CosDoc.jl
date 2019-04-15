@@ -10,7 +10,6 @@ export CosDoc,
 using Base: notnothing
 using ..Common
 
-
 """
 ```
     CosDoc

@@ -4,7 +4,7 @@ export CosDict, CosString, CosXString, CosLiteralString, CosNumeric,
     CosBoolean, CosTrue, CosFalse, CosObject, CosNull, CosNullType,
     CosFloat, CosInt, CosArray, CosName, CosDict, CosIndirectObjectRef,
     CosStream, set!, @cn_str, createTreeNode, CosTreeNode, CosIndirectObject,
-    CosDictType, IDD, IDDRef, IDDN, IDDNRef
+    CosDictType, IDD, IDDRef, IDDN, IDDNRef, ID, IDRef, IDN, IDNRef, showref
 
 """
 ```
@@ -133,6 +133,10 @@ const IDDRef{X}  = Union{X, CosIndirectObject{X}, CosIndirectObjectRef}
 const IDDN{X}    = Union{X, CosIndirectObject{X}, CosNullType}
 const IDDNRef{X} = Union{X, CosIndirectObject{X}, CosNullType,
                          CosIndirectObjectRef}
+const ID{X}      = CosIndirectObject{X}
+const IDRef{X}   = Union{CosIndirectObject{X}, CosIndirectObjectRef}
+const IDN{X}     = Union{CosIndirectObject{X}, CosNullType}
+const IDNRef{X}  = Union{CosIndirectObject{X}, CosNullType, CosIndirectObjectRef}
 
 """
 ```
