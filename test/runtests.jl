@@ -11,7 +11,7 @@ using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.1"
+pdftest_ver  = "0.0.2"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -32,6 +32,18 @@ for f in r.files
 end
 close(r)
 pdftest_dir="PDFTest-"*pdftest_ver*"/"
+
+function testfiles(filename)
+    name, ext = splitext(filename)
+    return (name*".res", joinpath(@__DIR__, pdftest_dir, "templates", name*".txt"))
+end
+
+function local_testfiles(filename, filesdir="files")
+    name, ext = splitext(filename)
+    return (name*".res", joinpath(@__DIR__, pdftest_dir, "templates", name*".txt"),
+            joinpath(@__DIR__, pdftest_dir, filesdir, filename))
+end
+
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
@@ -73,7 +85,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "Test FlateDecode" begin
         @test begin
-            filename="files/1.pdf"
+            resname, template, filename = local_testfiles("1.pdf")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             DEBUG && println(pdDocGetCatalog(doc))
@@ -97,7 +109,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
     end
     @testset "Document without Info" begin
         @test begin
-            filename="files/1_noinfo.pdf"
+            resname, template, filename = local_testfiles("1_noinfo.pdf")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             DEBUG && println(pdDocGetCatalog(doc))
@@ -112,7 +124,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "Document with empty property" begin
         @test begin
-            filename="files/empty_property.pdf"
+            resname, template, filename = local_testfiles("empty_property.pdf")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             DEBUG && println(pdDocGetCatalog(doc))
@@ -132,7 +144,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "PDF File with ObjectStreams" begin
         @test begin
-            filename="files/pdf-17.pdf"
+            resname, template, filename = local_testfiles("pdf-17.pdf")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 1
@@ -205,7 +217,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "Corrupt File" begin
         @test begin
-            filename="files/A1947-14.pdf"
+            resfile, template, filename = local_testfiles("A1947-14.pdf")
             DEBUG && println(filename)
             doc = pdDocOpen(filename)
             try
@@ -327,14 +339,14 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "Test read_string" begin
         @test begin
-            DEBUG && PDFIO.Cos.parse_data("files/page5.txt")
+            DEBUG && PDFIO.Cos.parse_data(pdftest_dir*"files/page5.txt")
             length(utilPrintOpenFiles()) == 0
         end
     end
 
     @testset "Page label test with outlines" begin
         @test begin
-            filename=pdftest_dir*"stillhq/431.pdf"
+            resfile, template, filename = local_testfiles("431.pdf", "stillhq")
             DEBUG && println(filename)
             @assert isfile(filename) 
             doc = pdDocOpen(filename)
@@ -351,11 +363,12 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
             iobuf = IOBuffer()
             print_tree(iobuf, outline)
             write("431.toc.res", take!(iobuf))
-            @assert files_equal("431.toc.res", "431.toc")
+            @assert files_equal("431.toc.res", pdftest_dir*"templates/431.toc")
             pdDocClose(doc)
             length(utilPrintOpenFiles()) == 0
         end
-        doc = pdDocOpen("files/1.pdf")
+        resfile, template, filename = local_testfiles("1.pdf")
+        doc = pdDocOpen(filename)
         @test pdDocHasPageLabels(doc) == false
         @test_throws ErrorException(E_INVALID_PAGE_LABEL) pdDocGetPageRange(doc, "1")
         pdDocClose(doc)
@@ -389,7 +402,7 @@ pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
     @testset "Font Flags test" begin
         @test begin
-            filename="files/pdf-sample.pdf"
+            resname, template, filename = local_testfiles("pdf-sample.pdf")
             doc = pdDocOpen(filename)
             (npage = pdDocGetPageCount(doc)) == 1
             page = pdDocGetPage(doc, 1)
