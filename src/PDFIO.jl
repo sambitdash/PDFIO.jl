@@ -32,6 +32,7 @@ export  PDDoc,
             pdPageGetFonts,
             pdPageGetCropBox,
             pdPageExtractText,
+            pdPageGetPageNumber,
         PDPageObject,
             PDPageObjectGroup,
                 PDPage_BeginGroup, PDPage_EndGroup,
@@ -47,7 +48,8 @@ export  PDDoc,
             pdFontIsAllCap,
             pdFontIsSmallCap,
         PDOutline,
-            PDOutlineItem
+            PDOutlineItem,
+                pdOutlineItemGetAttr
 
 using .Cos
 export  CosDoc,

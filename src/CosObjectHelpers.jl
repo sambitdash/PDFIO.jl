@@ -40,10 +40,10 @@ convert(::Type{Vector{UInt8}}, str::CosLiteralString) = str |> get
 
 Vector{T}(str::CosString) where {T <: UInt8} = convert(Vector{UInt8}, str)
 
-convert(::Type{CDTextString}, lstr::CosLiteralString) =
-    CDTextString(PDFEncodingToUnicode(lstr.val))
+convert(::Type{CDTextString}, lstr::IDD{CosLiteralString}) =
+    CDTextString(PDFEncodingToUnicode(get(lstr)))
 
-String(lstr::CosLiteralString) = convert(String, lstr)
+String(lstr::IDD{CosLiteralString}) = convert(String, lstr)
 
 convert(::Type{T}, i::CosInt) where {T <: Number} = convert(T, get(i))
 

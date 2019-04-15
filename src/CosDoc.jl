@@ -5,7 +5,8 @@ export CosDoc,
        cosDocGetInfo,
        cosDocGetObject,
        cosDocGetPageNumbers,
-       merge_streams
+    merge_streams,
+    find_ntree
 
 using Base: notnothing
 using ..Common
@@ -524,7 +525,7 @@ function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
     throw(ErrorException(E_INVALID_PAGE_LABEL))
 end
 
-function get_internal_pagecount(dict::IDD{CosDict})
+function get_internal_pagecount(dict::ID{CosDict})
     mytype = get(dict, cn"Type")
     isequal(mytype, cn"Pages") && return get(get(dict, cn"Count"))
     isequal(mytype, cn"Page" ) && return 1

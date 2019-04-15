@@ -11,7 +11,7 @@ using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.2"
+pdftest_ver  = "0.0.3"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -224,6 +224,7 @@ end
                 npage= pdDocGetPageCount(doc)
                 for i=1:npage
                     page = pdDocGetPage(doc, i)
+                    @assert i == pdPageGetPageNumber(page)
                     if pdPageIsEmpty(page) == false
                         pdPageGetContentObjects(page)
                         pdPageExtractText(IOBuffer(), page)
@@ -372,6 +373,23 @@ end
         @test pdDocHasPageLabels(doc) == false
         @test_throws ErrorException(E_INVALID_PAGE_LABEL) pdDocGetPageRange(doc, "1")
         pdDocClose(doc)
+    end
+
+    @testset "Outlines" begin
+        @test begin
+            resfile, template, filename = local_testfiles("outline.pdf")
+            DEBUG && println(filename)
+            @assert isfile(filename) 
+            doc = pdDocOpen(filename)
+            outline = pdDocGetOutline(doc)
+            iobuf = IOBuffer()
+            print_tree(iobuf, outline)
+            write("outline.toc.res", take!(iobuf))
+            @assert files_equal("outline.toc.res", pdftest_dir*"templates/outline.toc")
+            @assert pdOutlineItemGetAttr(outline[1][1][1][1])[:Destination][2].pageno == 5
+            pdDocClose(doc)
+            length(utilPrintOpenFiles()) == 0
+        end
     end
 
     @testset "Symbol Fonts test" begin

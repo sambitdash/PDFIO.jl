@@ -110,8 +110,8 @@ This has no meaning without a associated CosDoc. When a reference object is hit
 the object should be searched from the CosDoc and returned.
 """
 struct CosIndirectObjectRef <: CosObject
-    val::Tuple{Int,Int}
-    CosIndirectObjectRef(num::Int, gen::Int)=new((num,gen))
+    val::Tuple{Int, Int}
+    CosIndirectObjectRef(num::Int, gen::Int)=new((num, gen))
 end
 
 mutable struct CosIndirectObject{T <: CosObject} <: CosObject
@@ -119,6 +119,9 @@ mutable struct CosIndirectObject{T <: CosObject} <: CosObject
     gen::Int
     obj::T
 end
+
+CosIndirectObjectRef(obj::CosIndirectObject) =
+    CosIndirectObjectRef(obj.num, obj.gen)
 
 get(o::CosIndirectObject) = get(o.obj)
 

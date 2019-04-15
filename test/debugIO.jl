@@ -6,8 +6,6 @@ DEBUG=true. default is false.
 This is kept external to the regular library to ensure normal library operations
 are not affected.
 =#
-using Printf
-
 const DEBUG=false
 
 @static if DEBUG
