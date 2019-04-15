@@ -6,7 +6,8 @@ export PDPage,
     pdPageGetFonts,
     pdPageGetMediaBox,
     pdPageGetCropBox,
-    pdPageExtractText
+    pdPageExtractText,
+    pdPageGetPageNumber
 
 using ..Cos
 
@@ -115,9 +116,18 @@ function pdPageExtractText(io::IO, page::PDPage)
     return io
 end
 
+"""
+```
+    pdPageGetPageNumber(page::PDPage)
+```
+Returns the page number of the document page.
+"""
+pdPageGetPageNumber(page::PDPage) = 
+    pd_doc_get_pagenum(page.doc, CosIndirectObjectRef(page.cospage))
+
 mutable struct PDPageImpl <: PDPage
     doc::PDDocImpl
-    cospage::IDD{CosDict}
+    cospage::ID{CosDict}
     contents::CosObject
     content_objects::Union{Nothing, PDPageObjectGroup}
     fonts::Dict{CosName, PDFont}
@@ -129,14 +139,15 @@ mutable struct PDPageImpl <: PDPage
             Dict{CosName,PDXObject}())
 end
 
-PDPageImpl(doc::PDDocImpl, cospage::IDD{CosDict}) =
+PDPageImpl(doc::PDDocImpl, cospage::ID{CosDict}) =
     PDPageImpl(doc, cospage, CosNull)
 
 #=This function is added as non-exported type. PDPage may need other attributes
 which will make the constructor complex. This is the default with all default
 values.
 =#
-create_pdpage(doc::PDDocImpl, cospage::IDD{CosDict}) = PDPageImpl(doc, cospage)
+create_pdpage(doc::PDDocImpl, cospage::ID{CosDict}) =
+    PDPageImpl(doc, cospage)
 create_pdpage(doc::PDDocImpl, cospage::CosNullType) =
     throw(ErorException(E_INVALID_OBJECT))
 #=

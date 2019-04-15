@@ -6,7 +6,6 @@ DEBUG=true. default is false.
 This is kept external to the regular library to ensure normal library operations
 are not affected.
 =#
-
 const DEBUG=false
 
 @static if DEBUG
@@ -28,7 +27,7 @@ end
 function util_open(filename, mode)
     global IODebug
     io=open(filename, mode)
-    @printf "Opening file: %s\n" filename
+    println("Opening file: ", filename)
     push!(IODebug[2], (filename, io))
     return io
 end
@@ -38,7 +37,7 @@ function util_close(handle::IOStream)
     idx=1
     for file in IODebug[2]
         if (handle === file[2])
-            @printf "Closing file: %s, %d\n" file[1] idx
+            println("Closing file: ", file[1], " ", idx)
             close(handle)
             deleteat!(IODebug[2],idx)
             return
@@ -80,15 +79,4 @@ function extract_text(io, doc)
             println(io)
         end
     end
-end
-
-function testfiles(filename)
-    name, ext = splitext(filename)
-    return (name*".res", joinpath(@__DIR__, "files", name*".txt"))
-end
-
-function local_testfiles(filename)
-    name, ext = splitext(filename)
-    return (name*".res", joinpath(@__DIR__, "files", name*".txt"),
-            joinpath(@__DIR__, "files", filename))
 end

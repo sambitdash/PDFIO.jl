@@ -5,11 +5,11 @@ export CosDoc,
        cosDocGetInfo,
        cosDocGetObject,
        cosDocGetPageNumbers,
-       merge_streams
+    merge_streams,
+    find_ntree
 
 using Base: notnothing
 using ..Common
-
 
 """
 ```
@@ -181,7 +181,7 @@ function cosDocGetInfo(doc::CosDocImpl)::Union{CosNullType,
     info = doc.hasNativeXRefStm ? get(doc.xrefstm[1], cn"Info") :
         get(doc.trailer[1], cn"Info")
     return cosDocGetObject(doc, info)
-end 
+end
 
 cosDocGetObject(doc::CosDocImpl, obj::CosObject) = obj
 
@@ -266,7 +266,7 @@ function read_header(ps)
             empty!(b)
             break
         end
-        if cnt == 4 && c == MINUS_SIGN       
+        if cnt == 4 && c == MINUS_SIGN
             major = advance!(ps)
             if !ispdfdigit(major)
                 readline(ps)
@@ -278,7 +278,7 @@ function read_header(ps)
             if !ispdfdigit(minor)
                 readline(ps)
                 continue
-            end                
+            end
             minor -= DIGIT_ZERO
             break
         end
@@ -439,7 +439,7 @@ function find_ntree(fn::Function, doc::CosDoc,
         # This is the leaf
         # TBD: look into the values.
         node.kids === nothing && return (0, fn(doc, node.values, key, refdata))
-        for kid in kids
+        for kid in node.kids
             kidobj = cosDocGetObject(doc, kid)
             kidnode = createTreeNode(K, kidobj)
             inrange, val = find_ntree(fn, doc, kidnode, key, refdata)
@@ -460,8 +460,8 @@ const PDF_PageNumerals = [AlphaNumeral, RomanNumeral, Int]
 # This may look non-intuitive but PDF pages can have the same page labels for
 # multiple pages
 # Table 159 - PDF Spec
-function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
-                         key::Int, label::String)
+function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
+                             key::Int, label::String)
     prev_pageno = 0
     found = false
     lno = nothing
@@ -525,7 +525,7 @@ function find_page_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
     throw(ErrorException(E_INVALID_PAGE_LABEL))
 end
 
-function get_internal_pagecount(dict::IDD{CosDict})
+function get_internal_pagecount(dict::ID{CosDict})
     mytype = get(dict, cn"Type")
     isequal(mytype, cn"Pages") && return get(get(dict, cn"Count"))
     isequal(mytype, cn"Page" ) && return 1
@@ -546,7 +546,7 @@ function cosDocGetPageNumbers(doc::CosDoc,
     ref === CosNull && throw(ErrorException(E_INVALID_PAGE_LABEL))
     plroot = cosDocGetObject(doc, ref)
     troot = createTreeNode(Int, plroot)
-    return find_ntree(find_page_label, doc, troot, -1, label)[2]
+    return find_ntree(find_page_for_label, doc, troot, -1, label)[2]
 end
 
 cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) =

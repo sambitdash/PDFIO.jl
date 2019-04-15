@@ -1,6 +1,6 @@
 export  E_EXPECTED_EOF, E_UNEXPECTED_EOF, E_UNEXPECTED_CHAR, E_BAD_KEY,
         E_BAD_ESCAPE, E_BAD_CONTROL, E_LEADING_ZERO, E_BAD_NUMBER, E_BAD_HEADER,
-        E_BAD_TRAILER, E_NOT_IMPLEMENTED,
+        E_BAD_TRAILER, E_BAD_TYPE, E_NOT_IMPLEMENTED,
         E_INVALID_OBJECT, E_INVALID_PAGE_NUMBER, E_INVALID_PAGE_LABEL,
         E_NOT_TAGGED_PDF
 
@@ -14,6 +14,7 @@ const E_BAD_CONTROL     = "ASCII control character in string"
 const E_BAD_NUMBER      = "Invalid number"
 const E_BAD_HEADER      = "Invalid file header"
 const E_BAD_TRAILER     = "Invalid file trailer"
+const E_BAD_TYPE        = "Invalid object type"
 const E_NOT_IMPLEMENTED = "Not Implemented"
 
 const E_INVALID_OBJECT  = "Invalid Object Found"
