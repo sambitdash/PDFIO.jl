@@ -22,11 +22,11 @@ mutable struct PDDocImpl <: PDDoc
     end
 end
 
-function pdDocGetPage(doc::PDDocImpl, num::Int)
-    cosref = pd_doc_get_page(doc, num)
-    page = create_pdpage(doc, cosDocGetObject(doc.cosDoc, cosref))
-    return page
-end
+pdDocGetPage(doc::PDDocImpl, num::Int) = 
+    pdDocGetPage(doc, pd_doc_get_page(doc, num))
+
+pdDocGetPage(doc::PDDoc, cosref::CosIndirectObjectRef) = 
+    create_pdpage(doc, cosDocGetObject(doc.cosDoc, cosref))
 
 """
 ```
@@ -89,31 +89,6 @@ pd_doc_get_page(doc, pagenum::Int) = doc.pagen2r[pagenum]
     return nothing
 end
 
-#=
-This implementation may seem non-intuitive to some due to recursion and also
-seemingly non-standard way of computing page count. However, PDF spec does not
-discount the possibility of an intermediate node having page and pages nodes
-in the kids array. Hence, this implementation.
-=#
-function find_page_from_treenode(node::IDD{CosDict}, pageno::Int)
-    mytype = get(node, cn"Type")
-    #If this is a page object the pageno has to be 1
-    if mytype == cn"Page"
-        pageno == 1 && return node
-        throw(ErrorException(E_INVALID_PAGE_NUMBER))
-    end
-    kids = get(node, cn"Kids")
-    kidsarr = get(kids)
-    sum = 0
-    for kid in kidsarr
-        cnt = Cos.get_internal_pagecount(kid)
-        (sum + cnt) >= pageno &&
-            return find_page_from_treenode(kid, pageno-sum)
-        sum += cnt
-    end
-    throw(ErrorException(E_INVALID_PAGE_NUMBER))
-end
-
 # The structure tree is not fully loaded but the object linkages are established for future
 # correlations during text extraction.
 
@@ -138,35 +113,3 @@ get_pd_font!(doc::PDDocImpl, cosfont::IDD{CosDict}) =
 
 get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) =
     get!(doc.xobjs, cosxobj, createPDXObject(doc, cosxobj))
-
-function iterate_treenode!(pgmap::Dict{CosIndirectObjectRef, Int},
-                           node::CosIndirectObject, currpageno::Int)::Int
-    mytype = get(node, cn"Type")
-    if mytype == cn"Page"
-        pgmap[CosIndirectObjectRef(node.num, node.gen)] = currpageno
-        return currpageno + 1
-    elseif mytype == cn"Pages"
-        kids = get(node, cn"Kids")
-        @assert kids isa CosArray
-        kidsarr = get(kids)
-        for kid in kidsarr
-            currpageno = iterate_treenode!(pgmap, kid, currpageno)
-        end
-        return currpageno
-    end
-    throw(ErrorException(E_BAD_TYPE)) # PDF 32000-1:2008 / 7.7.3.1
-end
-
-function get_pageref_to_pageno_map(doc::PDDocImpl)::Dict{CosIndirectObjectRef, Int}
-    node = doc.pages
-    @assert get(node, cn"Type") == cn"Pages" # PDF 32000-1:2008 / 7.7.3.1
-    kids = get(node, cn"Kids")
-    @assert kids isa CosArray
-    kidsarr = get(kids)
-    currpageno = 1
-    themap = Dict{CosIndirectObjectRef, Int}()
-    for kid in kidsarr
-        currpageno = iterate_treenode!(themap, kid, currpageno)
-    end
-    return themap
-end
