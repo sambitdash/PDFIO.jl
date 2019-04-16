@@ -12,8 +12,23 @@ abstract type _ParentNode  end
 ```
     PDDestination
 ```
-"""
 
+Used for variety of purposes to locate a rectangular region in a PDF document.
+Particularly, used in outlines, actions etc.
+
+The structure can denote a location outside of a document as well like in remote
+GoTo(GoToR) actions. In such cases, it's best be used with filename additionally.
+Moreover, page references have no meaning in remote file references. Hence, the
+`pageno` attribute has been set to `Int` unlike the PDF Spec 32000-2008 12.3.2.2.
+
+    `pageno::Int` - Page number location
+    `layout::CosName` - Various view layouts are possible. Please review the PDF
+    spec for details. 
+    `values::Vector{Float32}` - [left, bottom, right, top] sequence array. Not
+    all values are used. The usage depends on the `layout` parameter.
+    `zoom::Float32` - Zoom value for the view. Can be `zero` depending on
+    `layout` where it's intrinsic; hence, redundant.
+"""
 struct PDDestination
     pageno::Int
     layout::CosName
@@ -50,6 +65,7 @@ function PDDestination(doc::PDDoc, arr::CosArray)
     end
     return PDDestination(page, v[2], values, zoom)
 end
+
 """
 ```
     PDOutlineItem
@@ -90,7 +106,10 @@ populate_outline_items!(parent::_ParentNode, ::CosNullType, ::CosNullType) =
         populate_outline_items!(curr, cfirst_obj, clast_obj)
 
         next_obj = cosDocGetObject(cosdoc, curr_obj, cn"Next")
-        next_obj === CosNull && break
+        if next_obj === CosNull
+            @assert curr_obj === last_obj "Invalid /Last attribute in outlines"
+            break
+        end
         prev_obj = cosDocGetObject(cosdoc, next_obj, cn"Prev")
         @assert prev_obj === curr_obj
             "Outline item with invalid /Prev attribute"
@@ -103,6 +122,28 @@ populate_outline_items!(parent::_ParentNode, ::CosNullType, ::CosNullType) =
     return nothing
 end
 
+"""
+```
+    pdOutlineItemGetAttr(item::PDOutlineItem) -> Dict{Symbol, Any}
+```
+
+Attributes stored with an `PDOutlineItem` object. The traversal parameters like
+`Prev`, `Next`, `First`, `Last` and `Parent` are stored with the structure.
+
+The following keys are stored in the dictionary object returned:
+
+`:Title` - The title assigned to the item (shows up in the table of content)
+`:Count` - A representation of no of items open under the outline item. Please
+refer to the PDF Spec 32000-2008 section 12.3.2.2 for details. Mostly, used for
+rendering on a user interface.
+`:Destination` - `(filepath, PDDestination)` value. Filepath is an empty string
+if the destination refers to a location in the same PDF file. This parameter is
+a combination of `/Dest` and `/A` attribute in the PDF specification. The action
+element is analyzed and data is extracted and stored with the `PDDestination` as
+the final refered location.
+`:C` - The color of the outline in the `DeviceRGB` space.
+`:F` - Flags for title text rendering `italic=1`, `bold=2`
+"""
 function pdOutlineItemGetAttr(item::PDOutlineItem)
     doc, cosdoc, dict = item.doc, item.doc.cosDoc, item.cosdict
     retval = Dict{Symbol, Any}()
@@ -113,16 +154,18 @@ function pdOutlineItemGetAttr(item::PDOutlineItem)
     retval[:Count] = count_obj === CosNull ? 0 : get(count_obj)
 
     dest_obj = cosDocGetObject(cosdoc, dict, cn"Dest")
-    if dest_obj === CosNull
-        dest_obj = cosDocGetObject(cosdoc, dict, cn"A")
-    end
+    dest_obj === CosNull &&
+        (dest_obj = cosDocGetObject(cosdoc, dict, cn"A"))
+
     dest_obj !== CosNull &&
         (retval[:Destination] = get_outline_destination(doc, dest_obj))
     
     c_obj    = cosDocGetObject(cosdoc, dict, cn"C")
     retval[:C] = c_obj === CosNull ? [0f0, 0f0, 0f0] : get(c_obj, true)
+
     f_obj    = cosDocGetObject(cosdoc, dict, cn"F")
     retval[:F] = f_obj === CosNull ? 0x00 : UInt8(get(f_obj))
+
     return retval
 end
 
@@ -179,6 +222,8 @@ end
 ```
 Representation of PDF document Outline (Table of Contents).
 
+Use the methods from `AbstractTrees` package to traverse the elements.
+
 """
 mutable struct PDOutline <: _ParentNode
     doc::PDDoc
@@ -223,4 +268,3 @@ Base.iterate(tn::PDOutlineItem, state::PDOutlineItem) = state, state.next
 Base.IteratorSize(tn::PDOutlineItem) = Base.SizeUnknown()
 Base.eltype(it::PDOutlineItem) = PDOutlineItem
 Base.similar(it::PDOutlineItem) = Vector{eltype(it)}()
-

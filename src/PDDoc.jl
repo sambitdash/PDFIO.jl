@@ -90,8 +90,10 @@ pdDocGetCosDoc(doc::PDDoc)= doc.cosDoc
 """
 ```
     pdDocGetPage(doc::PDDoc, num::Int) -> PDPage
+    pdDocGetPage(doc::PDDoc, ref::CosIndirectObjectRef) -> PDPage
 ```
-Given a document absolute page number, provides the associated page object.
+Given a document absolute page number or object reference, provides the
+associated page object.
 """
 pdDocGetPage
 
@@ -103,7 +105,8 @@ pdDocGetPage
 ```
 Given a range of page numbers or a label returns an array of pages associated
 with it.
-For a detailed explanation on page labels, refer to the method `pdDocHasPageLabels`.
+For a detailed explanation on page labels, refer to the method
+`pdDocHasPageLabels`.
 """
 function pdDocGetPageRange(doc::PDDoc, nums::AbstractRange{Int})
     pages = []
@@ -159,7 +162,7 @@ function pdDocGetInfo(doc::PDDoc)
                           (skey == "ModDate") ? CDDate(val) :
                           (skey == "Trapped") ? val : CDTextString(val)
         catch
-            # no op: we skipp the key that cannot be properly decoded
+            # no op: we skip the key that cannot be properly decoded
         end
     end
     return dInfo
