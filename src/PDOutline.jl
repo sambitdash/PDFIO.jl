@@ -154,6 +154,7 @@ function pdOutlineItemGetAttr(item::PDOutlineItem)
     retval[:Count] = count_obj === CosNull ? 0 : get(count_obj)
 
     dest_obj = cosDocGetObject(cosdoc, dict, cn"Dest")
+
     dest_obj === CosNull &&
         (dest_obj = cosDocGetObject(cosdoc, dict, cn"A"))
 
@@ -268,3 +269,4 @@ Base.iterate(tn::PDOutlineItem, state::PDOutlineItem) = state, state.next
 Base.IteratorSize(tn::PDOutlineItem) = Base.SizeUnknown()
 Base.eltype(it::PDOutlineItem) = PDOutlineItem
 Base.similar(it::PDOutlineItem) = Vector{eltype(it)}()
+
