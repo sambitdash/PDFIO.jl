@@ -45,7 +45,6 @@ CosIndirectObjectRef
 
 # PD
 ```@docs
-PDDoc
 pdDocOpen
 pdDocClose
 pdDocGetCatalog
@@ -55,11 +54,24 @@ pdDocGetCosDoc
 pdDocGetPage
 pdDocGetPageCount
 pdDocGetPageRange
+pdDocGetPageLabel
+pdDocGetOutline
 pdPageGetContents
 pdPageIsEmpty
 pdPageGetCosObject
 pdPageGetContentObjects
+pdPageGetMediaBox
+pdPageGetFonts
+pdPageGetCropBox
 pdPageExtractText
+pdPageGetPageNumber
+pdFontIsBold
+pdFontIsItalic
+pdFontIsFixedW
+pdFontIsAllCap
+pdFontIsSmallCap
+PDOutlineItem
+pdOutlineItemGetAttr
 ```
 ## PDF Page objects
 ```@docs

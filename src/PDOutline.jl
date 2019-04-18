@@ -21,13 +21,13 @@ GoTo(GoToR) actions. In such cases, it's best be used with filename additionally
 Moreover, page references have no meaning in remote file references. Hence, the
 `pageno` attribute has been set to `Int` unlike the PDF Spec 32000-2008 12.3.2.2.
 
-    `pageno::Int` - Page number location
-    `layout::CosName` - Various view layouts are possible. Please review the PDF
-    spec for details. 
-    `values::Vector{Float32}` - [left, bottom, right, top] sequence array. Not
+    - `pageno::Int` - Page number location
+    - `layout::CosName` - Various view layouts are possible. Please review the
+PDF spec for details. 
+    - `values::Vector{Float32}` - [left, bottom, right, top] sequence array. Not
     all values are used. The usage depends on the `layout` parameter.
-    `zoom::Float32` - Zoom value for the view. Can be `zero` depending on
-    `layout` where it's intrinsic; hence, redundant.
+    - `zoom::Float32` - Zoom value for the view. Can be `zero` depending on
+    - `layout` where it's intrinsic; hence, redundant.
 """
 struct PDDestination
     pageno::Int
@@ -132,17 +132,17 @@ Attributes stored with an `PDOutlineItem` object. The traversal parameters like
 
 The following keys are stored in the dictionary object returned:
 
-`:Title` - The title assigned to the item (shows up in the table of content)
-`:Count` - A representation of no of items open under the outline item. Please
+- `:Title` - The title assigned to the item (shows up in the table of content)
+- `:Count` - A representation of no of items open under the outline item. Please
 refer to the PDF Spec 32000-2008 section 12.3.2.2 for details. Mostly, used for
 rendering on a user interface.
-`:Destination` - `(filepath, PDDestination)` value. Filepath is an empty string
+- `:Destination` - `(filepath, PDDestination)` value. Filepath is an empty string
 if the destination refers to a location in the same PDF file. This parameter is
 a combination of `/Dest` and `/A` attribute in the PDF specification. The action
 element is analyzed and data is extracted and stored with the `PDDestination` as
 the final refered location.
-`:C` - The color of the outline in the `DeviceRGB` space.
-`:F` - Flags for title text rendering `italic=1`, `bold=2`
+- `:C` - The color of the outline in the `DeviceRGB` space.
+- `:F` - Flags for title text rendering `italic=1`, `bold=2`
 """
 function pdOutlineItemGetAttr(item::PDOutlineItem)
     doc, cosdoc, dict = item.doc, item.doc.cosDoc, item.cosdict
