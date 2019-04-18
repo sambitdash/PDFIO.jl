@@ -34,11 +34,11 @@ after_success:
   # push coverage results to Codecov
   - julia -e 'import PDFIO; cd(joinpath(dirname(pathof(PDFIO)), "..")); using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
   # push documentation from gh-pages
-  - julia -e 'Pkg.add("Documenter")'
-  - julia -e 'cd(Pkg.dir("PDFIO")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; Pkg.add("Documenter")'
+  - julia -e 'cd(dirname(pathof(PDFIO))); include(joinpath("docs", "make.jl"))'
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  github_token: $DOCUMENTER_KEY # Set in travis-ci.org dashboard
   on:
     branch: gh-pages
