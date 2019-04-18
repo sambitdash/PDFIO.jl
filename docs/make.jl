@@ -1,4 +1,7 @@
-push!(LOAD_PATH,"../src/")
+if Base.HOME_PROJECT[] !== nothing
+    # JuliaLang/julia/pull/28625
+    Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
+end
 
 using Documenter, PDFIO
 
