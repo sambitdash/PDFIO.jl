@@ -353,6 +353,10 @@ end
             doc = pdDocOpen(filename)
             @assert pdDocGetPageCount(doc) == 54
             @assert pdDocHasPageLabels(doc)
+            @assert pdDocGetPageLabel(doc, 3) == "ii"
+            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog,  1) == "title"
+            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog,  3) == "ii"
+            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog, 46) == "42"
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") ==
                 range(1, length=1)
             @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") ==

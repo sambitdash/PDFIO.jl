@@ -5,8 +5,9 @@ export CosDoc,
        cosDocGetInfo,
        cosDocGetObject,
        cosDocGetPageNumbers,
-    merge_streams,
-    find_ntree
+       cosDocGetPageLabel,
+       merge_streams,
+       find_ntree
 
 using Base: notnothing
 using ..Common
@@ -444,7 +445,7 @@ function find_ntree(fn::Function, doc::CosDoc,
             kidnode = createTreeNode(K, kidobj)
             inrange, val = find_ntree(fn, doc, kidnode, key, refdata)
             inrange == -1 && break
-            inrange == 0 && return (inrange,val)
+            inrange == 0 && return (inrange, val)
         end
     else
         return (inrange, nothing)
@@ -460,7 +461,7 @@ const PDF_PageNumerals = [AlphaNumeral, RomanNumeral, Int]
 # This may look non-intuitive but PDF pages can have the same page labels for
 # multiple pages
 # Table 159 - PDF Spec
-function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int,CosObject}},
+function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int, CosObject}},
                              key::Int, label::String)
     prev_pageno = 0
     found = false
@@ -549,8 +550,50 @@ function cosDocGetPageNumbers(doc::CosDoc,
     return find_ntree(find_page_for_label, doc, troot, -1, label)[2]
 end
 
-cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) =
+
+cosDocGetPageNumbers(doc::CosDoc, catalog::CosNullType, label::AbstractString) =
     error("Invalid document catalog")
+
+
+function find_label_for_pageno(doc::CosDoc,
+                               values::Vector{Tuple{Int, CosObject}},
+                               key::Int, ::CosNullType)
+    start = 1
+    key -= 1
+    ln = nothing
+    idx = searchsortedfirst(values, key; lt=(x, y)->x[1] < y[1])
+    idx > length(values) && throw(ErrorException(E_INVALID_PAGE_NUMBER))
+    pageno, obj = values[idx]
+    pageno > key && ((pageno, obj) =  values[idx-1])
+    plDict = cosDocGetObject(doc, obj)
+    s  = get(plDict, cn"S")
+    p  = get(plDict, cn"P")
+    st = get(plDict, cn"St")
+
+    start = (st === CosNull) ? 1 : get(st)
+
+    num = key - pageno + start
+            
+    pfx = p !== CosNull ? String(p) : ""
+    s === CosNull && return pfx
+    ln = (s == cn"D") ? LabelNumeral(Int, num; prefix=pfx) :
+         (s == cn"R") ? LabelNumeral(RomanNumeral, num; prefix=pfx) :
+         (s == cn"r") ? LabelNumeral(RomanNumeral, num; prefix=pfx,
+                                     caselower=true) :
+         (s == cn"A") ? LabelNumeral(AlphaNumeral, num; prefix=pfx) :
+         (s == cn"a") ? LabelNumeral(AlphaNumeral, num; prefix=pfx,
+                                     caselower=true) :
+         throw(ErrorException(E_INVALID_PAGE_LABEL))
+    return string(ln)
+end
+
+function cosDocGetPageLabel(doc::CosDoc, catalog::IDD{CosDict}, num::Int)
+    ref = get(catalog, cn"PageLabels")
+    ref === CosNull && throw(ErrorException(E_INVALID_PAGE_LABEL))
+    plroot = cosDocGetObject(doc, ref)
+    troot = createTreeNode(Int, plroot)
+    return find_ntree(find_label_for_pageno, doc, troot, num, CosNull)[2]
+end
 
 function merge_streams(cosdoc::CosDoc, stms::IDD{CosArray})
     (path,io) = get_tempfilepath()
