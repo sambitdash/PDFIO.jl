@@ -45,9 +45,4 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       after_success: skip  
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $DOCUMENTER_KEY # Set in travis-ci.org dashboard
-  on:
-    branch: gh-pages
+ 
