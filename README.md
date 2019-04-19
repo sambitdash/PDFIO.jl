@@ -3,7 +3,8 @@
 [![*nix Status](https://travis-ci.org/sambitdash/PDFIO.jl.svg?branch=master)](https://travis-ci.org/sambitdash/PDFIO.jl)
 [![Win status](https://ci.appveyor.com/api/projects/status/9cocsctqdkx603q0?svg=true)](https://ci.appveyor.com/project/sambitdash/pdfio-jl)
 [![codecov.io](http://codecov.io/github/sambitdash/PDFIO.jl/coverage.svg?branch=master)](http://codecov.io/github/sambitdash/PDFIO.jl?branch=master)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/docs/build/)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/dev)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sambitdash.github.io/PDFIO.jl/stable)
 
 PDFIO is a simple PDF API focused on processing text from PDF files. The
 APIs is kept fairly simple and follows the PDF-32000-1:2008 specification as
@@ -15,7 +16,7 @@ the file format parsing in native form. More over the object structure of PDF
 makes the API extend-able.
 
 Technically,the PDFIO does not fully fit into the stream based file access APIs
-like [JuliaIO/FileIO](/JuliaIO/FileIO.jl). However, there is a general interest
+like [JuliaIO/FileIO](https://github.com/JuliaIO/FileIO.jl). However, there is a general interest
 to submit this API in that direction to ensure it's considered as a native file
 format understood by Julia.
 
@@ -119,9 +120,13 @@ Not all PDF files that were used to test the library has been owned by the
 author. Hence, the author cannot make those files available to general public
 for distribution under the source code license. However, the author is grateful
 to the PDF document [library](http://www.stillhq.com/pdfdb/db.html) maintained
-by [mikal@stillhq.com](mikal@stillhq.com). Some of the files have to downloaded
-from the database for unit testing of the documents. Some files are also
-included from
+by [mikal@stillhq.com](mikal@stillhq.com). However, these files are no longer
+available in the link above. 
+
+Some files are also included from
 [openpreserve](https://github.com/openpreserve/format-corpus/tree/master/pdfCabinetOfHorrors).
 These files can be distributed with
 [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+However, test files may have different licensing that the `PDFIO`. Hence we have
+now uploaded most test files to another project under [PDFTest](https://github.com/sambitdash/PDFTest).

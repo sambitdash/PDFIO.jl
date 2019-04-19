@@ -400,10 +400,44 @@ SPACE_CODE(w::CIDWidth) = get_character_code(cn"space", w)
 INIT_CODE(x) = 0x00
 SPACE_CODE(x) = get_character_code(cn"space", x)
 
+"""
+```
+    pdFontIsBold(pdfont::PDFont)    ->Bool
+```
+    Returns `true` is the fonts have the attribute specified
+"""
 pdFontIsBold(pdfont::PDFont)     = (pdfont.flags & 0x80000000) > 0
+
+"""
+```
+    pdFontIsItalic(pdfont::PDFont)  ->Bool
+```
+    Returns `true` is the fonts have the attribute specified
+"""
 pdFontIsItalic(pdfont::PDFont)   = (pdfont.flags & 0x00000040) > 0
+
+"""
+```
+    pdFontIsFixedW(pdfont::PDFont)  ->Bool
+```
+    Returns `true` is the fonts have the attribute specified
+"""
 pdFontIsFixedW(pdfont::PDFont)   = (pdfont.flags & 0x00000001) > 0
+
+"""
+```
+    pdFontIsAllCap(pdfont::PDFont)  ->Bool
+```
+    Returns `true` is the fonts have the attribute specified
+"""
 pdFontIsAllCap(pdfont::PDFont)   = (pdfont.flags & 0x00010000) > 0
+
+"""
+```
+    pdFontIsSmallCap(pdfont::PDFont)->Bool
+```
+    Returns `true` is the fonts have the attribute specified
+"""
 pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
 
 # Not supported FD attribute in CIDFonts

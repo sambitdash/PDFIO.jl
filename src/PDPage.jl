@@ -45,13 +45,19 @@ end
     pdPageGetMediaBox(page::PDPage) -> CDRect{Float32}
     pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
 ```
-    Returns the media box associated with the page.
+    Returns the media box associated with the page. See 14.11.2 PDF 1.7 Spec.
 """
 function pdPageGetMediaBox(page::PDPage)
     arr = page_find_attribute(page, cn"MediaBox")::CosArray
     return CDRect{Float32}(CDRect(arr))::CDRect{Float32}
 end
 
+"""
+```
+    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
+```
+    Returns the crop box associated with the page. See 14.11.2 PDF 1.7 Spec.
+"""
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
