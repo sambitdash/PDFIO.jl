@@ -130,3 +130,9 @@ These files can be distributed with
 
 However, test files may have different licensing that the `PDFIO`. Hence we have
 now uploaded most test files to another project under [PDFTest](https://github.com/sambitdash/PDFTest).
+
+## Contribution
+
+Contributions in form of PRs are welcome for any features you will like to develop for the PDFIO library. 
+Contributors are requested to review the Issues section to understand the known issues and if they can take
+up few tasks to complete, it will be definitely appreciated. 
