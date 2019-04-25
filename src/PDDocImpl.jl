@@ -108,8 +108,16 @@ end
     return nothing
 end
 
-get_pd_font!(doc::PDDocImpl, cosfont::IDD{CosDict}) =
-    get!(doc.fonts, cosfont, PDFont(doc, cosfont))
+function get_pd_font!(doc::PDDocImpl, cosfont::IDD{CosDict})
+    font = get(doc.fonts, cosfont, nothing)
+    font !== nothing && return font
+    font = doc.fonts[cosfont] = PDFont(doc, cosfont)
+    return font
+end
 
-get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject) =
-    get!(doc.xobjs, cosxobj, createPDXObject(doc, cosxobj))
+function get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject)
+    xobj = get(doc.xobjs, cosxobj, nothing)
+    xobj !== nothing && return xobj
+    xobj = doc.xobjs[cosxobj] = createPDXObject(doc, cosxobj)
+    return xobj
+end

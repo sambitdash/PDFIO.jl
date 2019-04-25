@@ -67,13 +67,14 @@ const PDFEncoding_to_Unicode = begin
     d
 end
 
-function NativeEncodingToUnicode(barr::Vector{UInt8}, mapping::Dict)
-    carr = similar(barr, Char)
-    for i = 1:lastindex(barr)
+function NativeEncodingToUnicode(barr, mapping::Dict)
+    l = length(barr)
+    carr = Vector{Char}(undef, l)
+    for i = 1:l
         carr[i] = get(mapping, barr[i], zero(Char))
     end
     return carr
 end
 
-PDFEncodingToUnicode(barr::Vector{UInt8}) =
+PDFEncodingToUnicode(barr) =
     NativeEncodingToUnicode(barr, PDFEncoding_to_Unicode)

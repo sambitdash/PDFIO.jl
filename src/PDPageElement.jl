@@ -557,7 +557,7 @@ end
 
 function show_text_layout!(io::IO, state::GState)
     #Make sure to deepcopy. Otherwise the data structures will be lost
-    heap = deepcopy(get(state, :text_layout, Vector{TextLayout}))
+    heap = get(state, :text_layout, Vector{TextLayout})
     sort!(heap, lt= > )
     szdict = get(state, :h_profile, Dict{Int, Int})
 
@@ -569,8 +569,8 @@ function show_text_layout!(io::IO, state::GState)
     iht, num = pairs[1]
     ht = iht*0.1f0
 
-    afm = read_afm("Courier")
-    xwr = get_character_width(cn"X", afm)/1000f0
+    # Courier font X width is 600 
+    xwr = 0.6f0
     ph = 0f0
     npc = 0
     for i = 1:lastindex(heap)
