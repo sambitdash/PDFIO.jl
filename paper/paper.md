@@ -34,7 +34,7 @@ of usage of certain (de)compression codecs where standard open source softwares
 are being used. The API is written keeping the low level understanding of the PDF
 specification. This enables these APIs to be used in real life data science 
 applications where higher level knowledge abstractions can be built over the low
-level libraries. However, an understanding of PDF specification(PDF-32000-1:2008)
+level libraries. However, an understanding of PDF specification(PDF-32000-1:2008)[@Adobe:2008]
 may be needed to accomplish certain advanced tasks with the APIs. 
 
 The APIs are developed for text extraction as a major focus. The rendering and 
@@ -54,13 +54,3 @@ contributed to this effort. Their contribution can be viewed from the following
 [link](https://github.com/sambitdash/PDFIO.jl/graphs/contributors).
 
 # References
-
-@book{Adobe:2008,
-  	Adsnote = {Provided by Adobe Systems Incorporarted},
-  	Adsurl = {https://www.adobe.com/devnet/pdf/pdf_reference.html},
-  	Author = {Adobe Systems Inc.},
-  	Booktitle = {Document Management - Portable Document Format - Part 1: PDF 1.7},
-  	Publisher = {Adobe Systems Incorporarted},
-  	Title = {{Document Management - Portable Document Format - Part 1: PDF 1.7}},
-  	Year = 2008
-}
