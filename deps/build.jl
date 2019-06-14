@@ -8,8 +8,8 @@ function validate_libz_version(name, handle)
     f = Libdl.dlsym_e(handle, "zlibVersion")
     f == C_NULL && return false
     ver = VersionNumber(unsafe_string(ccall(f, Cstring, ())))
-    # Version 1.2.9 or above
-    return ver >= v"1.2.9"
+    # Version 1.2.8 or above
+    return ver >= v"1.2.8"
 end
 
 function validate_openssl_version(name, handle)
