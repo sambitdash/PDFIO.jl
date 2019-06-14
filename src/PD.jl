@@ -11,5 +11,6 @@ include("PDDocImpl.jl")
 include("PDPage.jl")
 include("PDFontTables.jl")
 include("PDOutline.jl")
+include("PDCrypt.jl")
 
 end

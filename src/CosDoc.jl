@@ -7,7 +7,8 @@ export CosDoc,
        cosDocGetPageNumbers,
        cosDocGetPageLabel,
        merge_streams,
-       find_ntree
+       find_ntree,
+       readfrom
 
 using Base: notnothing
 using ..Common
@@ -53,7 +54,16 @@ mutable struct CosDocImpl <: CosDoc
     end
 end
 
-Base.seek(doc::CosDoc, loc::Int) = seek(doc.ps, loc + doc.hoffset)
+Base.seek(doc::CosDoc, loc::Int)    = seek(doc.ps, loc + doc.hoffset)
+Base.read(doc::CosDoc, nbytes::Int) = read(doc.ps, nbytes)
+
+function readfrom(doc::CosDoc, from::Int, nbytes::Int)
+    mark(doc.ps)
+    seek(doc, from)
+    buf = read(doc, nbytes)
+    reset(doc.ps)
+    return buf
+end
 
 """
 ```
