@@ -72,6 +72,7 @@ else
                      `make install`
                  end
               end), libcrypto, os = :Windows)
+
 end
 
 @BinDeps.install Dict([:libz => :libz, :libcrypto => :libcrypto])

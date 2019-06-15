@@ -310,7 +310,7 @@ table.
    Document Time Stamp (DTS) has not been implemented.
 
 # Example
-```jldoctest
+```
 julia> r = pdDocValidateSignatures(doc);
 
 julia> r[1] # Failure case

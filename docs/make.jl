@@ -11,7 +11,7 @@ makedocs(
     sitename = "PDFIO",
     pages = [
         "intro.md",
-        "API Structure and Design" => "index.md"
+        "API Structure and Design" => "index.md",
         "Digital Signatures" => "digsig.md"
     ]
 )
