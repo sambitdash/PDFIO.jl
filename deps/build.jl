@@ -59,7 +59,19 @@ if !Sys.iswindows()
 else
     using WinRPM
     provides(WinRPM.RPM, "zlib1", [libz])
-    provides(WinRPM.RPM, "libopenssl", [libcrypto])
+    provides(Sources,
+             URI("https://github.com/openssl/openssl/archive/OpenSSL_1_1_0k.zip"),
+             libcrypto, unpacked_dir="openssl-OpenSSL_1_1_0k")
+    provides(SimpleBuild,
+             (@build_steps begin
+                 GetSources(libcrypto)
+                 @build_steps begin
+                     ChangeDirectory(joinpath(BinDeps.depsdir(libcrypto), "src", "openssl-OpenSSL_1_1_0k"))
+                     `./config --prefix=$prefix`
+                     `make depend`
+                     `make install`
+                 end
+              end), libcrypto, os = :Windows)
 end
 
 @BinDeps.install Dict([:libz => :libz, :libcrypto => :libcrypto])
