@@ -111,7 +111,7 @@ end
             end
         end
         @testset "Expired Certs" begin
-            files = ["blank_signed.pdf", "pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
+            files = ["pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
             for file in files
                 isfile(cacerts) && rm(cacerts)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
