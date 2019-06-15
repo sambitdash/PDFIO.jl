@@ -16,8 +16,8 @@ function validate_openssl_version(name, handle)
     f = Libdl.dlsym_e(handle, "OpenSSL_version_num")
     f == C_NULL && return false
     v = ccall(f, Culong, ())
-    # Version 1.1.0f or above
-    return v >= 0x1010000f
+    # Version 1.0.2f or above
+    return v >= 0x1000200f
 end
 
 libz = library_dependency("libz", aliases=["libz", "libzlib", "zlib1"], validate=validate_libz_version)
