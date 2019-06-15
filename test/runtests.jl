@@ -113,7 +113,7 @@ end
         @testset "Expired Certs" begin
             files = ["blank_signed.pdf", "pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
             for file in files
-                rm(cacerts)
+                isfile(cacerts) && rm(cacerts)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
@@ -124,7 +124,7 @@ end
             files = ["pades_example-1.pdf", "PAdES_SmartID.pdf",
                      "sbid_3rd_party_sign_pades.pdf", "sbid_authbased_signflow_pades.pdf"]
             for file in files
-                rm(cacerts)
+                isfile(cacerts) && rm(cacerts)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
