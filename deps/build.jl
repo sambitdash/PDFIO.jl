@@ -28,9 +28,6 @@ libcrypto = library_dependency("libcrypto", aliases=["libcrypto"], validate=vali
 prefix = joinpath(@__DIR__, "usr")
 
 if !Sys.iswindows()
-    provides(AptGet, Dict("zlib" => libz, "zlib1g" => libz))
-    provides(Yum, "zlib", [libz])
-    provides(Pacman, "zlib", [libz])
     provides(Sources,
              URI("https://github.com/madler/zlib/archive/v1.2.11.tar.gz"),
              libz, unpacked_dir="zlib-1.2.11")
@@ -45,9 +42,6 @@ if !Sys.iswindows()
                  end
               end), libz, os = :Unix)
 
-    provides(AptGet, Dict("libssl-dev" => libcrypto))
-    provides(Yum, "openssl-libs", [libcrypto])
-    provides(Pacman, "openssl", [libcrypto])
     provides(Sources,
              URI("https://github.com/openssl/openssl/archive/OpenSSL_1_1_0k.tar.gz"),
              libcrypto, unpacked_dir="openssl-OpenSSL_1_1_0k")
