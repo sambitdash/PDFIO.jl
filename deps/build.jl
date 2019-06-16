@@ -23,7 +23,7 @@ function validate_openssl_version(name, handle)
 end
 
 libz = library_dependency("libz", aliases=["libz", "libzlib", "zlib1"], validate=validate_libz_version)
-libcrypto = library_dependency("libcrypto", aliases=["libcrypto"], validate=validate_openssl_version)
+libcrypto = library_dependency("libcrypto", aliases=["libcrypto", "libcrypto-1_1-x64", "libcrypto-1_1-x32"], validate=validate_openssl_version)
 
 prefix = joinpath(@__DIR__, "usr")
 
