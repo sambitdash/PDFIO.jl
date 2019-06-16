@@ -62,12 +62,12 @@ if !Sys.iswindows()
               end), libcrypto, os = :Unix)
 
 else
-    using WinRPM
-    provides(WinRPM.RPM, "zlib1", [libz])
+    zlib_fn  = "zlib-1.2.11-win$(Sys.WORD_SIZE)-mingw.zip"
+    zlib_uri = "https://bintray.com/vszakats/generic/download_file?file_path=$(zlib_fn)"
+    provides(Binaries, URI(zlib_uri), libz, filename="$(zlib_fn)")
 
     openssl_fn   = "openssl-1.1.0i-win$(Sys.WORD_SIZE)-mingw.zip"
     openssl_uri  = "https://bintray.com/vszakats/generic/download_file?file_path=$(openssl_fn)"
-    
     provides(Binaries, URI(openssl_uri), libcrypto, filename="$(openssl_fn)")
 end
 
