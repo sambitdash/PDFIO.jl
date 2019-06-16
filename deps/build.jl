@@ -64,11 +64,11 @@ if !Sys.iswindows()
 else
     zlib_fn  = "zlib-1.2.11-win$(Sys.WORD_SIZE)-mingw.zip"
     zlib_uri = "https://bintray.com/vszakats/generic/download_file?file_path=$(zlib_fn)"
-    provides(Binaries, URI(zlib_uri), libz, filename="$(zlib_fn)")
+    provides(Binaries, URI(zlib_uri), libz, filename="$(zlib_fn)", unpacked_dir="$(zlib_fn)")
 
     openssl_fn   = "openssl-1.1.0i-win$(Sys.WORD_SIZE)-mingw.zip"
     openssl_uri  = "https://bintray.com/vszakats/generic/download_file?file_path=$(openssl_fn)"
-    provides(Binaries, URI(openssl_uri), libcrypto, filename="$(openssl_fn)")
+    provides(Binaries, URI(openssl_uri), libcrypto, filename="$(openssl_fn)", unpacked_dir="$(openssl_fn)")
 end
 
 @BinDeps.install Dict([:libz => :libz, :libcrypto => :libcrypto])
