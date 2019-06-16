@@ -270,9 +270,10 @@ function PDCert(cbytes::Vector{UInt8})
     return PDCert(cdata)
 end
 
-Base.:(==)(c1::PDCert, c2::PDCert) =
+Base.:(==)(c1::PDCert, c2::PDCert) = !(c1 < c2 || c2 < c1)
+Base.isless(c1::PDCert, c2::PDCert) = 
     ccall((:X509_cmp, libcrypto), Cint,
-          (Ptr{Cvoid}, Ptr{Cvoid}), c1.data, c2.data) == 1
+          (Ptr{Cvoid}, Ptr{Cvoid}), c1.data, c2.data) < 0
 
 function is_self_signed(c::PDCert)
     cert = c.data
@@ -298,8 +299,7 @@ function find_cert(s::PDCertStore, c::PDCert)
     c1 = ccall((:X509_OBJECT_get0_X509, libcrypto),
                Ptr{Cvoid}, (Ptr{Cvoid}, ), o)
     c1 == C_NULL && return false
-    return ccall((:X509_cmp, libcrypto), Cint,
-                 (Ptr{Cvoid}, Ptr{Cvoid}), c1, c.data) == 0
+    return PDCert(c1, nothing) == c
 end
 
 const ASN1_STRFLGS_ESC_2253           = Culong(1)
@@ -543,7 +543,7 @@ end
 
 Base.:(==)(k1::PDPKey, k2::PDPKey) = 
     ccall((:EVP_PKEY_cmp, libcrypto), Cint,
-                (Ptr{Cvoid}, Ptr{Cvoid}), k1.data, k2.data) == 1
+          (Ptr{Cvoid}, Ptr{Cvoid}), k1.data, k2.data) == 1
 
 const X509_V_FLAG_IGNORE_CRITICAL = Cint(0x10)
 
