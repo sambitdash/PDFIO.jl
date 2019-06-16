@@ -18,7 +18,7 @@ function validate_openssl_version(name, handle)
     f == C_NULL && return false
     v = ccall(f, Culong, ())
     println("Version OpenSSL is: $(string(v, base=16))")
-    # Version 1.1.0f or above
+    # Version 1.1.0 or above
     return v >= 0x1010000f
 end
 
@@ -42,14 +42,19 @@ if !Sys.iswindows()
                  end
               end), libz, os = :Unix)
 
+    osslver = "1_1_0k"
+    osslfn  = "OpenSSL_$(osslver)"
+    ossldir = "openssl-$(osslfn)"
+    osslpkg = "$(osslfn).tar.gz"
+    
     provides(Sources,
-             URI("https://github.com/openssl/openssl/archive/OpenSSL_1_1_0k.tar.gz"),
-             libcrypto, unpacked_dir="openssl-OpenSSL_1_1_0k")
+             URI("https://github.com/openssl/openssl/archive/$(osslpkg)"),
+             libcrypto, unpacked_dir="$(ossldir)")
     provides(SimpleBuild,
              (@build_steps begin
                  GetSources(libcrypto)
                  @build_steps begin
-                     ChangeDirectory(joinpath(BinDeps.depsdir(libcrypto), "src", "openssl-OpenSSL_1_1_0k"))
+                     ChangeDirectory(joinpath(BinDeps.depsdir(libcrypto), "src", "$(ossldir)"))
                      `./config --prefix=$prefix`
                      `make depend`
                      `make install`
@@ -59,20 +64,11 @@ if !Sys.iswindows()
 else
     using WinRPM
     provides(WinRPM.RPM, "zlib1", [libz])
-    provides(Sources,
-             URI("https://github.com/openssl/openssl/archive/OpenSSL_1_1_0k.zip"),
-             libcrypto, unpacked_dir="openssl-OpenSSL_1_1_0k")
-    provides(SimpleBuild,
-             (@build_steps begin
-                 GetSources(libcrypto)
-                 @build_steps begin
-                     ChangeDirectory(joinpath(BinDeps.depsdir(libcrypto), "src", "openssl-OpenSSL_1_1_0k"))
-                     `./config --prefix=$prefix`
-                     `make depend`
-                     `make install`
-                 end
-              end), libcrypto, os = :Windows)
 
+    openssl_fn   = "openssl-1.1.0i-win$(Sys.WORD_SIZE)-mingw.zip"
+    openssl_uri  = "https://bintray.com/vszakats/generic/download_file?file_path=$(openssl_fn)"
+    
+    provides(Binaries, URI(openssl_uri), libcrypto, filename="$(openssl_fn)")
 end
 
 @BinDeps.install Dict([:libz => :libz, :libcrypto => :libcrypto])
