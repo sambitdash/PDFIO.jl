@@ -11,6 +11,7 @@ export PDDoc,
        pdDocHasPageLabels,
        pdDocGetPageLabel,
        pdDocGetOutline,
+       pdDocHasSignature,
        pdDocValidateSignatures
 
 using ..Common
@@ -236,11 +237,16 @@ end
 
 """
 ```
-    pdDocIsSigned(doc::PDDoc) -> Bool
+    pdDocHasSignature(doc::PDDoc) -> Bool
 ```
-PDF documents can be signed and content can be approved by one or more reviewers.
+Returns `true` when the document has at least one signature field.
+
+This does not mean there is an actual digital signature embedded in the document.
+A PDF document can be signed and content can be approved by one or more
+reviewers. Signature fields are placeholders for storing and rendering such
+information. 
 """
-function pdDocIsSigned(doc::PDDoc)
+function pdDocHasSignature(doc::PDDoc)
     catalog = pdDocGetCatalog(doc)
     cosDoc = pdDocGetCosDoc(doc)
     acroform = cosDocGetObject(cosDoc, catalog, cn"AcroForm")

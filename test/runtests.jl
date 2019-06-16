@@ -98,6 +98,7 @@ end
                      "sample05.pdf", "sample06.pdf", "sample07.pdf", "sample08.pdf"]
             isfile(cacerts) && rm(cacerts)
             doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", "sample01.pdf"))
+            @test pdDocHasSignature(doc)
             r = pdDocValidateSignatures(doc, export_certs=true)
             pdDocClose(doc)
             @test r[1][:passed] == false
@@ -105,6 +106,7 @@ end
             cp("sample01.pem", cacerts, force=true)
             for file in files
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
                 pdDocClose(doc)
@@ -115,6 +117,7 @@ end
             for file in files
                 isfile(cacerts) && rm(cacerts)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
                 pdDocClose(doc)
@@ -126,6 +129,7 @@ end
             for file in files
                 isfile(cacerts) && rm(cacerts)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
                 pdDocClose(doc)
