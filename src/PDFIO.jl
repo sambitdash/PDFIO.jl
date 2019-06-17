@@ -9,7 +9,7 @@ include("PD.jl")     #Module PD
 #export Common, Cos, PD
 
 using .Common
-export CDTextString, CDDate, CDRect
+export CDTextString, CDDate, CDRect, getUTCTime
 
 using .PD
 export  PDDoc,
@@ -24,6 +24,8 @@ export  PDDoc,
             pdDocGetPageRange,
             pdDocGetPageLabel,
             pdDocGetOutline,
+            pdDocHasSignature,
+            pdDocValidateSignatures,
         PDPage,
             pdPageGetContents,
             pdPageIsEmpty,

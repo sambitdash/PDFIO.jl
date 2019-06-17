@@ -121,3 +121,35 @@ function get_pd_xobject!(doc::PDDocImpl, cosxobj::CosObject)
     xobj = doc.xobjs[cosxobj] = createPDXObject(doc, cosxobj)
     return xobj
 end
+
+function gather_sig_props(doc, fld, inherit)
+    inhdown = Dict{Symbol, Any}()
+    if get(fld, cn"FT") === cn"Sig"
+        tobj = cosDocGetObject(doc.cosDoc, fld, cn"T")
+        # Better to collect the page reference
+        p_ref = get(fld, cn"P")
+        page = p_ref === CosNull ? get(inherit, :P, CosNull) : p_ref
+        tparent = get(inherit, :FQT, "")
+        t = tobj !== CosNull ? CDTextString(tobj) : ""
+        fqt = !isempty(tparent) && !isempty(t) ? tparent*"."*t :
+            !isempty(tparent) ? tparent :
+            !isempty(t) ? t : ""
+        !isempty(fqt)    && (inhdown[:FQT] = fqt)
+        page !== CosNull && (inhdown[:P]   = page)
+    end
+    return inhdown
+end
+
+function pd_get_signature_fields!(doc::PDDocImpl, fldroot::IDD{CosArray},
+                                  inherit, sigflds)
+    fldarr = get(fldroot)
+    for fldobj in fldarr
+        fld  = cosDocGetObject(doc.cosDoc, fldobj)
+        inhdown = gather_sig_props(doc, fld, inherit)
+        get(fld, cn"FT") === cn"Sig" && push!(sigflds, (fld, inhdown))
+        kids = cosDocGetObject(doc.cosDoc, fld, cn"Kids")
+        kids !== CosNull && 
+            pd_get_signature_fields!(doc, kids, inhdown, sigflds)
+    end
+end
+

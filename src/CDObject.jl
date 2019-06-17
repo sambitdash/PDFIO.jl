@@ -1,4 +1,4 @@
-export CDTextString, CDDate, CDRect
+export CDTextString, CDDate, CDRect, getUTCTime
 
 """
 ```
@@ -27,6 +27,8 @@ using Dates
 using Dates: CompoundPeriod
 using Rectangle
 using Printf
+
+import Base: ==, isless, show
 
 """
 ```
@@ -59,43 +61,42 @@ function CDDate(str::CDTextString)
 
     tzhr = tzh === nothing ? Hour(0) : Hour(parse(Int, tzh))
     tzhm = tzm === nothing ? Minute(0) : Minute(parse(Int, tzm))
-    tz = tzhr + tzhm
-
+    tz = CompoundPeriod(tzhr, tzhm)
     ahead = !(ut == "-")
     return CDDate(DateTime(m[:dt], dateformat"yyyymmddHHMMSS"), tz, ahead)
-end
-
-import Base.==
-function (==)(d1::CDDate, d2::CDDate)
-    d1.ahead == d2.ahead && d1.tz == d2.tz && return d1.d == d2.d
-    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
-    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    return d1ut == d2ut
-end
-
-import Base.isless
-function Base.isless(d1::CDDate, d2::CDDate)
-    d1.ahead == d2.ahead && d1.tz == d2.tz && return isless(d1.d, d2.d)
-    d1ut = d1.ahead ? d1.d + d1.tz : d1.d - d1.tz
-    d2ut = d2.ahead ? d2.d + d2.tz : d2.d - d2.tz
-    return isless(d1ut, d2ut)
 end
 
 function Base.show(io::IO, dt::CDDate)
     print(io, "D:")
     Dates.format(io, dt.d, dateformat"YYYYmmddHHMMSS")
-    dt.tz == Minute(0) && return print(io, "Z")
+    tzp = dt.tz.periods
+    np = length(tzp)
+    @assert np <= 2
+    np == 0 && return print(io, "Z")
     print(io, dt.ahead ? "+" : "-")
-    tzh = dt.tz.periods[1].value
-    tzm = dt.tz.periods[2].value
+    tzh, tzm = 0, 0
+    if np == 2
+        tzh, tzm = tzp[1].value, tzp[2].value
+    else
+        p1 = tzp[1]
+        p1 isa Hour   && (tzh = p1.value)
+        p1 isa Minute && (tzm = p1.value)
+    end
     tzs = @sprintf "%02d'%02d" tzh tzm
     print(io, tzs)
 end
+
+getUTCTime(d::CDDate) = 
+    CDDate(d.ahead ? (d.d - d.tz) : (d.d + d.tz), CompoundPeriod())
+
+Base.isless(d1::CDDate, d2::CDDate) = isless(getUTCTime(d1).d, getUTCTime(d2).d)
+
+Base.:(==)(d1::CDDate, d2::CDDate) = !isless(d1, d2) && !isless(d2, d1)
 
 """
 ```
     CDRect
 ```
-An `CosArray` representation of a rectangle in the lower left and upper right point format
+`CosArray` representation of a rectangle in the lower left and upper right point format
 """
 const CDRect = Rect

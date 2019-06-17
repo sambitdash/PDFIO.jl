@@ -60,6 +60,11 @@ provided here for reference:
 
 # Licenses of third party libraries or data
 
+## OpenSSL
+
+OpenSSL is licensed under Apache License 2.0. The detailed license can be found
+at: [https://github.com/openssl/openssl/blob/master/LICENSE](https://github.com/openssl/openssl/blob/master/LICENSE)
+
 ## Zlib
 
 The software links with `Zlib` library for certain decompression modules. The

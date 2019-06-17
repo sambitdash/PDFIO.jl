@@ -8,30 +8,33 @@ using AbstractTrees
 
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
+using PDFIO.PD: openssl_error
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.3"
+pdftest_ver  = "0.0.4"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
 pdftest_link *= ".zip"
 zipfile *= ".zip"
-
-isfile(zipfile) || download(pdftest_link, zipfile)
-r = ZipFile.Reader(zipfile)
-buf = Vector{UInt8}(undef, 64*1024)
-for f in r.files
-    println("Filename: $(f.name)")
-    if f.method == ZipFile.Store
-        isdir(f.name) || mkdir(f.name)
-    elseif f.method == ZipFile.Deflate
-        isfile(f.name) ||
-            write(f.name, read(f, Vector{UInt8}(undef, f.uncompressedsize)))
-    end
-end
-close(r)
 pdftest_dir="PDFTest-"*pdftest_ver*"/"
+
+if !isdir(pdftest_dir)
+    isfile(zipfile) || download(pdftest_link, zipfile)
+    r = ZipFile.Reader(zipfile)
+    buf = Vector{UInt8}(undef, 64*1024)
+    for f in r.files
+        println("Filename: $(f.name)")
+        if f.method == ZipFile.Store
+            isdir(f.name) || mkdir(f.name)
+        elseif f.method == ZipFile.Deflate
+            isfile(f.name) ||
+                write(f.name, read(f, Vector{UInt8}(undef, f.uncompressedsize)))
+        end
+    end
+    close(r)
+end
 
 function testfiles(filename)
     name, ext = splitext(filename)
@@ -77,12 +80,63 @@ end
         @test CDDate("D:2009020201") == CDDate("D:20090202010000+00'00")
         @test CDDate("D:200902020102") == CDDate("D:20090202010200+00'00")
         @test CDDate("D:20090202010203") == CDDate("D:20090202010203+00'00")
-        @test CDDate("D:20090202010203-00'01") < CDDate("D:20090202010202") < CDDate("D:20090202010203") < CDDate("D:20090202010203+00'01")
-        @test CDDate("D:20090202+01'01") > CDDate("D:20090202+00'01") > CDDate("D:20090202-00'01") > CDDate("D:20090202-01'01")
-        @test isless(CDDate("D:2009020208-06"), CDDate("D:2009020204-01"))
-        @test isequal(CDDate("D:2009020208-06"), CDDate("D:2009020204-02"))
+        @test CDDate("D:20090202010202+00'01") < CDDate("D:20090202010202") <
+            CDDate("D:20090202010203") < CDDate("D:20090202010203-00'01")
+        @test CDDate("D:20090202-01'01") > CDDate("D:20090202-00'01") >
+            CDDate("D:20090202+00'01") > CDDate("D:20090202+01'01")
+        @test isless(CDDate("D:2009020208+06"), CDDate("D:2009020204+01"))
+        @test isequal(CDDate("D:2009020208+06"), CDDate("D:2009020204+02"))
+        @test getUTCTime(CDDate("D:20190425173659+05'30")) ==
+            CDDate("D:20190425120659Z")
     end
-
+    @testset "Crypto APIs" begin
+        @test_throws ErrorException openssl_error(0)
+        @test openssl_error(1) === nothing
+        cacerts   = joinpath(@__DIR__, "..", "data", "certs", "cacerts.pem")
+        @testset "Self-sign certs" begin
+            files = ["sample01.pdf", "sample02.pdf", "sample03.pdf", "sample04.pdf",
+                     "sample05.pdf", "sample06.pdf", "sample07.pdf", "sample08.pdf"]
+            isfile(cacerts) && rm(cacerts)
+            doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", "sample01.pdf"))
+            @test pdDocHasSignature(doc)
+            r = pdDocValidateSignatures(doc, export_certs=true)
+            pdDocClose(doc)
+            @test r[1][:passed] == false
+            @test isfile("sample01.pem")
+            cp("sample01.pem", cacerts, force=true)
+            for file in files
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
+                r = pdDocValidateSignatures(doc)
+                @test all([r[i][:passed] for i = 1:length(r)])
+                pdDocClose(doc)
+            end
+        end
+        @testset "Expired Certs" begin
+            files = ["pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
+            for file in files
+                isfile(cacerts) && rm(cacerts)
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
+                r = pdDocValidateSignatures(doc)
+                @test all([r[i][:passed] for i = 1:length(r)])
+                pdDocClose(doc)
+            end
+        end
+        @testset "PDF 2.0 experimental" begin
+            files = ["pades_example-1.pdf", "PAdES_SmartID.pdf",
+                     "sbid_3rd_party_sign_pades.pdf", "sbid_authbased_signflow_pades.pdf"]
+            for file in files
+                isfile(cacerts) && rm(cacerts)
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                @test pdDocHasSignature(doc)
+                r = pdDocValidateSignatures(doc)
+                @test all([r[i][:passed] for i = 1:length(r)])
+                pdDocClose(doc)
+            end
+        end
+    end
+    
     @testset "Test FlateDecode" begin
         @test begin
             resname, template, filename = local_testfiles("1.pdf")
@@ -560,6 +614,7 @@ end
         pdDocClose(doc)
         @test length(utilPrintOpenFiles()) == 0
     end
+
     files=readdir(get_tempdir())
     @assert length(files) == 0
 end

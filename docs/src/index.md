@@ -56,6 +56,7 @@ pdDocGetPageCount
 pdDocGetPageRange
 pdDocGetPageLabel
 pdDocGetOutline
+pdDocValidateSignatures
 pdPageGetContents
 pdPageIsEmpty
 pdPageGetCosObject
