@@ -8,12 +8,14 @@ using Documenter, PDFIO
 
 makedocs(
     format = Documenter.HTML(),
+    modules = [PDFIO],
     sitename = "PDFIO",
     pages = [
-        "intro.md",
+        "README.md",
         "Architecture and Design" => "arch.md",
         "Digital Signatures" => "digsig.md",
-        "API Reference" => "index.md"
+        "API Reference" => "index.md",
+        "PDFIO License" => "LICENSE.md"
     ]
 )
 

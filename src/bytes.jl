@@ -120,11 +120,11 @@ const STREAM   =[LATIN_S,LATIN_T,LATIN_R,LATIN_E,LATIN_A,LATIN_M]
 const ENDSTREAM=[LATIN_E,LATIN_N,LATIN_D,LATIN_S,LATIN_T,LATIN_R,LATIN_E,LATIN_A,LATIN_M]
 
 
-"""
+#=
 Like `isspace`, but work on bytes and includes only the four whitespace
 characters defined by the PDF standard: null, space, tab, line feed,
 form feed, and carriage return.
-"""
+=#
 ispdfspace(b::UInt8) = b == NULL || b == TAB || b == LINE_FEED || b == RETURN || b == FORM_FEED || b == SPACE
 
 ispdfdelimiter(b::UInt8) = (b == LEFT_PAREN || b == RIGHT_PAREN || b == LESS_THAN ||
@@ -132,14 +132,14 @@ ispdfdelimiter(b::UInt8) = (b == LEFT_PAREN || b == RIGHT_PAREN || b == LESS_THA
                             b == LEFT_SB || b == RIGHT_SB || b == PERCENT || b == SOLIDUS)
 
 
-"""
+#=
 Like `isdigit`, but for bytes.
-"""
+=#
 ispdfdigit(b::UInt8) = (DIGIT_ZERO ≤ b ≤ DIGIT_NINE)
 
-"""
+#=
 Like `isdigit`, but for bytes.
-"""
+=#
 ispdfodigit(b::UInt8) = (DIGIT_ZERO ≤ b ≤ DIGIT_SEVEN)
 
 ispdfxdigit(b::UInt8) =

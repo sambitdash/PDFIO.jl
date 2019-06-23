@@ -17,15 +17,11 @@ function get_xref_record(data, start, w)
     return v
 end
 
-function createObjectStreams(stm::CosStream)
-    objtype = get(stm, cn"Type")
-    objtype == cn"ObjStm" && return CosObjectStream(stm)
-    return stm
-end
+createIfObjectStream(stm::CosStream) = 
+    get(stm, cn"Type") === cn"ObjStm" ? CosObjectStream(stm) : stm
 
 function read_xref_stream(xrefstm::IDD{CosStream},
                           xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-
     @assert get(xrefstm, cn"Type") == cn"XRef"
     size = get(xrefstm, cn"Size")
     @assert size != CosNull

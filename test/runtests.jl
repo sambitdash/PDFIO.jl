@@ -408,15 +408,12 @@ end
             @assert pdDocGetPageCount(doc) == 54
             @assert pdDocHasPageLabels(doc)
             @assert pdDocGetPageLabel(doc, 3) == "ii"
-            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog,  1) == "title"
-            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog,  3) == "ii"
-            @assert PDFIO.Cos.cosDocGetPageLabel(doc.cosDoc, doc.catalog, 46) == "42"
-            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") ==
-                range(1, length=1)
-            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") ==
-                range(3, length=1)
-            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "42") ==
-                range(46, length=1)
+            @assert pdDocGetPageLabel(doc,  1) == "title"
+            @assert pdDocGetPageLabel(doc,  3) == "ii"
+            @assert pdDocGetPageLabel(doc, 46) == "42"
+            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "title") == range(1, length=1)
+            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "ii") == range(3, length=1)
+            @assert PDFIO.Cos.cosDocGetPageNumbers(doc.cosDoc, doc.catalog, "42") == range(46, length=1)
             pdDocGetPageRange(doc, "iii")
             outline = pdDocGetOutline(doc)
             iobuf = IOBuffer()

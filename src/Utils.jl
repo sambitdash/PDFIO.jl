@@ -17,10 +17,10 @@ using Pkg
 
 CURRENT_TMPDIR=""
 
-"""
+#=
 On every launch of the application a new directory needs to be created
 that will have the path of the new directory.
-"""
+=#
 function get_tempdir()
     global CURRENT_TMPDIR
     if (CURRENT_TMPDIR == "" )||!isdir(CURRENT_TMPDIR)

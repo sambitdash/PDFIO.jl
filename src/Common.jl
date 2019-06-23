@@ -1,6 +1,3 @@
-"""
-Internal implementation detail.
-"""
 module Common
 
 include("bytes.jl")

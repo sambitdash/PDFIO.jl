@@ -1,29 +1,30 @@
-# API Structure and Design
+# API Reference
 
-The API is segregated into 3 modules:
+The APIs are segregated into 3 modules:
 
 1. Common
-2. Cos
+2. COS
 3. PD
 
 **Common** module has general system access and file access and parsing APIs.
 
-**Cos** module is the low level file format for PDF. Carousel Object Structure
+**COS** module is the low level file format for PDF. Carousel Object Structure
 was original term proposed inside Adobe which later transformed into Acrobat.
-Cos layer has the object structure, definition and the cross references to
+COS layer has the object structure, definition and the cross references to
 access them.
 
 **PD** module is the higher level document access layer. Accessing PDF pages or
 extracting the content from there or understanding document rendering using
-fonts or image objects will be typically in this layer. Please note that many
-objects in the PD layer actually refer to the Cos structure. You can consider
-PD Layer as the business logic while Cos Layer as the database for it.
+fonts or image objects will be typically in this layer. 
+
+A detailed explanation of these layers and their rational has been explained in the [Architecture and Design](arch.md) section.
 
 # Common
 ```@docs
 CDTextString
 CDDate
 CDDate(::CDTextString)
+getUTCTime
 CDRect
 ```
 # COS Objects
@@ -38,13 +39,17 @@ CosNumeric
   CosFloat
 CosBoolean
 CosDict
+set!(::CosDict, ::CosName, ::CosObject)
 CosArray
+length(::CosArray)
 CosStream
 CosIndirectObjectRef
+get
 ```
 
 # PD
 ```@docs
+PDDoc
 pdDocOpen
 pdDocClose
 pdDocGetCatalog
@@ -54,8 +59,10 @@ pdDocGetCosDoc
 pdDocGetPage
 pdDocGetPageCount
 pdDocGetPageRange
+pdDocHasPageLabels
 pdDocGetPageLabel
 pdDocGetOutline
+pdDocHasSignature
 pdDocValidateSignatures
 pdPageGetContents
 pdPageIsEmpty
@@ -63,7 +70,6 @@ pdPageGetCosObject
 pdPageGetContentObjects
 pdPageGetMediaBox
 pdPageGetFonts
-pdPageGetCropBox
 pdPageExtractText
 pdPageGetPageNumber
 pdFontIsBold
@@ -71,7 +77,9 @@ pdFontIsItalic
 pdFontIsFixedW
 pdFontIsAllCap
 pdFontIsSmallCap
+PDOutline
 PDOutlineItem
+PDDestination
 pdOutlineItemGetAttr
 ```
 ## PDF Page objects
@@ -87,12 +95,11 @@ PDPage_BeginGroup
 PDPage_EndGroup
 ```
 
-# Cos
+# COS Methods
 ```@docs
 CosDoc
 cosDocOpen
 cosDocClose
 cosDocGetRoot
 cosDocGetObject
-cosDocGetPageNumbers
 ```

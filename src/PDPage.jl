@@ -31,6 +31,22 @@ Page rendering objects are normally stored in a `CosStream` object in a PDF file
 This method provides access to the stream object.
 
 Please refer to the PDF specification for further details.
+
+# Example
+```
+julia> pdPageGetContents(page)
+
+448 0 obj
+<<
+	/Length	437
+	/FFilter	/FlateDecode
+	/F	(/tmp/tmpZnGGFn/tmp5J60vr)
+>>
+stream
+...
+endstream
+endobj
+```
 """
 function pdPageGetContents(page::PDPage)
     if (page.contents === CosNull)
@@ -46,18 +62,23 @@ end
     pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
 ```
     Returns the media box associated with the page. See 14.11.2 PDF 1.7 Spec.
+It's typically, the designated size of the paper for the page. When a crop box
+is not defined, it defaults to the media box.
+
+# Example
+```
+julia> pdPageGetMediaBox(page)
+Rect:[0.0 0.0 595.0 792.0]
+
+julia> pdPageGetCropBox(page)
+Rect:[0.0 0.0 595.0 792.0]
+```
 """
 function pdPageGetMediaBox(page::PDPage)
     arr = page_find_attribute(page, cn"MediaBox")::CosArray
     return CDRect{Float32}(CDRect(arr))::CDRect{Float32}
 end
 
-"""
-```
-    pdPageGetCropBox(page::PDPage) -> CDRect{Float32}
-```
-    Returns the crop box associated with the page. See 14.11.2 PDF 1.7 Spec.
-"""
 function pdPageGetCropBox(page::PDPage)
     box = page_find_attribute(page, cn"CropBox")
     box === CosNull && return pdPageGetMediaBox(page)
@@ -69,6 +90,12 @@ end
     pdPageIsEmpty(page::PDPage) -> Bool
 ```
 Returns `true` when the page has no associated content object.
+
+# Example
+```
+julia> pdPageIsEmpty(page)
+false
+```
 """
 function pdPageIsEmpty(page::PDPage)
     return page.contents === CosNull && get_page_content_ref(page) === CosNull
@@ -92,6 +119,18 @@ end
     pdPageGetFonts(page::PDPage) -> Dict{CosName, PDFont}()
 ```
 Returns a dictionary of fonts in the page.
+
+#Example
+
+```
+julia> pdPageGetFonts(page)
+Dict{CosName,PDFIO.PD.PDFont} with 4 entries:
+  /F0 => PDFont(…
+  /F4 => PDFont(…
+  /F8 => PDFont(…
+  /F9 => PDFont(…
+
+```
 """
 function pdPageGetFonts(page::PDPage)
     cosfonts = find_resource(page, cn"Font", CosNull)
@@ -115,6 +154,26 @@ end
 Extracts the text from the `page`. This extraction works best for tagged PDF
 files.
 For PDFs not tagged, some line and word breaks will not be extracted properly.
+
+# Example
+
+Following code will extract the text from a full PDF file.
+
+```
+function getPDFText(src, out)
+    doc = pdDocOpen(src)
+    docinfo = pdDocGetInfo(doc)
+    open(out, "w") do io
+		npage = pdDocGetPageCount(doc)
+        for i=1:npage
+            page = pdDocGetPage(doc, i)
+            pdPageExtractText(io, page)
+        end
+    end
+    pdDocClose(doc)
+    return docinfo
+end
+```
 """
 function pdPageExtractText(io::IO, page::PDPage)
     state = pdPageEvalContent(page)
@@ -127,6 +186,13 @@ end
     pdPageGetPageNumber(page::PDPage)
 ```
 Returns the page number of the document page.
+
+# Example
+
+```
+julia> pdPageGetPageNumber(page)
+1
+```
 """
 pdPageGetPageNumber(page::PDPage) = 
     pd_doc_get_pagenum(page.doc, CosIndirectObjectRef(page.cospage))

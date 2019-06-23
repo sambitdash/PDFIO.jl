@@ -6,8 +6,6 @@ include("Common.jl") #Module Common
 include("Cos.jl")    #Module Cos
 include("PD.jl")     #Module PD
 
-#export Common, Cos, PD
-
 using .Common
 export CDTextString, CDDate, CDRect, getUTCTime
 
@@ -22,6 +20,7 @@ export  PDDoc,
             pdDocGetPage,
             pdDocGetPageCount,
             pdDocGetPageRange,
+            pdDocHasPageLabels,
             pdDocGetPageLabel,
             pdDocGetOutline,
             pdDocHasSignature,
@@ -51,6 +50,7 @@ export  PDDoc,
             pdFontIsAllCap,
             pdFontIsSmallCap,
         PDOutline,
+            PDDestination,
             PDOutlineItem,
                 pdOutlineItemGetAttr
 
@@ -60,10 +60,9 @@ export  CosDoc,
             cosDocClose,
             cosDocGetRoot,
             cosDocGetObject,
-            cosDocGetPageNumbers,
         CosObject,
             CosNull, CosDict, CosString, CosArray, CosStream,
-            CosIndirectObjectRef,
+            CosIndirectObjectRef, set!,
         CosBoolean,
             CosTrue, CosFalse,
         CosNumeric,

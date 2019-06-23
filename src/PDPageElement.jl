@@ -162,12 +162,12 @@ mutable struct PDPageInlineImage <: PDPageObject
     PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
-"""
+#=
 ```
     PDPage_BeginInlineImage
 ```
 A [`PDPageElement`](@ref) that represents the beginning of an inline image.
-"""
+=#
 mutable struct PDPage_BeginInlineImage <: PDPageObject
     elem::PDPageElement
     PDPage_BeginInlineImage(ts::AbstractString, ver::Tuple{Int,Int}, nop, ::Type)=
@@ -232,30 +232,29 @@ end
 
 function collect_inline_image(img::PDPageInlineImage, elem::PDPageElement,
                               bis::IO)
-    if (elem.t == Symbol("ID"))
-        while(!img.isRead && !eof(bis))
-            b1 = _peekb(bis)
-            if (b1 == LATIN_UPPER_E)
-                mark(bis)
-                skip(bis, 1);
-                b2 = _peekb(bis)
-                if (b2 == LATIN_UPPER_I)
-                    skip(bis,1); b3 = _peekb(bis)
-                    if (ispdfspace(b3))
-                        skip(bis,1)
-                        img.isRead=true
-                        unmark(bis)
-                        break
-                    else
-                        reset(bis)
-                    end
+    elem.t !== :ID && return img
+    while(!img.isRead && !eof(bis))
+        b1 = _peekb(bis)
+        if (b1 == LATIN_UPPER_E)
+            mark(bis)
+            skip(bis, 1)
+            b2 = _peekb(bis)
+            if (b2 == LATIN_UPPER_I)
+                skip(bis, 1); b3 = _peekb(bis)
+                if (ispdfspace(b3))
+                    skip(bis, 1)
+                    img.isRead = true
+                    unmark(bis)
+                    break
                 else
                     reset(bis)
                 end
+            else
+                reset(bis)
             end
-            push!(img.data, b1)
-            skip(bis,1);
         end
+        push!(img.data, b1)
+        skip(bis, 1)
     end
     return img
 end
@@ -306,7 +305,7 @@ function collect_object(grp::PDPageObjectGroup, elem::PDPage_EndGroup,
     return grp
 end
 
-"""
+#=
 |Operator|PostScript Equivalent|Description|Table|
 |:--------|:----------------------|:------------|------:|
 |BX||(PDF 1.1) Begin compatibility section|32|
@@ -381,7 +380,7 @@ end
 |DP||(PDF 1.2) Define marked-content point with property list|320|
 |EMC||(PDF 1.2) End marked-content sequence|320|
 |MP||(PDF 1.2) Define marked-content point|320|
-"""
+=#
 const PD_CONTENT_OPERATORS = Dict(
 "\'"=>[PDPageTextRun,"\'",(1,0),1],
 "\""=>[PDPageTextRun,"\"",(1,0),3],

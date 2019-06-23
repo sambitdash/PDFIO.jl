@@ -1,4 +1,5 @@
 export PDOutline,
+    PDDestination,
     PDOutlineItem,
     pdOutlineItemGetAttr
 
@@ -143,6 +144,18 @@ element is analyzed and data is extracted and stored with the `PDDestination` as
 the final refered location.
 - `:C` - The color of the outline in the `DeviceRGB` space.
 - `:F` - Flags for title text rendering `italic=1`, `bold=2`
+
+# Example
+
+```
+    julia> pdOutlineItemGetAttr(outlineitem)
+Dict{Symbol,Any} with 5 entries:
+  :F           => 0x00
+  :Title       => "Table of Contents"
+  :Count       => 0
+  :Destination => ("", PDDestination(2, /XYZ, Float32[0.0, 0.0, 0.0, 756.0], 0.0))
+  :C           => Float32[0.0, 0.0, 0.0]
+```
 """
 function pdOutlineItemGetAttr(item::PDOutlineItem)
     doc, cosdoc, dict = item.doc, item.doc.cosDoc, item.cosdict
