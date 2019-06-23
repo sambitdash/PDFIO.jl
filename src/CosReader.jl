@@ -16,10 +16,10 @@ function parse_data(filename)
     end
 end
 
-"""
+#=
 Given a `IOStream`, after possibly any amount of whitespace, return the next
 parseable value.
-"""
+=#
 function parse_value(ps::IO, fparse_more=x->nothing)
     chomp_space!(ps)
     byte = UInt8(peek(ps))
@@ -229,12 +229,12 @@ function ensure_line_feed_eol(ps::IO)
   end
 end
 
-"""
+#=
 Read the internal stream data and externalize to a temp file.
 If it's already an externalized stream then false is returned.
 The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
-"""
+=#
 function read_internal_stream_data(ps::IO, extent::CosDict, len::Int)
     if get(extent, CosName("F")) != CosNull
         return false
@@ -315,7 +315,7 @@ function postprocess_indirect_object(ps::IO, hoffset::Int, obj::CosDict,
 
         # Here you can make sure file data is decoded into a file
         # later it can be made into a memory based on size etc.
-        #Since, these are temporary files the spec is system file only
+        # Since, these are temporary files the spec is system file only
         isInternal = read_internal_stream_data(ps, obj, len)
 
         obj = CosStream(obj, isInternal)
@@ -323,7 +323,7 @@ function postprocess_indirect_object(ps::IO, hoffset::Int, obj::CosDict,
         #Now eat away the ENDSTREAM token
         chomp_space!(ps)
         skipv(ps,ENDSTREAM)
-        obj = createObjectStreams(obj)
+        obj = createIfObjectStream(obj)
     end
     return obj
 end
@@ -402,10 +402,10 @@ function try_parse_indirect_reference(ps::IO)
 end
 
 
-"""
+#=
 Return `true` if the given bytes vector, starting at `from` and ending at `to`,
 has a leading zero.
-"""
+=#
 function hasleadingzero(bytes::Vector{UInt8}, from::Int, to::Int)
     c = bytes[from]
     from + 1 < to && c == UInt8('-') &&
@@ -414,10 +414,10 @@ function hasleadingzero(bytes::Vector{UInt8}, from::Int, to::Int)
             ispdfdigit(bytes[from + 1])
 end
 
-"""
+#=
 Parse a float from the given bytes vector, starting at `from` and ending at the
 byte before `to`. Bytes enclosed should all be ASCII characters.
-"""
+=#
 function float_from_bytes(bytes::Vector{UInt8})
     res = tryparse(Float64, String(bytes))
     res === nothing && return res
@@ -426,10 +426,10 @@ function float_from_bytes(bytes::Vector{UInt8})
     return get(res)
 end
 
-"""
+#=
 Parse an integer from the given bytes vector, starting at `from` and ending at
 the byte before `to`. Bytes enclosed should all be ASCII characters.
-"""
+=#
 function int_from_bytes(bytes::Vector{UInt8})
     from = 1
     to = length(bytes)

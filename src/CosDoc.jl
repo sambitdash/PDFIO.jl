@@ -1,14 +1,15 @@
-export CosDoc,
-       cosDocOpen,
-       cosDocClose,
-       cosDocGetRoot,
-       cosDocGetInfo,
-       cosDocGetObject,
-       cosDocGetPageNumbers,
-       cosDocGetPageLabel,
-       merge_streams,
-       find_ntree,
-       readfrom
+export
+    CosDoc,
+    cosDocOpen,
+    cosDocClose,
+    cosDocGetRoot,
+    cosDocGetInfo,
+    cosDocGetObject,
+    cosDocGetPageNumbers,
+    cosDocGetPageLabel,
+    merge_streams,
+    find_ntree,
+    readfrom
 
 using Base: notnothing
 using ..Common
@@ -17,11 +18,23 @@ using ..Common
 ```
     CosDoc
 ```
-PDF document format is developed in two layers. A logical PDF document
-information is represented over a physical file structure called COS. `CosDoc` is
-an access object to the physical file structure of the PDF document. To be used
-for accessing PDF internal objects from document structure when no direct API is
-available.
+PDF file structure provides how the objects are arranged in a PDF file. PDF is
+designed to be accessed in a random access order. Some of the objects in PDF
+like fonts can be referred from multiple page objects. To address these concerns
+objects are provided reference identifiers and mappings are provided from
+various locations in the PDF files. Moreover, to reduce the size of the files,
+the objects are put inside stream containers and can be compressed. Access to a
+specific object reference may need several lookups before the actual object can
+be traced. All these lead to a fairly complex arrangement of objects.
+`CosDoc` wraps all the object reference schemes and provide a simplified
+API called [`cosDocGetObject`](@ref) and simplifies object look up.  Thus any PDF
+object can be classified into the following forms based on how they are
+represented in a document:
+
+- *Direct Objects*: Direct objects are defined where they are referred or used. 
+- *Indirect Objects*: Indirect objects have reference identifiers, there
+  location in a PDF document is described through a Object Reference identifier.
+  
 
 One can access any aspect of PDF using the COS level APIs alone. However, they
 may require you to know the PDF specification in details and they are not the
@@ -65,13 +78,13 @@ function readfrom(doc::CosDoc, from::Int, nbytes::Int)
     return buf
 end
 
-"""
+#=
 ```
     show(io::IO, doc::CosDoc)
 ```
 Prints the CosDoc. The intent is to print lesser information from the structure
 as default can be overwhelming flooding the REPL.
-"""
+=#
 function show(io::IO, doc::CosDoc)
     print(io, "\nCosDoc ==>\n")
     print(io, "\tfilepath:\t\t$(doc.filepath)\n")
@@ -146,15 +159,65 @@ object in the document structure. If an indirect object reference is passed as
 of the object) are returned. A `direct object` passed to the method is returned
 as is without any translation. This ensures the user does not have to go through
 checking the type of the objects before accessing the contents.
+
+# Example
+```
+julia> cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(555, 0))
+
+555 0 obj
+<<
+	/Count	18
+	/Last	629 0 R
+	/First	556 0 R
+>>
+endobj
+
+julia> cosDocGetObject(doc.cosDoc, cn"DirectObject")
+/DirectObject
+```
 """
 cosDocGetObject(doc::CosDoc, obj::CosObject) = CosNull
 
 """
 ```
-    cosDocGetObject(doc::CosDoc, dict::CosObject, key::CosName) -> CosObject
+    cosDocGetObject(doc::CosDoc, dict::CosObject, key::Union{CosName, CosNullType}) -> CosObject
 ```
-Returns the object referenced inside the `dict` dictionary. `dict` can be a PDF
-dictionary object reference or an indirect object or a direct `CosDict` object.
+Returns the object referenced inside the `dict` dictionary.
+
+- `dict` can be a PDF dictionary object reference or an indirect object or
+   a direct `CosDict` object.
+- `key` can be `CosNull` as well. In such a case, a replicated `CosDict` with
+   direct or indirect objects will be returned for all the input `dict`
+   keys.
+
+# Example
+```
+julia> catalog
+
+652 0 obj
+<<
+	/Outlines	555 0 R
+	/PageLayout	/SinglePage
+	/PageMode	/UseOutlines
+	/Pages	446 0 R
+	/Type	/Catalog
+	/OpenAction	[447 0 R /XYZ null null 0 ]
+>>
+endobj
+
+julia> pages = cosDocGetObject(doc.cosDoc, catalog, cn"Pages")
+
+446 0 obj
+<<
+	/Kids	[447 0 R 449 0 R 451 0 R]
+	/Count	3
+	/Type	/Pages
+>>
+endobj
+
+julia> cosDocGetObject(doc.cosDoc, catalog, cn"PageLayout")
+/SinglePage
+```
 """
 cosDocGetObject(doc::CosDoc,
                 dict::CosIndirectObject{CosDict},
@@ -543,14 +606,14 @@ function get_internal_pagecount(dict::ID{CosDict})
     error(E_INVALID_OBJECT)
 end
 
-"""
+#=
 ```
 cosDocGetPageNumbers(doc::CosDoc, catalog::CosObject, label::AbstractString) -> Range{Int}
 ```
 PDF utilizes two pagination schemes. An internal global page number that is
 maintained serially as an integer and `PageLabel` that is shown by the viewers.
 Given a `label` this method returns a `range` of valid page numbers.
-"""
+=#
 function cosDocGetPageNumbers(doc::CosDoc,
                               catalog::IDD{CosDict}, label::AbstractString)
     ref = get(catalog, cn"PageLabels")

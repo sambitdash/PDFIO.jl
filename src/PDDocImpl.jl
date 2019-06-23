@@ -28,12 +28,12 @@ pdDocGetPage(doc::PDDocImpl, num::Int) =
 pdDocGetPage(doc::PDDoc, cosref::CosIndirectObjectRef) = 
     create_pdpage(doc, cosDocGetObject(doc.cosDoc, cosref))
 
-"""
+#=
 ```
     show(io::IO, doc::PDDoc)
 ```
 Prints the PDDoc. The intent is to print lesser information from the structure.
-"""
+=#
 function Base.show(io::IO, doc::PDDoc)
     print(io, "\nPDDoc ==>\n")
     print(io, doc.cosDoc)
@@ -43,10 +43,10 @@ function Base.show(io::IO, doc::PDDoc)
     print(io, "isTagged: $(doc.isTagged)\n")
 end
 
-"""
+#=
 Recursively reads the page object and populates the indirect objects
 Ensures indirect objects are read and updated in the xref Dictionary.
-"""
+=#
 function populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict},
                             ncurr::Int)
     if (cn"Pages" == get(dict, cn"Type"))

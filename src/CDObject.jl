@@ -20,6 +20,10 @@ in such situations. Typically, strings in PDFs are of 3 types.
 
 1 and 2 can be represented by the `CDTextString`. `convert` methods are provided to
 translate the `CosString` to `CDTextString`
+
+*Ref*: PDF Specification Section 7.9.2
+
+*Note*: Internally `CDTextString` is a `String` object of julia. 
 """
 const CDTextString = String
 
@@ -37,6 +41,7 @@ import Base: ==, isless, show
 Internally represented as string objects, these are timezone enabled date and time objects.
 
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
+
 """
 struct CDDate
     d::DateTime
@@ -53,6 +58,22 @@ const CDDATE_REGEX =
     CDDate(s::CDTextString)
 ```
 PDF files support the string format: (D:YYYYMMDDHHmmSSOHH'mm)
+
+# Example
+
+```
+julia> date = CDDate("D:20190425173659+05'30")
+D:20190425173659+05'30
+
+julia> date.d
+2019-04-25T17:36:59
+
+julia> date.tz
+5 hours, 30 minutes
+
+julia> date.ahead
+true
+```
 """
 function CDDate(str::CDTextString)
     m = match(CDDATE_REGEX, str)
@@ -86,6 +107,19 @@ function Base.show(io::IO, dt::CDDate)
     print(io, tzs)
 end
 
+"""
+```
+    getUTCTime(d::CDDate) -> CDDate
+```
+Removes the timezone information and returns the CDDate at UTC.
+
+# Example
+
+```
+julia> getUTCTime(CDDate("D:20190425173659+05'30"))
+D:20190425120659Z
+```
+"""
 getUTCTime(d::CDDate) = 
     CDDate(d.ahead ? (d.d - d.tz) : (d.d + d.tz), CompoundPeriod())
 
@@ -98,5 +132,14 @@ Base.:(==)(d1::CDDate, d2::CDDate) = !isless(d1, d2) && !isless(d2, d1)
     CDRect
 ```
 `CosArray` representation of a rectangle in the lower left and upper right point format
+
+*Note*: `CDRect` maps to a `Rect` object in the `Rectangle` package. 
+
+# Example
+
+```
+julia> CDRect(CosArray(CosObject[CosInt(0), CosInt(0), CosInt(840), CosFloat(640)]))
+Rect:[0.0 0.0 840.0 640.0]
+```
 """
 const CDRect = Rect

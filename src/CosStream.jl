@@ -7,9 +7,9 @@ _not_implemented(input, params) = error(E_NOT_IMPLEMENTED)
 
 include("Inflate.jl")
 
-"""
+#=
 Decodes using the LZWDecode compression
-"""
+=#
 function decode_lzw(input, parms)
     early = 1
     if parms !== CosNull 
@@ -64,9 +64,8 @@ function cosStreamRemoveFilters(stm::IDD{CosStream})
     return stm
 end
 
-"""
-Reads the filter data and decodes the stream.
-"""
+
+# Reads the filter data and decodes the stream.
 function decode(stm::IDD{CosStream})
     filename = get(stm, cn"F")
     filters =  get(stm, cn"FFilter")

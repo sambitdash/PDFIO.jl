@@ -3,107 +3,175 @@
 [![*nix Status](https://travis-ci.org/sambitdash/PDFIO.jl.svg?branch=master)](https://travis-ci.org/sambitdash/PDFIO.jl)
 [![Win status](https://ci.appveyor.com/api/projects/status/9cocsctqdkx603q0?svg=true)](https://ci.appveyor.com/project/sambitdash/pdfio-jl)
 [![codecov.io](http://codecov.io/github/sambitdash/PDFIO.jl/coverage.svg?branch=master)](http://codecov.io/github/sambitdash/PDFIO.jl?branch=master)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/dev)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sambitdash.github.io/PDFIO.jl/stable)
+[![Doc Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/dev)
+[![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://sambitdash.github.io/PDFIO.jl/stable)
 
-PDFIO is a simple PDF API focused on processing text from PDF files. The
-APIs is kept fairly simple and follows the PDF-32000-1:2008 specification as
-downloaded from
-[Adobe website](http://www.adobe.com/devnet/pdf/pdf_reference.html). The updated
-ISO versions can be downloaded from ISO websites. The API does not consider
-those versions yet. The API is developed in Julia keeping in mind the need for
-the file format parsing in native form. More over the object structure of PDF
-makes the API extend-able.
+PDFIO is a native Julia implementation for reading PDF files. It's an 100% Julia 
+implementation of the PDF specification. Other than a few well established 
+algorithms like flate decode (`zlib` library) or cryptographic operations 
+(`openssl` library) almost all of the APIs are written in native Julia. 
 
-Technically,the PDFIO does not fully fit into the stream based file access APIs
-like [JuliaIO/FileIO](https://github.com/JuliaIO/FileIO.jl). However, there is a general interest
-to submit this API in that direction to ensure it's considered as a native file
-format understood by Julia.
+## Need for a PDF Reader API 
 
-## About PDF
+The following are some of the benefits of utilizing this approach:
 
-For people new to PDF development, PDF is a highly cross referenced file format
-without any specific linear location to read content. You can consider this as a
-form of a tree which needs to be read or understood as reading a tree. Hence, if
-your application demands you need not have to scan the full file format to get
-your job done. This is very different thinking than most file formats that are
-parsed from beginning to end.
+1. PDF files are in existence for over three decades. Implementations of the PDF
+   writers are not always to the specification or they may even vary
+   significantly from vendor to vendor. Everytime, you get a new PDF
+   file there is a possibility that it may not work to the best interpretation
+   of the specification. A script based language makes it easier for the
+   consumers to quickly modify the code and enhance to their specific needs. 
+   
+2. When a higher level scripting language implements a C/C++ PDF library API, the
+   scope is confined to achieving certain high level application tasks like, 
+   graphics or text extraction; annotation or signature content extraction or 
+   page merging or extraction. However, this API represents the PDF 
+   specification as a model (in MVC parlance). Every object in PDF 
+   specification can be represented in some form through these APIs. Hence, 
+   objects can be utilized effectively to understand document structure or 
+   correlate documents in more meaningful ways. 
+   
+3. Potential to be extended as a PDF generator. Since, the API is written as an 
+   object model of PDF documents, it's easier to extend with additional PDF 
+   write or update capabilities.
+   
 
-The second part to remember is PDF is a derivative of a Page Description
-Language (PDL) like PostScript. The visual sanctity is considered most important
-than document structure. Although, the document structure was introduced in PDF
-as an afterthought a lot later, it's not core to the format. Unfortunately, the
-creators never focus too much on this as it's a post processing over a print
-stream.
+There are also certain downsides to this approach:
 
-## Structure of API
+1. Any API that represents an object model of a document, tends to carry the 
+   complexity of introducing abstract objects, often opaque objects (handles) 
+   that are merely representational for an API user. They may not have any 
+   functional meaning. The methods tend to be granular than a method that can 
+   complete a user level task. 
+2. The user may need to refer to the PDF specification for having a complete 
+   semantic understanding.
+3. The amount of code needed to carry out certain tasks can be substantially 
+   higher. 
+   
+### Illustration
 
-The API is segregated into 3 modules:
+A popular package `Taro.jl` that utilizes Java based [Apache
+Tika](http://tika.apache.org/), [Apache POI](http://poi.apache.org/) and [Apache
+FOP](https://xmlgraphics.apache.org/fop/) libraries for reading PDF and other
+file types may need the following code to extract text and other metadata from
+the document.
 
-1. Common
-2. Cos
-3. PD
+```julia
+using Taro
+Taro.init()
+meta, txtdata = Taro.extract("sample.pdf");
 
-**Common** module has general system access and file access and parsing APIs.
+```
 
-**Cos** module is the low level file format for PDF. Carousel Object Structure
-was original term proposed inside Adobe which later transformed into Acrobat.
-Cos layer has the object structure, definition and the cross references to
-access them.
+While the same with `PDFIO` may look like below:
 
-**PD** module is the higher level document access layer. Accessing PDF pages or
-extracting the content from there or understanding document rendering using
-fonts or image objects will be typically in this layer. Please note that many
-objects in the PD layer actually refer to the Cos structure. You can consider
-PD Layer as the business logic while Cos Layer as the database for it.
+```julia
+function getPDFText(src, out)
+    doc = pdDocOpen(src)
+    docinfo = pdDocGetInfo(doc)
+    open(out, "w") do io
+		npage = pdDocGetPageCount(doc)
+        for i=1:npage
+            page = pdDocGetPage(doc, i)
+            pdPageExtractText(io, page)
+        end
+    end
+    pdDocClose(doc)
+    return docinfo
+end
 
-## Intent and Limitations
+```
 
-The APIs are developed for text extraction as a major focus. The rendering and
-printing aspects of PDF are not provided enough thoughts. Secondly, a native
-script based language was chosen as PDF specification is highly misunderstood
-and interpretations significantly vary from document creator to creator. A
-script based language provides flexibility to fix issues as we discover more
-nuances in the new files we discover. Thirdly, every well-developed native
-library out in the market need connectors and PDF being a standard should have
-native support in a modern language. Although, one can claim PDF is not the most
- ideal language for text processing, it's just ubiquitous and cannot be ignored.
+## Installation
 
- *Nothing stops anyone to extend this APIs into a fully developed PDF Library
- that's available to both commercial as well as non-commercial licensing under a
- flexible license model. I am happy to collaborate with anyone who sees value in
-  extending this library in that direction. MIT License looks most flexible to
- the author for the time-being.*
+The package can be added to a project by the command below:
 
-### Common
+```julia
+julia> Pkg.add("PDFIO")
+```
 
-1. Error handling is currently fairly weak with only errors or asserts leading
-to termination. Ideally, if the PDF is structurally weak, there is no point
-extracting content from the same. However, not all objects may be well-formed
-a linient approach may be taken in the PD layers.
+The current version of the API requires `julia 1.0`. The detailed list of packages  `PDFIO` depends on can be seen in the [Project.toml](Project.toml) file. 
 
+## Sample Code
 
-### Cos
-1. Streams have larger number of filter types. Only Flate has been tested to
-work reasonably.
-2. Filterparms are varied and only PNG filter UP has been tested to some extent
-as part of ObjectStream. RLE, ACII85, ASCIIHex are tested as well. Multiple
-filters per stream has been tested as well.
-3. Object stream extends attribute has not been considered. May not be needed
-for a reader context.
-4. Free indirect objects are ignored in the PDF file as it's not typically a
-reader requirement.
-5. No security is implemented for encrypted PDFs
+The above mentioned code takes a PDF file `src` as input and writes the text data into a file `out`. It enumerates all the pages in the document and extracts the text from the pages. The extracted text is written to the output file. 
 
-### PD
+```julia {.line_numbers}
+"""
+​```
+	getPDFText(src, out) -> Dict 
+​```
+- src - Input PDF file from where text is to be extracted
+- out - Output TXT file where the output will be written
+return - A dictionary containing metadata of the document
+"""
+function getPDFText(src, out)
+    doc = pdDocOpen(src)
+```
+Provides `doc` handle that can be used for subsequence operations on the document.
+```julia
+    docinfo = pdDocGetInfo(doc) 
+```
+Metadata extracted from the PDF document. This value is retained and returned as the return from the function. 
+```julia
+    open(out, "w") do io
+		npage = pdDocGetPageCount(doc)
+```
+Returns number of pages in the document
+```julia
+        for i=1:npage
+            page = pdDocGetPage(doc, i)
+```
+Returns a `page` handle to the specific page given the number number index. 
+```julia
+            pdPageExtractText(io, page)
+```
+Extract text from the page and write it to the output file.
+```julia
+        end
+    end
+    pdDocClose(doc)
+```
+Close the document handle. The `doc` handle should not be used after this call
+```julia
+    return docinfo
+end
+```
 
-1. PD layer is just barely developed for reading pages and extracting contents
-from it.
+As can be seen above, granular APIs are provided in `PDFIO` that can be used in combination to achieve a desirable task. For details, please refer to the [Architecture and Design](@ref).
+
+## Features
+
+`PDFIO` is implemented in layers enabling following features:
+
+1. Extract and render the Contents in of a PDF page. This ensures the contents are organized in a hierarchical grouping, that can be used for rendering of the content. Rendering is used here in a generic sense and not confined to painting on a raster device. For example, extracting document text can also be considered as a rendering task. `pdPageExtractText` is an apt example of the same. 
+2. Provide functional tasks to PDF document access. A few of such functionalities are:
+   - Getting the page count in a document ([`pdDocGetPageCount`](@ref))
+   - Finding labels in a document page ([`pdDocGetPageLabel`](@ref))
+   - Extracting outlines defined in the document ([`pdDocGetOutline`](@ref))
+   - Extracting document metadata information ([`pdDocGetInfo`](@ref))
+   - Validation of signatures in a PDF document ([`pdDocValidateSignatures`](@ref))
+   - Extracting fonts and font attributes ([`pdPageGetFonts`](@ref), [`pdFontIsItalic`](@ref) etc.)
+3. Access low level PDF objects and obtain information when high level APIs do not exist. 
+
+The [Architecture and Design](@ref) discusses some of these scenarios. 
+
+## Licensing
+
+`PDFIO` is developed to contribute to both commercial activities and scientific research alike. However, we strongly discourage usage of this product for any illegal, immoral or unethical purposes. [PDFIO License](@ref) while provides rights under a permissible `MIT Expat License`, is conditioned upon maintaining strong moral, ethical and legal standards of the final outcome. 
+
+## Contribution
+
+Contributions in form of PRs are welcome for any feature you will like to develop for the `PDFIO` library. You are requested to review the [GitHub Issues](https://github.com/sambitdash/PDFIO.jl/issues) section to understand the known issues. You can take up few of the issues, work on them and submit a PR. If you come across a bug or are unable to use the APIs in any manner, feel free to submit an issue. 
+
+## Similar Packages
+
+[Taro.jl](https://github.com/aviks/Taro.jl) is an alternate package in Julia that provides reading and extracting content from a PDF files. 
 
 ## Reference to Adobe
 
 It's almost impossible to talk PDF without reference to Adobe. All copyrights or
-trademarks are that are owned by Adobe or ISO, which have been referred to
+trademarks that are owned by Adobe or ISO, which have been referred to
 inadvertently without stating ownership, are owned by them. The author also
 has been part of Adobe's development culture in early part of his career with
 specific to PDF technology for about 2 years. However, the author has not been
@@ -111,7 +179,7 @@ part of any activities related to PDF development from 2003. Hence, this API can
  be considered a clean room development. Usage of words like
  Carousel and Cos are pretty much public knowledge and large number of reference
  to the same can be obtained from industry related websites etc.
- 
+
  The package contains [Adobe Font Metrics (AFM)](http://www.adobe.com/devnet/font.html) for 14 Core Adobe fonts. 
 
 ## Test files
@@ -131,8 +199,3 @@ These files can be distributed with
 However, test files may have different licensing that the `PDFIO`. Hence we have
 now uploaded most test files to another project under [PDFTest](https://github.com/sambitdash/PDFTest).
 
-## Contribution
-
-Contributions in form of PRs are welcome for any features you will like to develop for the PDFIO library. 
-Contributors are requested to review the Issues section to understand the known issues and if they can take
-up few tasks to complete, it will be definitely appreciated. 

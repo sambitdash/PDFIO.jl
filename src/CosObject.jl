@@ -1,4 +1,4 @@
-import Base:get, length, show
+import Base: get, length, show
 
 export CosDict, CosString, CosXString, CosLiteralString, CosNumeric,
     CosBoolean, CosTrue, CosFalse, CosObject, CosNull, CosNullType,
@@ -33,10 +33,19 @@ CosArray                            Concrete
 CosStream                           Concrete (always wrapped as an indirect object)
 CosIndirectObjectRef                Concrete (only useful when CosDoc is available)
 ```
+
+*Note*: As a reader API you may not need to instantiate any of `CosObject` types.
+They are normally populated as a result of parsing a PDF file. 
 """
 abstract type CosObject end
 
-get(o::T) where {T <: CosObject} = o.val
+"""
+```
+    get(o::CosObject) -> val
+    get(o::CosIndirectObjectRef) -> (objnum, gennum)
+```
+"""
+get(o::CosObject) = o.val
 
 """
 ```
@@ -157,30 +166,36 @@ end
     @cn_str(str) -> CosName
 ```
 A string decorator for easier instantiation of a [`CosName`](@ref)
+
+*Example*:
+```
+julia> cn"Name"
+/Name
+```
 """
 macro cn_str(str)
     return CosName(str)
 end
 
-"""
+#=
 ```
     CosXString
 ```
 Concrete representation of a [`CosString`](@ref) object. The underlying data is
 represented as hexadecimal characters in ASCII.
-"""
+=#
 struct CosXString <: CosString
-  val::Vector{UInt8}
-  CosXString(arr::Vector{UInt8})=new(arr)
+    val::Vector{UInt8}
+    CosXString(arr::Vector{UInt8})=new(arr)
 end
 
-"""
+#=
 ```
     CosLiteralString
 ```
 Concrete representation of a [`CosString`](@ref) object. The underlying data is
 represented by byte representations without any encoding.
-"""
+=#
 struct CosLiteralString <: CosString
     val::Vector{UInt8}
     CosLiteralString(arr::Vector{UInt8}) = new(arr)
@@ -215,6 +230,26 @@ An array in a PDF file. The objects can be any combination of
 
 `isNative = true` will return the underlying native object inside the `CosArray`
 by invoking get method on it.
+
+# Example
+```
+julia> a = CosArray(CosObject[CosInt(1), CosFloat(2f0), CosInt(3), CosFloat(4f0)])
+[1 2.0 3 4.0 ]
+
+julia> get(a)
+4-element Array{CosObject,1}:
+ 1  
+ 2.0
+ 3  
+ 4.0
+
+julia> get(a, true)
+4-element Array{Real,1}:
+ 1    
+ 2.0f0
+ 3    
+ 4.0f0
+```
 """
 get(o::CosArray, isNative=false) = isNative ? map(get, o.val) : o.val
 
@@ -223,10 +258,19 @@ get(o::CosIndirectObject{CosArray}, isNative=false) = get(o.obj, isNative)
 ```
     length(o::CosArray) -> Int
 ```
-Length of the `CosArray`
+Number of elements in `CosArray`
+
+# Example
+```
+julia> a = CosArray(CosObject[CosInt(1), CosFloat(2f0),
+                              CosInt(3), CosFloat(4f0)])
+[1 2.0 3 4.0 ]
+
+julia> length(a)
+4
+```
 """
 length(o::CosArray) = length(o.val)
-
 length(o::CosIndirectObject{CosArray}) = length(o.obj)
 
 """
@@ -245,34 +289,62 @@ const CosDictType = IDD{CosDict}
 
 """
 ```
-    get(dict::CosDict, name::CosName) -> CosObject
+    get(dict::CosDict, name::CosName, defval::T = CosNull) where T ->
+                                                            Union{CosObject, T}
+    get(stm::CosStream, name::CosName, defval::T = CosNull) where T ->
+                                                            Union{CosObject, T}
 ```
-Returns the value as a [`CosObject`](@ref) for the key `name`
+Returns the value as a [`CosObject`](@ref) for the key `name` or the `defval`
+provided.
+
+In case of `CosStream` objects the data is collected from the extent dictionary.
+
+# Example
+```
+julia> get(catalog, cn"Version")
+null
+
+julia> get(catalog, cn"Version", cn"1.4")
+/1.4
+
+julia> get(catalog, cn"Version", "1.4")
+"1.4"
+```
 """
 get(dict::CosDict, name::CosName, defval::T = CosNull) where T =
     get(dict.val, name, defval)
 
-get(o::CosIndirectObject{CosDict}, name::CosName, defval::T = CosNull) where T =
-    get(o.obj, name, defval)
-
 """
 ```
-    set!(dict::CosDict, name::CosName, obj::CosObject) -> CosObject
+    set!(dict::CosDict, name::CosName, obj::CosObject) -> CosDict
+
+    set!(stm::CosStream, name::CosName, obj::CosObject) -> CosStream
+
 ```
 Sets the value on a dictionary object. Setting a `CosNull` object deletes the
 object from the dictionary.
+
+In case of `CosStream` objects the data is added to the extent dictionary.
+
+# Example
+```
+julia> set!(catalog, cn"Version", cn"1.4")
+
+julia> <<
+...
+/Version /1.4
+...
+>>
+```
 """
 function set!(dict::CosDict, name::CosName, obj::CosObject)
     if (obj === CosNull)
-        delete!(dict.val,name)
+        delete!(dict.val, name)
     else
         dict.val[name] = obj
     end
     return dict
 end
-
-set!(o::CosIndirectObject{CosDict}, name::CosName, obj::CosObject) =
-    set!(o.obj, name, obj)
 
 """
 ```
@@ -287,26 +359,40 @@ mutable struct CosStream <: CosObject
     CosStream(d::CosDict,isInternal::Bool=true) = new(d, isInternal)
 end
 
-get(stm::CosStream, name::CosName) = get(stm.extent, name)
-
-get(o::CosIndirectObject{CosStream}, name::CosName) = get(o.obj, name)
+get(stm::CosStream, name::CosName, defval::T = CosNull) where T =
+    get(stm.extent, name, defval)
 
 set!(stm::CosStream, name::CosName, obj::CosObject)=
-    set!(stm.extent, name, obj)
-
-set!(o::CosIndirectObject{CosStream}, name::CosName, obj::CosObject) =
-    set!(o.obj, name, obj)
+    (set!(stm.extent, name, obj); stm)
 
 """
-Decodes the stream and provides output as an BufferedInputStream.
+```
+    get(stm::CosStream) -> IO
+```
+Decodes the stream and provides output as an `IO`.
+
+# Example
+```
+julia> stm
+
+448 0 obj
+<<
+	/FFilter	/FlateDecode
+	/F	(/tmp/tmpIyGPhL/tmp9hwwaG)
+	/Length	437
+>>
+stream
+...
+endstream
+endobj
+
+julia> io = get(stm)
+IOBuffer(data=UInt8[...], readable=true, writable=true, ...)
+
+```
 """
 get(stm::CosStream) = decode(stm)
 
-"""
-```
-    CosObjectStream
-```
-"""
 mutable struct CosObjectStream <: CosObject
     stm::CosStream
     n::Int
@@ -328,24 +414,29 @@ mutable struct CosObjectStream <: CosObject
     end
 end
 
-get(os::CosObjectStream, name::CosName) = get(os.stm, name)
-
-get(os::CosIndirectObject{CosObjectStream}, name::CosName) = get(os.obj,name)
+get(os::CosObjectStream, name::CosName, defval::T = CosNull) where T =
+    get(os.stm, name, defval)
 
 set!(os::CosObjectStream, name::CosName, obj::CosObject)=
-    set!(os.stm, name, obj)
-
-set!(os::CosIndirectObject{CosObjectStream}, name::CosName, obj::CosObject)=
-    set!(os.obj,name,obj)
+    (set!(os.stm, name, obj); os)
 
 get(os::CosObjectStream) = get(os.stm)
 
-"""
-```
-    CosObjectStream
-```
-"""
-mutable struct CosXRefStream<: CosObject
+get(o::Union{CosIndirectObject{CosDict},
+             CosIndirectObject{CosStream},
+             CosIndirectObject{CosObjectStream}},
+    name::CosName, defval::T = CosNull) where T =
+        get(o.obj, name, defval)
+
+set!(os::Union{CosIndirectObject{CosDict},
+               CosIndirectObject{CosStream},
+               CosIndirectObject{CosObjectStream}},
+     name::CosName, obj::CosObject) =
+         (set!(os.obj, name, obj); os)
+
+
+#=
+mutable struct CosXRefStream <: CosObject
   stm::CosStream
   isDecoded::Bool
   function CosXRefStream(s::CosStream, isDecoded::Bool=false)
@@ -364,8 +455,9 @@ set!(os::CosIndirectObject{CosXRefStream}, name::CosName, obj::CosObject)=
     set!(os.obj,name,obj)
 
 get(os::CosXRefStream) = get(os.stm)
+=#
 
-"""
+#=
 Can be a Number Tree or a Name Tree.
 
 `kids`: is `null` in case of a leaf node
@@ -374,7 +466,7 @@ Can be a Number Tree or a Name Tree.
 
 Intent: faster loookup without needing to load the complete tree structure.
 Hence, the tree will not be loaded on full scan.
-"""
+=#
 mutable struct CosTreeNode{K <: Union{Int, String}}
     values::Union{Nothing, Vector{Tuple{K, CosObject}}}
     kids::Union{Nothing, Vector{CosIndirectObjectRef}}
@@ -470,12 +562,12 @@ function show(io::IO, o::CosIndirectObject)
     println(io, "\nendobj\n")
 end
 
-"""
+#=
 ```
     CosComment
 ```
 A comment object in PDF which is normally ignored as a whitespace.
-"""
+=#
 struct CosComment <: CosObject
     val::String
 end

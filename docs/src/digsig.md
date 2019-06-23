@@ -1,57 +1,52 @@
 # Digital Signatures
 
-The integrity of a PDF document can be protected by using **digital**
-**signatures**. The signatures can be of various kinds; namely,
-signature images, biometric information as well as mathematical
-equations as in Public Key Infrastructure (PKI) based
-signatures. While PDF documents can support these varied signature
-schemes, the API designed here is only limited to the interoperable
-signature schemes related to PKI certificates described in the PDF
+The integrity of a PDF document can be protected by using **digital
+signatures**. The signatures can be of various kinds; namely, signature images,
+biometric information as well as mathematical equations as in Public Key
+Infrastructure (PKI) based signatures. While PDF documents can support these
+varied signature schemes, the API designed here is only limited to the
+interoperable signature schemes related to PKI certificates described in the PDF
 specification section 12.8.3. PKI standards are fairly involved set of
-operations, and exhaustive explanation of these operations cannot be
-possible in this section. Some high level concepts are described here
-for the API user to get familiarity of the operations.
+operations, and exhaustive explanation of these operations cannot be possible in
+this section. Some high level concepts are described here for the API user to
+get familiarity of the operations.
 
 ## Basics of Public Key Infrastructure (PKI)
 
-When Alice wants to send a PDF document to Bob, Bob would like to
-understand if:
+When Alice wants to send a PDF document to Bob, Bob would like to understand if:
 
 1. Alice only sent the document
-2. The document he got is what Alice intended to send and not a
-   tampered version.
+2. The document he got is what Alice intended to send and not a tampered
+   version.
 
-Digital signature schemes address these problems. **Public Key
-Infrastructure (PKI)** provides one such solution to the problem. It
-expects Alice to own two keys, one **private key (K<sub>v</sub>)**,
-that she has to keep absolutely secretly under her possession and a
-second one called **public key (K<sub>p</sub>)** that she has to
-provide to Bob. When an information is encoded using the private key
-(K<sub>v</sub>), it can only be decoded by the public key
-(K<sub>p</sub>) thus **verifying** the operation. This is the
-foundation of the **asymmetric cryptography**.
+Digital signature schemes address these problems. **Public Key Infrastructure
+(PKI)** provides one such solution to the problem. It expects Alice to own two
+keys, one **private key ($K_v$)**, that she has to keep absolutely
+secretly under her possession and a second one called **public key
+($K_p$)** that she has to provide to Bob. When an information is encoded
+using the private key ($K_v$), it can only be decoded by the public key ($K_p$)
+thus **verifying** the operation. This is the foundation of the **asymmetric
+cryptography**.
 
-Following are the **digital signing** operations as carried out by
-Alice:
+Following are the **digital signing** operations as carried out by Alice:
 
-1. Alice creates a **digest** of the PDF document using a **digest
-   algorithm**.
-   1. The digest is a one way derivative of the document, that cannot
-      be reverse engineered to get back to the original document.
-   2. The digest algorithms are such that even the slightest change in
-      the document will have a digest that is completely different
-      from the original digest.
-2. Alice encodes the digest **plain text** using K<sub>v</sub>. This
-   encoded **cipher text** is called the **signature**.
-3. Alice embeds the signature, the digest algorithm she used in in the
-   PDF document and sends it to Bob.
+1. Alice creates a **digest** of the PDF document using a **digest algorithm**.
+   1. The digest is a one way derivative of the document, that cannot be reverse
+      engineered to get back to the original document.
+   2. The digest algorithms are such that even the slightest change in the
+      document will have a digest that is completely different from the original
+      digest.
+2. Alice encodes the digest **plain text** using $K_v$. This encoded **cipher
+   text** is called the **signature**.
+3. Alice embeds the signature, the digest algorithm she used in in the PDF
+   document and sends it to Bob.
 
 Bob uses the following **validation** or **verification** steps:
 
-1. Bob computes the digest of the document using the same algorithm
-   Alice used by picking up the information from the PDF.
-2. He picks up the cipher text from the signature and applies decoding
-   method using K<sub>p</sub>.
+1. Bob computes the digest of the document using the same algorithm Alice used
+   by picking up the information from the PDF.
+2. He picks up the cipher text from the signature and applies decoding method
+   using $K_p$.
 3. The plain text thus obtained is compared with the digest generated
    in step 1 to ensure the document has not been tampered with.
 
@@ -63,13 +58,13 @@ operations.
 
 One problem which has still not been addressed in the previous example
 is how can Alice communicate to Bob her public key
-(K<sub>p</sub>). This is a significant concern in the internet world
+($K_p$). This is a significant concern in the internet world
 as Alice and Bob may never meet in person. Secondly, Alice may have to
 communicate to many other people and not just Bob and such information
 exchange needs a standardized framework so that she can provide same
 information to all the people she can interact with. She can contact a
 **certifying authority (CA)** and provide her public key
-(K<sub>p</sub>) and other personal details like name, contact
+($K_p$) and other personal details like name, contact
 etc. which will be signed by the private key of the CA and presented
 in a standardized format. The process is called **issuance of
 certificates** and the digital information Alice receives is called a
@@ -188,7 +183,7 @@ out with signing of PDF files:
 ## API and its Limitations
 
 The API provided here is a single method
-`pdDocValidateSignatures`. The method provides the following two
+[`pdDocValidateSignatures`](@ref). The method provides the following two
 functionalities:
 
 1. Scans the PDF document for approval signatures appearing in the
@@ -206,6 +201,8 @@ review the policies, profiles or purpose of the certificates.
 
 ## Reference
 
-1. Digital Signature article on [Wikipedia](https://en.wikipedia.org/wiki/Digital_signature)
-2. Adobe Systems Inc. (2008) Document Management - Portable Document
-   Format - Part 1: PDF 1.7, retrieved from [Adobe](https://www.adobe.com/devnet/pdf/pdf_reference.html).
+1. Digital Signature article on
+   [Wikipedia](https://en.wikipedia.org/wiki/Digital_signature)
+2. Adobe Systems Inc. (2008) Document Management - Portable Document Format -
+   Part 1: PDF 1.7, retrieved from
+   [Adobe](https://www.adobe.com/devnet/pdf/pdf_reference.html).
