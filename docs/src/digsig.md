@@ -196,7 +196,6 @@ functionalities:
    intermediate and root certificates can be picked up and added to
    the trusted certificate store.
    
-
 The functionality in terms of validation is fairly basic and does not 
 review the policies, profiles or purpose of the certificates.
 

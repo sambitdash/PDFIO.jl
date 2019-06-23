@@ -107,6 +107,13 @@ function Base.show(io::IO, dt::CDDate)
     print(io, tzs)
 end
 
+getUTCTime(d::CDDate) = 
+    CDDate(d.ahead ? (d.d - d.tz) : (d.d + d.tz), CompoundPeriod())
+
+Base.isless(d1::CDDate, d2::CDDate) = isless(getUTCTime(d1).d, getUTCTime(d2).d)
+
+Base.:(==)(d1::CDDate, d2::CDDate) = !isless(d1, d2) && !isless(d2, d1)
+
 """
 ```
     getUTCTime(d::CDDate) -> CDDate

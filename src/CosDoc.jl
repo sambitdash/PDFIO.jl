@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export
     CosDoc,
     cosDocOpen,
@@ -10,6 +11,19 @@ export
     merge_streams,
     find_ntree,
     readfrom
+=======
+export CosDoc,
+       cosDocOpen,
+       cosDocClose,
+       cosDocGetRoot,
+       cosDocGetInfo,
+       cosDocGetObject,
+       cosDocGetPageNumbers,
+       cosDocGetPageLabel,
+       merge_streams,
+       find_ntree,
+       readfrom
+>>>>>>> 6e38bf397e4061932c335119c171acc5b7ed980c
 
 using Base: notnothing
 using ..Common

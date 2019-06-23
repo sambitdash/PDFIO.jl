@@ -2,14 +2,32 @@
 
 ## Intention and Guidelines
 
-The software does not distinguish between academic research from commercial applications. The purposes of both activities should not get defeated in using this software. However, the authors and creators of this software must be given the due recognition they deserve. The software has been made available under the [MIT Expat License](https://github.com/sambitdash/PDFIO.jl/blob/master/LICENSE.md) keeping with the stated intention. We also believe:
+The software does not distinguish between academic research from
+commercial applications. The purposes of both activities should not
+get defeated in using this software. However, the authors and creators
+of this software must be given the due recognition they deserve. The
+software has been made available under the [MIT Expat
+License](https://github.com/sambitdash/PDFIO.jl/blob/master/LICENSE.md)
+keeping with the stated intention. We also believe:
 
-1. Any integration with any other software or implementation of any features that may reduce the flexibility of the research community or commercial usage of the original software or affect the authors' moral rights on the original software, is discouraged. 
-2. We presume your usage of this software is for purposes that's legal and morally aligned to the country of your operations, stakeholders and customers and world community in general. 
-3. The functionalities of this software should not be used to overcome technical restrictions imposed on a document like Digital Rights Management (DRM), or remove such restrictions, unless you have the legal access and rights over the document that permits you to do so. 
-4. The above conditions do not apply to activities that are permissible as fairuse under the law and can be carried out using this software.
+1. Any integration with any other software or implementation of any
+   features that may reduce the flexibility of the research community
+   or commercial usage of the original software or affect the authors'
+   moral rights on the original software, is discouraged.
+2. We presume your usage of this software is for purposes that's legal
+   and morally aligned to the country of your operations, stakeholders
+   and customers and world community in general.
+3. The functionalities of this software should not be used to overcome
+   technical restrictions imposed on a document like Digital Rights
+   Management (DRM), or remove such restrictions, unless you have the
+   legal access and rights over the document that permits you to do
+   so.
+4. The above conditions do not apply to activities that are
+   permissible as fairuse under the law and can be carried out using
+   this software.
 
-If your intentions are aligned to the guidelines above, you can use the software under the following license. 
+If your intentions are aligned to the guidelines above, you can use
+the software under the following license.
 
 ## License Text
 
@@ -75,13 +93,16 @@ provided here for reference:
 
 ### OpenSSL
 
-OpenSSL is licensed under Apache License 2.0. The detailed license can be found
-at: [https://github.com/openssl/openssl/blob/master/LICENSE](https://github.com/openssl/openssl/blob/master/LICENSE)
+OpenSSL is licensed under Apache License 2.0. The detailed license can
+be found at:
+[https://github.com/openssl/openssl/blob/master/LICENSE](https://github.com/openssl/openssl/blob/master/LICENSE)
+
 
 ### Zlib
 
-The software links with `Zlib` library for certain decompression modules. The
-license for the same can be found at: https://www.zlib.net/zlib_license.html
+The software links with `Zlib` library for certain decompression
+modules. The license for the same can be found at:
+https://www.zlib.net/zlib_license.html
 
 Also stated here for reference:
 
