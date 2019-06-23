@@ -73,7 +73,7 @@ There are also certain downsides to this approach:
    
 ## Illustration
 
-A popular package `Taro.jl` that utilizes Java based [Apache
+A popular package `Taro.jl`[@Avik:2013] that utilizes Java based [Apache
 Tika](http://tika.apache.org/), [Apache POI](http://poi.apache.org/)
 and [Apache FOP](https://xmlgraphics.apache.org/fop/) libraries for
 reading PDF and other file types may need the following code to
