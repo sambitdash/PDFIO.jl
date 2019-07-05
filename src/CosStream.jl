@@ -52,14 +52,14 @@ const function_map = Dict(
                          )
 
 function cosStreamRemoveFilters(stm::IDD{CosStream})
-    filters = get(stm, CosName("FFilter"))
+    filters = get(stm, cn"FFilter")
     if (filters != CosNull)
         bufstm = decode(stm)
         data = read(bufstm)
         util_close(bufstm)
-        filename = get(stm, CosName("F"))
+        filename = get(stm, cn"F")
         write(filename |> get |> String, data)
-        set!(stm, CosName("FFilter"), CosNull)
+        set!(stm, cn"FFilter", CosNull)
     end
     return stm
 end

@@ -236,31 +236,29 @@ The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 =#
 function read_internal_stream_data(ps::IO, extent::CosDict, len::Int)
-    if get(extent, CosName("F")) != CosNull
-        return false
-    end
+    get(extent, cn"F") != CosNull && return false
 
-    (path,io) = get_tempfilepath()
+    (path, io) = get_tempfilepath()
     try
-        data = read(ps,len)
+        data = read(ps, len)
         write(io, data)
     finally
         util_close(io)
     end
 
     #Ensuring all the data is written to a file
-    set!(extent, CosName("F"), CosLiteralString(path))
+    set!(extent, cn"F", CosLiteralString(path))
 
-    filter = get(extent, CosName("Filter"))
+    filter = get(extent, cn"Filter")
     if (filter != CosNull)
-        set!(extent, CosName("FFilter"), filter)
-        set!(extent, CosName("Filter"), CosNull)
+        set!(extent, cn"FFilter", filter)
+        set!(extent, cn"Filter", CosNull)
     end
 
-    parms = get(extent, CosName("DecodeParms"))
+    parms = get(extent, cn"DecodeParms")
     if (parms != CosNull)
-        set!(extent, CosName("FDecodeParms"), parms)
-        set!(extent, CosName("DecodeParms"),CosNull)
+        set!(extent, cn"FDecodeParms",  parms)
+        set!(extent, cn"DecodeParms", CosNull)
     end
 
     return true
@@ -286,10 +284,7 @@ function process_stream_length(stmlen::CosIndirectObjectRef,
     cosObjectLoc = xref[stmlen]
     if (cosObjectLoc.obj === CosNull)
         seek(ps, cosObjectLoc.loc + hoffset)
-        lenobj = parse_indirect_obj(ps, hoffset, xref)
-        if (lenobj != CosNull)
-            cosObjectLoc.obj = lenobj
-        end
+        cosObjectLoc.obj = parse_indirect_obj(ps, hoffset, xref)
     end
     return cosObjectLoc.obj
 end
@@ -297,18 +292,18 @@ end
 function postprocess_indirect_object(ps::IO, hoffset::Int, obj::CosDict,
                                      xref::Dict{CosIndirectObjectRef,
                                                 CosObjectLoc})
-    if locate_keyword!(ps,STREAM) == 0
+    if locate_keyword!(ps, STREAM) == 0
         ensure_line_feed_eol(ps)
         pos = position(ps)
         
-        stmlen = get(obj, CosName("Length"))
+        stmlen = get(obj, cn"Length")
 
         lenobj = process_stream_length(stmlen, ps, hoffset, xref)
 
         len = get(lenobj)
 
         if (lenobj != stmlen)
-            set!(obj, CosName("Length"), lenobj)
+            set!(obj, cn"Length", lenobj)
         end
 
         seek(ps, pos)
@@ -359,16 +354,14 @@ function parse_indirect_ref(ps::IO)
     # This may fail the content parser due to the RG operator
     b = ps |> _peekb
     ispdfdelimiter(b) || ispdfspace(b) ||
-        error("CosIndirectObjectRef is not delimited properly")
+        error(E_INVALID_DELIMITER)
     chomp_space!(ps)
     return CosIndirectObjectRef(objn, genn)
 end
 
 function try_parse_indirect_reference(ps::IO)
     nobj = parse_number(ps)
-    if isa(nobj, CosFloat)
-        return nobj
-    end
+    nobj isa CosFloat && return nobj
     chomp_space!(ps)
     mark(ps)
     if ispdfdigit(ps |> _peekb)
@@ -418,13 +411,7 @@ end
 Parse a float from the given bytes vector, starting at `from` and ending at the
 byte before `to`. Bytes enclosed should all be ASCII characters.
 =#
-function float_from_bytes(bytes::Vector{UInt8})
-    res = tryparse(Float64, String(bytes))
-    res === nothing && return res
-    res isa Float64 && return res
-    isnull(res) && return nothing
-    return get(res)
-end
+float_from_bytes(bytes::Vector{UInt8}) = tryparse(Float64, String(bytes))
 
 #=
 Parse an integer from the given bytes vector, starting at `from` and ending at

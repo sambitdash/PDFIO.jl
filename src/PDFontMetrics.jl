@@ -159,10 +159,10 @@ get_font_widths(cosdoc::CosDoc, font::CosNullType) = zeros(Float32, 256)
 
 function get_font_widths(cosdoc::CosDoc, font::IDD{CosDict})
     d = zeros(Float32, 256)
-    @assert get(font, cn"Type") === cn"Font"
-    subtype = get(font, cn"Subtype")
+    @assert cosDocGetObject(cosdoc, font, cn"Type") === cn"Font"
+    subtype = cosDocGetObject(cosdoc, font, cn"Subtype")
     (subtype === cn"Type0") && return get_cid_font_widths(cosdoc, font)
-    basefont = get(font, cn"BaseFont")
+    basefont = cosDocGetObject(cosdoc, font, cn"BaseFont")
     widths_obj = cosDocGetObject(cosdoc, font, cn"Widths")
     widths_obj === CosNull && return get_font_widths(basefont)
     firstchar = get(font, cn"FirstChar") |> get

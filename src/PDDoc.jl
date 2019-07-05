@@ -73,8 +73,8 @@ endobj
 isTagged: none
 ```
 """
-function pdDocOpen(filepath::AbstractString)
-    doc = PDDocImpl(filepath)
+function pdDocOpen(filepath::AbstractString; access::Union{String, Function}="")
+    doc = PDDocImpl(filepath, access=access)
     update_page_tree(doc)
     update_structure_tree!(doc)
     return doc
@@ -248,10 +248,8 @@ julia> PDFIO.PD.pdDocHasPageLabels(doc)
 false
 ```
 """
-function pdDocHasPageLabels(doc::PDDoc)
-    catalog = pdDocGetCatalog(doc)
-    return get(catalog, cn"PageLabels") !== CosNull
-end
+pdDocHasPageLabels(doc::PDDoc) =
+    cosDocGetObject(doc.cosDoc, doc.catalog, cn"PageLabels") !== CosNull
 
 """
 ```
@@ -344,11 +342,8 @@ julia> pdDocGetNamesDict(doc)
 endobj
 ```
 """
-function pdDocGetNamesDict(doc::PDDoc)
-    catalog = pdDocGetCatalog(doc)
-    ref = get(catalog, CosName("Names"))
-    obj = cosDocGetObject(doc.cosDoc, ref)
-end
+pdDocGetNamesDict(doc::PDDoc) =
+    cosDocGetObject(doc.cosDoc, doc.catalog, cn"Names")
 
 """
 ```
