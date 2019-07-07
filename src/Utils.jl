@@ -1,16 +1,18 @@
-export get_tempdir,
-       get_tempfilepath,
-       util_open,
-       util_close,
-       load_data_file,
-       dict_remap,
-       NativeEncodingToUnicode,
-       PDFEncodingToUnicode,
-       utilPrintOpenFiles,
-       to_uint8,
-       to_uint16,
-       reverse_dict,
-       UnicodeToPDFEncoding
+export
+    get_tempdir,
+    get_tempfilepath,
+    util_open,
+    util_close,
+    load_data_file,
+    dict_remap,
+    NativeEncodingToUnicode,
+    PDFEncodingToUnicode,
+    utilPrintOpenFiles,
+    to_uint8,
+    to_uint16,
+    reverse_dict,
+    UnicodeToPDFEncoding,
+    UTF8ToPDFEncoding
 
 # Non-exported variable that retains the current tempdir location.
 # This shoould be only accessed by get_tempdir() only

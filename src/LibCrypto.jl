@@ -3,6 +3,8 @@
 
 include("../deps/deps.jl")
 
+using Base: SecretBuffer
+
 export
     BIO,
     read_cddate,
@@ -33,7 +35,8 @@ export
     verify,
     PKCS1SignedInfo,
     get_rsa_digest,
-    BigNum
+    BigNum,
+    crypto_random
     
 const V_ASN1_UNDEF                    = Cint(-1)
 const V_ASN1_EOC                      = Cint(0)
@@ -195,13 +198,16 @@ function Base.reset(ctx::DigestContext)
     return nothing
 end
 
-function update!(ctx::DigestContext, v::Vector{UInt8})
+function update!(ctx::DigestContext, v::AbstractVector{UInt8})
     ret = ccall((:EVP_DigestUpdate, libcrypto), Cint,
                 (Ptr{Cvoid}, Ptr{Cuchar}, Cint),
                 ctx.data, pointer(v), length(v))
     openssl_error(ret)
     return nothing
 end
+
+update!(ctx::DigestContext, s::SecretBuffer) =
+    update!(ctx, (@view s.data[1:s.size]))
 
 const EVP_MAX_MD_SIZE = Cint(64)
 
@@ -225,8 +231,8 @@ end
 mutable struct CipherContext
     data::Ptr{Cvoid}
     ca::Ptr{Cvoid}
-    function CipherContext(algo::String, key::AbstractVector{UInt8},
-                           iv::AbstractVector{UInt8}, isencrypt::Bool)
+    function CipherContext(algo::String, key::SecretBuffer,
+                           iv::SecretBuffer, isencrypt::Bool)
         ca = ccall((:EVP_get_cipherbyname, libcrypto), Ptr{Cvoid},
                    (Ptr{Cstring}, ), pointer(algo))
         if ca == C_NULL
@@ -248,17 +254,17 @@ mutable struct CipherContext
     end
 end
 
-function init(ctx::CipherContext, key::AbstractVector{UInt8},
-              iv::AbstractVector{UInt8}, isencrypt::Bool)
+function init(ctx::CipherContext, key::SecretBuffer,
+              iv::SecretBuffer, isencrypt::Bool)
     enc = Cint(isencrypt ? 1 : 0)
-    piv = length(iv) > 0 ? pointer(iv) : C_NULL
+    piv = iv.size > 0 ? pointer(iv.data) : C_NULL
     ret = ccall((:EVP_CipherInit_ex, libcrypto), Cint,
                 (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},
                  Ptr{Cuchar}, Ptr{Cuchar}, Cint),
-                ctx.data, ctx.ca, C_NULL, pointer(key), piv, enc)
+                ctx.data, ctx.ca, C_NULL, pointer(key.data), piv, enc)
     openssl_error(ret)
     ret = ccall((:EVP_CIPHER_CTX_set_key_length, libcrypto), Cint,
-                (Ptr{Cvoid}, Cint), ctx.data, length(key))
+                (Ptr{Cvoid}, Cint), ctx.data, key.size)
     openssl_error(ret)
     return nothing
 end
@@ -287,6 +293,10 @@ function update!(ctx::CipherContext, indata::AbstractVector{UInt8})
     openssl_error(ret)
     return resize!(out, outlen[])
 end
+
+update!(ctx::CipherContext, s::SecretBuffer) =
+    update!(ctx, (@view s.data[1:s.size]))
+
 
 function Base.close(ctx::CipherContext)
     c_value = Vector{UInt8}(undef, EVP_MAX_BLOCK_LENGTH)
