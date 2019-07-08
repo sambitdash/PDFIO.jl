@@ -82,19 +82,24 @@ CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosString) =
 CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosObjectStream) =
     CryptParams(h, num, gen, o.stm)
 
+# For Crypt filter chain ensure the filters before the crypt filters are removed.
+# Crypt filter parameters are associated with the document and the CosStream as
+# such may not have access to such parameters. Hence, the crypt filter has to be
+# decrypted when the document information is available.
 function CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosStream)
     cfn = nothing
     filters = get(o, cn"FFilter")
+    filters === CosNull && return CryptParams(num, gen, h.stmf)
     if filters isa CosName
         if cn"Crypt" === filters
             params = get(o, cn"FDecodeParms")
             cfn = get(params, cn"Name")
         end
-    elseif filters isa CosArray
+    else
         i = findnext(x -> x === cn"Crypt", get(filters), 1)
         params = get(o, cn"FDecodeParms")
         cfn = get(params[i], cn"Name")
-        # i > 1 && decode_until(
+        i > 1 && cosStreamRemoveFilters(stm, until=(i-1))
     end
     return CryptParams(num, gen, cfn !== nothing ? cfn : h.stmf)
 end
@@ -368,7 +373,6 @@ algo09(h::StdSecHandler, password::Vector{UInt8}) = error(E_NOT_IMPLEMENTED)
 algo10(h::StdSecHandler, password::Vector{UInt8}) = error(E_NOT_IMPLEMENTED)
 
 function algo11(h::StdSecHandler, password::SecretBuffer)
-    println("")
     u = h.u
     uv, uvs, uks = (@view u[1:32]), (@view u[33:40]), (@view u[41:48])
     uc = shred!(SecretBuffer()) do upw

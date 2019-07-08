@@ -32,11 +32,11 @@ function read_xref_stream(xrefstm::IDD{CosStream},
 
     index = get(xrefstm, cn"Index")
 
-    if (index == CosNull)
-        index = CosArray(CosObject[CosInt(0), size])
-    end
+    index === CosNull &&
+        (index = CosArray(CosObject[CosInt(0), size]))
 
-    # The xref stream may be accessed later. There is no point encrypting this data
+    # The xref stream may be accessed later.
+    # There is no point encrypting this data
     # Ideal will be to remove the filter.
     cosStreamRemoveFilters(xrefstm)
 

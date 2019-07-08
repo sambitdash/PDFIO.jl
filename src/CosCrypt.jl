@@ -17,12 +17,19 @@ function decrypt!(h::Nothing, oi::CosIndirectObject{CosObjectStream})
     return oi
 end
 
-decrypt!(h::SecHandler, oi::CosIndirectObject{CosObjectStream}) = 
-    (oi.obj.stm = decrypt(h, CryptParams(h, oi), oi.obj.stm); oi)
+function decrypt!(h::SecHandler, oi::CosIndirectObject{CosObjectStream})
+    oi.obj.stm = decrypt(h, CryptParams(h, oi), oi.obj.stm)
+    return invoke(decrypt!, Tuple{Nothing, CosIndirectObject{CosObjectStream}},
+                  nothing, oi)
+end
 
 decrypt!(h::SecHandler, oi::CosIndirectObject{CosStream}) = 
     (oi.obj = decrypt(h, CryptParams(h, oi), oi.obj);  oi)
 
+# For Crypt filter chain ensure the filters before the crypt filters are removed.
+# Crypt filter parameters are associated with the document and the CosStream as
+# such may not have access to such parameters. Hence, the crypt filter has to be
+# decrypted when the document information is available.
 function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
     # If the stream is external to the PDF file then it's not encrypted
     !o.isInternal && return o
@@ -39,6 +46,31 @@ function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
     end
     set!(o, cn"F", CosLiteralString(path))
     set!(o, cn"Length", CosInt(len))
+
+    filters = get(o, cn"FFilter")
+    if filters !== CosNull
+        if filters isa CosName
+            if cn"Crypt" === filters
+                set!(o, cn"FFilter", CosNull)
+                set!(o, cn"FDecodeParms", CosNull)
+            end
+        else
+            vf = get(filters)
+            l = length(vf)
+            if vf[1] === cn"Crypt"
+                if l == 1
+                    set!(o, cn"FFilter", CosNull)
+                    set!(o, cn"FDecodeParms", CosNull)
+                else
+                    filters = get(o, cn"FFilter")
+                    deleteat!(get(filters), 1)
+                    params = get(o, cn"FDecodeParms")
+                    params !== CosNull && deleteat!(get(params), 1)
+                end
+            end
+        end
+    end
+    
     o.isInternal = false
     return o
 end
