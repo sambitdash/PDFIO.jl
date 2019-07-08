@@ -309,8 +309,8 @@ function get_encoded_string(barr, cmap::CMap)
 end
 
 cmap_command(b::Vector{UInt8}) = 
-    b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
-        nothing : Symbol(String(b))
+    length(b), b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
+    nothing : Symbol(String(b))
 
 function on_cmap_command!(stm::IO, command::Symbol,
                          params::Vector{CosInt}, cmap::CMap)

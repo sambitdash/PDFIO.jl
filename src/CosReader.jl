@@ -75,19 +75,27 @@ function parse_name(ps::IO)
 end
 
 function parse_pdfOpsOrConst(ps::IO, fparse_more::Function)
-  b = UInt8[]
-  while !eof(ps)
-      c = ps |> _peekb
-      if ispdfspace(c) || ispdfdelimiter(c)
-          break
-      end
-      skip(ps, 1)
-      push!(b, c)
-  end
-  chomp_space!(ps)
-  obj = get_pdfconstant(b)
-  obj != nothing && return obj
-  return fparse_more(b)
+    b = UInt8[]
+    mark(ps)
+    try
+        while !eof(ps)
+            c = ps |> _peekb
+            (ispdfspace(c) || ispdfdelimiter(c)) && break
+            skip(ps, 1)
+            push!(b, c)
+        end
+        ns = chomp_space!(ps)
+        obj = get_pdfconstant(b)
+        obj !== nothing && return obj
+        nused, ret = fparse_more(b)
+        if nused < length(b)
+            reset(ps)
+            skip(ps, nused)
+        end
+        return ret
+    finally
+        unmark(ps)
+    end
 end
 
 function get_pdfconstant(b::Vector{UInt8})

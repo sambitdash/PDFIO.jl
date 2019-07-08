@@ -458,9 +458,22 @@ const PD_CONTENT_OPERATORS = Dict(
 )
 
 function get_pdfcontentops(b::Vector{UInt8})
-    arr = get(PD_CONTENT_OPERATORS, String(b), CosNull)
-    (arr === CosNull) && return CosNull
-    return eval(Expr(:call, arr...))
+    # PDF content operators are never longer than 3 bytes and may not be
+    # delimited. Hence, search for the longest 3 byte keyword, then 2 bytes
+    # and lastly 1
+    arr, l, sb = nothing, length(b), b
+    if l > 3
+        sb, l = b[1:3], 3
+    end
+    s = l
+    while arr == nothing && s > 0
+        arr = get(PD_CONTENT_OPERATORS, String(sb[1:s]), nothing)
+        s -= 1
+    end
+    if arr !== nothing
+        return s+1, eval(Expr(:call, arr...))
+    end
+    error("Invalid content operator: $(String(b))")
 end
 
 struct TextLayout
@@ -533,9 +546,9 @@ save!(gs::GState) = (push!(gs.state, copy(gs.state[end])); gs)
 restore!(gs::GState) = (pop!(gs.state); gs)
 
 @inline function init_graphics_state()
-    state = Vector{Dict{Symbol, Any}}()
+    state = Vector{Dict{Symbol, Any}}(undef, 0)
     push!(state, Dict{Symbol, Any}())
-
+    
     state[end][:text_layout] = Vector{TextLayout}()
 
     # Histogram along the y-axis. Not used currently.
