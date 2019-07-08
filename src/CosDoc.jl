@@ -128,7 +128,7 @@ Returns a `CosDoc` which can be subsequently used for all query into the PDF
 files. Remember to release the document with `cosDocClose`, once the object is
 used.
 """
-function cosDocOpen(fp::AbstractString; access::Union{String, Function}="")
+function cosDocOpen(fp::AbstractString; access::Function=identity)
     doc = CosDocImpl(abspath(fp))
     ps = doc.ps
     h = read_header(ps)

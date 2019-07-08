@@ -73,7 +73,7 @@ endobj
 isTagged: none
 ```
 """
-function pdDocOpen(filepath::AbstractString; access::Union{String, Function}="")
+function pdDocOpen(filepath::AbstractString; access::Function=identity)
     doc = PDDocImpl(filepath, access=access)
     update_page_tree(doc)
     update_structure_tree!(doc)

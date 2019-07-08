@@ -1,0 +1,84 @@
+struct CryptParams
+    num::Int
+    gen::Int
+    cfn::CosName
+end
+
+decrypt!(::Union{Nothing, SecHandler}, obj) = obj
+
+# Even when document has no security handler the object stream needs to be
+# decoded and all the objects and their positions are to be loaded.
+function decrypt!(h::Nothing, oi::CosIndirectObject{CosObjectStream})
+    obj = oi.obj
+    obj.populated && return oi
+    cosStreamRemoveFilters(obj.stm)
+    read_object_info_from_stm(obj.stm, obj.oids, obj.oloc, obj.n, obj.first)
+    obj.populated = true
+    return oi
+end
+
+decrypt!(h::SecHandler, oi::CosIndirectObject{CosObjectStream}) = 
+    (oi.obj.stm = decrypt(h, CryptParams(h, oi), oi.obj.stm); oi)
+
+decrypt!(h::SecHandler, oi::CosIndirectObject{CosStream}) = 
+    (oi.obj = decrypt(h, CryptParams(h, oi), oi.obj);  oi)
+
+function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
+    # If the stream is external to the PDF file then it's not encrypted
+    !o.isInternal && return o
+    f = String(get(o, cn"F"))
+    len = get(get(o, cn"Length"))
+    ctext = open(io->read(io, len), f)
+    
+    (path, io) = get_tempfilepath()
+    try
+        ptext = crypt(h, params, ctext, false)
+        write(io, ptext)
+    finally
+        util_close(io)
+    end
+    set!(o, cn"F", CosLiteralString(path))
+    set!(o, cn"Length", CosInt(len))
+    o.isInternal = false
+    return o
+end
+
+function decrypt!(h::SecHandler, oi::Union{ID{CosXString}, ID{CosLiteralString}})
+    oi.obj = decrypt(h, CryptParams(h, oi), oi.obj)
+    return oi
+end
+
+decrypt(h::SecHandler, params::CryptParams, s::CosLiteralString) = 
+    crypt(h, params, Vector{UInt8}(s), false) |> CosLiteralString
+
+decrypt(h::SecHandler, params::CryptParams, s::CosXString) = 
+    crypt(h, params, Vector{UInt8}(s), false) |>
+        bytes2hex |> Vector{UInt8} |> CosXString
+
+function decrypt!(h::SecHandler, oi::Union{ID{CosArray}, ID{CosDict}})
+    oi.obj = decrypt(h, oi.num, oi.gen, oi.obj)
+    return oi
+end
+    
+function decrypt(h::SecHandler, num::Int, gen::Int, a::CosArray)
+    v = get(a)
+    for i = 1:length(v)
+        v[i] = decrypt(h, num, gen, v[i])
+    end
+    return a
+end
+
+function decrypt(h::SecHandler, num::Int, gen::Int, o::CosDict)
+    d = get(o)
+    for (k, v) in d
+        v1 = decrypt(h, num, gen, v)
+        v1 === v && continue
+        d[k] = v1
+    end
+    return o
+end
+
+decrypt(h::SecHandler, num::Int, gen::Int, s::CosString) = 
+    decrypt(h, CryptParams(h, num, gen, s), s)
+
+decrypt(h::SecHandler, num::Int, gen::Int, o::CosObject) = o

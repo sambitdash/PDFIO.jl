@@ -12,7 +12,7 @@ mutable struct PDDocImpl <: PDDoc
     xobjs::Dict{CosObject, PDXObject}
     pager2n::Dict{CosIndirectObjectRef, Int}
     pagen2r::Dict{Int, CosIndirectObjectRef}
-    function PDDocImpl(fp::AbstractString; access::Union{String, Function}="")
+    function PDDocImpl(fp::AbstractString; access::Function)
         cosDoc = cosDocOpen(fp, access=access)
         catalog = cosDocGetRoot(cosDoc)
         new(cosDoc,catalog,CosNull,CosNull,:none,
