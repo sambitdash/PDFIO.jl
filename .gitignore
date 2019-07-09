@@ -24,6 +24,7 @@ docs/site/
 Manifest.toml
 
 *.res
+*~
 .vscode/
 test/downloads
 test/*.pdf

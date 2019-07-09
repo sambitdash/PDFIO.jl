@@ -13,6 +13,7 @@ makedocs(
     pages = [
         "README.md",
         "Architecture and Design" => "arch.md",
+        "Encryption in PDF" => "encrypt.md",
         "Digital Signatures" => "digsig.md",
         "API Reference" => "index.md",
         "PDFIO License" => "LICENSE.md"
