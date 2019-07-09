@@ -1,16 +1,18 @@
-export get_tempdir,
-       get_tempfilepath,
-       util_open,
-       util_close,
-       load_data_file,
-       dict_remap,
-       NativeEncodingToUnicode,
-       PDFEncodingToUnicode,
-       utilPrintOpenFiles,
-       to_uint8,
-       to_uint16
-
-using Pkg
+export
+    get_tempdir,
+    get_tempfilepath,
+    util_open,
+    util_close,
+    load_data_file,
+    dict_remap,
+    NativeEncodingToUnicode,
+    PDFEncodingToUnicode,
+    utilPrintOpenFiles,
+    to_uint8,
+    to_uint16,
+    reverse_dict,
+    UnicodeToPDFEncoding,
+    UTF8ToPDFEncoding
 
 # Non-exported variable that retains the current tempdir location.
 # This shoould be only accessed by get_tempdir() only
@@ -53,6 +55,14 @@ function dict_remap(ab::Dict{A, B}, bc::Dict{B, C}) where {A, B, C}
     return d
 end
 
+function reverse_dict(dict::Dict{K, V}) where {K, V}
+    rdict = Dict{V, K}()
+    for (x, y) in dict
+        rdict[y] = x
+    end
+    return rdict
+end
+
 to_uint16(x) = parse(UInt16, x, base=16)
 to_uint8(x)  = parse(UInt8,  x, base=8)
 
@@ -67,6 +77,8 @@ const PDFEncoding_to_Unicode = begin
     d
 end
 
+const Unicode_to_PDFEncoding = reverse_dict(PDFEncoding_to_Unicode)
+
 function NativeEncodingToUnicode(barr, mapping::Dict)
     l = length(barr)
     carr = Vector{Char}(undef, l)
@@ -78,3 +90,6 @@ end
 
 PDFEncodingToUnicode(barr) =
     NativeEncodingToUnicode(barr, PDFEncoding_to_Unicode)
+
+UnicodeToPDFEncoding(c::Char) = get(Unicode_to_PDFEncoding, c, 0x00)
+UnicodeToPDFEncoding(s::String) = [UnicodeToPDFEncoding(c) for c in s]

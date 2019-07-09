@@ -11,7 +11,7 @@ function convert(::Type{CDTextString}, xstr::CosXString)
     prefix = xstr.val[1:4]
     hasPrefix = (prefix == feff || prefix == FEFF)
     isUTF16   = hasPrefix || prefix[1:2] == UInt8[0x30, 0x30]
-    data = xstr.val
+    data = get(xstr)
     buffer = data |> String |> hex2bytes
     if isUTF16
         len2 = div(length(buffer), 2)
@@ -39,6 +39,8 @@ convert(::Type{Vector{UInt8}}, xstr::CosXString) =
 convert(::Type{Vector{UInt8}}, str::CosLiteralString) = str |> get
 
 Vector{T}(str::CosString) where {T <: UInt8} = convert(Vector{UInt8}, str)
+
+Vector{UInt8}(::CosNullType) = Vector{UInt8}(undef, 0)
 
 convert(::Type{CDTextString}, lstr::IDD{CosLiteralString}) =
     CDTextString(PDFEncodingToUnicode(get(lstr)))

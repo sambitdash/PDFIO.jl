@@ -128,8 +128,9 @@ function merge_encoding!(fum::FontUnicodeMapping,
     return fum
 end
 
-function update_glyph_id_std_14(cosfont, glyph_name_to_cid, cid_to_glyph_name)
-    basefont = get(cosfont, cn"BaseFont")
+function update_glyph_id_std_14(cosdoc, cosfont,
+                                glyph_name_to_cid, cid_to_glyph_name)
+    basefont = cosDocGetObject(cosdoc, cosfont, cn"BaseFont")
     basefont === CosNull && return false
     String(basefont) in ADOBE_STD_14 || return false
     gn2cid, cid2gn =
@@ -147,10 +148,12 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
     glyph_name_to_cid, cid_to_glyph_name =
         Dict{CosName, UInt8}(), Dict{UInt8, CosName}()
     cosfont === CosNull && return glyph_name_to_cid, cid_to_glyph_name
-    subtype = get(cosfont, cn"Subtype")
+    subtype = cosDocGetObject(cosdoc, cosfont, cn"Subtype")
     subtype === cn"Type0" && return glyph_name_to_cid, cid_to_glyph_name
 
-    update_glyph_id_std_14(cosfont, glyph_name_to_cid, cid_to_glyph_name) &&
+    update_glyph_id_std_14(cosdoc, cosfont,
+                           glyph_name_to_cid,
+                           cid_to_glyph_name) &&
         return glyph_name_to_cid, cid_to_glyph_name
 
     encoding = cosDocGetObject(cosdoc, cosfont, cn"Encoding")
@@ -208,7 +211,6 @@ function get_unicode_chars(b::UInt8, i::Interval, v::Union{CosXString, CosArray}
         carr = get_unicode_chars(bytes)
         carr[1] += (b - f)  # Only one char should be generated here
     elseif v isa CosArray
-        @assert v isa CosArray
         arr = get(v)
         xstr = arr[b - f + 1]
         @assert xstr isa CosXString
@@ -307,8 +309,8 @@ function get_encoded_string(barr, cmap::CMap)
 end
 
 cmap_command(b::Vector{UInt8}) = 
-    b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
-        nothing : Symbol(String(b))
+    length(b), b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
+    nothing : Symbol(String(b))
 
 function on_cmap_command!(stm::IO, command::Symbol,
                          params::Vector{CosInt}, cmap::CMap)
@@ -444,7 +446,7 @@ pdFontIsSmallCap(pdfont::PDFont) = (pdfont.flags & 0x00020000) > 0
 # Not supported FD attribute in CIDFonts
 @inline function get_font_flags(doc::PDDoc, cosfont::IDD{CosDict}, widths)
     flags = 0x00000000
-    refdesc = get(cosfont, cn"FontDescriptor")
+    refdesc = cosDocGetObject(doc.cosDoc, cosfont, cn"FontDescriptor")
     refdesc === CosNull && return get_font_flags(widths)
     cosflags = cosDocGetObject(doc.cosDoc, refdesc, cn"Flags")
     cfweight = cosDocGetObject(doc.cosDoc, refdesc, cn"FontWeight")
@@ -460,7 +462,7 @@ end
 get_font_flags(x) = 0x00000000
 
 @inline function get_font_name(doc::PDDoc, cosfont::IDD{CosDict}, widths)
-    refdesc = get(cosfont, cn"FontDescriptor")
+    refdesc = cosDocGetObject(doc.cosDoc, cosfont, cn"FontDescriptor")
     refdesc === CosNull && return get_font_name(cosfont, widths)    
     return cosDocGetObject(doc.cosDoc, refdesc, cn"FontName")
 end

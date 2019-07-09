@@ -8,7 +8,7 @@ function make_number(data, start, nbytes)
 end
 
 function get_xref_record(data, start, w)
-    v=Vector{Int}()
+    v = Vector{Int}()
     for tw in w
         n = make_number(data, start, tw)
         start += tw
@@ -22,9 +22,9 @@ createIfObjectStream(stm::CosStream) =
 
 function read_xref_stream(xrefstm::IDD{CosStream},
                           xref::Dict{CosIndirectObjectRef, CosObjectLoc})
-    @assert get(xrefstm, cn"Type") == cn"XRef"
+    @assert get(xrefstm, cn"Type") === cn"XRef"
     size = get(xrefstm, cn"Size")
-    @assert size != CosNull
+    @assert size !== CosNull
 
     w = get(xrefstm, cn"W")
     @assert w != CosNull
@@ -32,11 +32,11 @@ function read_xref_stream(xrefstm::IDD{CosStream},
 
     index = get(xrefstm, cn"Index")
 
-    if (index == CosNull)
-        index = CosArray(CosObject[CosInt(0), size])
-    end
+    index === CosNull &&
+        (index = CosArray(CosObject[CosInt(0), size]))
 
-    # The xref stream may be accessed later. There is no point encrypting this data
+    # The xref stream may be accessed later.
+    # There is no point encrypting this data
     # Ideal will be to remove the filter.
     cosStreamRemoveFilters(xrefstm)
 
@@ -79,7 +79,7 @@ function read_object_info_from_stm(stm::CosStream,
                                    oids::Vector{Int},
                                    oloc::Vector{Int},
                                    n::Int, first::Int)
-    filename = get(stm, CosName("F"))
+    filename = get(stm, cn"F")
     io = util_open(String(filename),"r")
     try
         for i = 1:n

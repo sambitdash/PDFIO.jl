@@ -10,12 +10,14 @@ export CosDict, CosString, CosXString, CosLiteralString, CosNumeric,
 ```
     CosObject
 ```
-PDF is a structured document format with lots of internal data structures like
-dictionaries, arrays, trees. `CosObject` is the interface to access these objects and get
-detailed access to the objects and gather additional information. Although, defined in the
-COS layer, objects of these type are returned from almost all the APIs. Hence, the objects
-have a separate significance whether you need to use the `Cos` layer or not. Below is the
-object hierarchy.
+
+PDF is a structured document format with lots of internal data
+structures like dictionaries, arrays, trees. `CosObject` is the
+interface to access these objects and get detailed access to the
+objects and gather additional information. Although, defined in the
+COS layer, objects of these type are returned from almost all the
+APIs. Hence, the objects have a separate significance whether you need
+to use the `Cos` layer or not. Below is the object hierarchy.
 
 ```
 CosObject                           Abstract
@@ -271,7 +273,10 @@ julia> length(a)
 ```
 """
 length(o::CosArray) = length(o.val)
-length(o::CosIndirectObject{CosArray}) = length(o.obj)
+length(o::ID{CosArray}) = length(o.obj)
+
+Base.getindex(o::CosArray, i::Int) = o.val[i]
+Base.getindex(o::ID{CosArray}, i::Int) = getindex(o.obj, i)
 
 """
 ```
@@ -356,7 +361,7 @@ by binary data.
 mutable struct CosStream <: CosObject
     extent::CosDict
     isInternal::Bool
-    CosStream(d::CosDict,isInternal::Bool=true) = new(d, isInternal)
+    CosStream(d::CosDict, isInternal::Bool=true) = new(d, isInternal)
 end
 
 get(stm::CosStream, name::CosName, defval::T = CosNull) where T =
@@ -399,18 +404,19 @@ mutable struct CosObjectStream <: CosObject
     first::Int
     oids::Vector{Int}
     oloc::Vector{Int}
+    populated::Bool
     function CosObjectStream(s::CosStream)
-        n = get(s, CosName("N"))
+        n = get(s, cn"N")
         @assert n != CosNull
-        first = get(s, CosName("First"))
-        @assert first != CosNull
-        cosStreamRemoveFilters(s)
+        first = get(s, cn"First")
+        @assert first !== CosNull
         n_n = get(n)
         first_n = get(first)
         oids = zeros(Int, n_n)
         oloc = zeros(Int, n_n)
-        read_object_info_from_stm(s, oids, oloc, n_n, first_n)
-        new(s, n_n, first_n,oids, oloc)
+        # cosStreamRemoveFilters(s)
+        # read_object_info_from_stm(s, oids, oloc, n_n, first_n)
+        new(s, n_n, first_n,oids, oloc, false)
     end
 end
 
@@ -478,8 +484,8 @@ end
 
 # If K is Int, it's a number tree else it's a String which is a name tree
 function createTreeNode(::Type{K}, dict::IDD{CosDict}) where K
-    range = get(dict, CosName("Limits"))
-    kids  = get(dict, CosName("Kids"))
+    range = get(dict, cn"Limits")
+    kids  = get(dict, cn"Kids")
     node = CosTreeNode{K}()
     if (range !== CosNull)
         r = get(range, true)
@@ -492,7 +498,7 @@ function createTreeNode(::Type{K}, dict::IDD{CosDict}) where K
 end
 
 function populate_values(node::CosTreeNode{Int}, dict::IDD{CosDict})
-    nums = get(dict, CosName("Nums"))
+    nums = get(dict, cn"Nums")
     if (nums !== CosNull)
         v = get(nums)
         values = [(get(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]
@@ -502,7 +508,7 @@ function populate_values(node::CosTreeNode{Int}, dict::IDD{CosDict})
 end
 
 function populate_values(node::CosTreeNode{String}, dict::IDD{CosDict})
-    names = get(dict, CosName("Names"))
+    names = get(dict, cn"Names")
     if (names !== CosNull)
         v = get(names, false) #true => v[2i] is Tuple{Int} => error
         values = [(String(v[2i-1]), v[2i]) for i=1:div(length(v), 2)]

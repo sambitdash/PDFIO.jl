@@ -73,8 +73,8 @@ endobj
 isTagged: none
 ```
 """
-function pdDocOpen(filepath::AbstractString)
-    doc = PDDocImpl(filepath)
+function pdDocOpen(filepath::AbstractString; access::Function=identity)
+    doc = PDDocImpl(filepath, access=access)
     update_page_tree(doc)
     update_structure_tree!(doc)
     return doc
@@ -248,10 +248,8 @@ julia> PDFIO.PD.pdDocHasPageLabels(doc)
 false
 ```
 """
-function pdDocHasPageLabels(doc::PDDoc)
-    catalog = pdDocGetCatalog(doc)
-    return get(catalog, cn"PageLabels") !== CosNull
-end
+pdDocHasPageLabels(doc::PDDoc) =
+    cosDocGetObject(doc.cosDoc, doc.catalog, cn"PageLabels") !== CosNull
 
 """
 ```
@@ -344,11 +342,8 @@ julia> pdDocGetNamesDict(doc)
 endobj
 ```
 """
-function pdDocGetNamesDict(doc::PDDoc)
-    catalog = pdDocGetCatalog(doc)
-    ref = get(catalog, CosName("Names"))
-    obj = cosDocGetObject(doc.cosDoc, ref)
-end
+pdDocGetNamesDict(doc::PDDoc) =
+    cosDocGetObject(doc.cosDoc, doc.catalog, cn"Names")
 
 """
 ```
@@ -552,10 +547,13 @@ function pdDocValidateSignatures(doc::PDDoc; export_certs=false)
     if !isempty(certmap)
         bn = basename(doc.cosDoc.filepath)
         fname = splitext(bn)[1]*".pem"
-        open(fname, "w") do io
+        io = util_open(fname, "w")
+        try
             for val in values(certmap)
                 print(io, val)
             end
+        finally
+            util_close(io)
         end
     end
     return ret

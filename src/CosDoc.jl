@@ -7,11 +7,12 @@ export
     cosDocGetObject,
     cosDocGetPageNumbers,
     cosDocGetPageLabel,
+    cosDocIsEncrypted,
+    cosDocGetID,
     merge_streams,
     find_ntree,
     readfrom
 
-using Base: notnothing
 using ..Common
 
 """
@@ -35,12 +36,13 @@ represented in a document:
 - *Indirect Objects*: Indirect objects have reference identifiers, there
   location in a PDF document is described through a Object Reference identifier.
   
-
 One can access any aspect of PDF using the COS level APIs alone. However, they
 may require you to know the PDF specification in details and they are not the
 most intuititive.
 """
 abstract type CosDoc end
+
+abstract type SecHandler end
 
 mutable struct CosDocImpl <: CosDoc
     filepath::String
@@ -55,15 +57,18 @@ mutable struct CosDocImpl <: CosDoc
     trailer::Vector{CosDict}
     xrefstm::Vector{CosIndirectObject{CosStream}}
     tmpfiles::Vector{AbstractString}
+    encrypt::IDDN{CosDict}
     isPDF::Bool
     hasNativeXRefStm::Bool
+    secHandler::Union{SecHandler, Nothing}
+    perms::UInt32
     function CosDocImpl(fp::AbstractString)
         io = util_open(fp,"r")
         sz = filesize(fp)
         ps = io
         new(fp, sz, io, ps, 0, "", 0, (0, 0),
             Dict{CosIndirectObjectRef, CosObjectLoc}(),
-            [], [], [], false, false)
+            [], [], [], CosNull, false, false, nothing, 0)
     end
 end
 
@@ -123,8 +128,8 @@ Returns a `CosDoc` which can be subsequently used for all query into the PDF
 files. Remember to release the document with `cosDocClose`, once the object is
 used.
 """
-function cosDocOpen(fp::AbstractString)
-    doc = CosDocImpl(abspath(fp));
+function cosDocOpen(fp::AbstractString; access::Function=identity)
+    doc = CosDocImpl(abspath(fp))
     ps = doc.ps
     h = read_header(ps)
     doc.version = (h[1], h[2])
@@ -132,17 +137,25 @@ function cosDocOpen(fp::AbstractString)
     doc.hoffset = h[4]
     doc.isPDF = (doc.header == "PDF")
     doc_trailer_update(ps, doc)
+    trailer = doc.hasNativeXRefStm ? doc.xrefstm[1] : doc.trailer[1]
+    encref = get(trailer, cn"Encrypt")
+    doc.encrypt = cosDocGetObject(doc, encref)
+    doc.encrypt === CosNull && return doc
+    doc.secHandler = SecHandler(doc, access)
+    # With every cosDocClose all the crypto key and iv files are removed
+    push!(doc.tmpfiles, doc.secHandler.skey_path, doc.secHandler.iv_path)
     return doc
 end
+
+get_key(::Nothing, password) = error(E_DECRYPT_DOCUMENT)            
+cosDocIsEncrypted(doc::CosDoc) = doc.encrypt !== CosNull
 
 """
 ```
     cosDocGetRoot(doc::CosDoc) -> CosDoc
 ```
-The structural starting point of a PDF document. Also known as document root
-dictionary. This provides details of object locations and document access
-methodology. This should not be confused with the `catalog` object of the PDF
-document.
+The structural starting point of a PDF document. Also known as document catalog
+dictionary. 
 """
 cosDocGetRoot(doc::CosDoc) = CosNull
 
@@ -243,19 +256,16 @@ function cosDocGetObject(doc::CosDoc, dict::CosDict, key::CosNullType)
     return dres
 end
 
-function cosDocGetRoot(doc::CosDocImpl)
-    root = doc.hasNativeXRefStm ? get(doc.xrefstm[1], CosName("Root")) :
-                                  get(doc.trailer[1], CosName("Root"))
-    return cosDocGetObject(doc, root)
-end
+doc_get_trailer(doc::CosDocImpl) =
+    doc.hasNativeXRefStm ? doc.xrefstm[1] : doc.trailer[1]
 
-function cosDocGetInfo(doc::CosDocImpl)::Union{CosNullType,
-                                               CosDict,
-                                               CosIndirectObject{CosDict}}
-    info = doc.hasNativeXRefStm ? get(doc.xrefstm[1], cn"Info") :
-        get(doc.trailer[1], cn"Info")
-    return cosDocGetObject(doc, info)
-end
+cosDocGetRoot(doc::CosDocImpl) =
+    cosDocGetObject(doc, get(doc_get_trailer(doc), cn"Root"))
+
+cosDocGetInfo(doc::CosDocImpl) =
+    cosDocGetObject(doc, get(doc_get_trailer(doc), cn"Info"))
+
+cosDocGetID(doc::CosDocImpl) = get(doc_get_trailer(doc), cn"ID")
 
 cosDocGetObject(doc::CosDocImpl, obj::CosObject) = obj
 
@@ -267,9 +277,11 @@ end
 
 function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
                          ref::CosIndirectObjectRef, locObj::CosObjectLoc)
-    if (locObj.obj == CosNull)
+    if (locObj.obj === CosNull)
         seek(doc, locObj.loc)
         locObj.obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref)
+        # Decrypt here
+        decrypt!(doc.secHandler, locObj.obj)
         attach_object(doc, locObj.obj)
     end
     return locObj.obj
@@ -300,9 +312,7 @@ end
 function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
     look_ahead = 2048
     loc = doc.startxref - look_ahead
-    if loc < 0
-        loc = 0
-    end
+    loc < 0 && (loc = 0)
     seek(doc, loc)
     look_ahead = doc.startxref - loc
     ref = get(stmref)
@@ -312,6 +322,8 @@ function scan_object_stream(doc::CosDocImpl, stmref::CosIndirectObjectRef)
     seek(doc, loc + loc1)
     obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref)
     obj === CosNull && return CosNull
+    # Decrypt here
+    decrypt!(doc.secHandler, obj)
     doc.xref[stmref] = CosObjectLoc(loc + loc1, CosNull, obj)
     return obj
 end
@@ -408,7 +420,7 @@ attach_object(doc::CosDocImpl, indstm::CosIndirectObject{CosStream})=
   attach_object(doc,indstm.obj)
 
 function attach_object(doc::CosDocImpl, stm::CosStream)
-    tmpfile = get(get(stm,  CosName("F")))
+    tmpfile = get(get(stm, cn"F"))
     push!(doc.tmpfiles, String(tmpfile))
     return nothing
 end
@@ -422,10 +434,10 @@ end
 function read_xref_streams(ps::IOStream, doc::CosDocImpl)
     found = false
     while(true)
+        # XRefStm shall not be decrypted. S.7.5.8.2
         xrefstm = parse_indirect_obj(ps, doc.hoffset, doc.xref)
-
         if (!found)
-            get(xrefstm,  CosName("Root")) == CosNull && error(E_BAD_TRAILER)
+            get(xrefstm, cn"Root") == CosNull && error(E_BAD_TRAILER)
             attach_xref_stream(doc, xrefstm)
             found = true
         else
@@ -433,7 +445,7 @@ function read_xref_streams(ps::IOStream, doc::CosDocImpl)
         end
         read_xref_stream(xrefstm, doc)
 
-        prev = get(xrefstm,  CosName("Prev"))
+        prev = get(xrefstm, cn"Prev")
         prev === CosNull && break
         seek(doc, get(prev))
     end
@@ -446,21 +458,22 @@ function read_xref_tables(ps::IOStream, doc::CosDocImpl)
         trailer = read_trailer(ps, length(TRAILER))
 
         if (!found)
-            get(trailer,  CosName("Root")) == CosNull && error(E_BAD_TRAILER)
+            get(trailer, cn"Root") == CosNull && error(E_BAD_TRAILER)
             push!(doc.trailer, trailer)
             found = true
         else
             push!(doc.trailer, trailer)
         end
         #Hybrid case
-        loc = get(trailer,  CosName("XRefStm"))
+        loc = get(trailer, cn"XRefStm")
         if (loc != CosNull)
             seek(doc, get(loc))
+            # XRefStm shall not be decrypted. S.7.5.8.2
             xrefstm = parse_indirect_obj(ps, doc.hoffset, doc.xref)
             attach_object(doc, xrefstm)
-            read_xref_stream(xrefstm,doc)
+            read_xref_stream(xrefstm, doc)
         end
-        prev = get(trailer, CosName("Prev"))
+        prev = get(trailer, cn"Prev")
         prev == CosNull && break
         seek(doc, get(prev))
     end
@@ -543,7 +556,7 @@ function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int, CosObject}},
     for (pageno, obj) in values
         if found
             if lno !== nothing
-                ln = notnothing(lno)
+                ln = lno
                 ln < start && throw(ErrorException(E_INVALID_PAGE_LABEL))
                 found_page = prev_pageno + 1 + ln - start
                 found_page <= pageno && return range(found_page, length=1)
@@ -591,13 +604,14 @@ function find_page_for_label(doc::CosDoc, values::Vector{Tuple{Int, CosObject}},
     found && lno === nothing &&
         return range(prev_pageno + 1, length=(pageno - prev_pageno))
     if found && lno !== nothing
-        ln = notnothing(lno)
         ln < start && throw(ErrorException(E_INVALID_PAGE_LABEL))
         found_page = prev_pageno + 1 + ln - start
         return range(found_page, length=1)
     end
     throw(ErrorException(E_INVALID_PAGE_LABEL))
 end
+
+get_internal_pagecount(::CosNullType) = 0
 
 function get_internal_pagecount(dict::ID{CosDict})
     mytype = get(dict, cn"Type")
@@ -625,7 +639,7 @@ end
 
 
 cosDocGetPageNumbers(doc::CosDoc, catalog::CosNullType, label::AbstractString) =
-    error("Invalid document catalog")
+    error(E_INVALID_CATALOG)
 
 
 function find_label_for_pageno(doc::CosDoc,

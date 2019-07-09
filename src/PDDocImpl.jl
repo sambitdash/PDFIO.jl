@@ -12,8 +12,8 @@ mutable struct PDDocImpl <: PDDoc
     xobjs::Dict{CosObject, PDXObject}
     pager2n::Dict{CosIndirectObjectRef, Int}
     pagen2r::Dict{Int, CosIndirectObjectRef}
-    function PDDocImpl(fp::AbstractString)
-        cosDoc = cosDocOpen(fp)
+    function PDDocImpl(fp::AbstractString; access::Function)
+        cosDoc = cosDocOpen(fp, access=access)
         catalog = cosDocGetRoot(cosDoc)
         new(cosDoc,catalog,CosNull,CosNull,:none,
             Dict{CosObject, PDFont}(), Dict{CosObject, PDXObject}(),
@@ -49,7 +49,7 @@ Ensures indirect objects are read and updated in the xref Dictionary.
 =#
 function populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict},
                             ncurr::Int)
-    if (cn"Pages" == get(dict, cn"Type"))
+    if (cn"Pages" == cosDocGetObject(doc.cosDoc, dict, cn"Type"))
         kids = cosDocGetObject(doc.cosDoc, dict, cn"Kids")
         arr = get(kids)
         len = length(arr)
@@ -67,10 +67,10 @@ function populate_doc_pages(doc::PDDocImpl, dict::CosIndirectObject{CosDict},
         doc.pager2n[ref]   = ncurr
         doc.pagen2r[ncurr] = ref
     end
-    parent = get(dict, cn"Parent")
+    parent = cosDocGetObject(doc.cosDoc, dict, cn"Parent")
     if (parent === CosNull)
         obj = cosDocGetObject(doc.cosDoc, parent)
-        set!(dict, CosName("Parent"), obj)
+        set!(dict, cn"Parent", obj)
     end
     return ncurr
 end
@@ -82,8 +82,7 @@ pd_doc_get_pagenum(doc, pageref::CosIndirectObjectRef) = doc.pager2n[pageref]
 pd_doc_get_page(doc, pagenum::Int) = doc.pagen2r[pagenum]
 
 @inline function update_page_tree(doc::PDDocImpl)
-    pagesref = get(doc.catalog, cn"Pages")::CosIndirectObjectRef
-    pages = cosDocGetObject(doc.cosDoc, pagesref)::CosIndirectObject{CosDict}
+    pages = cosDocGetObject(doc.cosDoc, doc.catalog, cn"Pages")
     populate_doc_pages(doc, pages, 0)
     doc.pages = pages
     return nothing
@@ -94,17 +93,16 @@ end
 
 @inline function update_structure_tree!(doc::PDDocImpl)
     catalog = pdDocGetCatalog(doc)
-    marking = get(catalog, cn"MarkInfo")
+    marking = cosDocGetObject(doc.cosDoc, catalog, cn"MarkInfo")
 
     if (marking !== CosNull)
-        tagged  = get(marking, cn"Marked")
-        suspect = get(marking, cn"Suspect")
+        tagged  = cosDocGetObject(doc.cosDoc, marking, cn"Marked")
+        suspect = cosDocGetObject(doc.cosDoc, marking, cn"Suspect")
         doc.isTagged = (suspect === CosTrue) ? (:suspect) :
                        (tagged  === CosTrue) ? (:tagged)  : (:none)
     end
 
-    structTreeRef = get(catalog, cn"StructTreeRoot")
-    doc.structTreeRoot = cosDocGetObject(doc.cosDoc, structTreeRef)
+    doc.structTreeRoot = cosDocGetObject(doc.cosDoc, catalog, cn"StructTreeRoot")
     return nothing
 end
 
@@ -124,10 +122,10 @@ end
 
 function gather_sig_props(doc, fld, inherit)
     inhdown = Dict{Symbol, Any}()
-    if get(fld, cn"FT") === cn"Sig"
+    if cosDocGetObject(doc.cosDoc, fld, cn"FT") === cn"Sig"
         tobj = cosDocGetObject(doc.cosDoc, fld, cn"T")
         # Better to collect the page reference
-        p_ref = get(fld, cn"P")
+        p_ref = cosDocGetObject(doc.cosDoc, fld, cn"P")
         page = p_ref === CosNull ? get(inherit, :P, CosNull) : p_ref
         tparent = get(inherit, :FQT, "")
         t = tobj !== CosNull ? CDTextString(tobj) : ""
@@ -146,7 +144,8 @@ function pd_get_signature_fields!(doc::PDDocImpl, fldroot::IDD{CosArray},
     for fldobj in fldarr
         fld  = cosDocGetObject(doc.cosDoc, fldobj)
         inhdown = gather_sig_props(doc, fld, inherit)
-        get(fld, cn"FT") === cn"Sig" && push!(sigflds, (fld, inhdown))
+        cosDocGetObject(doc.cosDoc, fld, cn"FT") === cn"Sig" &&
+            push!(sigflds, (fld, inhdown))
         kids = cosDocGetObject(doc.cosDoc, fld, cn"Kids")
         kids !== CosNull && 
             pd_get_signature_fields!(doc, kids, inhdown, sigflds)

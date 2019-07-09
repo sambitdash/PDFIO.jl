@@ -26,14 +26,6 @@ WINEncoding_to_GlyphName[0xA0] = cn"colon"
 
 MACEncoding_to_GlyphName[0xCA] = cn"colon"
 
-function reverse_dict(dict::Dict{K, V}) where {K, V}
-    rdict = Dict{V, K}()
-    for (x, y) in dict
-        rdict[y] = x
-    end
-    return rdict
-end
-
 const GlyphName_to_STDEncoding = reverse_dict(STDEncoding_to_GlyphName)
 const GlyphName_to_MACEncoding = reverse_dict(MACEncoding_to_GlyphName)
 const GlyphName_to_WINEncoding = reverse_dict(WINEncoding_to_GlyphName)

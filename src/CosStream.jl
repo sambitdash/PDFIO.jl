@@ -51,40 +51,59 @@ const function_map = Dict(
                           cn"Crypt" => _not_implemented
                          )
 
-function cosStreamRemoveFilters(stm::IDD{CosStream})
-    filters = get(stm, CosName("FFilter"))
+function cosStreamRemoveFilters(stm::IDD{CosStream}, until=-1)
+    filters = get(stm, cn"FFilter")
     if (filters != CosNull)
-        bufstm = decode(stm)
+        bufstm = decode(stm, until)
         data = read(bufstm)
         util_close(bufstm)
-        filename = get(stm, CosName("F"))
-        write(filename |> get |> String, data)
-        set!(stm, CosName("FFilter"), CosNull)
+        filename = get(stm, cn"F") |> get |> CDTextString
+        n = write(filename, data)
+        if until == -1
+            set!(stm, cn"FFilter", CosNull)
+            set!(stm, cn"FDecodeParms", CosNull)
+        else
+            filters = get(stm, cn"FFilter")
+            parms   = get(stm, cn"FDecodeParms")
+            l = length(filters)
+            if l == until
+                set!(stm, cn"FFilter", CosNull)
+                set!(stm, cn"FDecodeParms", CosNull)
+            else
+                deleteat!(filters, 1:until)
+                parms !== CosNull && deleteat!(parms, 1:until)
+            end
+        end
+        set!(stm, cn"Length", CosInt(n))
     end
     return stm
 end
 
 
 # Reads the filter data and decodes the stream.
-function decode(stm::IDD{CosStream})
+function decode(stm::IDD{CosStream}, until = -1)
     filename = get(stm, cn"F")
     filters =  get(stm, cn"FFilter")
     parms =    get(stm, cn"FDecodeParms")
 
     io = util_open(String(filename), "r")
 
-    return decode_filter(io, filters, parms)
+    return decode_filter(io, filters, parms, until)
 end
 
-decode_filter(io, filter::CosNullType, parms::CosObject) = io
+decode_filter(io::IO, filter::CosNullType, parms::CosObject, until=-1) = io
 
-decode_filter(io, filter::CosName, parms::CosObject) =
+decode_filter(io::IO, filter::CosName, parms::CosObject, until=-1) =
     function_map[filter](io, parms)
 
-function decode_filter(io, filters::CosArray, parms::CosObject)
+function decode_filter(io::IO, filters::CosArray, parms::IDDN{CosArray},
+                       until::Int=length(filters))
+    until == -1 && (until = length(filters))
     bufstm = io
-    for filter in get(filters)
-        bufstm = decode_filter(bufstm, filter, parms)
+    vf, vp = get(filters), (parms === CosNull ? CosNull : get(parms))
+    for i = 1:until
+        f, p = vf[i], (vp === CosNull ? CosNull : vp[i])
+        bufstm = decode_filter(bufstm, f, p)
     end
     return bufstm
 end

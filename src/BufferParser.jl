@@ -7,8 +7,14 @@ _peekb
 
 import Base: peek
 
-@inline chomp_space!(ps::IO) =
-    while !eof(ps) && ps |> _peekb |> ispdfspace skip(ps,1) end
+@inline function chomp_space!(ps::IO)
+    n = 0
+    while !eof(ps) && ps |> _peekb |> ispdfspace
+        skip(ps, 1)
+        n += 1
+    end
+    return n
+end
 
 @inline chomp_eol!(ps::IO) =
     while !eof(ps) && ps |> _peekb |> is_crorlf skip(ps,1) end

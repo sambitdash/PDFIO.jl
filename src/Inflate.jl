@@ -7,10 +7,10 @@ mutable struct z_stream
     avail_out::Cuint
     total_out::Culong
     msg::Ptr{UInt8}
-    state::Ptr{Nothing}
-    zalloc::Ptr{Nothing}
-    zfree::Ptr{Nothing}
-    opaque::Ptr{Nothing}
+    state::Ptr{Cvoid}
+    zalloc::Ptr{Cvoid}
+    zfree::Ptr{Cvoid}
+    opaque::Ptr{Cvoid}
     data_type::Cint
     adler::Culong
     reserved::Culong
@@ -25,7 +25,7 @@ mutable struct z_stream
             0,       # total_out 
             C_NULL,  # msg       
             C_NULL,  # state     
-            C_NULL,  # zalloc    
+            C_NULL,  # zalloc
             C_NULL,  # zfree     
             C_NULL,  # opaque    
             0,       # data_type 
@@ -50,11 +50,12 @@ const Z_VERSION_ERROR = -6
 
 include("../deps/deps.jl")
 
-_zlibVersion() = ccall((:zlibVersion, libz), Ptr{UInt8}, ())
+_zlibVersion() = ccall((:zlibVersion, libz), Ptr{Cstring}, ())
 
 _inflateInit(stm::z_stream) =
-    ccall((:inflateInit2_, libz), Cint, (Ref{z_stream}, Cint, Ptr{UInt8}, Cint),
-          stm, 47, _zlibVersion(), sizeof(z_stream))
+    ccall((:inflateInit2_, libz), Cint,
+          (Ptr{Cvoid}, Cint, Ptr{Cstring}, Cint),
+          Ref(stm), 47, _zlibVersion(), sizeof(z_stream))
 
 _inflateEnd(stm::z_stream) =
     ccall((:inflateEnd, libz), Cint, (Ref{z_stream},), stm)
@@ -74,28 +75,28 @@ function inflate(io::IO)
     inb = zeros(UInt8, CHUNK)
     oub = zeros(UInt8, CHUNK)
 
-    while ret != Z_STREAM_END
-        strm.avail_in = readbytes!(io, inb, CHUNK)
-        strm.avail_in == 0 && break
-        strm.next_in = pointer(inb)
+    try
+        while ret != Z_STREAM_END
+            strm.avail_in = readbytes!(io, inb, CHUNK)
+            strm.avail_in == 0 && break
+            strm.next_in = pointer(inb)
 
-        strm.avail_out = 0
-        while strm.avail_out == 0
-            strm.avail_out = CHUNK
-            strm.next_out = pointer(oub)
-            ret = _inflate(strm)
-            @assert ret != Z_STREAM_ERROR  "zlib stream state clobbered"
-            if ret != Z_OK 
-                _inflateEnd(strm)
-                ret != Z_STREAM_END && _zerror(ret)
+            strm.avail_out = 0
+            while strm.avail_out == 0
+                strm.avail_out = CHUNK
+                strm.next_out = pointer(oub)
+                ret = _inflate(strm)
+                ret == Z_STREAM_ERROR && error("zlib stream state clobbered")
+                ret != Z_OK && ret != Z_STREAM_END && _zerror(ret)
+                have = CHUNK - strm.avail_out
+                resize!(oub, have)
+                write(iob, oub)
+                resize!(oub, CHUNK)
             end
-            have = CHUNK - strm.avail_out
-            resize!(oub, have)
-            write(iob, oub)
-            resize!(oub, CHUNK)
         end
+    finally
+        _inflateEnd(strm)
     end
-    _inflateEnd(strm)
     return seekstart(iob)
 end
 
@@ -168,7 +169,7 @@ function decode_lzw(io::IO, earlyChange::Int = 1)
                 s = copy(t[old + 1])
                 push!(s, c)
             else
-                error("Data not compressed properly. $n : $it")
+                error(E_FAILED_COMPRESSION*" $n : $it")
             end
             write(iob, s)
             c = s[1]

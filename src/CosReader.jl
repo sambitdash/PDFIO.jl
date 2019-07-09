@@ -8,7 +8,7 @@ function parse_data(filename)
     ps=util_open(filename,"r")
     try
         while(!eof(ps))
-            println(parse_value(ps))
+            println(parse_value(ps, x->(length(x), String(x))))
             chomp_space!(ps)
         end
     finally
@@ -20,7 +20,7 @@ end
 Given a `IOStream`, after possibly any amount of whitespace, return the next
 parseable value.
 =#
-function parse_value(ps::IO, fparse_more=x->nothing)
+function parse_value(ps::IO, fparse_more=x->(length(x), nothing))
     chomp_space!(ps)
     byte = UInt8(peek(ps))
     byte == LEFT_PAREN ? parse_string(ps) :
@@ -75,19 +75,27 @@ function parse_name(ps::IO)
 end
 
 function parse_pdfOpsOrConst(ps::IO, fparse_more::Function)
-  b = UInt8[]
-  while !eof(ps)
-      c = ps |> _peekb
-      if ispdfspace(c) || ispdfdelimiter(c)
-          break
-      end
-      skip(ps, 1)
-      push!(b, c)
-  end
-  chomp_space!(ps)
-  obj = get_pdfconstant(b)
-  obj != nothing && return obj
-  return fparse_more(b)
+    b = UInt8[]
+    mark(ps)
+    try
+        while !eof(ps)
+            c = ps |> _peekb
+            (ispdfspace(c) || ispdfdelimiter(c)) && break
+            skip(ps, 1)
+            push!(b, c)
+        end
+        ns = chomp_space!(ps)
+        obj = get_pdfconstant(b)
+        obj !== nothing && return obj
+        nused, ret = fparse_more(b)
+        if nused < length(b)
+            reset(ps)
+            skip(ps, nused)
+        end
+        return ret
+    finally
+        unmark(ps)
+    end
 end
 
 function get_pdfconstant(b::Vector{UInt8})
@@ -236,31 +244,29 @@ The value can be stored in the stream object attribute so that the reverse
 process will be carried out for serialization.
 =#
 function read_internal_stream_data(ps::IO, extent::CosDict, len::Int)
-    if get(extent, CosName("F")) != CosNull
-        return false
-    end
+    get(extent, cn"F") != CosNull && return false
 
-    (path,io) = get_tempfilepath()
+    (path, io) = get_tempfilepath()
     try
-        data = read(ps,len)
+        data = read(ps, len)
         write(io, data)
     finally
         util_close(io)
     end
 
     #Ensuring all the data is written to a file
-    set!(extent, CosName("F"), CosLiteralString(path))
+    set!(extent, cn"F", CosLiteralString(path))
 
-    filter = get(extent, CosName("Filter"))
+    filter = get(extent, cn"Filter")
     if (filter != CosNull)
-        set!(extent, CosName("FFilter"), filter)
-        set!(extent, CosName("Filter"), CosNull)
+        set!(extent, cn"FFilter", filter)
+        set!(extent, cn"Filter", CosNull)
     end
 
-    parms = get(extent, CosName("DecodeParms"))
+    parms = get(extent, cn"DecodeParms")
     if (parms != CosNull)
-        set!(extent, CosName("FDecodeParms"), parms)
-        set!(extent, CosName("DecodeParms"),CosNull)
+        set!(extent, cn"FDecodeParms",  parms)
+        set!(extent, cn"DecodeParms", CosNull)
     end
 
     return true
@@ -286,10 +292,7 @@ function process_stream_length(stmlen::CosIndirectObjectRef,
     cosObjectLoc = xref[stmlen]
     if (cosObjectLoc.obj === CosNull)
         seek(ps, cosObjectLoc.loc + hoffset)
-        lenobj = parse_indirect_obj(ps, hoffset, xref)
-        if (lenobj != CosNull)
-            cosObjectLoc.obj = lenobj
-        end
+        cosObjectLoc.obj = parse_indirect_obj(ps, hoffset, xref)
     end
     return cosObjectLoc.obj
 end
@@ -297,18 +300,18 @@ end
 function postprocess_indirect_object(ps::IO, hoffset::Int, obj::CosDict,
                                      xref::Dict{CosIndirectObjectRef,
                                                 CosObjectLoc})
-    if locate_keyword!(ps,STREAM) == 0
+    if locate_keyword!(ps, STREAM) == 0
         ensure_line_feed_eol(ps)
         pos = position(ps)
         
-        stmlen = get(obj, CosName("Length"))
+        stmlen = get(obj, cn"Length")
 
         lenobj = process_stream_length(stmlen, ps, hoffset, xref)
 
         len = get(lenobj)
 
         if (lenobj != stmlen)
-            set!(obj, CosName("Length"), lenobj)
+            set!(obj, cn"Length", lenobj)
         end
 
         seek(ps, pos)
@@ -336,6 +339,7 @@ postprocess_indirect_object(ps::IO,
 function parse_indirect_obj(ps::IO,
                             hoffset::Int,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+    chomp_space!(ps)
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
@@ -350,6 +354,7 @@ function parse_indirect_obj(ps::IO,
 end
 
 function parse_indirect_ref(ps::IO)
+    chomp_space!(ps)
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
@@ -359,16 +364,14 @@ function parse_indirect_ref(ps::IO)
     # This may fail the content parser due to the RG operator
     b = ps |> _peekb
     ispdfdelimiter(b) || ispdfspace(b) ||
-        error("CosIndirectObjectRef is not delimited properly")
+        error(E_INVALID_DELIMITER)
     chomp_space!(ps)
     return CosIndirectObjectRef(objn, genn)
 end
 
 function try_parse_indirect_reference(ps::IO)
     nobj = parse_number(ps)
-    if isa(nobj, CosFloat)
-        return nobj
-    end
+    nobj isa CosFloat && return nobj
     chomp_space!(ps)
     mark(ps)
     if ispdfdigit(ps |> _peekb)
@@ -418,13 +421,7 @@ end
 Parse a float from the given bytes vector, starting at `from` and ending at the
 byte before `to`. Bytes enclosed should all be ASCII characters.
 =#
-function float_from_bytes(bytes::Vector{UInt8})
-    res = tryparse(Float64, String(bytes))
-    res === nothing && return res
-    res isa Float64 && return res
-    isnull(res) && return nothing
-    return get(res)
-end
+float_from_bytes(bytes::Vector{UInt8}) = tryparse(Float64, String(bytes))
 
 #=
 Parse an integer from the given bytes vector, starting at `from` and ending at

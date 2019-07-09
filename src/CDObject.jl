@@ -77,7 +77,7 @@ true
 """
 function CDDate(str::CDTextString)
     m = match(CDDATE_REGEX, str)
-    m === nothing && error("Invalid date format in input")
+    m === nothing && error(E_INVALID_DATE)
     ut, tzh, tzm = m[:ahead], m[:tzh], m[:tzm]
 
     tzhr = tzh === nothing ? Hour(0) : Hour(parse(Int, tzh))
