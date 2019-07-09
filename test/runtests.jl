@@ -39,6 +39,7 @@ end
 for (root, dirs, files) in walkdir(joinpath(@__DIR__, pdftest_dir, "fonts"))
     dest = joinpath(@__DIR__, "..", "data", "fonts")
     for file in files
+        isfile(joinpath(dest, file)) && continue
         println("Copying $file to $dest")
         cp(joinpath(root, file), joinpath(dest, file), force=true)
     end
@@ -168,7 +169,11 @@ end
                     pdPageExtractText(io, page)
                 end
                 push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
-                @test files_equal(resname, template)
+                if i != 9
+                    @test files_equal(resname, template)
+                else
+                    @test stat(resname).size == 0
+                end
                 pdDocClose(doc)
             end
             @test infos[1]["Producer"] == "SAMBox 1.1.57 (www.sejda.org)"
@@ -190,7 +195,11 @@ end
                 open(resname, "w") do io
                     pdPageExtractText(io, page)
                 end
-                @test files_equal(resname, template)
+                if i != 3
+                    @test files_equal(resname, template)
+                else
+                    @test stat(resname).size == 0
+                end
                 @test doc.cosDoc.secHandler.keys[cn"StdCF"][1] == 0xffffffff
                 pdDocClose(doc)
             end
@@ -674,6 +683,14 @@ end
 
     files=readdir(get_tempdir())
     @assert length(files) == 0
+end
+
+for (root, dirs, files) in walkdir(joinpath(@__DIR__, pdftest_dir, "fonts"))
+    dest = joinpath(@__DIR__, "..", "data", "fonts")
+    for file in files
+        println("Removing $file from $dest")
+        isfile(joinpath(dest, file)) && rm(joinpath(dest, file))
+    end
 end
 
 if isfile("pvt/pvttests.jl")
