@@ -8,12 +8,16 @@ const PASSWD_PADDING =
 
 const AES_SUFFIX = [0x73, 0x41, 0x6C, 0x54] # sAlT
 
-function UTF8ToPDFEncoding(s::SecretBuffer)
-    r = SecretBuffer()
-    while !eof(s)
-        write(r, UnicodeToPDFEncoding(read(s, Char)))
+function UTF8ToPDFEncoding!(s::SecretBuffer)
+    try
+        r = SecretBuffer()
+        while !eof(s)
+            write(r, UnicodeToPDFEncoding(read(s, Char)))
+        end
+        return seekstart(r)
+    finally
+        shred!(s)
     end
-    return seekstart(r)
 end
 
 struct StdSecHandler <: SecHandler
@@ -34,17 +38,15 @@ struct StdSecHandler <: SecHandler
     strf::CosName
     eff::CosName
     password::Function
+    skey_path::String
+    iv_path::String
     keys::Dict{CosName, Tuple{UInt32, Vector{UInt8}}}
 end
 
-const STORE_KEY = crypto_random(32)
-const STORE_IV  = crypto_random(16)
-
 function store_key(s::StdSecHandler, cfn::CosName,
                    data::Tuple{UInt32, SecretBuffer})
-
-    skey = SecretBuffer(); iv = SecretBuffer()
-    write(skey, STORE_KEY); write(iv, STORE_IV)
+    skey = SecretBuffer!(read(s.skey_path, 32))
+    iv   = SecretBuffer!(read(s.iv_path, 16))
     cctx = CipherContext("aes_256_cbc", skey, iv, true)
     shred!(skey); shred!(iv)
 
@@ -59,8 +61,8 @@ function get_key(s::StdSecHandler, cfn::CosName)
     permkey = get(s.keys, cfn, nothing)
     permkey === nothing && return nothing
     
-    skey = SecretBuffer(); iv = SecretBuffer()
-    write(skey, STORE_KEY); write(iv, STORE_IV)
+    skey = SecretBuffer!(read(s.skey_path, 32))
+    iv   = SecretBuffer!(read(s.iv_path, 16))
     cctx = CipherContext("aes_256_cbc", skey, iv, false)
     shred!(skey); shred!(iv)
     
@@ -131,8 +133,8 @@ function algo01(h::StdSecHandler, params::CryptParams,
     genarr = genarr[1:2]
     perm, key = get_key(h, params)
     n = div(h.length, 8)
-    n != key.size && error("Invalid encryption key length")
     md = shred!(key) do kc
+        n != kc.size && error("Invalid encryption key length")
         seekend(kc); write(kc, numarr); write(kc, genarr)
         !isRC4 && write(kc, AES_SUFFIX)
         mdctx = DigestContext("md5")
@@ -143,23 +145,29 @@ function algo01(h::StdSecHandler, params::CryptParams,
     key = SecretBuffer!(md[1:l])
     iv = SecretBuffer!(isRC4 ?     UInt8[] :
                        isencrypt ? crypto_random(16) : data[1:16])
-    cctx = CipherContext(isRC4 ? "rc4" : "aes_128_cbc", key, iv, isencrypt)
-    shred!(key); shred!(iv)
-    d = (isRC4 || isencrypt) ? update!(cctx, data) :
-                               update!(cctx, (@view data[17:end]))
-    append!(d, close(cctx))
-    return d
-end
+    try
+        cctx = CipherContext(isRC4 ? "rc4" : "aes_128_cbc", key, iv, isencrypt)
+        d = (isRC4 || isencrypt) ? update!(cctx, data) :
+            update!(cctx, (@view data[17:end]))
+        append!(d, close(cctx))
+        return d
+    finally
+        shred!(key); shred!(iv)
+    end
+ end
 
 function algo01a(h::StdSecHandler, params::CryptParams,
                 data::AbstractVector{UInt8}, isencrypt::Bool)
     perm, key = get_key(h, params)
-    iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16]) 
-    cctx = CipherContext("aes_256_cbc", key, iv, isencrypt)
-    shred!(key); shred!(iv)
-    d = isencrypt ? update!(cctx, data) : update!(cctx, (@view data[17:end]))
-    append!(d, close(cctx))
-    return d
+    iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16])
+    try
+        cctx = CipherContext("aes_256_cbc", key, iv, isencrypt)
+        d = isencrypt ? update!(cctx, data) : update!(cctx, (@view data[17:end]))
+        append!(d, close(cctx))
+        return d
+    finally
+        shred!(key); shred!(iv)
+    end
 end
 
 function algo02(h::StdSecHandler, password::SecretBuffer)
@@ -222,14 +230,17 @@ function algo02a(h::StdSecHandler, pw::SecretBuffer, isowner::Bool)
         return SecretBuffer!(algo02b(h, pw, seekstart(pv), isowner))
     end
     iv = SecretBuffer!(fill(0x00, 16))
-    cctx = CipherContext("aes_256_cbc", ik, iv, false)
-    shred!(ik); shred!(iv)
-    set_padding(cctx, 0)
-    de = isowner ? oe : ue
-    fek = SecretBuffer!(update!(cctx, de))
-    write(seekend(fek), close(cctx))
-    # f
-    return algo13(h, seekstart(fek)) ? seekstart(fek) : nothing
+    try
+        cctx = CipherContext("aes_256_cbc", ik, iv, false)
+        set_padding(cctx, 0)
+        de = isowner ? oe : ue
+        fek = SecretBuffer!(update!(cctx, de))
+        write(seekend(fek), close(cctx))
+        # f
+        return algo13(h, seekstart(fek)) ? seekstart(fek) : nothing
+    finally
+        shred!(ik); shred!(iv)
+    end
 end
 
 function algo02b(h::StdSecHandler, password::SecretBuffer,
@@ -319,34 +330,37 @@ end
 
 function algo05p_a_e(h::StdSecHandler, password::SecretBuffer)
     key = SecretBuffer!(algo02(h, password))
-    mdctx = DigestContext("md5")
-    update!(mdctx, PASSWD_PADDING)
-    update!(mdctx, h.id)
-    md = close(mdctx)
-
     iv = SecretBuffer!(UInt8[])
-
-    cctx = CipherContext("rc4", key, iv, true)
-    c = update!(cctx, md)
-    append!(c, close(cctx))
-
-    for i = 1:19
-        reset(cctx)
-        shred!(modkey(key, i)) do tkey
-            init(cctx, tkey, iv, true)
-        end
-        c = update!(cctx, c)
+    try
+        mdctx = DigestContext("md5")
+        update!(mdctx, PASSWD_PADDING)
+        update!(mdctx, h.id)
+        md = close(mdctx)
+        cctx = CipherContext("rc4", key, iv, true)
+        c = update!(cctx, md)
         append!(c, close(cctx))
+
+        for i = 1:19
+            reset(cctx)
+            shred!(modkey(key, i)) do tkey
+                init(cctx, tkey, iv, true)
+            end
+            c = update!(cctx, c)
+            append!(c, close(cctx))
+        end
+        return c, key
+    finally
+        shred!(iv)
     end
-    shred!(iv)
-    return c, key
 end
 
 algo05(h::StdSecHandler, password::Vector{UInt8}) = error(E_NOT_IMPLEMENTED)
 
 function algo06(h::StdSecHandler, password::SecretBuffer)
     (u, key) = h.r == 2 ? algo04(h, password) : algo05p_a_e(h, password) 
-    return u == h.u[1:16] ? key : nothing
+    u == h.u[1:16] && return key
+    shred!(key)
+    return nothing
 end
 
 function algo07(h::StdSecHandler, password::SecretBuffer)
@@ -354,18 +368,21 @@ function algo07(h::StdSecHandler, password::SecretBuffer)
     key = SecretBuffer!(algo03p_a_d(h, password))
     # b
     iv = SecretBuffer!(UInt8[])
-    cctx = CipherContext("rc4", key, iv, false)
-    od, count = h.o, (h.r == 2 ? 0 : 19)
-    for i = count:-1:0
-        reset(cctx)
-        shred!(modkey(key, i)) do tkey
-            init(cctx, tkey, iv, false)
+    try
+        cctx = CipherContext("rc4", key, iv, false)
+        od, count = h.o, (h.r == 2 ? 0 : 19)
+        for i = count:-1:0
+            reset(cctx)
+            shred!(modkey(key, i)) do tkey
+                init(cctx, tkey, iv, false)
+            end
+            od = update!(cctx, od)
+            append!(od, close(cctx))
         end
-        od = update!(cctx, od)
-        append!(od, close(cctx))
+        return shred!(upw -> algo06(h, upw), SecretBuffer!(od))
+    finally
+        shred!(iv); shred!(key)
     end
-    shred!(iv); shred!(key)
-    return shred!(upw -> algo06(h, upw), SecretBuffer!(od))
 end
 
 algo08(h::StdSecHandler, password::Vector{UInt8}) = error(E_NOT_IMPLEMENTED)
@@ -445,10 +462,21 @@ function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
     end
     eff  = get(enc, cn"EFF", stmf)
     access === identity && (access = doUI)
+    skey_path, io = get_tempfilepath()
+    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+        write(io, s)
+        close(io)
+    end
+    iv_path, io = get_tempfilepath()
+    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+        write(io, s)
+        close(io)
+    end
     keys = Dict(cn"Identity" => (0xffffffff, Vector{UInt8}()))
     return StdSecHandler(v, vrsn, length, r, o, u, oe, ue,
                          p, perms, encMetadata, id,
-                         cf, stmf, strf, eff, access, keys)
+                         cf, stmf, strf, eff, access,
+                         skey_path, iv_path, keys)
 end
 
 function crypt(h::SecHandler, params::CryptParams,
@@ -468,7 +496,7 @@ end
 
 function validateUserPW(h::StdSecHandler, cfn::CosName, password::SecretBuffer)
     cfm = get_cfm(h, cfn)
-    cfm === cn"None"  && return Vector{UInt8}()
+    cfm === cn"None"  && return SecretBuffer!(Vector{UInt8}(undef, 0))
     cfm === cn"V2"    && return algo06(h, password)
     cfm === cn"AESV2" && return algo06(h, password)
     cfm === cn"AESV3" && return algo11(h, password)
@@ -477,7 +505,7 @@ end
 
 function validateOwnerPW(h::StdSecHandler, cfn::CosName, password::SecretBuffer)
     cfm = get_cfm(h, cfn)
-    cfm === cn"None"  && return Vector{UInt8}()
+    cfm === cn"None"  && return SecretBuffer!(Vector{UInt8}(undef, 0))
     cfm === cn"V2"    && return algo07(h, password)
     cfm === cn"AESV2" && return algo07(h, password)
     cfm === cn"AESV3" && return algo12(h, password)
@@ -494,8 +522,8 @@ function validatePW(h::StdSecHandler, cfn::CosName, s::SecretBuffer)
     return nothing
 end
 
-funicode(h::StdSecHandler, cfn::CosName, pw::SecretBuffer) =
-    shred!(UTF8ToPDFEncoding, pw)
+funicode!(h::StdSecHandler, cfn::CosName, pw::SecretBuffer) =
+    shred!(UTF8ToPDFEncoding!, pw)
 
 function get_key(h::StdSecHandler, params::CryptParams)
     vpw = get_key(h, params.cfn)
@@ -508,7 +536,7 @@ function get_key(h::StdSecHandler, cfn::CosName, password::Function)
     vpw === nothing || return store_key(h, cfn, vpw)
     i = 1
     while vpw === nothing && i <= 3
-        vpw = shred!(pw -> validatePW(h, cfn, pw), funicode(h, cfn, password()))
+        vpw = shred!(pw -> validatePW(h, cfn, pw), funicode!(h, cfn, password()))
         i += 1
     end
     vpw === nothing && error(E_INVALID_PASSWORD)

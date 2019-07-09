@@ -142,6 +142,8 @@ function cosDocOpen(fp::AbstractString; access::Function=identity)
     doc.encrypt = cosDocGetObject(doc, encref)
     doc.encrypt === CosNull && return doc
     doc.secHandler = SecHandler(doc, access)
+    # With every cosDocClose all the crypto key and iv files are removed
+    push!(doc.tmpfiles, doc.secHandler.skey_path, doc.secHandler.iv_path)
     return doc
 end
 

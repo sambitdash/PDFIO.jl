@@ -12,7 +12,7 @@ using PDFIO.PD: openssl_error
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.4"
+pdftest_ver  = "0.0.5"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -36,6 +36,14 @@ if !isdir(pdftest_dir)
     close(r)
 end
 
+for (root, dirs, files) in walkdir(joinpath(@__DIR__, pdftest_dir, "fonts"))
+    dest = joinpath(@__DIR__, "..", "data", "fonts")
+    for file in files
+        println("Copying $file to $dest")
+        cp(joinpath(root, file), joinpath(dest, file), force=true)
+    end
+end
+
 function testfiles(filename)
     name, ext = splitext(filename)
     return (name*".res", joinpath(@__DIR__, pdftest_dir, "templates", name*".txt"))
@@ -46,7 +54,6 @@ function local_testfiles(filename, filesdir="files")
     return (name*".res", joinpath(@__DIR__, pdftest_dir, "templates", name*".txt"),
             joinpath(@__DIR__, pdftest_dir, filesdir, filename))
 end
-
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
@@ -132,6 +139,59 @@ end
                 @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
                 @test all([r[i][:passed] for i = 1:length(r)])
+                pdDocClose(doc)
+            end
+        end
+
+        @testset "PDF user password documents" begin
+            files = ["dt-256-aes.pdf",              # V-5 R-6 supported in PDF 2.0
+                     "dt-embed-protected.pdf",      # V-2 R-3
+                     "dt-own-pass-same.pdf",        # V-2 R-3 - upw = opw = user
+                     "dt.pdf",                      # V-2 R-3
+                     "dt-protected.pdf",            # V-4 R-4
+                     "dt-nopass.pdf",               # No encryption
+                     "pdf-example-password.pdf",    # V-2 R-3
+                     "pdf-example-encryption.pdf",  # V-2 R-3 No user password
+                     "upw-password-opw-sample.pdf", # V-5 R-5
+                     "samplesecured_256bitaes.pdf", # V-5 R-5
+                     ]           
+            pws = Vector{UInt8}[b"user", b"user", b"user", b"user", b"user", b"", b"test", b"", b"password", b""]
+            infos = []
+            encrypted = []
+            for i = 1:length(files)
+                file = files[i]
+                resname, template, filename = local_testfiles(file)
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(pws[i]))
+                page = pdDocGetPage(doc, 1)
+                push!(infos, pdDocGetInfo(doc))
+                open(resname, "w") do io
+                    pdPageExtractText(io, page)
+                end
+                push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
+                @test files_equal(resname, template)
+                pdDocClose(doc)
+            end
+            @test infos[1]["Producer"] == "SAMBox 1.1.57 (www.sejda.org)"
+            @test infos[2]["Producer"] == "LibreOffice 6.0"
+            @test infos[3]["Producer"] == "LibreOffice 6.0"
+            @test infos[4]["Producer"] == "LibreOffice 6.0"
+            @test infos[5]["Producer"] =="3-Heights(TM) PDF Security Shell 4.8.25.2 (http://www.pdf-tools.com)"
+            @test infos[6]["Producer"] == "LibreOffice 6.0"
+            @test all(encrypted[1:5])
+        end
+        @testset "PDF owner password documents" begin
+            files = ["dt.pdf", "dt-own-pass-same.pdf", "upw-password-opw-sample.pdf"]
+            opws = Vector{UInt8}[b"owner", b"user", b"sample"]
+            for i = 1:length(files)
+                file = files[i]
+                resname, template, filename = local_testfiles(file)
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
+                page = pdDocGetPage(doc, 1)
+                open(resname, "w") do io
+                    pdPageExtractText(io, page)
+                end
+                @test files_equal(resname, template)
+                @test doc.cosDoc.secHandler.keys[cn"StdCF"][1] == 0xffffffff
                 pdDocClose(doc)
             end
         end

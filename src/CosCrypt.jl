@@ -35,8 +35,10 @@ function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
     !o.isInternal && return o
     f = String(get(o, cn"F"))
     len = get(get(o, cn"Length"))
-    ctext = open(io->read(io, len), f)
-    
+    io = util_open(f, "r")
+    ctext = read(io, len)
+    util_close(io)
+    rm(f) # Not unsafe as decryption is carried out before attaching temp files
     (path, io) = get_tempfilepath()
     try
         ptext = crypt(h, params, ctext, false)

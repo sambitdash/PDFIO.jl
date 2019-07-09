@@ -8,7 +8,7 @@ function parse_data(filename)
     ps=util_open(filename,"r")
     try
         while(!eof(ps))
-            println(parse_value(ps))
+            println(parse_value(ps, x->(length(x), String(x))))
             chomp_space!(ps)
         end
     finally
@@ -20,7 +20,7 @@ end
 Given a `IOStream`, after possibly any amount of whitespace, return the next
 parseable value.
 =#
-function parse_value(ps::IO, fparse_more=x->nothing)
+function parse_value(ps::IO, fparse_more=x->(length(x), nothing))
     chomp_space!(ps)
     byte = UInt8(peek(ps))
     byte == LEFT_PAREN ? parse_string(ps) :
@@ -339,6 +339,7 @@ postprocess_indirect_object(ps::IO,
 function parse_indirect_obj(ps::IO,
                             hoffset::Int,
                             xref::Dict{CosIndirectObjectRef, CosObjectLoc})
+    chomp_space!(ps)
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val
@@ -353,6 +354,7 @@ function parse_indirect_obj(ps::IO,
 end
 
 function parse_indirect_ref(ps::IO)
+    chomp_space!(ps)
     objn = parse_unsignednumber(ps).val
     chomp_space!(ps)
     genn = parse_unsignednumber(ps).val

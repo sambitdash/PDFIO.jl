@@ -547,10 +547,13 @@ function pdDocValidateSignatures(doc::PDDoc; export_certs=false)
     if !isempty(certmap)
         bn = basename(doc.cosDoc.filepath)
         fname = splitext(bn)[1]*".pem"
-        open(fname, "w") do io
+        io = util_open(fname, "w")
+        try
             for val in values(certmap)
                 print(io, val)
             end
+        finally
+            util_close(io)
         end
     end
     return ret
