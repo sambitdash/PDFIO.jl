@@ -93,9 +93,13 @@ provided here for reference:
 
 ### OpenSSL
 
-OpenSSL is licensed under Apache License 2.0. The detailed license can
+OpenSSL is licensed under Apache License 2.0 for version 3.x and above. The detailed license can
 be found at:
 [https://github.com/openssl/openssl/blob/master/LICENSE](https://github.com/openssl/openssl/blob/master/LICENSE)
+
+Since, PDFIO can work with OpenSSL 1.1.0 the license can be seen at:
+
+[https://github.com/openssl/openssl/blob/OpenSSL_1_1_0-stable/LICENSE](https://github.com/openssl/openssl/blob/OpenSSL_1_1_0-stable/LICENSE) which will be the license for all the 1.x versions of OpenSSL. 
 
 
 ### Zlib
