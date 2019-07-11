@@ -50,29 +50,18 @@ function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
     set!(o, cn"Length", CosInt(len))
 
     filters = get(o, cn"FFilter")
-    if filters !== CosNull
-        if filters isa CosName
-            if cn"Crypt" === filters
-                set!(o, cn"FFilter", CosNull)
-                set!(o, cn"FDecodeParms", CosNull)
-            end
-        else
-            vf = get(filters)
-            l = length(vf)
-            if vf[1] === cn"Crypt"
-                if l == 1
-                    set!(o, cn"FFilter", CosNull)
-                    set!(o, cn"FDecodeParms", CosNull)
-                else
-                    filters = get(o, cn"FFilter")
-                    deleteat!(get(filters), 1)
-                    params = get(o, cn"FDecodeParms")
-                    params !== CosNull && deleteat!(get(params), 1)
-                end
-            end
-        end
+    if filters isa CosNullType ||
+        (filters isa CosName && cn"Crypt" === filters) ||
+        (filters isa CosArray &&
+         (length(filters) == 0 ||
+          (length(filters) == 1 && cn"Crypt" === filters[1])))
+        set!(o, cn"FFilter", CosNull)
+        set!(o, cn"FDecodeParms", CosNull)
+    elseif filters isa CosArray && cn"Crypt" === filters[1]
+        deleteat!(get(filters), 1)
+        params = get(o, cn"FDecodeParms")
+        params !== CosNull && deleteat!(get(params), 1)
     end
-    
     o.isInternal = false
     return o
 end

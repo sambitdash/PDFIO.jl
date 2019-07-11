@@ -89,21 +89,16 @@ CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosObjectStream) =
 # such may not have access to such parameters. Hence, the crypt filter has to be
 # decrypted when the document information is available.
 function CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosStream)
-    cfn = nothing
+    cfn = h.stmf
     filters = get(o, cn"FFilter")
-    filters === CosNull && return CryptParams(num, gen, h.stmf)
-    if filters isa CosName
-        if cn"Crypt" === filters
-            params = get(o, cn"FDecodeParms")
-            cfn = get(params, cn"Name")
-        end
-    else
-        i = findnext(x -> x === cn"Crypt", get(filters), 1)
-        params = get(o, cn"FDecodeParms")
-        cfn = get(params[i], cn"Name")
-        i > 1 && cosStreamRemoveFilters(stm, until=(i-1))
+    filters === CosNull && return CryptParams(num, gen, cfn)
+    if cn"Crypt" === filters ||
+        (filters isa CosArray && length(filters) > 0 && cn"Crypt" === filters[1])
+        params = get(o, cn"FDecodeParms", CosDict())
+        param = params isa CosDict ? params : params[1]
+        cfn = get(param, cn"Name", cn"Identity")
     end
-    return CryptParams(num, gen, cfn !== nothing ? cfn : h.stmf)
+    return CryptParams(num, gen, cfn)
 end
 
 # Output 32-bytes padded password
@@ -157,7 +152,7 @@ function algo01(h::StdSecHandler, params::CryptParams,
  end
 
 function algo01a(h::StdSecHandler, params::CryptParams,
-                data::AbstractVector{UInt8}, isencrypt::Bool)
+                 data::AbstractVector{UInt8}, isencrypt::Bool)
     perm, key = get_key(h, params)
     iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16])
     try
@@ -423,7 +418,7 @@ function algo13(h::StdSecHandler, fek::SecretBuffer)
     return (h.p == reinterpret(UInt32, dpermp)[1]) 
 end
 
-function SecHandler(doc::CosDoc, access::Union{String, Function})
+function SecHandler(doc::CosDoc, access::Function)
     enc = doc.encrypt
     get(enc, cn"Filter") === cn"Standard" || return nothing
     v      = get(get(enc, cn"V", CosInt(0)))
@@ -431,7 +426,7 @@ function SecHandler(doc::CosDoc, access::Union{String, Function})
     return StdSecHandler(doc, v, access)
 end
 
-function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
+function StdSecHandler(doc::CosDoc, v::Int, access::Function)
     enc = doc.encrypt
     length = get(get(enc, cn"Length", CosInt(40)))
     r      = get(get(enc, cn"R"))
@@ -461,14 +456,18 @@ function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
         strf = get(enc, cn"StrF", cn"Identity")
     end
     eff  = get(enc, cn"EFF", stmf)
+    eff !== stmf &&
+        Base.@warn("Embedded file streams without Crypt filters may not decrypt")
     access === identity && (access = doUI)
     skey_path, io = get_tempfilepath()
-    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+    # Ensure the files have enough bytes in them.
+    shred!(SecretBuffer!(crypto_random(rand(1000:10000)))) do s
         write(io, s)
         close(io)
     end
     iv_path, io = get_tempfilepath()
-    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+    # Ensure the files have enough bytes in them.
+    shred!(SecretBuffer!(crypto_random(rand(1000:10000)))) do s
         write(io, s)
         close(io)
     end

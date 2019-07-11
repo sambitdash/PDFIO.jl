@@ -204,6 +204,17 @@ end
                 pdDocClose(doc)
             end
         end
+        @testset "PDF Crypt filter" begin
+            files = ["dt-att-protected.pdf"]
+            opws = Vector{UInt8}[b"user1234"]
+            for i = 1:length(files)
+                file = files[i]
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
+                obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(43, 0))
+                @test String(read(get(obj))) == "An embedded text file. "
+                pdDocClose(doc)
+            end
+        end
     end
     
     @testset "Test FlateDecode" begin
