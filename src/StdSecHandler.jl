@@ -37,73 +37,10 @@ struct StdSecHandler <: SecHandler
     stmf::CosName
     strf::CosName
     eff::CosName
-    password::Function
+    access::Function
     skey_path::String
     iv_path::String
     keys::Dict{CosName, Tuple{UInt32, Vector{UInt8}}}
-end
-
-function store_key(s::StdSecHandler, cfn::CosName,
-                   data::Tuple{UInt32, SecretBuffer})
-    skey = SecretBuffer!(read(s.skey_path, 32))
-    iv   = SecretBuffer!(read(s.iv_path, 16))
-    cctx = CipherContext("aes_256_cbc", skey, iv, true)
-    shred!(skey); shred!(iv)
-
-    perm, key = data
-    c = update!(cctx, key)
-    append!(c, close(cctx))
-    s.keys[cfn] = (perm, c)
-    return data
-end
-
-function get_key(s::StdSecHandler, cfn::CosName)
-    permkey = get(s.keys, cfn, nothing)
-    permkey === nothing && return nothing
-    
-    skey = SecretBuffer!(read(s.skey_path, 32))
-    iv   = SecretBuffer!(read(s.iv_path, 16))
-    cctx = CipherContext("aes_256_cbc", skey, iv, false)
-    shred!(skey); shred!(iv)
-    
-    perm, c = permkey
-    b = update!(cctx, c)
-    append!(b, close(cctx))
-    return perm, SecretBuffer!(b)
-end
-
-CryptParams(h::StdSecHandler, oi::CosIndirectObject) = 
-    CryptParams(h, oi.num, oi.gen, oi.obj)
-
-CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosObject) =
-    h.r < 4 ? CryptParams(num, gen, cn"StdCF") : error(E_INVALID_OBJECT)
-
-CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosString) =
-    CryptParams(num, gen, h.strf)
-
-CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosObjectStream) =
-    CryptParams(h, num, gen, o.stm)
-
-# For Crypt filter chain ensure the filters before the crypt filters are removed.
-# Crypt filter parameters are associated with the document and the CosStream as
-# such may not have access to such parameters. Hence, the crypt filter has to be
-# decrypted when the document information is available.
-function CryptParams(h::StdSecHandler, num::Int, gen::Int, o::CosStream)
-    cfn = nothing
-    filters = get(o, cn"FFilter")
-    filters === CosNull && return CryptParams(num, gen, h.stmf)
-    if filters isa CosName
-        if cn"Crypt" === filters
-            params = get(o, cn"FDecodeParms")
-            cfn = get(params, cn"Name")
-        end
-    else
-        i = findnext(x -> x === cn"Crypt", get(filters), 1)
-        params = get(o, cn"FDecodeParms")
-        cfn = get(params[i], cn"Name")
-        i > 1 && cosStreamRemoveFilters(stm, until=(i-1))
-    end
-    return CryptParams(num, gen, cfn !== nothing ? cfn : h.stmf)
 end
 
 # Output 32-bytes padded password
@@ -118,56 +55,6 @@ function get_padded_pw(password::SecretBuffer)
         end
     end
     return seekstart(up)
-end
-
-function algo01(h::StdSecHandler, params::CryptParams,
-                data::AbstractVector{UInt8}, isencrypt::Bool)
-    num, gen, cfn = params.num, params.gen, params.cfn
-    cfm = get_cfm(h, cfn)
-    isRC4 = cfm === cn"V2"
-    numarr = copy(reinterpret(UInt8, [num]))
-    ENDIAN_BOM == 0x01020304 && reverse!(numarr)
-    numarr = numarr[1:3]
-    genarr = copy(reinterpret(UInt8, [gen]))
-    ENDIAN_BOM == 0x01020304 && reverse!(genarr)
-    genarr = genarr[1:2]
-    perm, key = get_key(h, params)
-    n = div(h.length, 8)
-    md = shred!(key) do kc
-        n != kc.size && error("Invalid encryption key length")
-        seekend(kc); write(kc, numarr); write(kc, genarr)
-        !isRC4 && write(kc, AES_SUFFIX)
-        mdctx = DigestContext("md5")
-        update!(mdctx, kc)
-        return close(mdctx)
-    end
-    l = min(n+5, 16)
-    key = SecretBuffer!(md[1:l])
-    iv = SecretBuffer!(isRC4 ?     UInt8[] :
-                       isencrypt ? crypto_random(16) : data[1:16])
-    try
-        cctx = CipherContext(isRC4 ? "rc4" : "aes_128_cbc", key, iv, isencrypt)
-        d = (isRC4 || isencrypt) ? update!(cctx, data) :
-            update!(cctx, (@view data[17:end]))
-        append!(d, close(cctx))
-        return d
-    finally
-        shred!(key); shred!(iv)
-    end
- end
-
-function algo01a(h::StdSecHandler, params::CryptParams,
-                data::AbstractVector{UInt8}, isencrypt::Bool)
-    perm, key = get_key(h, params)
-    iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16])
-    try
-        cctx = CipherContext("aes_256_cbc", key, iv, isencrypt)
-        d = isencrypt ? update!(cctx, data) : update!(cctx, (@view data[17:end]))
-        append!(d, close(cctx))
-        return d
-    finally
-        shred!(key); shred!(iv)
-    end
 end
 
 function algo02(h::StdSecHandler, password::SecretBuffer)
@@ -423,15 +310,20 @@ function algo13(h::StdSecHandler, fek::SecretBuffer)
     return (h.p == reinterpret(UInt32, dpermp)[1]) 
 end
 
-function SecHandler(doc::CosDoc, access::Union{String, Function})
+function SecHandler(doc::CosDoc, access::Function)
     enc = doc.encrypt
-    get(enc, cn"Filter") === cn"Standard" || return nothing
-    v      = get(get(enc, cn"V", CosInt(0)))
-    v >= 1 || return nothing
-    return StdSecHandler(doc, v, access)
+    if get(enc, cn"Filter") === cn"Standard"
+        v      = get(get(enc, cn"V", CosInt(0)))
+        v >= 1 || return nothing
+        return StdSecHandler(doc, v, access)
+    end
+    subfilter = get(enc, cn"SubFilter")
+    subfilter in [cn"adbe.pkcs7.s3", cn"adbe.pkcs7.s4", cn"adbe.pkcs7.s5"] &&
+        return PKISecHandler(doc, subfilter, access)
+    error("Incompatible security handler used in the document")
 end
 
-function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
+function StdSecHandler(doc::CosDoc, v::Int, access::Function)
     enc = doc.encrypt
     length = get(get(enc, cn"Length", CosInt(40)))
     r      = get(get(enc, cn"R"))
@@ -461,14 +353,18 @@ function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
         strf = get(enc, cn"StrF", cn"Identity")
     end
     eff  = get(enc, cn"EFF", stmf)
+    eff !== stmf &&
+        Base.@warn("Embedded file streams without Crypt filters may not decrypt")
     access === identity && (access = doUI)
     skey_path, io = get_tempfilepath()
-    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+    # Ensure the files have enough bytes in them.
+    shred!(SecretBuffer!(crypto_random(rand(1000:10000)))) do s
         write(io, s)
         close(io)
     end
     iv_path, io = get_tempfilepath()
-    shred!(SecretBuffer!(crypto_random(rand(1:10000)))) do s
+    # Ensure the files have enough bytes in them.
+    shred!(SecretBuffer!(crypto_random(rand(1000:10000)))) do s
         write(io, s)
         close(io)
     end
@@ -477,21 +373,6 @@ function StdSecHandler(doc::CosDoc, v::Int, access::Union{String, Function})
                          p, perms, encMetadata, id,
                          cf, stmf, strf, eff, access,
                          skey_path, iv_path, keys)
-end
-
-function crypt(h::SecHandler, params::CryptParams,
-               data::Vector{UInt8}, isencrypt::Bool)
-    cfm = get_cfm(h, params.cfn)
-    cfm === cn"None"  && return data
-    cfm === cn"AESV3" && return algo01a(h, params, data, isencrypt)
-    return algo01(h, params, data, isencrypt)
-end
-
-function get_cfm(h::StdSecHandler, cfn::CosName)
-    cfn === cn"Identity" && return cn"None"
-    cfm = get(get(h.cf, cfn), cn"CFM")
-    cfm in [cn"None", cn"V2", cn"AESV2", cn"AESV3"] || error(E_INVALID_CRYPT)
-    return cfm
 end
 
 function validateUserPW(h::StdSecHandler, cfn::CosName, password::SecretBuffer)
@@ -524,12 +405,6 @@ end
 
 funicode!(h::StdSecHandler, cfn::CosName, pw::SecretBuffer) =
     shred!(UTF8ToPDFEncoding!, pw)
-
-function get_key(h::StdSecHandler, params::CryptParams)
-    vpw = get_key(h, params.cfn)
-    vpw === nothing || return vpw
-    return get_key(h, params.cfn, h.password)
-end
 
 function get_key(h::StdSecHandler, cfn::CosName, password::Function)
     vpw = shred!(pw -> validatePW(h, cfn, pw), SecretBuffer(""))

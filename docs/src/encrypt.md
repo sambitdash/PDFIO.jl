@@ -123,3 +123,29 @@ nor the file encryption key resident in memory. With the API
 being open source we do not expect to provide any protection against
 debugging. 
 
+### PKI Security Handler
+PKI security handler can be used to decrypt PDF documents if
+needed. The handler will be invoked when needed to decrypt data very
+similar to the standard security handler. The default method provides
+capabilities to decrypt the document using a PKCS#12 (.p12) file as a
+keystore. However, the default behavior can be easily overwritten by
+providing your own access function. The default code looks like below:
+
+```
+function get_digital_id()
+    p12file = ""
+    while !isfile(p12file)
+        p12file =
+            prompt("Select the PCKS#12 (.p12) certificate for the recepient")
+    end
+    p12pass = getpass("Enter the password to open the PKCS#12 (.p12) file")
+    return shred!(x->read_pkcs12(p12file, x), p12pass)
+end
+
+doc = pdDocOpen("file.pdf", access=get_digital_id)
+```
+
+The functionality has been developed with `OpenSSL`. OpenSSL `ENGINE`
+interface can be used to implement another version of `get_digital_id`
+method using a `PKCS#11` based interface to enable HSM or hardware
+tokens as certificate stores.

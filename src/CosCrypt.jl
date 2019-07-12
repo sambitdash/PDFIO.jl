@@ -1,7 +1,139 @@
+using Base: SecretBuffer, SecretBuffer!, shred!
+import ..Common: decrypt
+
+function store_key(s::SecHandler, cfn::CosName,
+                   data::Tuple{UInt32, SecretBuffer})
+    skey = SecretBuffer!(read(s.skey_path, 32))
+    iv   = SecretBuffer!(read(s.iv_path, 16))
+    cctx = CipherContext("aes_256_cbc", skey, iv, true)
+    shred!(skey); shred!(iv)
+
+    perm, key = data
+    c = update!(cctx, key)
+    append!(c, close(cctx))
+    s.keys[cfn] = (perm, c)
+    return data
+end
+
+function get_key(s::SecHandler, cfn::CosName)
+    permkey = get(s.keys, cfn, nothing)
+    permkey === nothing && return nothing
+    
+    skey = SecretBuffer!(read(s.skey_path, 32))
+    iv   = SecretBuffer!(read(s.iv_path, 16))
+    cctx = CipherContext("aes_256_cbc", skey, iv, false)
+    shred!(skey); shred!(iv)
+    
+    perm, c = permkey
+    b = update!(cctx, c)
+    append!(b, close(cctx))
+    return perm, SecretBuffer!(b)
+end
+
+function get_cfm(h::SecHandler, cfn::CosName)
+    cfn === cn"Identity" && return cn"None"
+    cfm = get(get(h.cf, cfn), cn"CFM")
+    cfm in [cn"None", cn"V2", cn"AESV2", cn"AESV3"] || error(E_INVALID_CRYPT)
+    return cfm
+end
+
 struct CryptParams
     num::Int
     gen::Int
     cfn::CosName
+end
+
+CryptParams(h::SecHandler, oi::CosIndirectObject) = 
+    CryptParams(h, oi.num, oi.gen, oi.obj)
+
+CryptParams(h::SecHandler, num::Int, gen::Int, o::CosObject) =
+    h.r < 4 ? CryptParams(num, gen, cn"StdCF") : error(E_INVALID_OBJECT)
+
+CryptParams(h::SecHandler, num::Int, gen::Int, o::CosString) =
+    CryptParams(num, gen, h.strf)
+
+CryptParams(h::SecHandler, num::Int, gen::Int, o::CosObjectStream) =
+    CryptParams(h, num, gen, o.stm)
+
+# For Crypt filter chain ensure the filters before the crypt filters are removed.
+# Crypt filter parameters are associated with the document and the CosStream as
+# such may not have access to such parameters. Hence, the crypt filter has to be
+# decrypted when the document information is available.
+function CryptParams(h::SecHandler, num::Int, gen::Int, o::CosStream)
+    cfn = h.stmf
+    filters = get(o, cn"FFilter")
+    filters === CosNull && return CryptParams(num, gen, cfn)
+    if cn"Crypt" === filters ||
+        (filters isa CosArray && length(filters) > 0 && cn"Crypt" === filters[1])
+        params = get(o, cn"FDecodeParms", CosDict())
+        param = params isa CosDict ? params : params[1]
+        cfn = get(param, cn"Name", cn"Identity")
+    end
+    return CryptParams(num, gen, cfn)
+end
+
+function get_key(h::SecHandler, params::CryptParams)
+    vpw = get_key(h, params.cfn)
+    vpw === nothing || return vpw
+    return get_key(h, params.cfn, h.access)
+end
+
+function algo01(h::SecHandler, params::CryptParams,
+                data::AbstractVector{UInt8}, isencrypt::Bool)
+    num, gen, cfn = params.num, params.gen, params.cfn
+    cfm = get_cfm(h, cfn)
+    isRC4 = cfm === cn"V2"
+    numarr = copy(reinterpret(UInt8, [num]))
+    ENDIAN_BOM == 0x01020304 && reverse!(numarr)
+    numarr = numarr[1:3]
+    genarr = copy(reinterpret(UInt8, [gen]))
+    ENDIAN_BOM == 0x01020304 && reverse!(genarr)
+    genarr = genarr[1:2]
+    perm, key = get_key(h, params)
+    n = div(h.length, 8)
+    md = shred!(key) do kc
+        n != kc.size && error("Invalid encryption key length")
+        seekend(kc); write(kc, numarr); write(kc, genarr)
+        !isRC4 && write(kc, AES_SUFFIX)
+        mdctx = DigestContext("md5")
+        update!(mdctx, kc)
+        return close(mdctx)
+    end
+    l = min(n+5, 16)
+    key = SecretBuffer!(md[1:l])
+    iv = SecretBuffer!(isRC4 ?     UInt8[] :
+                       isencrypt ? crypto_random(16) : data[1:16])
+    try
+        cctx = CipherContext(isRC4 ? "rc4" : "aes_128_cbc", key, iv, isencrypt)
+        d = (isRC4 || isencrypt) ? update!(cctx, data) :
+            update!(cctx, (@view data[17:end]))
+        append!(d, close(cctx))
+        return d
+    finally
+        shred!(key); shred!(iv)
+    end
+ end
+
+function algo01a(h::SecHandler, params::CryptParams,
+                 data::AbstractVector{UInt8}, isencrypt::Bool)
+    perm, key = get_key(h, params)
+    iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16])
+    try
+        cctx = CipherContext("aes_256_cbc", key, iv, isencrypt)
+        d = isencrypt ? update!(cctx, data) : update!(cctx, (@view data[17:end]))
+        append!(d, close(cctx))
+        return d
+    finally
+        shred!(key); shred!(iv)
+    end
+end
+
+function crypt(h::SecHandler, params::CryptParams,
+               data::Vector{UInt8}, isencrypt::Bool)
+    cfm = get_cfm(h, params.cfn)
+    cfm === cn"None"  && return data
+    cfm === cn"AESV3" && return algo01a(h, params, data, isencrypt)
+    return algo01(h, params, data, isencrypt)
 end
 
 decrypt!(::Union{Nothing, SecHandler}, obj) = obj
@@ -50,29 +182,18 @@ function decrypt(h::SecHandler, params::CryptParams, o::CosStream)
     set!(o, cn"Length", CosInt(len))
 
     filters = get(o, cn"FFilter")
-    if filters !== CosNull
-        if filters isa CosName
-            if cn"Crypt" === filters
-                set!(o, cn"FFilter", CosNull)
-                set!(o, cn"FDecodeParms", CosNull)
-            end
-        else
-            vf = get(filters)
-            l = length(vf)
-            if vf[1] === cn"Crypt"
-                if l == 1
-                    set!(o, cn"FFilter", CosNull)
-                    set!(o, cn"FDecodeParms", CosNull)
-                else
-                    filters = get(o, cn"FFilter")
-                    deleteat!(get(filters), 1)
-                    params = get(o, cn"FDecodeParms")
-                    params !== CosNull && deleteat!(get(params), 1)
-                end
-            end
-        end
+    if filters isa CosNullType ||
+        (filters isa CosName && cn"Crypt" === filters) ||
+        (filters isa CosArray &&
+         (length(filters) == 0 ||
+          (length(filters) == 1 && cn"Crypt" === filters[1])))
+        set!(o, cn"FFilter", CosNull)
+        set!(o, cn"FDecodeParms", CosNull)
+    elseif filters isa CosArray && cn"Crypt" === filters[1]
+        deleteat!(get(filters), 1)
+        params = get(o, cn"FDecodeParms")
+        params !== CosNull && deleteat!(get(params), 1)
     end
-    
     o.isInternal = false
     return o
 end

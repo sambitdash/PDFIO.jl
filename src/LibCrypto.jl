@@ -3,7 +3,8 @@
 
 include("../deps/deps.jl")
 
-using Base: SecretBuffer
+using Base: SecretBuffer, SecretBuffer!
+import Base: copy
 
 export
     BIO,
@@ -23,6 +24,7 @@ export
     find_cert,
     get_info,
     PKey,
+    CMSContentInfo,
     CMSSignedInfo,
     get_signer,
     get_signer_info,
@@ -36,7 +38,9 @@ export
     PKCS1SignedInfo,
     get_rsa_digest,
     BigNum,
-    crypto_random
+    crypto_random,
+    read_pkcs12,
+    decrypt
     
 const V_ASN1_UNDEF                    = Cint(-1)
 const V_ASN1_EOC                      = Cint(0)
@@ -118,6 +122,14 @@ mutable struct BIO <: IO
         finalizer(x->ccall((:BIO_vfree, libcrypto), Cvoid,
                            (Ptr{Cvoid}, ), x.data), this)
     end
+end
+
+# R or W File BIO
+function BIO(fname::String, mode::String="r")
+    bio = ccall((:BIO_new_file, libcrypto), Ptr{Cvoid},
+                (Ptr{Cstring}, Ptr{Cstring}), pointer(fname), pointer(mode))
+    bio == C_NULL && openssl_error(0)
+    return BIO(bio)
 end
 
 # Readonly memory BIO
@@ -370,9 +382,24 @@ function set_params!(store::CertStore, d::Dict)
     return nothing
 end
 
-abstract type SignedInfo end
+# abstract type SignedInfo end
+mutable struct PKey
+    data::Ptr{Cvoid}
+    function PKey(p::Ptr{Cvoid}, clean::Bool=true)
+        this = new(p)
+        finalizer(x->ccall((:EVP_PKEY_free, libcrypto),
+                           Cvoid, (Ptr{Cvoid}, ), x.data), this)
+        return this       
+    end
+end
 
-struct PKCS1SignedInfo <: SignedInfo
+function copy(pkey::PKey)
+    ret = ccall((:EVP_PKEY_up_ref, libcrypto), Cint, (Ptr{Cvoid}, ), pkey.data)
+    openssl_error(ret)
+    return pkey
+end
+
+struct PKCS1SignedInfo 
     sdata::Vector{UInt8}
     function PKCS1SignedInfo(sd::Vector{UInt8})
         str = ccall((:d2i_ASN1_OCTET_STRING, libcrypto), Ptr{Cvoid},
@@ -388,11 +415,11 @@ struct PKCS1SignedInfo <: SignedInfo
     end
 end
 
-mutable struct CMSSignedInfo <: SignedInfo 
+mutable struct CMSContentInfo 
     cms::Ptr{Cvoid}
     detached::Bool
-    function CMSSignedInfo(contents::Vector{UInt8},
-                           detached::Bool = false)
+    function CMSContentInfo(contents::Vector{UInt8},
+                            detached::Bool = false)
         cms = ccall((:d2i_CMS_ContentInfo, libcrypto), Ptr{Cvoid},
                     (Ptr{Cvoid}, Ptr{Ptr{UInt8}}, Clong),
                     C_NULL, Ref(pointer(contents)), length(contents))
@@ -403,6 +430,8 @@ mutable struct CMSSignedInfo <: SignedInfo
         return this
     end
 end
+
+const CMSSignedInfo = CMSContentInfo
 
 function Base.show(io::IO, si::CMSSignedInfo)
     bio = BIO()
@@ -778,17 +807,11 @@ function verify(store::CertStore, cert::Cert)
     end
 end
 
-mutable struct PKey
-    data::Ptr{Cvoid}
-    function PKey(cert::Cert)
-        kdata = ccall((:X509_get_pubkey, libcrypto), Ptr{Cvoid},
-                      (Ptr{Cvoid}, ), cert.data)
-        kdata == C_NULL && error("Cannot extract public key from certificate")
-        this = new(kdata)
-        finalizer(x->ccall((:EVP_PKEY_free, libcrypto),
-                           Cvoid, (Ptr{Cvoid}, ), x.data), this)
-        return this
-    end
+function PKey(cert::Cert)
+    kdata = ccall((:X509_get_pubkey, libcrypto), Ptr{Cvoid},
+                  (Ptr{Cvoid}, ), cert.data)
+    kdata == C_NULL && error("Cannot extract public key from certificate")
+    return PKey(kdata)
 end
 
 Base.:(==)(k1::PKey, k2::PKey) = 
@@ -844,5 +867,66 @@ function get_rsa_digest(si::PKCS1SignedInfo, cert::Cert)
         return xtract_digest, sn
     finally
         ccall((:X509_SIG_free, libcrypto), Cvoid, (Ptr{Cvoid}, ), sig)
+    end
+end
+
+function read_pkcs12(fn::AbstractString, pw::SecretBuffer)
+    data = read(fn)
+    p12 = ccall((:d2i_PKCS12, libcrypto), Ptr{Cvoid},
+                (Ptr{Cvoid}, Ptr{Ptr{Cuchar}}, Clong),
+                C_NULL, Ref(pointer(data)), length(data))
+    p12 == C_NULL && error("Unable to read $fn")
+
+    xkey, xcert, xca = Ref(C_NULL), Ref(C_NULL), Ref(C_NULL)
+
+    ret = ccall((:PKCS12_parse, libcrypto), Cint,
+                (Ptr{Cvoid}, Ptr{Cstring},
+                 Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}),
+                p12, pointer(pw.data), xkey, xcert, xca)
+    openssl_error(ret)
+    return Cert(xcert[]), PKey(xkey[])
+end
+
+const CMS_RECIPINFO_TRANS = Cint(0)
+
+function decrypt(ci::CMSContentInfo, key::PKey, cert::Cert,
+                 detached::Vector{UInt8}, flags::Cint)
+    ris = ccall((:CMS_get0_RecipientInfos, libcrypto), Ptr{Cvoid},
+                (Ptr{Cvoid}, ), ci.cms)
+
+    nri = ccall((:OPENSSL_sk_num, libcrypto), Cint, (Ptr{Cvoid}, ), ris)
+
+    found = false
+    for i = 1:nri
+        ri = ccall((:OPENSSL_sk_value, libcrypto), Ptr{Cvoid},
+                   (Ptr{Cvoid}, Cint), ris, Cint(i-1))
+        if CMS_RECIPINFO_TRANS == ccall((:CMS_RecipientInfo_type, libcrypto),
+                                        Cint, (Ptr{Cvoid}, ), ri)
+            if ccall((:CMS_RecipientInfo_ktri_cert_cmp, libcrypto), Cint,
+                     (Ptr{Cvoid}, Ptr{Cvoid}), ri, cert.data) == 0
+                found = true
+                kcpy = copy(key)
+                ret = ccall((:CMS_RecipientInfo_set0_pkey, libcrypto), Cint,
+                            (Ptr{Cvoid}, Ptr{Cvoid}), ri, kcpy.data)
+                openssl_error(ret)
+                ret = ccall((:CMS_RecipientInfo_decrypt, libcrypto), Cint,
+                            (Ptr{Cvoid}, Ptr{Cvoid}), ci.cms, ri)
+                openssl_error(ret)
+                break
+            end
+        end
+    end
+
+    if found 
+        out  = BIO()
+        dbio = ci.detached ? BIO(detached).data : C_NULL
+        ret = ccall((:CMS_decrypt, libcrypto), Cint,
+                    (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid},
+                     Ptr{Cvoid}, Ptr{Cvoid}, Cint),
+                    ci.cms, C_NULL, C_NULL, dbio, out.data, flags)
+        openssl_error(ret)
+        return read(out)
+    else
+        return nothing
     end
 end

@@ -15,5 +15,5 @@ include("CosObjStream.jl")
 include("CosDoc.jl")
 include("CosCrypt.jl")
 include("StdSecHandler.jl")
-
+include("PKISecHandler.jl")
 end
