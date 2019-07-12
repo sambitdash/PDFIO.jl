@@ -874,6 +874,7 @@ function read_pkcs12(fn::AbstractString, pw::SecretBuffer)
     bio = BIO(String(fn))
     p12 = ccall((:d2i_PKCS12_bio, libcrypto), Ptr{Cvoid},
                 (Ptr{Cvoid}, Ptr{Cvoid}), bio.data, C_NULL)
+    finalize(bio)
     p12 == C_NULL && error("Unable to read $fn")
 
     xkey, xcert, xca = Ref(C_NULL), Ref(C_NULL), Ref(C_NULL)
