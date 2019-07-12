@@ -9,10 +9,11 @@ using AbstractTrees
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
 using PDFIO.PD: openssl_error
+using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.5"
+pdftest_ver  = "0.0.6"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -214,6 +215,38 @@ end
                 @test String(read(get(obj))) == "An embedded text file. "
                 pdDocClose(doc)
             end
+        end
+        @testset "PKI Security Handlers" begin
+            files = ["dt-embed-protected-cert.pdf",
+                     "dt-all-aes-128.pdf",
+                     "dt-cert-all.pdf",
+                     "dt-rc-4-all.pdf"
+                     ]
+            infos = []
+            encrypted = []
+            pw = Base.SecretBuffer("password")
+            p12path = joinpath(@__DIR__, pdftest_dir, "certs", "doc-crypt.p12")
+            Base.shred!(pw) do pw
+                for i = 1:length(files)
+                    file = files[i]
+                    resname, template, filename = local_testfiles(file)
+                    path = joinpath(@__DIR__, pdftest_dir, "encrypt", file)
+                    doc = pdDocOpen(path, access=()->read_pkcs12(p12path, pw))
+                    page = pdDocGetPage(doc, 1)
+                    push!(infos, pdDocGetInfo(doc))
+                    open(resname, "w") do io
+                        pdPageExtractText(io, page)
+                    end
+                    push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
+                    @test files_equal(resname, template)
+                    pdDocClose(doc)
+                end
+            end
+            @test infos[1]["Producer"] == "LibreOffice 6.0"
+            @test infos[2]["Producer"] == "LibreOffice 6.0"
+            @test infos[3]["Producer"] == "LibreOffice 6.0"
+            @test infos[4]["Producer"] == "LibreOffice 6.0"
+            @test all(encrypted)
         end
     end
     
