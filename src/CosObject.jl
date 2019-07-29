@@ -529,7 +529,19 @@ show(io::IO, o::CosName) = print(io, "/", String(o))
 
 show(io::IO, o::CosXString) =  print(io, "<", String(copy(o.val)), ">")
 
-show(io::IO, o::CosLiteralString) = print(io, "(", String(copy(o.val)), ")")
+function show(io::IO, o::CosLiteralString)
+    print(io, '(')
+    for b in o.val
+        c = Char(b)
+        if isprint(c)
+            print(io, c)
+        else
+            print(io, '\\')
+            print(io, string(b, base=8, pad=3))
+        end
+    end
+    print(io, ')')
+end
 
 function show(io::IO, o::CosArray)
   print(io, '[')

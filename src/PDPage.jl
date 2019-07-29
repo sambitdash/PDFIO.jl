@@ -11,8 +11,6 @@ export PDPage,
 
 using ..Cos
 
-abstract type PDPage end
-
 """
 ```
     pdPageGetCosObject(page::PDPage) -> CosObject
@@ -270,6 +268,7 @@ end
     return load_page_objects(page, stm)
 end
 
+#=
 function populate_font_encoding(page, font, fontname)
     if get(page.fums, fontname, CosNull) === CosNull
         fum = FontUnicodeMapping()
@@ -277,6 +276,7 @@ function populate_font_encoding(page, font, fontname)
         page.fums[fontname] = fum
     end
 end
+=#
 
 function find_resource(page::PDPageImpl,
                        restype::CosName,
@@ -344,3 +344,4 @@ get_encoded_string(s::CosString, fontname::CosNullType, page::PDPage) =
 
 get_encoded_string(s::CosString, fontname::CosName, page::PDPage) =
     get_encoded_string(s, get(page.fonts, fontname, nothing))
+

@@ -1,5 +1,3 @@
-abstract type PDXObject end
-
 mutable struct PDFormXObject <: PDXObject
     doc::PDDoc
     cosXObj::CosIndirectObject{CosStream}

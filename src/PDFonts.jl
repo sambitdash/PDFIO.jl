@@ -1,13 +1,13 @@
 import ..Cos: CosXString
 
-export pdFontIsBold,
+export
+    pdFontIsBold,
     pdFontIsItalic,
     pdFontIsFixedW,
     pdFontIsAllCap,
     pdFontIsSmallCap
 
 using Rectangle
-
 
 #=
 Sample CMaps are available now as 8.cmap and 16.cmap in the test/files directory
@@ -44,23 +44,59 @@ function show(io::IO, cmap::CMap)
     show(io, cmap.range_map)
 end
 
+
+const FontUnicodeMapping = Union{Dict{UInt8, Char}, CMap, Nothing}
+
+#=
 mutable struct FontUnicodeMapping
     encoding::Dict{UInt8, Char}
     cmap::CMap
     hasCMap::Bool
     FontUnicodeMapping() = new(Dict{UInt8, Char}(), CMap(), false)
 end
+=#
 
-function merge_encoding!(fum::FontUnicodeMapping, encoding::CosName,
+function merge_encoding!(fum::Dict{UInt8, Char}, encoding::CosName,
                          doc::CosDoc, font::IDDRef{CosDict})
     encoding_mapping =
         encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
         encoding == cn"MacRomanEncoding"  ? MACEncoding_to_Unicode :
         encoding == cn"MacExpertEncoding" ? MEXEncoding_to_Unicode :
                                             STDEncoding_to_Unicode
-    merge!(fum.encoding, encoding_mapping)
+    merge!(fum, encoding_mapping)
     return fum
 end
+
+abstract type FontType end
+struct FontType1    <: FontType end
+struct FontType3    <: FontType end
+struct FontMMType1  <: FontType end
+struct FontTrueType <: FontType end
+struct FontDefType  <: FontType end
+
+function FontType(subtype::CosName)
+    subtype === cn"Type1"      && return FontType1()
+    subtype === cn"Type3"      && return FontType3()
+    subtype === cn"TrueType"   && return FontTrueType()
+    subtype === cn"MMType1"    && return FontMMType1()
+    return FontDefType()
+end
+
+merge_encoding!(fum::FontUnicodeMapping, ftype::FontType,
+                doc::CosDoc, font::IDDRef{CosDict}) = fum
+
+function merge_encoding!(fum::Dict{UInt8, Char},
+                         ftype::Union{FontType1, FontMMType1},
+                         doc::CosDoc, font::IDDRef{CosDict})
+    basefont = cosDocGetObject(doc, font, cn"BaseFont")
+    basefont_with_subset = CDTextString(basefont)
+    basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
+    enc = basefont_str == "Symbol"       ? SYMEncoding_to_Unicode :
+          basefont_str == "ZapfDingbats" ? ZAPEncoding_to_Unicode :
+                                           STDEncoding_to_Unicode
+    merge!(fum, enc)
+    return fum
+end    
 
 # for type 0 use cmap.
 # for symbol and zapfdingbats - use font encoding
@@ -68,26 +104,21 @@ end
 # Reading encoding from the font files in case of Symbolic fonts are not
 # supported.
 # Font subset is addressed with font name identification.
-function merge_encoding!(fum::FontUnicodeMapping, encoding::CosNullType,
-                        doc::CosDoc, font::IDDRef{CosDict})
+function merge_encoding!(fum::Dict{UInt8, Char}, encoding::CosNullType,
+                         doc::CosDoc, font::IDDRef{CosDict})
     subtype  = cosDocGetObject(doc, font, cn"Subtype")
-    subtype !== cn"Type1" && subtype !== cn"MMType1" && return fum
-    basefont = cosDocGetObject(doc, font, cn"BaseFont")
-    basefont_with_subset = CDTextString(basefont)
-    basefont_str = rsplit(basefont_with_subset, '+';limit=2)[end]
-    enc = basefont_str == "Symbol"       ? SYMEncoding_to_Unicode :
-          basefont_str == "ZapfDingbats" ? ZAPEncoding_to_Unicode :
-                                           STDEncoding_to_Unicode
-    merge!(fum.encoding, enc)
-    return fum
+    subtype === CosNull && return fum
+    return merge_encoding!(fum, FontType(subtype), doc, font)
 end
 
-function merge_encoding!(fum::FontUnicodeMapping,
+function merge_encoding!(fum::Dict{UInt8, Char},
                          encoding::IDD{CosDict},
                          doc::CosDoc, font::IDDRef{CosDict})
     baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
     merge_encoding!(fum, baseenc, doc, font)
     # Add the Differences
+    subtype = cosDocGetObject(doc, font, cn"Subtype")
+    subtype === cn"Type3" && return fum
     diff = cosDocGetObject(doc, encoding, cn"Differences")
     diff === CosNull && return fum
     values = get(diff)
@@ -101,31 +132,28 @@ function merge_encoding!(fum::FontUnicodeMapping,
             cid += 1
         end
     end
+    
     dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
-    merge!(fum.encoding, dict_to_unicode)
+    merge!(fum, dict_to_unicode)
     return fum
 end
 
-function merge_encoding!(fum::FontUnicodeMapping, doc::CosDoc,
-                         font::IDDRef{CosDict})
-    encoding = cosDocGetObject(doc, font, cn"Encoding")
-    merge_encoding!(fum, encoding, doc, font)
+function get_unicode_mapping(doc::CosDoc, font::IDDRef{CosDict})
     toUnicode = cosDocGetObject(doc, font, cn"ToUnicode")
-    toUnicode == CosNull && return fum
-    merge_encoding!(fum, toUnicode, doc, font)
+    toUnicode !== CosNull &&
+        return get_unicode_mapping(toUnicode)
+    encoding = cosDocGetObject(doc, font, cn"Encoding")
+    d = merge_encoding!(Dict{UInt8, Char}(), encoding, doc, font)
+    return length(d) == 0 ? nothing : d
 end
 
-function merge_encoding!(fum::FontUnicodeMapping,
-                         cmap::CosIndirectObject{CosStream},
-                         doc::CosDoc, font::IDDRef{CosDict})
-    stm_cmap = get(cmap)
+function get_unicode_mapping(cmap_stm::CosIndirectObject{CosStream})
+    io = get(cmap_stm)
     try
-        fum.cmap = read_cmap(stm_cmap)
-        fum.hasCMap = true
+        return read_cmap(io)
     finally
-        util_close(stm_cmap)
+        util_close(io)
     end
-    return fum
 end
 
 function update_glyph_id_std_14(cosdoc, cosfont,
@@ -185,22 +213,19 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
         else
             glyph_name_to_cid[v] = cid
             cid_to_glyph_name[cid] = v
-            cid += 1
+            cid += 0x1
         end
     end
     return glyph_name_to_cid, cid_to_glyph_name
 end
 
-get_encoded_string(s::CosString, fum::Nothing) = CDTextString(s)
-
-get_encoded_string(s::CosString, fum::FontUnicodeMapping) = 
+get_encoded_string(s::CosString, fum::Union{Dict{UInt8, Char}, CMap}) = 
     get_encoded_string(Vector{UInt8}(s), fum)
 
-@inline function get_encoded_string(v::Union{Vector{UInt8}, NTuple{N, UInt8}},
-                                    fum::FontUnicodeMapping) where N
+function get_encoded_string(v::Union{Vector{UInt8}, NTuple{N, UInt8}},
+                                    fum::Dict{UInt8, Char}) where N
     length(v) == 0 && return ""
-    fum.hasCMap && return get_encoded_string(v, fum.cmap)
-    return String(NativeEncodingToUnicode(v, fum.encoding))
+    return String(NativeEncodingToUnicode(v, fum))
 end
 
 function get_unicode_chars(b::UInt8, i::Interval, v::Union{CosXString, CosArray})
@@ -225,28 +250,26 @@ function get_unicode_chars(barr::Vector{UInt8})
     nb = 0
     retarr = Vector{Char}()
     while nb < l
-        b1 = barr[1]
-        b2 = barr[2]
+        b1, b2 = barr[1], barr[2]
         nb += 2
-        c::UInt32 = 0
+        c = 0
         if 0xD8  <= b1 <= 0xDB
             # UTF-16 Supplementary plane = 4 bytes
             b1 -= 0xD8
             c = b1
-            c = (c << 8) + b2
+            c = c*256 + b2
             b3 = barr[3]
             b4 = barr[4]
             nb += 2
             if 0xDC <= b3 <= 0xDF
                 b3 -= 0xDC
                 c1 = b3
-                c1 = (c1 << 8) + b4
-                c = (c << 10) + c1
+                c1 = c1*256 + b4
+                c  = c*1024 + c1
                 c += 0x10000
             end
         else
-            c = b1
-            c = (c << 8) + b2
+            c = b1*256 + b2
         end
         push!(retarr, Char(c))
     end
@@ -385,16 +408,17 @@ mutable struct PDFont
     cid_to_glyph_name::Dict{UInt8, CosName}
     flags::UInt32
     fontname::CosName
+    props::Dict
     @inline function PDFont(doc::PDDoc, cosfont::IDD{CosDict})
-        fum = FontUnicodeMapping()
-        merge_encoding!(fum, doc.cosDoc, cosfont)
+        fum = get_unicode_mapping(doc.cosDoc, cosfont)
         widths = get_font_widths(doc.cosDoc, cosfont)
         glyph_name_to_cid, cid_to_glyph_name =
             get_glyph_id_mapping(doc.cosDoc, cosfont)
         flags = get_font_flags(doc, cosfont, widths)
         fontname = get_font_name(doc, cosfont, widths)
+        props = Dict()
         return new(doc, cosfont, widths, fum, glyph_name_to_cid,
-                   cid_to_glyph_name, flags, fontname)
+                   cid_to_glyph_name, flags, fontname, props)
     end
 end
 
@@ -402,6 +426,12 @@ INIT_CODE(::CIDWidth) = 0x0000
 SPACE_CODE(w::CIDWidth) = get_character_code(cn"space", w)
 INIT_CODE(x) = 0x00
 SPACE_CODE(x) = get_character_code(cn"space", x)
+
+function FontType(font::PDFont)
+    subtype = cosDocGetObject(font.doc.cosDoc, font.obj, cn"Subtype")
+    subtype === CosNull && return FontDefType()
+    return FontType(subtype)
+end
 
 """
 ```
@@ -494,6 +524,8 @@ get_character_code(name::CosName, w) =
     get(GlyphName_to_STDEncoding, name, INIT_CODE(w))
 
 get_encoded_string(s, pdfont::PDFont) = get_encoded_string(s, pdfont.fum)
+
+get_encoded_string(s, pdfont::Nothing) = CDTextString(s)
 
 get_char(barr, w) = iterate(barr)
 function get_char(barr, w::CIDWidth)
