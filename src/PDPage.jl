@@ -7,7 +7,8 @@ export PDPage,
     pdPageGetMediaBox,
     pdPageGetCropBox,
     pdPageExtractText,
-    pdPageGetPageNumber
+    pdPageGetPageNumber,
+    pdPageEvalContent
 
 using ..Cos
 
