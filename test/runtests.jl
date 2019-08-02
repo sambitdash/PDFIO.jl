@@ -359,7 +359,7 @@ end
                 util_close(io)
                 pdDocClose(doc)
             end
-            @assert files_equal(resfile, template)
+            @test files_equal(resfile, template)
             length(utilPrintOpenFiles()) == 0
         end
     end
@@ -377,7 +377,7 @@ end
                 util_close(io)
                 pdDocClose(doc)
             end
-            @assert files_equal(resfile, template)
+            @test files_equal(resfile, template)
             length(utilPrintOpenFiles()) == 0
         end
     end
@@ -630,7 +630,7 @@ end
                         end
                     end
                 end
-                @assert files_equal(result, template_file)
+                @test files_equal(result, template_file)
             finally
                  pdDocClose(doc)
             end
@@ -655,7 +655,7 @@ end
                         end
                     end
                 end
-                @assert files_equal(result, template_file)
+                @test files_equal(result, template_file)
             finally
                  pdDocClose(doc)
             end

@@ -1,19 +1,25 @@
-export  PDPageObject,
-        PDPageElement,
-        PDPageObjectGroup,
-        PDPageTextObject,
-        PDPageTextRun,
-        PDPageMarkedContent,
-        PDPageInlineImage,
-        PDPage_BeginGroup,
-        PDPage_EndGroup,
-        GState
+export
+    PDPageObject,
+    PDPageElement,
+    PDPageObjectGroup,
+    PDPageTextObject,
+    PDPageTextRun,
+    PDPageMarkedContent,
+    PDPageInlineImage,
+    PDPage_BeginGroup,
+    PDPage_EndGroup,
+    GState
 
 import Base: get, show, getindex, setindex!, delete!, >
 import ..Common: CDRect
 using ..Cos: CosComment
 
 using LinearAlgebra
+
+
+abstract type PDPage end
+abstract type PDXObject end
+
 """
 ```
     PDPageObject
@@ -162,6 +168,16 @@ mutable struct PDPageInlineImage <: PDPageObject
     PDPageInlineImage()=new(CosDict(),Vector{UInt8}(),false)
 end
 
+function show(io::IO, im::PDPageInlineImage)
+    println(io, "BI")
+    for (k, v) in get(im.params)
+        println("$k $v")
+    end
+    println("ID")
+    println("< $(length(im.data)) bytes... >")
+    println(io, "EI")
+end
+
 #=
 ```
     PDPage_BeginInlineImage
@@ -205,7 +221,13 @@ mutable struct PDPageTextRun <: PDPageObject
             PDPageElement(ts, ver, nop))
 end
 
-show(io::IO, tr::PDPageTextRun) = show(io, tr.ss)
+function show(io::IO, tr::PDPageTextRun)
+    print(io, "[")
+    for s in tr.ss
+        print(io, s)
+    end
+    print(io, "]")
+end
 
 function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
                         bis::IO)
@@ -224,8 +246,7 @@ function collect_object(grp::PDPageObjectGroup, tr::PDPageTextRun,
     return tr
 end
 
-function collect_inline_image(img::PDPageInlineImage, name::CosName,
-    bis::IO)
+function collect_inline_image(img::PDPageInlineImage, name::CosName, bis::IO)
     value = parse_value(bis, get_pdfcontentops)
     set!(img.params, name, value)
 end
@@ -639,6 +660,27 @@ end
     return state
 end
 
+function eval_unicode_mapping(tr::PDPageTextRun, state::GState)
+    fontname, font = get(state, :font, (cn"", CosNull), Tuple{CosName, PDFont})
+    if font.fum === nothing
+        src = get(state, :source, nothing, Union{PDPage, PDXObject})
+        src === nothing && error("Graphics state :source is not configured")
+        warn_no_unicode_mapping(src, font, fontname)
+        @warn "Text run $tr may be decoded as ASCII"
+    end
+    return fontname, font
+end
+
+function warn_no_unicode_mapping(page::PDPage, font, fontname)
+    pageno = pdPageGetPageNumber(page)
+    @warn "No unicode mapping for font $fontname at Page $pageno"
+end
+
+function warn_no_unicode_mapping(xo::PDXObject, font, fontname)
+    ref = CosIndirectObjectRef(xo.cosXObj.num, xo.cosXObj.gen)
+    @warn "No unicode mapping for font $fontname at XObject at $ref"
+end
+
 @inline function evalContent!(tr::PDPageTextRun, state::GState)
     evalContent!(tr.elem, state)
     tfs = get(state, :fontsize, 0f0)
@@ -650,10 +692,8 @@ end
     ctm = get(state, :CTM, Matrix{Float32})
     trm = tm*ctm
 
-    (fontname, font) = get(state, :font,
-                           (cn"", CosNull),
-                           Tuple{CosName, PDFont})
-
+    fontname, font = eval_unicode_mapping(tr, state)
+    
     heap = get(state, :text_layout, Vector{TextLayout})
     text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
 
@@ -809,6 +849,6 @@ function evalContent!(pdo::PDPageElement{:Do}, state::GState)
     return Do(xobj, state)
 end
 
-evalContent!(pdo::PDPageInlineImage, state::GState=GState()) = state
+evalContent!(pdo::PDPageInlineImage, state::GState) = state
 
-evalContent!(pdo::CosObject, state::GState=GState()) = state
+evalContent!(pdo::CosObject, state::GState) = state

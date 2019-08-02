@@ -85,10 +85,20 @@ function parse_pdfOpsOrConst(ps::IO, fparse_more::Function)
             push!(b, c)
         end
         ns = chomp_space!(ps)
-        obj = get_pdfconstant(b)
-        obj !== nothing && return obj
-        nused, ret = fparse_more(b)
-        if nused < length(b)
+        # It's ok to skip all spaces till eof
+        # but if eof is not reached read only one space
+        # If no space is found then do not advance
+        reset_marker = ns > 0 && !eof(ps)
+        nused, ret = length(b)+1, get_pdfconstant(b)
+        if ret === nothing
+            nused, ret = fparse_more(b)
+            if nused < length(b)
+                reset_marker = true
+            else
+                nused += 1
+            end
+        end
+        if reset_marker
             reset(ps)
             skip(ps, nused)
         end
