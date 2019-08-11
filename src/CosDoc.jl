@@ -378,7 +378,7 @@ end
 function read_trailer(ps::IOStream, lookahead::Int)
     chomp_space!(ps)
     locate_keyword!(ps,TRAILER,lookahead) < 0 && error(E_UNEXPECTED_CHAR)
-    chomp_eol!(ps)
+    chomp_space!(ps)
     skipv(ps,LESS_THAN)
     skipv(ps,LESS_THAN)
 
