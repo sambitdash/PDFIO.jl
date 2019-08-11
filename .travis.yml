@@ -7,7 +7,7 @@ julia:
 os:
   - linux
   - osx
-
+  - windows
 matrix:
  allow_failures:
  - julia: nightly
