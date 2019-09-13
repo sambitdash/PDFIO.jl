@@ -158,7 +158,9 @@ The [Architecture and Design](@ref) discusses some of these scenarios.
 
 ## Licensing
 
-`PDFIO` is developed to contribute to both commercial activities and scientific research alike. However, we strongly discourage usage of this product for any illegal, immoral or unethical purposes. [PDFIO License](@ref) while provides rights under a permissible `MIT Expat License`, is conditioned upon maintaining strong moral, ethical and legal standards of the final outcome. 
+`PDFIO` is developed to contribute to both commercial activities and scientific research alike. However, we strongly discourage usage of this product for any illegal, immoral or unethical purposes. [PDFIO License](@ref) while provides rights under a permissible `MIT Expat License`, is conditioned upon maintaining strong moral, ethical and legal standards of the final outcome.
+
+*This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. (http://www.openssl.org/)*
 
 ## Contribution
 
