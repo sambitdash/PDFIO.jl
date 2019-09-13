@@ -93,6 +93,8 @@ provided here for reference:
 
 ### OpenSSL
 
+*This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. (http://www.openssl.org/)*
+
 OpenSSL is licensed under Apache License 2.0 for version 3.x and above. The detailed license can
 be found at:
 [https://github.com/openssl/openssl/blob/master/LICENSE](https://github.com/openssl/openssl/blob/master/LICENSE)
