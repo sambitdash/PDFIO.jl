@@ -160,11 +160,13 @@ function update_glyph_id_std_14(cosdoc, cosfont,
                                 glyph_name_to_cid, cid_to_glyph_name)
     basefont = cosDocGetObject(cosdoc, cosfont, cn"BaseFont")
     basefont === CosNull && return false
-    String(basefont) in ADOBE_STD_14 || return false
+    basefont_with_subset = CDTextString(basefont)
+    basefont_str = String(rsplit(basefont_with_subset, '+';limit=2)[end])
+    basefont_str in ADOBE_STD_14 || return false
     gn2cid, cid2gn =
-        basefont === cn"Symbol" ?
+        basefont_str == "Symbol" ?
         (GlyphName_to_SYMEncoding, SYMEncoding_to_GlyphName) :
-        basefont === cn"ZapfDingbats" ?
+        basefont_str == "ZapfDingbats" ?
         (GlyphName_to_ZAPEncoding, ZAPEncoding_to_GlyphName) :
         (GlyphName_to_STDEncoding, STDEncoding_to_GlyphName)
     merge!(glyph_name_to_cid, gn2cid)
@@ -179,10 +181,7 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
     subtype = cosDocGetObject(cosdoc, cosfont, cn"Subtype")
     subtype === cn"Type0" && return glyph_name_to_cid, cid_to_glyph_name
 
-    update_glyph_id_std_14(cosdoc, cosfont,
-                           glyph_name_to_cid,
-                           cid_to_glyph_name) &&
-        return glyph_name_to_cid, cid_to_glyph_name
+    update_glyph_id_std_14(cosdoc, cosfont, glyph_name_to_cid, cid_to_glyph_name)
 
     encoding = cosDocGetObject(cosdoc, cosfont, cn"Encoding")
     encoding === CosNull && return glyph_name_to_cid, cid_to_glyph_name
