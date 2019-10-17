@@ -1,5 +1,5 @@
 ---
-title: PDFIO: PDF Reader Library for native Julia'
+title: 'PDFIO: PDF Reader Library for native Julia'
 tags:
   - Julia
   - PDF
