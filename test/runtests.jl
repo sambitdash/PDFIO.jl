@@ -13,7 +13,7 @@ using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.6"
+pdftest_ver  = "0.0.7"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -349,6 +349,24 @@ end
     @testset "Hybrid x-ref" begin
         @test begin
             filename="A1947-15.pdf"
+            DEBUG && println(filename)
+            resfile, template, filename = local_testfiles(filename)
+            doc = pdDocOpen(filename)
+            io = util_open(resfile, "w")
+            try
+                extract_text(io, doc)
+            finally
+                util_close(io)
+                pdDocClose(doc)
+            end
+            @test files_equal(resfile, template)
+            length(utilPrintOpenFiles()) == 0
+        end
+    end
+
+    @testset "Floating point CIDWidth" begin
+        @test begin
+            filename="sample-google-doc.pdf"
             DEBUG && println(filename)
             resfile, template, filename = local_testfiles(filename)
             doc = pdDocOpen(filename)

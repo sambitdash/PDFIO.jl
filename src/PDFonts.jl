@@ -389,14 +389,13 @@ function read_cmap(stm::IO)
 end
 
 struct CIDWidth
-    imap::IntervalTree{UInt16, Int}
-    dw::Int
-    CIDWidth(m::IntervalTree{UInt16, Int}, tdw::Int) = new(m, tdw)
+    imap::IntervalTree{UInt16, Float32}
+    dw::Float32
 end
 
-CIDWidth(m::IntervalTree{UInt16, Int}) = CIDWidth(m, 1000)
-CIDWidth(tdw::Int) = CIDWidth(IntervalTree{UInt16, Int}(), tdw)
-CIDWidth() = CIDWidth(1000)
+CIDWidth(m::IntervalTree{UInt16, Float32}) = CIDWidth(m, 1000f0)
+CIDWidth(tdw::Float32) = CIDWidth(IntervalTree{UInt16, Float32}(), tdw)
+CIDWidth() = CIDWidth(1000f0)
 
 mutable struct PDFont
     doc::PDDoc

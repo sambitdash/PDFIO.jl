@@ -179,7 +179,7 @@ end
 get_font_widths(basefonts::CosName) = read_afm(convert(CDTextString, basefonts))
 
 function get_cid_font_widths(cosDoc::CosDoc, font::IDDRef{CosDict})
-    m = IntervalTree{UInt16, Int}()
+    m = IntervalTree{UInt16, Float32}()
     encoding = cosDocGetObject(cosDoc, font, cn"Encoding")
     desc = cosDocGetObject(cosDoc, font, cn"DescendantFonts") |> get
     w = cosDocGetObject(cosDoc, desc[1], cn"W")
@@ -187,7 +187,7 @@ function get_cid_font_widths(cosDoc::CosDoc, font::IDDRef{CosDict})
     # If widths are not specified or the font encoding is not Identity-H
     # widths cannot be extracted.
     if w === CosNull || encoding != cn"Identity-H"
-        return (dw === CosNull) ? CIDWidth() : CIDWidth(get(dw))
+        return (dw === CosNull) ? CIDWidth() : CIDWidth(Float32(get(dw)))
     end
     w = get(w)
     next = iterate(w)
@@ -201,16 +201,16 @@ function get_cid_font_widths(cosDoc::CosDoc, font::IDDRef{CosDict})
         if ecid isa Vector
             for wdo in ecid
                 width = get(wdo)
-                m[Interval(UInt16(ccid), UInt16(ccid))] = width
+                m[Interval(UInt16(ccid), UInt16(ccid))] = Float32(width)
                 ccid += 1
             end
         else
             (width, state) = iterate(w, state)
-            m[Interval(UInt16(bcid), UInt16(ecid))] = get(width)
+            m[Interval(UInt16(bcid), UInt16(ecid))] = Float32(get(width))
         end
         next = iterate(w, state)
     end
-    return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, get(dw))
+    return (dw === CosNull) ? CIDWidth(m) : CIDWidth(m, Float32(get(dw)))
 end
 
 get_character_width(n::CosName, afm::AdobeFontMetrics) =
