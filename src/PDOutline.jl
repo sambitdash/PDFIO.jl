@@ -4,8 +4,7 @@ export PDOutline,
     pdOutlineItemGetAttr
 
 using ..Cos
-using AbstractTrees
-import AbstractTrees: children, printnode
+using AbstractTrees: AbstractTrees
 
 abstract type _ParentNode  end
 
@@ -264,12 +263,13 @@ end
 # interfaces. One can use these methods to traverse through the
 # PDOutline and PDOutlineItem objects.
 
-children(tn::_ParentNode) = tn.first === nothing ? () : collect(tn.first)
-getindex(tn::_ParentNode, i::Int) = children(tn)[i]
+AbstractTrees.children(tn::_ParentNode) =
+    tn.first === nothing ? () : collect(tn.first)
+Base.getindex(tn::_ParentNode, i::Int) = AbstractTrees.children(tn)[i]
 
-printnode(io::IO, it::PDOutline) = print(io, "Contents")
+AbstractTrees.printnode(io::IO, it::PDOutline) = print(io, "Contents")
 
-function printnode(io::IO, it::PDOutlineItem)
+function AbstractTrees.printnode(io::IO, it::PDOutlineItem)
     cosdoc, cosdict = it.doc.cosDoc, it.cosdict
     title_obj = cosDocGetObject(cosdoc, cosdict, cn"Title")
     print(io, CDTextString(title_obj))

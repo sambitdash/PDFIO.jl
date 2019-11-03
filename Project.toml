@@ -1,7 +1,7 @@
 name = "PDFIO"
 uuid = "4d0d745f-9d9a-592e-8d18-1ad8a0f42b92"
 authors = ["Sambit Kumar Dash<sambitdash@gmail.com> "]
-version = "0.1.7"
+version = "0.1.8"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -18,6 +18,12 @@ Rectangle = "9a9db56c-8f71-5460-add5-cb450131785e"
 RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
 
 [compat]
+AbstractTrees = "0.2.1"
+AdobeGlyphList = "0.1.1"
+BinDeps = "0.8.10"
+LabelNumerals = "0.1.0"
+Rectangle = "0.1.1"
+RomanNumerals = "0.3.1"
 julia = "1.0"
 
 [extras]

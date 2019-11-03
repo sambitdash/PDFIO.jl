@@ -22,65 +22,56 @@ The following are some of the benefits of utilizing this approach:
    of the specification. A script based language makes it easier for the
    consumers to quickly modify the code and enhance to their specific needs. 
    
-2. When a higher level scripting language implements a C/C++ PDF library API, the
-   scope is confined to achieving certain high level application tasks like, 
-   graphics or text extraction; annotation or signature content extraction or 
-   page merging or extraction. However, this API represents the PDF 
-   specification as a model (in MVC parlance). Every object in PDF 
-   specification can be represented in some form through these APIs. Hence, 
-   objects can be utilized effectively to understand document structure or 
-   correlate documents in more meaningful ways. 
+2. When a higher level scripting language implements a C/C++ PDF
+   library API, the scope is kept limited to achieving certain high 
+   level tasks like, graphics or text extraction; annotation or
+   signature content extraction; or page extraction or merging. 
    
-3. Potential to be extended as a PDF generator. Since, the API is written as an 
-   object model of PDF documents, it's easier to extend with additional PDF 
-   write or update capabilities.
-   
+   However, `PDFIO` represents the PDF specification as a model in the 
+   Model, View and Controller parlance. A PDF file can be represented 
+   as a collection of interconnected Julia structures. Those 
+   structures can be utilized in granular tasks or simply can be used 
+   to understand the structure of the PDF document. 
+
+   As per the PDF specification, text can be presented as part of the
+   page content stream or inside PDF page annotations. An API like 
+   `PDFIO` can create two categories of object types. One representing
+   the text object inside the content stream and the other for the 
+   text inside an annotation object. Thus, providing flexibility to 
+   the API user. 
+    
+3. Since, the API is written as an object model of PDF documents, it's 
+   easier to extend with additional PDF write or update capabilities. 
+   Although, the current implementation does not provide the PDF 
+   writing capabilities, the foundation has been laid for future 
+   extension.
 
 There are also certain downsides to this approach:
 
-1. Any API that represents an object model of a document, tends to carry the 
-   complexity of introducing abstract objects, often opaque objects (handles) 
-   that are merely representational for an API user. They may not have any 
-   functional meaning. The methods tend to be granular than a method that can 
-   complete a user level task. 
-2. The user may need to refer to the PDF specification for having a complete 
-   semantic understanding.
-3. The amount of code needed to carry out certain tasks can be substantially 
-   higher. 
+1. Any API that represents an object model of a document, tends to
+   carry the complexity of introducing abstract objects. They can be
+   opaque objects (handles) that are representational specific to the 
+   API. They may not have any functional meaning. The methods are
+   granular and may not complete one use level task. The amount of code
+   needed to complete a user level task can be substantially higher. 
    
-### Illustration
+   In `PDFIO` the following steps have to be carried out: 
+   a. Open the PDF document and obtain the document handle.  
+   b. Query the document handle for all the pages in the document. 
+   c. Iterate the pages and obtain the page object handles for each of
+      the pages.  
+   d. Extract the text from the page objects and write to a file IO.  
+   e. Close the document ensuring all the document resources are 
+      reclaimed.
+2. The API user may need to refer to the PDF specification
+   (PDF-32000-1:2008)[@Adobe:2008] for semantic understanding of PDF 
+   files in accomplishing some of the tasks. For example, the workflow 
+   of PDF text extraction above is a natural extension from how text is 
+   represented in a PDF file as per the specification. A PDF file is 
+   composed of pages and text is represented inside each page content 
+   object. The object model of `PDFIO` is a Julia language 
+   representation of the PDF specification. 
 
-A popular package `Taro.jl` that utilizes Java based [Apache
-Tika](http://tika.apache.org/), [Apache POI](http://poi.apache.org/) and [Apache
-FOP](https://xmlgraphics.apache.org/fop/) libraries for reading PDF and other
-file types may need the following code to extract text and other metadata from
-the document.
-
-```julia
-using Taro
-Taro.init()
-meta, txtdata = Taro.extract("sample.pdf");
-
-```
-
-While the same with `PDFIO` may look like below:
-
-```julia
-function getPDFText(src, out)
-    doc = pdDocOpen(src)
-    docinfo = pdDocGetInfo(doc)
-    open(out, "w") do io
-		npage = pdDocGetPageCount(doc)
-        for i=1:npage
-            page = pdDocGetPage(doc, i)
-            pdPageExtractText(io, page)
-        end
-    end
-    pdDocClose(doc)
-    return docinfo
-end
-
-```
 
 ## Installation
 
@@ -94,48 +85,99 @@ The current version of the API requires `julia 1.0`. The detailed list of packag
 
 ## Sample Code
 
-The above mentioned code takes a PDF file `src` as input and writes the text data into a file `out`. It enumerates all the pages in the document and extracts the text from the pages. The extracted text is written to the output file. 
+The below mentioned code takes a PDF file `src` as input and writes the text data into a file `out`. It enumerates all the pages in the document and extracts the text from the pages. The extracted text is written to the output file. 
 
 ```julia {.line_numbers}
 """
 ​```
-	getPDFText(src, out) -> Dict 
+    getPDFText(src, out) -> Dict 
 ​```
 - src - Input PDF file from where text is to be extracted
 - out - Output TXT file where the output will be written
 return - A dictionary containing metadata of the document
 """
 function getPDFText(src, out)
+    # handle that can be used for subsequence operations on the document.
     doc = pdDocOpen(src)
-```
-Provides `doc` handle that can be used for subsequence operations on the document.
-```julia
+    
+    # Metadata extracted from the PDF document. 
+    # This value is retained and returned as the return from the function. 
     docinfo = pdDocGetInfo(doc) 
-```
-Metadata extracted from the PDF document. This value is retained and returned as the return from the function. 
-```julia
     open(out, "w") do io
-		npage = pdDocGetPageCount(doc)
-```
-Returns number of pages in the document
-```julia
+    
+        # Returns number of pages in the document       
+        npage = pdDocGetPageCount(doc)
+
         for i=1:npage
+        
+            # handle to the specific page given the number index. 
             page = pdDocGetPage(doc, i)
-```
-Returns a `page` handle to the specific page given the number number index. 
-```julia
+            
+            # Extract text from the page and write it to the output file.
             pdPageExtractText(io, page)
-```
-Extract text from the page and write it to the output file.
-```julia
+
         end
     end
+    # Close the document handle. 
+    # The doc handle should not be used after this call
     pdDocClose(doc)
-```
-Close the document handle. The `doc` handle should not be used after this call
-```julia
     return docinfo
 end
+```
+
+### Interactive Code Examples
+
+One can also execute the following interactive commands on a Julia REPL to access objects of a PDF file. 
+
+#### Getting Document Handle
+```julia
+julia> doc = pdDocOpen("test/sample-google-doc.pdf")
+
+PDDoc ==>
+
+CosDoc ==>
+	filepath:		/home/sambit/.julia/dev/PDFIO/test/sample-google-doc.pdf
+	size:			21236
+	hasNativeXRefStm:	 true
+	Trailer dictionaries: 
+
+Catalog:
+4 0 obj
+<<
+	/Pages	14 0 R
+	/Type	/Catalog
+>>
+endobj
+
+isTagged: none
+```
+
+#### Getting Document Info
+```
+julia> info = pdDocGetInfo(doc)
+Dict{String,Union{CDDate, String, CosObject}} with 1 entry:
+  "Producer" => "Skia/PDF m79"
+```
+#### Getting the Number of Pages
+```
+julia> npage = pdDocGetPageCount(doc)
+1
+```
+#### Get the Page Handle
+```
+julia> page = pdDocGetPage(doc, 1)
+PDFIO.PD.PDPageImpl(
+...
+)
+```
+#### View Page Text Contents
+```
+julia> pdPageExtractText(stdout, page);
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut 
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
+        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non 
+        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 ```
 
 As can be seen above, granular APIs are provided in `PDFIO` that can be used in combination to achieve a desirable task. For details, please refer to the [Architecture and Design](@ref).
