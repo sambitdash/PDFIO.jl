@@ -1,5 +1,9 @@
+@static isfile(joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")) ||
+        error("PDFIO not properly installed. Please run Pkg.build(\"PDFIO\")")
+
+include("../deps/deps.jl")
+
 using Base: SecretBuffer, SecretBuffer!
-using OpenSSL_jll: libcrypto
 import Base: copy
 
 export
