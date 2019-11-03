@@ -18,6 +18,12 @@ Rectangle = "9a9db56c-8f71-5460-add5-cb450131785e"
 RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
 
 [compat]
+AbstractTrees = ">= 0.2.1"
+AdobeGlyphList = ">= 0.1.1"
+BinDeps = ">= 0.8.10"
+LabelNumerals = ">= 0.1.0"
+Rectangle = ">= 0.1.2"
+RomanNumerals = ">= 0.3.1"
 julia = "1.0"
 
 [extras]
