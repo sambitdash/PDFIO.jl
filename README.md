@@ -85,7 +85,7 @@ The current version of the API requires `julia 1.0`. The detailed list of packag
 
 ## Sample Code
 
-The above mentioned code takes a PDF file `src` as input and writes the text data into a file `out`. It enumerates all the pages in the document and extracts the text from the pages. The extracted text is written to the output file. 
+The below mentioned code takes a PDF file `src` as input and writes the text data into a file `out`. It enumerates all the pages in the document and extracts the text from the pages. The extracted text is written to the output file. 
 
 ```julia {.line_numbers}
 """
