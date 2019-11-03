@@ -1,7 +1,12 @@
-@static isfile(joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")) ||
+@static if Base.VERSION > v"1.3-" && !(Sys.iswindows() && Sys.WORD_SIZE == 32)
+    using Pkg
+    Pkg.add("OpenSSL_jll")
+    using OpenSSL_jll: libcrypto
+else
+    isfile(joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")) ||
         error("PDFIO not properly installed. Please run Pkg.build(\"PDFIO\")")
-
-include("../deps/deps.jl")
+    include("../deps/deps.jl")
+end
 
 using Base: SecretBuffer, SecretBuffer!
 import Base: copy
