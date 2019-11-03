@@ -125,6 +125,61 @@ function getPDFText(src, out)
 end
 ```
 
+### Interactive Code Examples
+
+One can also execute the following interactive commands on a Julia REPL to access objects of a PDF file. 
+
+#### Getting Document Handle
+```julia
+julia> doc = pdDocOpen("test/sample-google-doc.pdf")
+
+PDDoc ==>
+
+CosDoc ==>
+	filepath:		/home/sambit/.julia/dev/PDFIO/test/sample-google-doc.pdf
+	size:			21236
+	hasNativeXRefStm:	 true
+	Trailer dictionaries: 
+
+Catalog:
+4 0 obj
+<<
+	/Pages	14 0 R
+	/Type	/Catalog
+>>
+endobj
+
+isTagged: none
+```
+
+#### Getting Document Info
+```
+julia> info = pdDocGetInfo(doc)
+Dict{String,Union{CDDate, String, CosObject}} with 1 entry:
+  "Producer" => "Skia/PDF m79"
+```
+#### Getting the Number of Pages
+```
+julia> npage = pdDocGetPageCount(doc)
+1
+```
+#### Get the Page Handle
+```
+julia> page = pdDocGetPage(doc, 1)
+PDFIO.PD.PDPageImpl(
+...
+)
+```
+#### View Page Text Contents
+```
+julia> pdPageExtractText(stdout, page);
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut 
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
+        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non 
+        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+```
+
 As can be seen above, granular APIs are provided in `PDFIO` that can be used in combination to achieve a desirable task. For details, please refer to the [Architecture and Design](@ref).
 
 ## Features
