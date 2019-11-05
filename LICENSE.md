@@ -54,7 +54,7 @@ The PDFIO.jl package is licensed under the MIT "Expat" License:
 > SOFTWARE.
 > 
 PDFIO is dependent on packages like `AbstractTrees`, `AdobeGlyphList`, 
-`Documenter`, `LabelNumerals`, `Rectangle`, `RomanNumerals`, `ZipFile` 
+`BinaryBuilder`, `Documenter`, `LabelNumerals`, `Rectangle`, `RomanNumerals`, `ZipFile` 
 that use similar licenses. 
 
 ## LZW Decompression
