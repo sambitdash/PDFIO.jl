@@ -36,18 +36,18 @@ cryptography, where standard open source libraries are being used.
 
 The following are some of the benefits of utilizing this approach:
 
-1. PDF files are in existence for over three decades. Implementations
-   of the PDF writers are not always accurate to the specification.
+1. PDF files have been in existence for over three decades. Implementations
+   of PDF writers are not always accurate to the specification.
    They may even vary significantly from vendor to vendor. Every time 
    someone gets a new PDF file, there is a possibility that file
-   may not be interpreted as per the specification. A script based 
+   may not be interpreted as per the specification. A script-based 
    language makes it easier for the consumers to quickly modify and 
    enhance the code to their specific needs.
    
-2. When a higher level scripting language implements a C/C++ PDF
-   library API, the scope is kept limited to achieving certain high 
-   level tasks like, graphics or text extraction; annotation or
-   signature content extraction; or page extraction or merging. 
+2. When a higher-level scripting language implements a C/C++ PDF
+   library API, the scope is limited to achieving certain high- level 
+   tasks like graphics or text extraction, annotation or
+   signature content extraction, or page extraction or merging. 
    
    However, `PDFIO` represents the PDF specification as a model in the 
    Model, View and Controller parlance. A PDF file can be represented 
@@ -59,7 +59,7 @@ The following are some of the benefits of utilizing this approach:
    page content stream or inside PDF page annotations. An API like 
    `PDFIO` can create two categories of object types. One representing
    the text object inside the content stream and the other for the 
-   text inside an annotation object. Thus, providing flexibility to 
+   text inside an annotation object. Thus, it provides flexibility to 
    the API user. 
     
 3. Since, the API is written as an object model of PDF documents, it's 
@@ -70,21 +70,21 @@ The following are some of the benefits of utilizing this approach:
    
 There are also certain downsides to this approach:
 
-1. Any API that represents an object model of a document, tends to
+1. Any API that represents an object model of a document tends to
    carry the complexity of introducing abstract objects. They can be
-   opaque objects (handles) that are representational specific to the 
+   opaque objects (handles) that are representational-specific to the 
    API. They may not have any functional meaning. The methods are
-   granular and may not complete one use level task. The amount of code
-   needed to complete a user level task can be substantially higher. 
+   granular and may not complete one use-level task. The amount of code
+   needed to complete a user-level task can be substantially higher. 
    
    A comparative presentation of such approach can be seen in the 
-   illustration given below. A text extraction task, that can be just
+   illustration given below. A text extraction task that can be 
    one simple method invocation in a competing library like `Taro`, 
    can involve more number of steps in `PDFIO`. For example, in `PDFIO` 
    the following steps have to be carried out: 
    a. Open the PDF document and obtain the document handle.  
    b. Query the document handle for all the pages in the document. 
-   c. Iterate the pages and obtain the page object handles for each of
+   c. Iterate the pages and obtain page object handles for each of
       the pages.  
    d. Extract the text from the page objects and write to a file IO.  
    e. Close the document ensuring all the document resources are 
@@ -100,7 +100,7 @@ There are also certain downsides to this approach:
    
 ## Illustration
 
-A popular package `Taro.jl`[@Avik:2013] that utilizes Java based [Apache
+The popular package `Taro.jl`[@Avik:2013] that utilizes Java based [Apache
 Tika](http://tika.apache.org/), [Apache POI](http://poi.apache.org/)
 and [Apache FOP](https://xmlgraphics.apache.org/fop/) libraries for
 reading PDF and other file types may need the following code to
@@ -113,7 +113,7 @@ meta, txtdata = Taro.extract("sample.pdf");
 
 ```
 
-While the same with `PDFIO` may look like below:
+The same functionality with `PDFIO` may look like the code below:
 
 ```julia
 function getPDFText(src, out)
@@ -131,19 +131,19 @@ function getPDFText(src, out)
 end
 
 ```   
-While `PDFIO` requires a larger number of lines of code, it definitely
-provides a more granular set of APIs to understand the PDF document
+While `PDFIO` requires a larger number of lines of code, it
+provides a more granular set of APIs for understanding the PDF document
 structure. 
 
 # Functionality
 
 `PDFIO` is implemented in layers enabling following features:
 
-1. Extract and render the Contents in of a PDF page. This ensures the
-   contents are organized in a hierarchical grouping, that can be used
+1. Extract and render the Contents in a PDF page. This ensures the
+   contents are organized in a hierarchical grouping that can be used
    for rendering of the content. Rendering is used here in a generic
-   sense and not confined to painting on a raster device. For example,
-   extracting document text can also be considered as a rendering
+   sense and is not confined to painting on a raster device. For example,
+   extracting document text can also be considered a rendering
    task. `pdPageExtractText` is an apt example of the same.
 2. Provide functional tasks to PDF document access. A few of such
    functionalities are:
@@ -155,7 +155,7 @@ structure.
    - Extracting fonts and font attributes (`pdPageGetFonts`,
      `pdFontIsItalic` etc.)
 3. Access low level PDF objects (`CosObject`) and obtain information
-   when high level APIs do not exist. These kinds of functionalities
+   when high-level APIs do not exist. These kinds of functionalities
    are mostly related to the file structure of the PDF documents and
    also known as the `COS` layer APIs.
 
