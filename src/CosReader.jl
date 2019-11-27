@@ -3,6 +3,8 @@ get_pdfcontentops
 
 import Base: peek
 
+_error(msg, io) = error(msg*" at $(position(io)) found $(_peekb(io))")
+
 #This function is for testing only
 function parse_data(filename)
     ps=util_open(filename,"r")
@@ -239,11 +241,11 @@ end
 function ensure_line_feed_eol(ps::IO)
   c = advance!(ps)
   if (c == RETURN)
-    skipv(ps,LINE_FEED)
+      skipv(ps,LINE_FEED)
   elseif (c == LINE_FEED)
-    return c
+      return c
   else
-    _error(E_UNEXPECTED_CHAR)
+      _error(E_UNEXPECTED_CHAR, ps)
   end
 end
 
