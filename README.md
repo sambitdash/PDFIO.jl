@@ -12,7 +12,7 @@ implementation of the PDF specification. Other than a few well established
 algorithms like flate decode (`zlib` library) or cryptographic operations 
 (`openssl` library) almost all of the APIs are written in native Julia. 
 
-If you using the work you may cite the following:
+If you are using this work you may cite as following:
 
 ```
 @article{Dash_2019,
