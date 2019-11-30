@@ -4,6 +4,7 @@ get_pdfcontentops
 import Base: peek
 
 _error(msg, io) = error(msg*" at $(position(io)) found $(_peekb(io))")
+_error(msg, io, cs...) = error(msg*" at $(position(io)) next: $(_peekb(io)) curr: $cs")
 
 #This function is for testing only
 function parse_data(filename)
@@ -66,7 +67,7 @@ function parse_name(ps::IO)
             if ispdfxdigit(c1) && ispdfxdigit(c2)
                 c = UInt8(gethexval(c1)*16+gethexval(c2))
             else
-                _error(E_UNEXPECTED_CHAR, ps)
+                _error(E_UNEXPECTED_CHAR, ps, c1, c2)
             end
         end
         skip(ps,1)
@@ -183,26 +184,22 @@ end
 
 function parse_xstring(ps::IO)
     b = UInt8[]
-    skip(ps,1)  # skip open LT
+    skip(ps, 1)  # skip open LT
 
-    count = 0
     while true
         c = advance!(ps)
-        if c == LESS_THAN
-            return parse_dict(ps)
+        c == LESS_THAN && return parse_dict(ps)
+        # As per section 7.3.4.3 space must be ignored
+        ispdfspace(c) && continue
+        if ispdfxdigit(c)
+            push!(b, c)
         elseif c == GREATER_THAN
-            if count % 2 !=0
-                count +=1
-                push!(b, NULL)
-            end
+            length(b) % 2 != 0 && push!(b, NULL)
             chomp_space!(ps)
             return CosXString(b)
-        elseif !ispdfxdigit(c)
-            _error(E_UNEXPECTED_CHAR, ps)
         else
-            count +=1
+            _error(E_UNEXPECTED_CHAR, ps, c)
         end
-        push!(b, c)
     end
 end
 
@@ -245,7 +242,7 @@ function ensure_line_feed_eol(ps::IO)
   elseif (c == LINE_FEED)
       return c
   else
-      _error(E_UNEXPECTED_CHAR, ps)
+      _error(E_UNEXPECTED_CHAR, ps, c)
   end
 end
 
