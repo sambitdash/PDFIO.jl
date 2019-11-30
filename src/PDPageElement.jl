@@ -615,8 +615,7 @@ function show_text_layout!(io::IO, state::GState)
         xw = xwr*ht
         nc = length(tlayout.text)
         w = width(tlayout)/nc
-        @assert w > 0.1f0
-        @assert h > 0.1f0
+        (w > 0.1f0 && h > 0.1f0) || continue
         if (ht > h)
             while (y > tlayout.lty)
                 print(io, '\n')
