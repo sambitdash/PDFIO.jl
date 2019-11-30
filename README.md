@@ -12,6 +12,24 @@ implementation of the PDF specification. Other than a few well established
 algorithms like flate decode (`zlib` library) or cryptographic operations 
 (`openssl` library) almost all of the APIs are written in native Julia. 
 
+If you are using this work you may cite as following:
+
+```
+@article{Dash_2019,
+	doi = {10.21105/joss.01453},
+	url = {https://doi.org/10.21105%2Fjoss.01453},
+	year = 2019,
+	month = {nov},
+	publisher = {The Open Journal},
+	volume = {4},
+	number = {43},
+	pages = {1453},
+	author = {Sambit Dash},
+	title = {{PDFIO}: {PDF} Reader Library for native Julia},
+	journal = {Journal of Open Source Software}
+} 
+```
+
 ## Need for a PDF Reader API 
 
 The following are some of the benefits of utilizing this approach:
