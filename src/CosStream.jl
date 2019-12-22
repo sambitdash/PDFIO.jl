@@ -34,9 +34,11 @@ decode_ascii85(input::IO, parms) = decode_ascii85(input)
 
 decode_rle(input::IO, parms) = decode_rle(input)
 
-decode_jpg(input::IO, parms) = decode_jpg(input) = input
+decode_jpg(input::IO, parms) = decode_jpg(input)
+decode_jpg(input) = input
 
-decode_jpx(input::IO, parms) = decode_jpx(input) = input
+decode_jpx(input::IO, parms) = decode_jpx(input)
+decode_jpx(input) = input
 
 const function_map = Dict(
                           cn"ASCIIHexDecode" => decode_asciihex,
