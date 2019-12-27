@@ -1,0 +1,29 @@
+fonts:
+  - "data/fonts/*"
+  
+encoding:
+  - "data/*.txt"
+  
+certificates:
+  - "data/certs/*"
+  
+deps:
+  - "deps/*"
+  
+docs:
+  - "docs/src/*.md"
+  
+paper:
+  - "paper/*"
+  
+source:
+  - "src/*"
+  
+tests:
+  - "test/*"
+  
+github-actions:
+  - ".github/*"
+  
+readme:
+  - "README.md"
