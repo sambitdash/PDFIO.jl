@@ -244,6 +244,8 @@ get_page_contents(page::PDPageImpl, contents::CosIndirectObjectRef) =
 
 get_page_contents(page::PDPage, obj::IDD{CosStream}) = obj
 
+get_page_contents(page::PDPage, ::CosNullType) = CosNull
+
 @inline function load_page_objects(page::PDPageImpl)
     contents = pdPageGetContents(page)
     page.content_objects === nothing &&
