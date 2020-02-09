@@ -66,9 +66,11 @@ mutable struct CosDocImpl <: CosDoc
         io = util_open(fp,"r")
         sz = filesize(fp)
         ps = io
-        new(fp, sz, io, ps, 0, "", 0, (0, 0),
-            Dict{CosIndirectObjectRef, CosObjectLoc}(),
-            [], [], [], CosNull, false, false, nothing, 0)
+        this = new(fp, sz, io, ps, 0, "", 0, (0, 0),
+                   Dict{CosIndirectObjectRef, CosObjectLoc}(),
+                   [], [], [], CosNull, false, false, nothing, 0)
+        finalizer(x->util_close(x.ps), this)
+        return this
     end
 end
 
@@ -113,7 +115,6 @@ called if you have opened the document by 'cosDocOpen'. Documents opened with
 `pdDocOpen` do not need to use this method.
 """
 function cosDocClose(doc::CosDocImpl)
-    util_close(doc.ps)
     for path in doc.tmpfiles
         rm(path)
     end
@@ -132,6 +133,7 @@ function cosDocOpen(fp::AbstractString; access::Function=identity)
     doc = CosDocImpl(abspath(fp))
     ps = doc.ps
     h = read_header(ps)
+    h[1] == 0 && error(E_BAD_HEADER)
     doc.version = (h[1], h[2])
     doc.header = String(h[3])
     doc.hoffset = h[4]
