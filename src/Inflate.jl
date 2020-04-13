@@ -69,7 +69,7 @@ _inflate(stm::z_stream) =
     ccall((:inflate, libz), Cint, (Ref{z_stream}, Cint), stm, 0)
 
 function inflate(io::IO)
-    CHUNK = 16384
+    CHUNK = 262144
 
     iob = IOBuffer()
     
@@ -92,10 +92,13 @@ function inflate(io::IO)
                 strm.next_out = pointer(oub)
                 ret = _inflate(strm)
                 ret == Z_STREAM_ERROR && error("zlib stream state clobbered")
-                ret != Z_OK && ret != Z_STREAM_END && _zerror(ret)
+                ret == Z_DATA_ERROR && @warn "invalid or incomplete inflate data"
+                ret != Z_OK && ret != Z_STREAM_END && ret != Z_DATA_ERROR &&
+                    _zerror(ret)
                 have = CHUNK - strm.avail_out
                 resize!(oub, have)
                 write(iob, oub)
+                (ret == Z_STREAM_END || ret == Z_DATA_ERROR) && break
                 resize!(oub, CHUNK)
             end
         end
@@ -108,7 +111,6 @@ end
 function _zerror(ret::Cint)
     msg =
         ret == Z_STREAM_ERROR  ? "invalid compression level" :
-        ret == Z_DATA_ERROR    ? "invalid or incomplete deflate data" :
         ret == Z_MEM_ERROR     ? "out of memory" :
         ret == Z_VERSION_ERROR ? "zlib version mismatch!" :
                                  "zlib internal error"
