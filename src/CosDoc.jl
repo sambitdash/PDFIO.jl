@@ -281,7 +281,8 @@ function cosDocGetObject(doc::CosDocImpl, stm::CosNullType,
                          ref::CosIndirectObjectRef, locObj::CosObjectLoc)
     if (locObj.obj === CosNull)
         seek(doc, locObj.loc)
-        locObj.obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref)
+        locObj.obj = parse_indirect_obj(doc.ps, doc.hoffset, doc.xref,
+                                        (x, y, z)->cosDocGetObject(doc, x, y, z))
         # Decrypt here
         decrypt!(doc.secHandler, locObj.obj)
         attach_object(doc, locObj.obj)
