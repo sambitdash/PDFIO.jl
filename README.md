@@ -111,8 +111,8 @@ The below mentioned code takes a PDF file `src` as input and writes the text dat
 ​```
     getPDFText(src, out) -> Dict 
 ​```
-- src - Input PDF file from where text is to be extracted
-- out - Output TXT file where the output will be written
+- src - Input PDF file path from where text is to be extracted
+- out - Output TXT file path where the output will be written
 return - A dictionary containing metadata of the document
 """
 function getPDFText(src, out)
