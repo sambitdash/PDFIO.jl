@@ -68,5 +68,6 @@ CDDate(str::CosString) = convert(CDDate, str)
 convert(::Type{CDTextString}, name::CosName) =
     CDTextString(split(String(name.val), '_'; limit=2)[2])
 
+String(id::ID{CosName}) = String(get(id))
 String(name::CosName) = convert(String, name)
 
