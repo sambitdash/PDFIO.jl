@@ -1,0 +1,97 @@
+Contents
+├─ Table of Contents
+├─ 1. Introduction
+├─ 2. Quick Steps - Kernel Compile
+│  ├─ 2.1. Precautionary Preparations
+│  ├─ 2.2. Minor Upgrading of Kernel
+│  ├─ 2.3. For the Impatient
+│  ├─ 2.4. Building New Kernel - Explanation of Steps
+│  ├─ 2.5. Troubleshooting
+│  └─ 2.6. Post Kernel Building
+├─ 3. Loadable Modules
+│  ├─ 3.1. Installing the module utilities
+│  ├─ 3.2. Modules distributed with the kernel
+│  └─ 3.3. Howto Install Just A Single Module ?
+├─ 4. Cloning of Linux Kernels
+├─ 5. Important questions and their answers
+│  ├─ 5.1. What does the kernel do, anyway?
+│  ├─ 5.2. Why would I want to upgrade my kernel?
+│  ├─ 5.3. What kind of hardware do the newer kernels support?
+│  ├─ 5.4. What version of gcc and libc do I need?
+│  ├─ 5.5. What's a loadable module?
+│  ├─ 5.6. How much disk space do I need?
+│  └─ 5.7. How long does it take?
+├─ 6. Patching the kernel
+│  ├─ 6.1. Applying a patch
+│  ├─ 6.2. If something goes wrong
+│  ├─ 6.3. Getting rid of the .orig files
+│  └─ 6.4. Other patches
+├─ 7. Tips and tricks
+│  ├─ 7.1. Redirecting output of the make or patch commands
+│  ├─ 7.2. Conditional kernel install
+│  └─ 7.3. Kernel updates
+├─ 8. Mount RPMs With FTPFS
+│  ├─ 8.1. Using the ftpfs
+│  └─ 8.2. The ftpfs Commands
+│     ├─ 8.2.1. The autofs way - A must try!
+│     ├─ 8.2.2. The ftpmount way
+│     ├─ 8.2.3. The mount way
+│     └─ 8.2.4. Some notes
+├─ 9. Linux Kernel Textbooks and Documents
+├─ 10. Kernel Files Information
+│  ├─ 10.1. vmlinuz and vmlinux
+│  ├─ 10.2. Bootloader Files
+│  ├─ 10.3. Message File
+│  ├─ 10.4. initrd.img
+│  ├─ 10.5. bzImage
+│  ├─ 10.6. module-info
+│  ├─ 10.7. config
+│  ├─ 10.8. grub
+│  └─ 10.9. System.map
+│     ├─ 10.9.1. System.map
+│     ├─ 10.9.2. What Are Symbols?
+│     ├─ 10.9.3. What Is The Kernel Symbol Table?
+│     ├─ 10.9.4. What Is The System.map File?
+│     ├─ 10.9.5. What Is An Oops?
+│     ├─ 10.9.6. What Does An Oops Have To Do With System.map?
+│     ├─ 10.9.7. Where Should System.map Be Located?
+│     ├─ 10.9.8. What else uses the System.map
+│     ├─ 10.9.9. What Happens If I Don't Have A Healthy System.map?
+│     └─ 10.9.10. How Do I Remedy The Above Situation?
+├─ 11. Advanced Topics - Linux Boot Process
+│  └─ 11.1. References for Boot Process
+├─ 12. Other Formats of this Document
+│  ├─ 12.1. Acrobat PDF format
+│  ├─ 12.2. Convert Linuxdoc to Docbook format
+│  ├─ 12.3. Convert to MS WinHelp format
+│  └─ 12.4. Reading various formats
+├─ 13. Appendix A - Creating initrd.img file
+│  ├─ 13.1. Using mkinitrd
+│  ├─ 13.2. Kernel Docs
+│  └─ 13.3. Linuxman Book
+├─ 14. Appendix B - Sample lilo.conf
+├─ 15. Appendix C - GRUB Details And A Sample grub.conf
+├─ 16. Appendix D - Post Kernel Building
+└─ 17. Appendix E - Troubleshoot Common Mistakes
+   ├─ 17.1. Compiles OK but does not boot
+   ├─ 17.2. The System Hangs at LILO
+   ├─ 17.3. No init found
+   ├─ 17.4. Lot of Compile Errors
+   ├─ 17.5. The 'depmod' gives "Unresolved symbol error messages"
+   ├─ 17.6. Kernel Does Not Load Module - "Unresolved symbols" Error Messages
+   ├─ 17.7. Kernel fails to load a module
+   ├─ 17.8. Loadable modules
+   ├─ 17.9. See Docs
+   ├─ 17.10. make clean
+   ├─ 17.11. Huge or slow kernels
+   ├─ 17.12. The parallel port doesn't work/my printer doesn't work
+   ├─ 17.13. Kernel doesn't compile
+   ├─ 17.14. New version of the kernel doesn't seem to boot
+   ├─ 17.15. You forgot to run LILO, or system doesn't boot at all
+   ├─ 17.16. It says `warning: bdflush not running'
+   ├─ 17.17. I can't get my IDE/ATAPI CD-ROM drive to work
+   ├─ 17.18. It says weird things about obsolete routing requests
+   ├─ 17.19. ``Not a compressed kernel Image file''
+   ├─ 17.20. Problems with console terminal after upgrade to Linux v1.3.x
+   ├─ 17.21. Can't seem to compile things after kernel upgrade
+   └─ 17.22. Increasing limits

@@ -1,0 +1,1098 @@
+                                Système de gestion des structures (GSQ-6026)
+
+
+                               RAPPORT D'INSPECTION GÉNÉRALE
+      Date de l'inspection : 2017-08-22                                        Statut :  FERMÉE
+      Numéro de structure : 00007
+      Type de structure :   41 - Pont à poutres en béton armé
+      Nom :                                          Resp. gestion :      10 - Min.
+      Route :     Route 386                            Classe route :      30 - Régionale
+      Obstacle :   Rivière Laflamme                      An. const. :        1958
+      Municipalité : Barraute                             Niveau de structure : 3
+
+                                ÉLÉMENTS RETENANT L'ATTENTION
+      T.     GROUPE           ÉLÉMENT       No Pos.  Qté  Unit. P/S N.I.  A  B  C  D CEC
+                                                   Extré       unité1 Contreventements   Diaphragmes                      8         S  N.d.  55  20  25  0   4mité        (s)
+
+      1 Piles             Colonnes / bancs         2        73   m2   P  N.d.  70  5   5  20  3
+
+      1 Platelage          Côté extérieur               Sud   19   m2   P  N.d.  50  30  20  0   4
+
+        Poutres à âme pleine /1                  Poutre                 1        34   m2   P  N.d.  48  50  1   1   4poutres-caissons
+                                                   Extré       unité2 Contreventements   Diaphragmes                      8         S  N.d.  49  20  30  1   4mité        (s)
+
+      2 Dispositif de retenue  Glissière (gauche ou droite)     Nord  15   m   S  N.d.  90  8   1   1   4
+
+
+
+
+
+
+
+
+
+
+
+
+                           DEMANDES D'INFORMATIONS ADDITIONNELLES
+      Commentaires
+
+
+
+
+
+      Inspections suggérées                             Suivi
+           Spéciale                                          Risque de chute de fragments de béton
+           Observation                                       Risque de chute de strates de rouille
+           Sous marine                                       Avis technique - fissuration béton
+           Essai non destructif – acier                            Suivi particulier - inspection générale
+
+
+
+                                     INDICATEURS DE GESTION
+      Inspection actuelle                               Inspection précédente
+      IMS :  61,7            Structure avec déficiences :   IMS :  65,3
+      ICS :   93,5            État :                    ICS :  88,0
+      CECS : 3              Fonctionnalité :            CECS : 3
+
+                                PROCHAINE INSPECTION GÉNÉRALE
+      Fréquence suggérée :3                Effective :3             Année prochaine inspection : 2020
+
+                                           INSPECTEURS
+      Nom des inspecteurs :    Gagnon, Mélinda (Min.)          B2   Gilbert-Laplante, Alexandre (Min.)   B1
+                          Robitaille, Pascal (Min.)          A1
+
+
+
+
+
+
+      Firme :
+      Ingénieur responsable de l'inspection :Robitaille, Pascal (Min.)                              Date
+
+
+
+  Imprimé le 2017-12-12                                                                      Page 1 de 18
+                                Système de gestion des structures (GSQ-6026)
+
+                               FICHE D'INSPECTION - COMPLÉMENT
+
+     Numéro structure : 00007                                     Date de l'inspection : 2017-08-22
+
+      Route :        Route 386                         Type de structure :  41 - Pont à poutres en béton armé
+      Obstacle :      Rivière Laflamme                    Niveau de structure : 3     Fréq. effective (an) :3
+      Municipalité :   Barraute                          An. const. :        1958
+      Site :         Village de Barraute                  Resp. gestion :     10 - Min.
+      Orientation :    Est-Ouest                         X :236566            Y :521203
+      Point de repère : Est vers Belcourt                    Lat :48,437304         Long :-77,631626
+
+                                     INSPECTEURS IMPLIQUÉS
+      Nom des inspecteurs :    Gagnon, Mélinda (Min.)          B2   Gilbert-Laplante, Alexandre (Min.)   B1
+                           Robitaille, Pascal (Min.)          A1
+
+
+
+
+
+      Ingénieur responsable de l'inspection : Robitaille, Pascal (Min.)                    Date :
+      Firme :
+
+                              COMPLÉMENTS - INSPECTION GÉNÉRALE
+
+                                               MÉTÉO
+      17 °C, nuageux.
+                         ÉLÉMENTS À SURVEILLER LORS DE L'INSPECTION ANNUELLE
+      État des pieux à la pile (fissuration du gainage et dégradation).
+
+
+
+
+
+
+                               DEMANDE D'INFORMATIONS ADDITIONNELLES
+      Commentaires
+
+
+
+
+
+
+      Inspections suggérées                           Suivi
+           Spéciale                                      Risque de chute de fragments de béton (sécurité)
+           Observation                                    Risque de chute de strates de rouille
+           Sous-marine                                   Avis technique - fissuration béton
+           Essai non destructif – acier                         Suivi particulier - inspection générale
+
+                                         ACTIVITÉ STRUCTURE
+       CODE   UNITÉ   QTÉ                CODE   UNITÉ   QTÉ                CODE   UNITÉ   QTÉ
+
+
+       CODE   UNITÉ   QTÉ                CODE   UNITÉ   QTÉ
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 2 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+                          Cours d'eau1  1 Cours d'eau et remblai                         0                 S  N.d.                  4
+     Commentaire : 1
+                1
+                          Remblai2  1 Cours d'eau et remblai                         0  Ouest           S  N.d.                  3Granulaire
+     Commentaire : 1 Affaissement du remblai sous le mur de front. 1
+                          Protection de talus3  1 Cours d'eau et remblai                         0  Ouest           S  N.d.                  4Autres types de protection de talus
+     Commentaire : 1
+                1
+                          Fondation4  1 Culées                                  1                 P  N.d.                  4Pieux en acier
+     Commentaire : 1 Acier des pieux complètement corrodé, béton apparent à l'intérieur (2007). 1
+                          Mur de front5  1 Culées                                  1        14  m2   P  N.d.  80  10  10  0   4
+     Commentaire : 1 Délaminage sous les poutres 3 et 4. Inspection sous-marine 2013 par Genivar-SSBLM. 1
+                          Garde-grève6  1 Culées                                  1        11  m2   S  N.d.  82  10  8   0   4
+     Commentaire : 1 Désagrégation importante à la jonction de l'assise et du garde-grève (dans le haut entre les poutres 3 et 4). 1
+                          Murs en aile / en retour7  1 Culées                                  1        5  m2   S  N.d.  89  10  1   0   4Indéterminé
+     Commentaire : 1 Joint de coulée. // Désagrégation importante. 1
+                          Murs en aile / en retour8  1 Culées                                  2        5  m2   S  N.d.  94  5   1   0   4Indéterminé
+     Commentaire : 1 Joint de coulée.  Éclat. 1
+                          Assise9  1 Culées                                  1        18  m2   P  N.d.  90  10  0   0   4
+     Commentaire : 1 Désagrégation importante à la jonction de l'assise et du garde-grève (mis dans garde-grève). 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 3 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+                          Fondation10  1 Piles                                   2                 P  N.d.                  4Pieux en acier
+     Commentaire : 1 Inspection sous-marine 2013 par Genivar-SSBLM. 1
+                          Colonnes / bancs11  1 Piles                                   2        73  m2   P  N.d.  70  5   5  20  3Forme ronde
+     Commentaire : 1 Inspection sous-marine 2013 par Genivar-SSBLM.  Hauteur apparente : 2,6 m. Première colonne du rang ouest : ouverture de 3 mm 1 sur 2 m sur la gaine en acier exposant le béton. Deuxième colonne du rang ouest : déformation partielle de 25 mm sur 0,2 m de 1 long ...     Chevêtre12  1 Piles                                   2        48  m2   P  N.d.  55  40  5   0   4
+     Commentaire : 1 Délaminage. 1
+                          Assise13  1 Piles                                   2        23  m2   P  N.d.  95  5   0   0   4
+     Commentaire : 1 Désagrégation et délaminage. 1
+                          Surface de roulement14  1 Platelage                                 0       140  m2   S  N.d.  34  65  1   0   3
+     Commentaire : 1 Réparé, mais durabilité non garantie. 1
+                          Système de drainage15  1 Platelage                                 0        2       S  N.d.                  4
+     Commentaire : 1
+                1
+                          Côté extérieur16  1 Platelage                                 0   Sud  19  m2   P  N.d.  50  30  20  0   4
+     Commentaire : 1 Délaminage. 1
+                          Côté extérieur17  1 Platelage                                 0  Nord  19  m2   P  N.d.  60  38  2   0   4
+     Commentaire : 1 Délaminage. 1
+                          Platelage18  1 Platelage                                 0       187  m2   P  N.d.  79  20  1   0   4Dalle en béton régulier
+     Commentaire : 1 Délaminage contour des drains et sur la dalle. 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+       11    3211    unité(s)    18
+       16    3136      m      15
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 4 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+            Poutres à âme pleine /Poutre19  1                                       1        34  m2   P  N.d.  48  50  1   1   4poutres-caissons   Béton armé
+     Commentaire : 1 Éclatement extérieur ouest avec armature apparente avec plus de 30 % de perte de section. 1
+            Poutres à âme pleine /Poutre20  1                                       2        34  m2   P  N.d.  85  15  0   0   4poutres-caissons   Béton armé
+     Commentaire : 1
+                1
+            Poutres à âme pleine /Poutre21  1                                       3        34  m2   P  N.d.  85  13  2   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage et éclatement avec armature apparente à l'extrémité ouest et légèrement à l'extrémité est. 1
+            Poutres à âme pleine /Poutre22  1                                       4        34  m2   P  N.d.  50  50  0   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage extrémité ouest. 1
+            Poutres à âme pleine /Poutre23  1                                       5        34  m2   P  N.d.  30  68  2   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage et éclatement avec armature apparente à l'extrémité ouest (légèrement à l'extrémité est). // Fissure de cisaillement 0,15 1 mm.
+                          Diaphragmes                   Extrémi     unité24  1 Contreventements                           0        8       S  N.d.  55  20  25  0   4té       (s)
+     Commentaire : 1 Délaminage dans le bas. 1
+                          Diaphragmes                   Intermé     unité25  1 Contreventements                           0        4       S  N.d.  85  15  0   0   4diaire      (s)
+     Commentaire : 1
+                1
+                          Trottoir26  1 Chasse-roue / trottoir                          0   Sud  23  m2   S  N.d.  60  40  0   0   4
+     Commentaire : 1 Joint de trottoir laisse infiltrer l'eau sur les assises (2007). // Joint de coulée et trace de rouille. 1
+                          Trottoir27  1 Chasse-roue / trottoir                          0  Nord  23  m2   S  N.d.   0  100  0   0   4
+     Commentaire : 1 Joint de trottoir laisse infiltrer l'eau sur les assises (2007). // Joint de coulée et trace de rouille. 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+       19    3122    unité(s)    1
+       23    3122    unité(s)    1
+       24    3121      m      8
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 5 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+                          Glissière (gauche ou droite)28  1 Dispositif de retenue                          0   Sud  15  m   S  N.d.  85  14  1   0   4Poteaux en béton et grillage
+     Commentaire : 1 Éclatement. 1
+                          Glissière (gauche ou droite)29  1 Dispositif de retenue                          0  Nord  15  m   S  N.d.  90  9   1   0   4Poteaux en béton et grillage
+     Commentaire : 1 Éclatement. // Ouverture sous troisième poteau (fissure à la base). 1
+                          Transition de chaussée30  1 Approches                                0  Ouest           S  N.d.                  4
+     Commentaire : 1 Affaissement du trottoir formant une marche pour les piétons. 1
+                          Glissière31  1 Approches                                0  Ouest  28  m   S  N.d.  100  0   0   0   4Semi-rigide avec poteau de bois
+     Commentaire : 1 Quelques éclats sur les poteaux de bois. 1
+                          Remblai32  2 Cours d'eau et remblai                         0   Est           S  N.d.                  3Granulaire
+     Commentaire : 1 Affaissement du remblai sous le mur de front. 1
+                          Fondation33  2 Culées                                  3                 P  N.d.                  4Pieux en acier
+     Commentaire : 1 Acier des pieux complètement corrodé, béton apparent à l'intérieur (2007). 1
+                          Mur de front34  2 Culées                                  3        14  m2   P  N.d.  78  20  2   0   4
+     Commentaire : 1 Délaminage et éclatement. 1
+                          Garde-grève35  2 Culées                                  3        11  m2   S  N.d.  65  25  10  0   4
+     Commentaire : 1 Désagrégation importante à la jonction de l'assise et du garde-grève. 1
+                          Murs en aile / en retour36  2 Culées                                  3        5  m2   S  N.d.  70  30  0   0   4Indéterminé
+     Commentaire : 1 Joint de coulée. 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 6 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+                          Murs en aile / en retour37  2 Culées                                  4        5  m2   S  N.d.  100  0   0   0   4Indéterminé
+     Commentaire : 1 Joint de coulée. 1
+                          Assise38  2 Culées                                  3        16  m2   P  N.d.  90  10  0   0   4
+     Commentaire : 1 Désagrégation. 1
+                          Surface de roulement39  2 Platelage                                 0       140  m2   S  N.d.  25  75  0   0   3
+     Commentaire : 1
+                1
+                          Système de drainage40  2 Platelage                                 0        2       S  N.d.                  4
+     Commentaire : 1
+                1
+                          Côté extérieur41  2 Platelage                                 0   Sud  19  m2   P  N.d.  55  30  15  0   4
+     Commentaire : 1 Délaminage. 1
+                          Côté extérieur42  2 Platelage                                 0  Nord  19  m2   P  N.d.  85  14  1   0   4
+     Commentaire : 1 Délaminage. 1
+                          Platelage43  2 Platelage                                 0       187  m2   P  N.d.  79  20  1   0   4Dalle en béton régulier
+     Commentaire : 1 Délaminage, pourtour des réparations vis-à-vis ancien drain. 1
+            Poutres à âme pleine /Poutre44  2                                       1        34  m2   P  N.d.  45  54  1   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage extrémité est. 1
+            Poutres à âme pleine /Poutre45  2                                       2        34  m2   P  N.d.  79  20  1   0   4 poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage extrémité est. 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 7 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+            Poutres à âme pleine /Poutre46  2                                       3        34  m2   P  N.d.  79  20  1   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage extrémités est et ouest. 1
+            Poutres à âme pleine /Poutre47  2                                       4        34  m2   P  N.d.  87  12  1   0   4poutres-caissons   Béton armé
+     Commentaire : 1 Délaminage extrémité est et éclatement. 1
+            Poutres à âme pleine /Poutre48  2                                       5        34  m2   P  N.d.  60  40  0   0   4poutres-caissons   Béton armé
+     Commentaire : 1
+                1
+                          Diaphragmes                   Extrémi     unité49  2 Contreventements                           0        8       S  N.d.  49  20  30  1   4té       (s)
+     Commentaire : 1 Délaminage dans le bas et fissure de plus de 0,8 mm à la culée et trace de rouille à la pile. 1
+                          Diaphragmes                   Intermé     unité50  2 Contreventements                           0        4       S  N.d.  75  25  0   0   4diaire      (s)
+     Commentaire : 1 Trous de carottage entre les poutres 4 et 5. 1
+                          Trottoir51  2 Chasse-roue / trottoir                          0   Sud  23  m2   S  N.d.  80  19  1   0   4
+     Commentaire : 1 Joint de trottoir laisse infiltrer l'eau sur les assises (2007). Éclat. 1
+                          Trottoir52  2 Chasse-roue / trottoir                          0  Nord  23  m2   S  N.d.   0  100  0   0   4
+     Commentaire : 1 Joint de trottoir laisse infiltrer l'eau sur les assises (2007). 1
+                          Glissière (gauche ou droite)53  2 Dispositif de retenue                          0   Sud  15  m   S  N.d.  89  10  1   0   4Poteaux en béton et grillage
+     Commentaire : 1 Fissure à 0,8 mm dans un poteau de glissière en béton armé. 1
+                          Glissière (gauche ou droite)54  2 Dispositif de retenue                          0  Nord  15  m   S  N.d.  90  8   1   1   4Poteaux en béton et grillage
+     Commentaire : 1 Éclatement. 1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+       49    3121      m      5
+       54    3071      m      1
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 8 de 18
+                                Système de gestion des structures (GSQ-6026)
+                                       FICHE D'INSPECTION
+
+       Numéro de structure : 00007                 Municipalité :       Barraute
+       Route :   Route 386                       Date de l'inspection :                2017-08-22
+       Obstacle : Rivière Laflamme                  Type de structure :   41 - Pont à poutres en béton armé
+
+                                      DONNÉES D'INSPECTION              État du matériau (%)
+          T.    GROUPE         ÉLÉMENT / TYPE      # Él. Pos.  Qté Unit. P/S N.I.   A  B  C  D  CEC
+                          Transition de chaussée55  2 Approches                                0   Est           S  N.d.                  4
+     Commentaire : 1
+                1
+                          Glissière56  2 Approches                                0   Est  30  m   S  N.d.  100  0   0   0   4Semi-rigide avec poteau de bois
+     Commentaire : 1
+                1
+     N.I.: Nature inspection / N.d.: Nouvelle donnée / D. r.: Donnée reportée / É. i. : Élément inaccessible
+
+                                       RECOMMANDATIONS
+
+            CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ           CODE   UNITÉ   QTÉ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                        Inspection générale fermée
+  Imprimé le 2017-12-12                                                                      Page 9 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/01-Cours d'eau et remblai/11 -
+                                                                Remblai//Ouest
+
+                                                    A/B/C/D/CEC: ////3
+                                                    Commentaires:
+                                                     Affaissement du remblai sous le mur de front.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/02-Culées/20 - Fondation/1/
+
+
+                                                    A/B/C/D/CEC: ////4
+                                                    Commentaires:
+                                                     Acier des pieux complètement corrodé, béton
+                                                     apparent à l'intérieur (2007).
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/02-Culées/20 - Fondation/1/
+
+
+                                                    A/B/C/D/CEC: ////4
+                                                    Commentaires:
+                                                     Acier des pieux complètement corrodé, béton
+                                                     apparent à l'intérieur (2007).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 10 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/02-Culées/24 - Garde-grève/1/
+
+
+                                                    A/B/C/D/CEC: 82/10/8/0/4
+                                                    Commentaires:
+                                                     Désagrégation importante à la jonction de
+                                                     l'assise et du garde-grève (dans le haut
+                                                     entre les poutres 3 et 4).
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/03-Piles/32 - Colonnes / bancs/2/
+
+
+                                                    A/B/C/D/CEC: 70/5/5/20/3
+                                                    Commentaires:
+                                                     Inspection sous-marine 2013 par Genivar-
+                                                     SSBLM.  Hauteur apparente : 2,6 m. Première
+                                                     colonne du rang ouest : ouverture de 3 mm sur
+                                                     2 m sur la gaine en acier exposant le béton.
+                                                     Deuxième colonne du rang ouest : déformation
+                                                     partielle de 25 mm sur 0,2 m de long sur la
+                                                     gaine en acier. Perte de section de 34 %
+                                                     entre 150 mm au-dessus de l'eau et le fond
+                                                     marin sur la gaine en acier.
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/03-Piles/32 - Colonnes / bancs/2/
+
+
+                                                    A/B/C/D/CEC: 70/5/5/20/3
+                                                    Commentaires:
+                                                     Inspection sous-marine 2013 par Genivar-
+                                                     SSBLM.  Hauteur apparente : 2,6 m. Première
+                                                     colonne du rang ouest : ouverture de 3 mm sur
+                                                     2 m sur la gaine en acier exposant le béton.
+                                                     Deuxième colonne du rang ouest : déformation
+                                                     partielle de 25 mm sur 0,2 m de long sur la
+                                                     gaine en acier. Perte de section de 34 %
+                                                     entre 150 mm au-dessus de l'eau et le fond
+                                                     marin sur la gaine en acier.
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 11 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/1/
+
+                                                    A/B/C/D/CEC: 48/50/1/1/4
+                                                    Commentaires:
+                                                     Éclatement extérieur ouest avec armature
+                                                     apparente avec plus de 30 % de perte de
+                                                     section.
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/1/
+
+                                                    A/B/C/D/CEC: 48/50/1/1/4
+                                                    Commentaires:
+                                                     Éclatement extérieur ouest avec armature
+                                                     apparente avec plus de 30 % de perte de
+                                                     section.
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/1/
+
+                                                    A/B/C/D/CEC: 48/50/1/1/4
+                                                    Commentaires:
+                                                     Éclatement extérieur ouest avec armature
+                                                     apparente avec plus de 30 % de perte de
+                                                     section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 12 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/1/
+
+                                                    A/B/C/D/CEC: 48/50/1/1/4
+                                                    Commentaires:
+                                                     Éclatement extérieur ouest avec armature
+                                                     apparente avec plus de 30 % de perte de
+                                                     section.
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/3/
+
+                                                    A/B/C/D/CEC: 85/13/2/0/4
+                                                    Commentaires:
+                                                     Délaminage et éclatement avec armature
+                                                     apparente à l'extrémité ouest et légèrement à
+                                                     l'extrémité est.
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/3/
+
+                                                    A/B/C/D/CEC: 85/13/2/0/4
+                                                    Commentaires:
+                                                     Délaminage et éclatement avec armature
+                                                     apparente à l'extrémité ouest et légèrement à
+                                                     l'extrémité est.
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 13 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/5/
+
+                                                    A/B/C/D/CEC: 30/68/2/0/4
+                                                    Commentaires:
+                                                     Délaminage et éclatement avec armature
+                                                     apparente à l'extrémité ouest (légèrement à
+                                                     l'extrémité est). // Fissure de cisaillement
+                                                     0,15 mm.
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/5/
+
+                                                    A/B/C/D/CEC: 30/68/2/0/4
+                                                    Commentaires:
+                                                     Délaminage et éclatement avec armature
+                                                     apparente à l'extrémité ouest (légèrement à
+                                                     l'extrémité est). // Fissure de cisaillement
+                                                     0,15 mm.
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 1/16-Dispositif de retenue/160 - Glissière
+                                                                (gauche ou droite)//Nord
+
+                                                    A/B/C/D/CEC: 90/9/1/0/4
+                                                    Commentaires:
+                                                     Éclatement. // Ouverture sous troisième
+                                                     poteau (fissure à la base).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 14 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/01-Cours d'eau et remblai/11 -
+                                                                Remblai//Est
+
+                                                    A/B/C/D/CEC: ////3
+                                                    Commentaires:
+                                                     Affaissement du remblai sous le mur de front.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/02-Culées/24 - Garde-grève/3/
+
+
+                                                    A/B/C/D/CEC: 65/25/10/0/4
+                                                    Commentaires:
+                                                     Désagrégation importante à la jonction de
+                                                     l'assise et du garde-grève.
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/02-Culées/24 - Garde-grève/3/
+
+
+                                                    A/B/C/D/CEC: 65/25/10/0/4
+                                                    Commentaires:
+                                                     Désagrégation importante à la jonction de
+                                                     l'assise et du garde-grève.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 15 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/02-Culées/24 - Garde-grève/3/
+
+
+                                                    A/B/C/D/CEC: 65/25/10/0/4
+                                                    Commentaires:
+                                                     Désagrégation importante à la jonction de
+                                                     l'assise et du garde-grève.
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/3/
+
+                                                    A/B/C/D/CEC: 79/20/1/0/4
+                                                    Commentaires:
+                                                     Délaminage extrémités est et ouest.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/4/
+
+                                                    A/B/C/D/CEC: 87/12/1/0/4
+                                                    Commentaires:
+                                                     Délaminage extrémité est et éclatement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 16 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/4/
+
+                                                    A/B/C/D/CEC: 87/12/1/0/4
+                                                    Commentaires:
+                                                     Délaminage extrémité est et éclatement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/05-Poutres à âme pleine / poutres-
+                                                                caissons /50 - Poutre/4/
+
+                                                    A/B/C/D/CEC: 87/12/1/0/4
+                                                    Commentaires:
+                                                     Délaminage extrémité est et éclatement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/13-Contreventements/132 -
+                                                                Diaphragmes//Extrémité
+
+                                                    A/B/C/D/CEC: 49/20/30/1/4
+                                                    Commentaires:
+                                                     Délaminage dans le bas et fissure de plus de
+                                                     0,8 mm à la culée et trace de rouille à la
+                                                     pile.
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 17 de 18
+                               Système de gestion des structures (GSQ-6026)
+
+                          INSPECTION GÉNÉRALE - RAPPORT PHOTOS
+  Numéro de structure: 00007          (Route 386 / Rivière Laflamme / Barraute)
+
+                                                    Date insp.:    2017-08-22     Type struct.: 41
+                                                    T/G/E/No/Pos: 2/16-Dispositif de retenue/160 - Glissière
+                                                                (gauche ou droite)//Nord
+
+                                                    A/B/C/D/CEC: 90/8/1/1/4
+                                                    Commentaires:
+                                                     Éclatement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Imprimé le 2017-12-12                                                                     Page 18 de 18

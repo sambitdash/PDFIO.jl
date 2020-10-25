@@ -1,0 +1,3775 @@
+             SUPREME COURT
+ OF THE UNITED STATES
+ 
+
+
+          IN THE SUPREME COURT OF THE UNITED STATES
+ 
+
+       SAS INSTITUTE INC.,        )
+
+              Petitioner,     )
+
+             v.           ) No. 16-969
+ 
+       JOSEPH MATAL, Interim Director, )
+ 
+       U.S. Patent and Trademark Office, )
+ 
+       and COMPLEMENTSOFT, LLC, 	    )
+
+              Respondents. )
+ 
+
+
+
+
+
+
+
+       Pages: 1 through 72
+ 
+       Place: Washington, D.C.
+ 
+       Date: November 27, 2017
+ 
+
+           HERITAGE REPORTING CORPORATION 
+                 Official Reporters1220 L Street, N.W., Suite 206 Washington, D.C.  20005 (202) 628-4888www.hrccourtreporters.com
+                                                                    1
+ 
+
+                        IN THE SUPREME COURT OF THE UNITED STATES
+ 
+
+
+                      SAS INSTITUTE INC.,               ) 
+                                    Petitioner,         ) 
+                                  v.                    ) No. 16-969 
+                      JOSEPH MATAL, Interim Director,   ) 
+                      U.S. Patent and Trademark Office, ) 
+                      and COMPLEMENTSOFT, LLC,          ) 
+                                    Respondents.        ) 
+
+
+
+
+                                     Washington, D.C.
+ 
+                                   Monday, November 27, 2017
+ 
+
+
+                                  The above-entitled matter came on for
+ 
+                      oral argument before the Supreme Court of the
+ 
+                      United States at 11:09 a.m.
+ 
+
+
+                      APPEARANCES:
+ 
+                      GREGORY A. CASTANIAS, Washington, D.C.; on behalf
+ 
+                          of the Petitioner.
+ 
+                      JONATHAN C. BOND, Assistant to the Solicitor General,
+ 
+                          Department of Justice, Washington, D.C.; on behalf
+ 
+                          of the Respondents.
+ 
+                                       C O N T E N T S 
+                      ORAL ARGUMENT OF:                      PAGE: 
+                      GREGORY A. CASTANIAS 
+                          On behalf of the Petitioner           3 
+                      ORAL ARGUMENT OF: 
+                      JONATHAN C. BOND 
+                          On behalf of the Respondents         30 
+                     REBUTTAL ARGUMENT OF: 
+                     GREGORY A. CASTANIAS 
+                          On behalf of the Petitioner          66 
+                                  P R O C E E D I N G S
+ 
+                                                        (11:09 a.m.)
+ 
+                               CHIEF JUSTICE ROBERTS: We'll hear
+ 
+                     argument next in Case 16-969, SAS Institute
+ 
+                     versus Matal.
+ 
+                               Mr. Castanias.
+ 
+                               ORAL ARGUMENT OF GREGORY A. CASTANIAS
+ 
+                                    ON BEHALF OF THE PETITIONER
+ 
+                               MR. CASTANIAS: Mr. Chief Justice, and
+ 
+                     may it please the Court:
+ 
+                               For three reasons, the Patent Trial
+ 
+                     and Appeal Board is not authorized to issue
+ 
+                     final written decisions on fewer than all of
+ 
+                     the patent claims challenged by inter partes
+ 
+                     review petitioners.
+ 
+                               The first is the plain language of the
+ 
+                     statute. It requires the Board to issue a
+ 
+                     final written decision with respect to the
+ 
+                     patentability of "any patent claim challenged
+ 
+                     by the petitioner." That's also supported by
+ 
+                     the context of the Act.
+ 
+                               Second, that plain and inclusive
+ 
+                     command is not -­
+                               JUSTICE GINSBURG: And doesn't -- may
+ 
+                     I just ask you about what you just quoted,
+ 
+                      doesn't the provision begin "if an inter partes
+ 
+                      review is instituted"? If there is -- it's
+ 
+                      instituted, then -­
+                               MR. CASTANIAS: Yes, that's exactly
+ 
+                      right, Justice Ginsburg. The -- the statute
+ 
+                      starts with a conditional. The conditional was
+ 
+                      met in this case because an inter partes review
+ 
+                      was -- was, in fact, instituted in this case.
+ 
+                               The second -- the second reason -­
+                               JUSTICE SOTOMAYOR: It was only
+ 
+                      instituted with respect to certain claims. So
+ 
+                      I have two questions.
+ 
+                               MR. CASTANIAS: Please.
+ 
+                               JUSTICE SOTOMAYOR: I'm not at all
+ 
+                      clear what it is you're challenging here. Are
+ 
+                      you challenging the Board's right to initiate
+ 
+                      partial adjudications or are you challenging
+ 
+                      the fact that they are not addressing all of
+ 
+                      the claims in their final decision? What is it
+ 
+                      that you're actually asking us to review?
+ 
+                               MR. CASTANIAS: Well, we are
+ 
+                      challenging the latter. Our question presented
+ 
+                      is focused on the language -­
+                               JUSTICE SOTOMAYOR: So what is it
+ 
+                      exactly that you want the Board to do with
+ 
+                      respect to the claims that it didn't grant
+ 
+                      adjudication of?
+ 
+                               MR. CASTANIAS: We -- we believe that
+ 
+                      Section 318(a) requires the Board -­
+                               JUSTICE SOTOMAYOR: So you want them
+ 
+                      to say we didn't grant review on these claims
+ 
+                      because? Or do you want them to say the patent
+ 
+                      is valid with respect to these claims that we
+ 
+                      didn't grant review?
+ 
+                               MR. CASTANIAS: Well, I think it's
+ 
+                      actually -­
+                               JUSTICE SOTOMAYOR: Because the only
+ 
+                      -- the only power they're given is to decide
+ 
+                      the patentability of claims. So what exactly
+ 
+                      is it that you're asking them to do?
+ 
+                               MR. CASTANIAS: Well, Justice
+ 
+                      Sotomayor, what we are asking the Board to do
+ 
+                      is to say, in its final written decision, that
+ 
+                      we are not finding, for example, claim 4 of the
+ 
+                      ComplementSoft patent -- as they did in this
+ 
+                      case, we are not finding that unpatentable.
+ 
+                      That way, we can then appeal that decision -­
+                               JUSTICE SOTOMAYOR: Ahh, you want to
+ 
+                      get around Cuozzo.
+ 
+                               MR. CASTANIAS: No, I don't.
+ 
+                               JUSTICE SOTOMAYOR: That -- that's
+ 
+                      exactly what you want to do.
+ 
+                               MR. CASTANIAS: That -- that's what
+ 
+                      the government -­
+                               JUSTICE SOTOMAYOR: You want to -­
+                               MR. CASTANIAS: That's what the
+ 
+                      government says we want to do. That's not what
+ 
+                      we want to do.
+ 
+                               JUSTICE SOTOMAYOR: Well, I don't see
+ 
+                      what else you're trying to do, because what
+ 
+                      will you do? You will come up on appeal and
+ 
+                      say the Board was wrong in not instituting
+ 
+                      review of those other claims? That's what
+ 
+                      Cuozzo was about, us saying you can't do that.
+ 
+                               I didn't agree with Cuozzo, so -­
+                               MR. CASTANIAS: Well, I certainly
+ 
+                      under -­
+                               JUSTICE SOTOMAYOR: -- you know, I
+ 
+                      mean -­
+                               MR. CASTANIAS: -- I certainly
+ 
+                      understand that.
+ 
+                               (Laughter.)
+ 
+                               JUSTICE SOTOMAYOR: But -- but -- but
+ 
+                      it is what we said. And -- and so, assuming I
+ 
+                      stick with precedent on this issue, what other
+ 
+                      purpose would there be for the Board basically
+ 
+                      to say we made a decision not to institute
+ 
+                      review?
+ 
+                               MR. CASTANIAS: Well, first of all,
+ 
+                      Justice Sotomayor, if you look at what the
+ 
+                      Board actually did in saying that they were not
+ 
+                      going to institute review, the Board
+ 
+                      effectively did make a patentability
+ 
+                      determination in what it calls its initial
+ 
+                      determination. So we have a decision by the
+ 
+                      Patent -- the Patent Trial and Appeal Board
+ 
+                      that has, in fact, ruled on the question but
+ 
+                      because of the way they have ruled on it, we
+ 
+                      can't appeal it and it can't be estopping. And
+ 
+
+
+                               JUSTICE SOTOMAYOR: All right. You do
+ 
+                      want to get around Cuozzo.
+ 
+                               MR. CASTANIAS: Well, it's -­
+                               JUSTICE SOTOMAYOR: Because there is
+ 
+                      absolutely no way that that's anything other
+ 
+                      than that. What's the -- if you're not
+ 
+                      challenging their decision not to institute
+ 
+                      review, why would that make any difference?
+ 
+                               MR. CASTANIAS: Well, Justice Breyer's
+ 
+                      opinion for the Court in Cuozzo was very clear
+ 
+                      in saying that the -- that the determination in
+ 
+                      that case was a challenge under the Section
+ 
+                      314(a) institution only.
+ 
+                               We're not challenging the Section
+ 
+                      314(a) institution; what we're saying is that
+ 
+                      whatever institution means, whatever
+ 
+                      institution means when the Board says we're
+ 
+                      only instituting as to these particular claims,
+ 
+                      it doesn't take into account the fact -- and
+ 
+                      this was not addressed in Cuozzo -- that 318(a)
+ 
+                      by its terms, by its text, requires a final
+ 
+                      written decision.
+ 
+                               JUSTICE SOTOMAYOR: So would the
+ 
+                      review on appeal be on the basis of a motion -­
+                      like a motion to dismiss? On the face of
+ 
+                      whatever you presented the Board with, at the
+ 
+                      beginning, did the Board have a reasonable
+ 
+                      basis to conclude that no reasonable basis
+ 
+                      existed to challenge the validity of that
+ 
+                      claim?
+ 
+                               MR. CASTANIAS: No, the review would
+ 
+                      not be over the reasonable basis or not. The
+ 
+                      review would be on the question of
+ 
+                      patentability.
+ 
+                               JUSTICE SOTOMAYOR: So how could we -­
+                      how could the appellate court make that
+ 
+                      determination if there's no record with respect
+ 
+                      to that issue?
+ 
+                               MR. CASTANIAS: Well, Justice
+ 
+                      Sotomayor, there actually -­
+                               JUSTICE SOTOMAYOR: If -­
+                               MR. CASTANIAS: -- is a record. I'm
+ 
+                      sorry, I didn't mean to -­
+                               JUSTICE SOTOMAYOR: No, no, I -­
+                               MR. CASTANIAS: -- cut you off.
+ 
+                               JUSTICE SOTOMAYOR: If the Board
+ 
+                      didn't institute review of those claims, there
+ 
+                      would be an incomplete record with respect to
+ 
+                      those other claims.
+ 
+                               MR. CASTANIAS: Let's keep in mind
+ 
+                      that there are -- inter partes review is a -­
+                      is a much more streamlined process than trial
+ 
+                      court litigation. And the complaint is much
+ 
+                      more than notice pleading.
+ 
+                               In this case, the -- the petition that
+ 
+                      was filed here was a complete document. It
+ 
+                      laid out all of the grounds and all of the
+ 
+                      challenges to all 16 of the ComplementSoft
+ 
+                      patent claims. It also included a declaration
+ 
+                      from an expert witness.
+ 
+                               If you look at the first few pages of
+ 
+                      the Joint Appendix in this case, which has
+ 
+                      the -­
+                               JUSTICE SOTOMAYOR: Well, that's fine.
+ 
+                      But if the Board didn't institute review of
+ 
+                      those other claims, the other side has not had
+ 
+                      an opportunity to present its evidence in
+ 
+                      contravention of your expert.
+ 
+                               You're asking the appellate court to
+ 
+                      decide patentability on the basis of an
+ 
+                      incomplete, undeveloped record.
+ 
+                               MR. CASTANIAS: Well, we'll either ask
+ 
+                      the appellate court to decide patentability or
+ 
+                      at least decide that we made a case of
+ 
+                      patentability that ought to be decided.
+ 
+                               JUSTICE SOTOMAYOR: All right.
+ 
+                               MR. CASTANIAS: And it -­
+                               JUSTICE SOTOMAYOR: So why don't you
+ 
+                      get to the first issue at all?
+ 
+                               MR. CASTANIAS: Right.
+ 
+                               JUSTICE SOTOMAYOR: What you really
+ 
+                      want to say is the Board shouldn't institute
+ 
+                      partial reviews; it should, if it finds -- I
+ 
+                      think what you're saying is, once it determines
+ 
+                      you have enough evidence to challenge one
+ 
+                      claim, it should hold a hearing on everything.
+ 
+                      Because without that, you can't really decide
+ 
+                      patentability in a due process way, in a fair
+ 
+                      way.
+ 
+                               So why have you limited your challenge
+ 
+                      in the way you have? What's the purpose of
+ 
+                      doing that? And what advantage does that give
+ 
+                      you?
+ 
+                               It seems to me that it's an unfair
+ 
+                      advantage to the other side. It's an unfair
+ 
+                      advantage to the system. So why don't you just
+ 
+                      argue what you really want to argue, which is,
+ 
+                      I should have an opportunity to litigate all of
+ 
+                      my claims?
+ 
+                               MR. CASTANIAS: Well, that's exactly
+ 
+                      -- that is exactly our argument. We should
+ 
+                      have the opportunity to litigate them in -­
+                               JUSTICE GINSBURG: But the statute
+ 
+                      precludes you from contesting the Institution
+ 
+                      decision.
+ 
+                               MR. CASTANIAS: Well, the -- the
+ 
+                      statute precludes me from contesting the
+ 
+                      Institution decision, but, Justice Ginsburg, I
+ 
+                      think if we could move to the -- to the
+ 
+                      regulation that the Patent Office issued in
+ 
+                      this case, that there -- that the government is
+ 
+                      relying on.
+ 
+                               What you see in the -- in the Federal
+ 
+                      Register, at 77 Federal Register 48702, the
+ 
+                      government considered the objection that
+ 
+                      reviews ought to take place with regard to all
+ 
+                      challenged patent claims.
+ 
+                               And what you won't see in the Federal
+ 
+                      Register, where the Patent Office took up this
+ 
+                      regulation, is any reference to Section 318(a).
+ 
+                      It was -- that section was never considered.
+ 
+                               What we have under Section 318(a) is
+ 
+                      Congress saying to us and to -- and to the
+ 
+                      public that when an -- when an inter partes
+ 
+                      review is instituted -- and -- and keep in mind
+ 
+                      that that's a binary choice -­
+                               JUSTICE GINSBURG: And it's -- if it's
+ 
+                      instituted and -- here, it was instituted, but
+ 
+                      only on two of -- what -- what?
+ 
+                               MR. CASTANIAS: Nine out of the 16
+ 
+                      claims.
+ 
+                               JUSTICE GINSBURG: Nine -- okay. Nine
+ 
+                      out of 16. So that's -- so 318 relates to when
+ 
+                      an inter partes review is instituted.
+ 
+                               MR. CASTANIAS: It's an if/then -­
+                      it's an if/then. It's a binary, that if it's
+ 
+                      instituted, then we're entitled to a decision
+ 
+                      on all challenged patent claims. And that's -­
+                               JUSTICE GINSBURG: If it's -- if it's
+ 
+                      instituted on any one, then the decision has to
+ 
+                      be on all 16?
+ 
+                               MR. CASTANIAS: The decision has to be
+ 
+                      on all 16, that's right. That's what Section
+ 
+                      318 says.
+ 
+                               JUSTICE GINSBURG: Even though the
+ 
+                      only one that they're examining is one?
+ 
+                               MR. CASTANIAS: Well, that is -- that
+ 
+                      is a determination by the Board at the outset
+ 
+                      that we apparently have not met a burden of
+ 
+                      proof. What we end up with under the -- under
+ 
+                      the scheme that -- that the Patent Office is
+ 
+                      following right now is a system whereby we were
+ 
+                      sued -- we were sued in a complaint by
+ 
+                      ComplementSoft, in a complaint that alleged
+ 
+                      infringement of -- and I quote the complaint,
+ 
+                      "at least claims 1, 2, 3, 4, 8, and 10."
+ 
+                               We asked for review of all 16 claims
+ 
+                      because of that "at least" language. The
+ 
+                      Patent Office then only reviewed a certain
+ 
+                      number of the claims, and then, in their
+ 
+                      infringement contentions in this case,
+ 
+                      ComplementSoft asserted every single claim in
+ 
+                      the patent against us but claim 4.
+ 
+                               And so, now, what we're left with is a
+ 
+                      situation whereby we are in the Patent Office,
+ 
+                      fighting for years in the inter partes review
+ 
+                      over the patentability of nine of the 16
+ 
+                      claims, and then we're going to have to go back
+ 
+
+
+                               JUSTICE SOTOMAYOR: I'm sorry. How
+ 
+                      did you do that for years? It's a year and a
+ 
+                      half, isn't it, at most?
+ 
+                               MR. CASTANIAS: Well, the -- the
+ 
+                      petition was filed in 2012, and then we've gone
+ 
+                      up to the Federal Circuit, and now, we're
+ 
+                      before this Court. But, yes, it's a year and a
+ 
+                      half at most, three months -- well -­
+                               JUSTICE SOTOMAYOR: It's usually a
+ 
+                      year. How long did it take here?
+ 
+                               MR. CASTANIAS: It took -- they took
+ 
+                      the maximum amount of time in this case. So -­
+                               JUSTICE SOTOMAYOR: A year and a half
+ 
+                      or a year?
+ 
+                               MR. CASTANIAS: The year, they did not
+ 
+                      extend the time.
+ 
+                               JUSTICE SOTOMAYOR: All right.
+ 
+                               MR. CASTANIAS: So -­
+                               JUSTICE KAGAN: Mr. Castanias, can I
+ 
+                      ask how your statutory argument works, given
+ 
+                      your position on canceled claims?
+ 
+                               MR. CASTANIAS: Uh-huh.
+ 
+                               JUSTICE KAGAN: If I understand your
+ 
+                      position on canceled claims, it's that the
+ 
+                      Board need not render a decision as to those
+ 
+                      claims. Is that right?
+ 
+                               MR. CASTANIAS: That's right.
+ 
+                               JUSTICE KAGAN: So I guess what's the
+ 
+                      difference between a canceled claim and a
+ 
+                      non-instituted claim? In other words, both
+ 
+                      were originally in the petition. Both are no
+ 
+                      longer in dispute.
+ 
+                               So, with respect to the one, you say
+ 
+                      it's perfectly consistent with the statutory
+ 
+                      language that the Board did not render a
+ 
+                      decision. Then why not with respect to the
+ 
+                      other as well?
+ 
+                               MR. CASTANIAS: Well, Justice Kagan,
+ 
+                      there's a world of difference between the two.
+ 
+                               A canceled claim no longer exists. We
+ 
+                      can't be sued in the district court on a
+ 
+                      canceled claim. If the denial of institution
+ 
+                      means that we have to go relitigate that claim
+ 
+                      under the same Section 102 and 103 grounds,
+ 
+                      that we would otherwise be able to challenge
+ 
+                      them in front of the -- the Patent Trial and
+ 
+                      Appeal Board -­
+                               JUSTICE KAGAN: So I understand
+ 
+                      there's a practical difference, but I was
+ 
+                      looking for -- because you say that your view
+ 
+                      is commanded by the statute and particularly, I
+ 
+                      think, by this phrase "challenged by the
+ 
+                      Petitioner."
+ 
+                               But if you were right about the
+ 
+                      statutory language, that would apply to
+ 
+                      canceled claims as well? It was challenged by
+ 
+                      the Petitioner in the original petition.
+ 
+                               MR. CASTANIAS: Yes, and -- but it's
+ 
+                      no longer challenged by the Petitioner at the
+ 
+                      time of the final decision.
+ 
+                               JUSTICE KAGAN: And this one is also 
+                      no longer in dispute. 
+                               MR. CASTANIAS: And it is -- it is an 
+                      ex-claim. It is no longer a claim. There's
+ 
+                      nothing -- there's nothing to adjudicate. And
+ 
+                      that's the -- that's the answer by the -­
+                               JUSTICE KAGAN: And I think what the
+ 
+                      Board would say is that the same thing is true
+ 
+                      here, there's nothing to adjudicate because
+ 
+                      they have said that it doesn't pass the
+ 
+                      threshold, so they're not in the business of
+ 
+                      adjudicating it.
+ 
+                               MR. CASTANIAS: But it's -- but it's
+ 
+                      because they've said that, and that's not what
+ 
+                      the statute says. Now, it's -- our position is
+ 
+
+
+                               JUSTICE KAGAN: Well, what language in
+ 
+                      the statute distinguishes between the canceled
+ 
+                      claim and the non-instituted claim?
+ 
+                               MR. CASTANIAS: It is challenged by
+ 
+                      the Petitioner -- and, actually, the word
+ 
+                      "claim" would work as well because it's no
+ 
+                      longer a patent claim. It doesn't exist.
+ 
+                               But there is -- the -- the chapter -­
+                      the inter partes chapter of the American
+ 
+                      Invents Act, Justice Kagan, tells a really -­
+                      it's a very simple, straightforward, and I
+ 
+                      would dare say elegant story. It starts by
+ 
+                      defining the scope of inter partes review in
+ 
+                      section 311. Section 311 is entitled Inter
+ 
+                      Partes Review.
+ 
+                               Section 311(b) is entitled Scope. And
+ 
+                      in that scope provision, it refers to what the
+ 
+                      petitioner in an inter partes review may
+ 
+                      request. You then move on to section 312,
+ 
+                      which defines the requirements of a petition.
+ 
+                      What does it require the petition to identify?
+ 
+                      Among other things, each claim challenged.
+ 
+                               So now, we're still at the beginning
+ 
+                      of the process, and then 314 -­
+                               JUSTICE SOTOMAYOR: Why bother -- why
+ 
+                      bother requiring you to set forth all your
+ 
+                      grounds for every claim you choose to
+ 
+                      challenge? Because nothing in this forces you
+ 
+                      to challenge the claims in inter partes review.
+ 
+                               MR. CASTANIAS: No, we might select a
+ 
+                      subset -­
+                               JUSTICE SOTOMAYOR: So you could
+ 
+                      choose -- you could have chosen to challenge
+ 
+                      four and still gone back to district court and
+ 
+                      challenged all 16 in district court.
+ 
+                               MR. CASTANIAS: And we -- and we might
+ 
+                      have to do that -­
+                               JUSTICE SOTOMAYOR: So this was never
+ 
+                      -- so this was never intended to capture all
+ 
+                      litigation over validity?
+ 
+                               MR. CASTANIAS: Oh, no, of course not.
+ 
+                      And -- and we would never say that.
+ 
+                               JUSTICE SOTOMAYOR: So -- so why
+ 
+                      bother requiring you to set forth all your
+ 
+                      grounds, particularly if you only really have
+ 
+                      to do it with respect to one? You could take
+ 
+                      your strongest case, set forth all the grounds
+ 
+                      there, and on the other, say, we also want to
+ 
+                      challenge all the other 15 because, under your
+ 
+                      theory, you don't have to do anything more than
+ 
+                      that.
+ 
+                               You just have to identify one claim
+ 
+                      that's weak. The Board says, we'll institute
+ 
+                      review, and then you're entitled to challenge
+ 
+                      all the other claims that you didn't set forth
+ 
+                      with particularity.
+ 
+                               MR. CASTANIAS: And -- and the -­
+                               JUSTICE SOTOMAYOR: Because the Board
+ 
+                      has to give you a hearing on those claims
+ 
+                      anyway.
+ 
+                               MR. CASTANIAS: And the statute -- but
+ 
+                      -- but, Justice Sotomayor, keep in mind that
+ 
+                      the statute invests the Board with the
+ 
+                      discretion at the outset whether or not, that
+ 
+                      binary choice, whether or not to institute.
+ 
+                               And that's the -- and that's an
+ 
+                      important word in the statute, "whether." It
+ 
+                      doesn't say whether and if so as to which
+ 
+                      claims. It is a binary choice, whether. And
+ 
+                      that's consistent -­
+                               JUSTICE KENNEDY: Could the Board
+ 
+                      contact the parties and say, we will not grant
+ 
+                      review as to all of the challenges claimed, but
+ 
+                      if you reduce it to just claims 3 and 4, we
+ 
+                      will hear it? Could the Board do that?
+ 
+                               MR. CASTANIAS: I -- I think the Board
+ 
+                      could do that and then leave the Petitioner
+ 
+                      with the election at that point to say, you
+ 
+                      know what, we think we'd rather go challenge
+ 
+                      all the claims in district court and have -­
+                      have to pay for one proceeding, rather than
+ 
+                      two.
+ 
+                               And that's really what this -- this is
+ 
+                      about, Justice Sotomayor, to go back to your
+ 
+                      question about what do you really want. We
+ 
+                      want to have our Section 102 and 103 objections
+ 
+                      to the ComplementSoft patent heard in a single
+ 
+                      forum.
+ 
+                               Is the Patent Trial and Appeal Board
+ 
+                      more favorable for that -­
+                               JUSTICE SOTOMAYOR: But you don't -­
+                      you want that, but it doesn't mean the other
+ 
+                      side wants that. It doesn't mean that the
+ 
+                      Board needs that.
+ 
+                               MR. CASTANIAS: Well, the statute -­
+                      we believe the statute says that that's what
+ 
+                      we're entitled to if -­
+                               JUSTICE SOTOMAYOR: You think it's an
+ 
+                      inherent right.
+ 
+                               MR. CASTANIAS: -- if there is a grant
+ 
+
+
+                               JUSTICE SOTOMAYOR: Could you show me
+ 
+                      where -- anywhere in this statute the Board is
+ 
+                      prohibited directly from initiating -­
+                      initiation -- initiating partial review?
+ 
+                               MR. CASTANIAS: Well, I -­
+                               JUSTICE SOTOMAYOR: Of some claims -­
+                      of some claims or not? And -­
+                               MR. CASTANIAS: To the extent that
+ 
+                      we're talking about the sort of partial
+ 
+                      institution that they're doing right now, where
+ 
+                      those are not decided in the final decision, I
+ 
+                      would start with Section 318(a). It -- it -­
+                               JUSTICE SOTOMAYOR: Assume there's not
+ 
+                      -- I find that 314 -­
+                               MR. CASTANIAS: Okay.
+ 
+                               JUSTICE SOTOMAYOR: -- permits -- it
+ 
+                      has no direct prohibition of partial
+ 
+                      institution, that the Board is entitled to do
+ 
+                      that, then why would we have to read the
+ 
+                      language "patent claims challenged by the
+ 
+                      Petitioner" any different than the Board is
+ 
+                      reading it?
+ 
+                               The Board is reading it to -- to mean
+ 
+                      any patent claim challenged by the Petitioner
+ 
+                      at the review stage.
+ 
+                               MR. CASTANIAS: Justice Sotomayor, as
+ 
+                      I was -- when I was engaging in colloquy with
+ 
+                      Justice Ginsburg earlier and Justice Kagan, I
+ 
+                      was talking about how the -- the statute tells
+ 
+                      a really elegant story and -- and the way that
+ 
+                      the inter partes review is supposed to work.
+ 
+                      Once -- once a petition is filed, it is that
+ 
+                      petition that is before the Board.
+ 
+                               And Section 314, the one that you're
+ 
+                      -- you're focused on, gives the director the
+ 
+                      discretion to institute. It's whether to
+ 
+                      institute. But it is whether to institute that
+ 
+                      petition. It's not whether to institute with
+ 
+                      regard to any particular claim.
+ 
+                               JUSTICE KAGAN: Well, one of the
+ 
+                      stories that the statute as written seems to
+ 
+                      tell is of great discretion to the Board with
+ 
+                      respect to the institution decision.
+ 
+                               MR. CASTANIAS: Uh-huh.
+ 
+                               JUSTICE KAGAN: It says you never have
+ 
+                      to institute; it's your choice whether to
+ 
+                      institute; you can't get review of the
+ 
+                      institution decision, which is our Cuozzo case;
+ 
+                      you get to write your own rules about the
+ 
+                      institution decision, which is the -- the
+ 
+                      rule-making delegation.
+ 
+                               So it's a little bit odd to say, well,
+ 
+                      here's the one thing you don't have discretion
+ 
+                      over when it comes to institution: you can't
+ 
+                      say these claims but not those claims.
+ 
+                               In a -- in a context in which Congress
+ 
+                      said the institution decision is really for the
+ 
+                      Board, it's a discretionary decision that lies
+ 
+                      in its bailiwick, why should we carve out that
+ 
+                      one thing?
+ 
+                               MR. CASTANIAS: Well, excuse me,
+ 
+                      Justice Kagan, I think I would answer your
+ 
+                      question by saying that the fact that that
+ 
+                      discretion is imposed to grant or deny, whether
+ 
+                      to grant, suggests very strongly as a textual
+ 
+                      matter that there is not a further secret grant
+ 
+                      of selective review at that point.
+ 
+                               But, moreover, why -- why should it be
+ 
+                      our choice? Why -- why should we be the -- the
+ 
+                      entity that picks? Well, obviously, the
+ 
+                      statutory language, we think, supports us. The
+ 
+                      ordinary principle that the petitioner or the
+ 
+                      plaintiff in litigation is the master of its
+ 
+                      complaint, we -- because so many of these cases
+ 
+                      follow litigation, we know best what claims
+ 
+                      we're likely to be facing in litigation.
+ 
+                               And, finally, it serves exactly the
+ 
+                      two purposes that the majority opinion of the
+ 
+                      Court in Cuozzo identified for the inter partes
+ 
+                      review system, which is it screens out bad
+ 
+                      patents while bolstering valid ones.
+ 
+                               And it's -- it's one of the reasons
+ 
+                      why you don't have a lot of amicus briefs on
+ 
+                      either side in this case, is that we're
+ 
+                      actually in the position of saying, yes, we
+ 
+                      would like -- we would like to be -- have
+ 
+                      appellate review and be bound by an adverse
+ 
+                      decision with regard to claims that the Patent
+ 
+                      Office did not think met the standard for
+ 
+                      institution.
+ 
+                               But that's not -- that's not
+ 
+                      unreasonable, particularly in this case,
+ 
+                      because as we pointed out in our reply brief on
+ 
+                      the merits, the Patent Office in this case, the
+ 
+                      Board, decided to institute review with respect
+ 
+                      to claim 4 but not claim 2.
+ 
+                               Now, claim 4 actually is identical to
+ 
+                      claim 2, except it contains an additional
+ 
+                      limitation. Had we been given the opportunity
+ 
+                      to say to the -- to either to the Board in the
+ 
+                      process of the litigation leading up to a final
+ 
+                      decision or to the Federal Circuit on appellate
+ 
+                      review, we could have said: Look, claim 4, if
+ 
+                      it falls, claim 2 is going to fall with it.
+ 
+                      There is no -- there's no earthly reason why we
+ 
+                      should confirm this claim or reject that claim
+ 
+                      but allow the other claim to go into -­
+                               JUSTICE BREYER: The Patent Office -­
+                      the Patent Office disagrees. So -- so I can't
+ 
+                      make -- I -- I think the language does,
+ 
+                      actually, help you. I have no doubt that the
+ 
+                      language you point to helps you, but where I
+ 
+                      run into trouble is I can't imagine how a
+ 
+                      statute is supposed to work where you,
+ 
+                      objecting, say: I object to 10 claims, all
+ 
+                      right? Now we look at this and say: You're
+ 
+                      going to get that grant; if just one of those
+ 
+                      10 claims is reasonable likelihood, you'll
+ 
+                      prevail. Okay?
+ 
+                               MR. CASTANIAS: I'm not sure I -- I'm
+ 
+                      not sure I follow that.
+ 
+                               JUSTICE BREYER: So you will -- you
+ 
+                      will have inter partes review under the first
+ 
+                      thing, 13, 14, as long as just one, all you
+ 
+                      have to have is one, and you will get inter
+ 
+                      partes review.
+ 
+                               MR. CASTANIAS: I -- it's not "will
+ 
+                      get"; I "may get."
+ 
+                               JUSTICE BREYER: You may get. Okay.
+ 
+                      They say -- now, it's up to the Patent Office.
+ 
+                      And the Patent Office says, yeah, one, okay.
+ 
+                               Now, what you're saying is because
+ 
+                      there was one and nine they're never going to
+ 
+                      review, they think there's nothing to it.
+ 
+                      Okay? And it says that their decision not to
+ 
+                      review will not be appealed, all right?
+ 
+                               Okay. So they find one, and all of a
+ 
+                      sudden, they discover they're in court and have
+ 
+                      to appeal everything on nine claims they
+ 
+                      thought made no sense. But if they find all 10
+ 
+                      are no good, then they're out of court, no way
+ 
+                      to get them in there, dah, dah, dah. Okay?
+ 
+                               Now, that's the part I have trouble
+ 
+                      grasping, why someone would write a statute
+ 
+                      like that.
+ 
+                               MR. CASTANIAS: Well, Justice Breyer,
+ 
+                      I think I'd start by urging you to read the
+ 
+                      statute free of the regulation. Just read the
+ 
+                      statutory language -­
+                               JUSTICE BREYER: I have done that. I
+ 
+                      actually have it written down. My law clerk
+ 
+                      has it here. But I -- I grant you I have a
+ 
+                      hard time keeping it all in mind.
+ 
+                               MR. CASTANIAS: And -- and it's hard
+ 
+                      to find in -- in the entire statutory scheme,
+ 
+                      the language of scope, what the "challenged in
+ 
+                      the petition," even the amendment -­
+                               JUSTICE BREYER: No, I started by
+ 
+                      saying -­
+                               MR. CASTANIAS: -- language didn't
+ 
+                      specify anything about -­
+                               JUSTICE BREYER: I started by saying
+ 
+
+
+                               MR. CASTANIAS: Excuse me.
+ 
+                               JUSTICE BREYER: -- that I think
+ 
+                      language does favor you but not definitely. I
+ 
+                      mean, there is a lot of opening and ambiguity
+ 
+                      here. And that's why I turned to what I was
+ 
+                      having trouble with, is trying to imagine what
+ 
+                      the purpose would be of writing a statute the
+ 
+                      way you want, though I find it very practical
+ 
+                      to think of the statute as your opponents want
+ 
+                      it.
+ 
+                               Now, that -- that exposing my method
+ 
+                      of thinking, I'm not wedded to that, but I do
+ 
+                      want to know what your answer is.
+ 
+                               MR. CASTANIAS: Well, my -- my answer
+ 
+                      is that I think that it makes -- it's very
+ 
+                      practical to read the statute as we're reading
+ 
+                      it. And I don't think it's ambiguous at all.
+ 
+                      I think it's -- I think the ambiguity is only
+ 
+                      injected by the addition of the regulation that
+ 
+                      the Patent Office has -- has introduced into
+ 
+                      this, because you won't find a hint of partial
+ 
+                      institution anywhere in the statute, and you
+ 
+                      have some strong textual indicators against it.
+ 
+                               That's why we say that even if we were
+ 
+                      in Chevron world and even if Section 318 were
+ 
+                      the subject of a regulation, which it's not, it
+ 
+                      would still not be within the zone of
+ 
+                      reasonableness with regard to the -- the scope
+ 
+                      of the ambiguity.
+ 
+                               But why would you write it this way?
+ 
+                      For exactly the two reasons that you -- you
+ 
+                      wrote for the Court in Cuozzo. IPR screens out
+ 
+                      bad patents while bolstering valid ones.
+ 
+                               Look at what the Board did in this
+ 
+                      case. In their institution decision, which ran
+ 
+                      22 pages, it's not -- it wasn't just a
+ 
+                      determination like the statute anticipates. It
+ 
+                      was a full, written, reasoned decision, made in
+ 
+                      very short order after three months. The Board
+ 
+                      moved all of the work that they could have done
+ 
+                      at the end to this institution phase and said:
+ 
+                      Yeah, we're not going to institute with regard
+ 
+                      to claim 2 and claims 10 through 16.
+ 
+                               But we've still got reasoned decisions
+ 
+                      on that. But those claims haven't been
+ 
+                      bolstered, to use the words of -- of Cuozzo.
+ 
+                      And the -- the decision by the Board to reject
+ 
+                      our arguments ought to then, if we lose either
+ 
+                      before the Board in the final decision written
+ 
+                      or on appeal, it should estop us from
+ 
+                      relitigating those issues in the federal
+ 
+                      courts.
+ 
+                               That was exactly the point of the
+ 
+                      inter partes review statute, is to make
+ 
+                      district court litigation simpler by allowing
+ 
+                      the expert agency to do these types of
+ 
+                      adjudications. I say that with trepidation
+ 
+                      because of the first argument -- but they are
+ 
+                      adjudications of a type that agencies may make,
+ 
+                      and it streamlines the patent litigation that
+ 
+                      follows.
+ 
+                               If there are no further questions,
+ 
+                      I'll reserve the remainder of my time.
+ 
+                               CHIEF JUSTICE ROBERTS: Thank you,
+ 
+                      counsel.
+ 
+                               Mr. Bond.
+ 
+                                 ORAL ARGUMENT OF JONATHAN C. BOND
+ 
+                                   ON BEHALF OF THE RESPONDENTS
+ 
+                               MR. BOND: Mr. Chief Justice, and may
+ 
+                     it please the Court:
+ 
+                               In establishing inter partes review,
+ 
+                     Congress gave the PTO an enhanced tool to
+ 
+                     identify and revisit patent claims that it has
+ 
+                     determined may not be patentable for certain
+ 
+                     reasons, and it entrusted the agency with
+ 
+                     determining when to use that tool and how those
+ 
+                      proceedings should work in practice.
+ 
+                               Petitioner's challenge to the scope of
+ 
+                      the final written decision here, its argument
+ 
+                      that it should have included more claims in the
+ 
+                      final written decision, fails because the PTO
+ 
+                      or the -- the Board here, as under delegated
+ 
+                      authority, validly determined not to institute
+ 
+                      on those claims. They were never part of the
+ 
+                      instituted proceeding, and there's nothing in
+ 
+                      the statute that requires the Board to
+ 
+                      institute or to include in its final decision
+ 
+                      claims that were never part of the proceeding
+ 
+                      in the first place.
+ 
+                               Now, the crux of this dispute is, as I
+ 
+                      think the prior colloquy illustrated, over the
+ 
+                      partial institution decision. The Board's
+ 
+                      partial institution decision here to institute
+ 
+                      review, except as to claims 2 and 11 through
+ 
+                      16, is not reviewable under Section 314(d) and
+ 
+                      this Court's decision in Cuozzo. And, in any
+ 
+                      event, it reflects a permissible exercise of
+ 
+                      the broad discretion conferred on the Board by
+ 
+                      the statute.
+ 
+                               JUSTICE GORSUCH: Well, what is the -­
+                               CHIEF JUSTICE ROBERTS: But what do
+ 
+                      you do with the problem your friend raised with
+ 
+                      respect to claim 4 and claim 2? It does seem
+ 
+                      to put them in a difficult position.
+ 
+                               MR. BOND: So it's actually not clear
+ 
+                      that claim 4 is narrower than claim 2. As we
+ 
+                      explained in the briefing in the court of
+ 
+                      appeals, it's possible that claim 4 is actually
+ 
+                      broader in some respects. That's a close
+ 
+                      dispute that the Board, in its discretion,
+ 
+                      determined claim 4 presents a -- a close
+ 
+                      question. Claim 2 does not, as presented to
+ 
+                      us, present a close question.
+ 
+                               CHIEF JUSTICE ROBERTS: Well, that
+ 
+                      doesn't seem to me -- I mean, I know we don't
+ 
+                      have review of the decision which claims to
+ 
+                      review, it doesn't seem to me like very
+ 
+                      helpful, in terms of what the whole process was
+ 
+                      supposed to accomplish.
+ 
+                               MR. BOND: So we think Congress vested
+ 
+                      the Board with discretion of deciding in what
+ 
+                      circumstances claims are closely-enough related
+ 
+                      that granting a review on one may -- implies
+ 
+                      that it makes sense to grant a claim on a
+ 
+                      related claim -- or grant review on a related
+ 
+                      claim because they're so closely related.
+ 
+                               Here, the Board determined that the
+ 
+                      request for review on claim 2 failed because
+ 
+                      the petition failed at the threshold. It
+ 
+                      didn't identify specific references in the
+ 
+                      prior art that rendered claim 2 obvious over
+ 
+                      the prior art.
+ 
+                               With respect to claim 4, the petition
+ 
+                      had made a closer showing. Now, that's a
+ 
+                      function of the petition.
+ 
+                               JUSTICE KENNEDY: Well, why couldn't
+ 
+                      the Board just -- just say we -- we decline to
+ 
+                      grant it unless you reduce the -- unless you
+ 
+                      eliminate this claim?
+ 
+                               MR. BOND: So, we think the Board
+ 
+                      could do that, and we think that the Board has
+ 
+                      that authority to say we're denying review
+ 
+                      across the board, but we -- and on Petitioner's
+ 
+                      view, I think that he conceded that that -­
+                               JUSTICE KENNEDY: But then we can rule
+ 
+                      against you, and there's no real problem.
+ 
+                               MR. BOND: We -- we could deny review
+ 
+                      across the board, but if you tailor your
+ 
+                      petition, we could grant review in that
+ 
+                      circumstance.
+ 
+                               But that, we think, illustrates the
+ 
+                      artificiality of the Petitioner's position that
+ 
+                      the Board could get to the same result, just
+ 
+                      through a more cumbersome, multistage process
+ 
+                      of saying, we're not going to grant it this
+ 
+                      way, but if you revise and resubmit, we will
+ 
+                      then entertain your challenge.
+ 
+                               Here, we understand that Congress
+ 
+                      designed -­
+                               JUSTICE KENNEDY: Well, it doesn't
+ 
+                      because the challengers might say, in that -­
+                      in that event, we'll just go to the district
+ 
+                      court. We don't want -- we don't want it.
+ 
+                               MR. BOND: Sure, and they could do
+ 
+                      that in this instance. A challenger here who's
+ 
+                      dissatisfied with the Board's decision about
+ 
+                      the scope of review can say, you know what,
+ 
+                      it's not worth our time, we can settle with the
+ 
+                      -- the Patent Owner our -- our IPR dispute, we
+ 
+                      can agree not to pursue it and can proceed in
+ 
+                      litigation.
+ 
+                               And if, as in this case, the alleged
+ 
+                      infringer was sued in a -- in a district court
+ 
+                      infringement case and then brings an I -- IPR
+ 
+                      proceeding, there's no stay of the district
+ 
+                      court proceeding, at least mandated by the
+ 
+                      statute, so they can proceed in the district
+ 
+                      court to litigate as they had -- already had
+ 
+                      been doing.
+ 
+                               CHIEF JUSTICE ROBERTS: I -- I thought
+ 
+                      roughly half of the proceedings were stayed?
+ 
+                               MR. BOND: As matter of the district
+ 
+                      court's discretion, I think a little over
+ 
+                      50 percent of contested stay motions are
+ 
+                      granted, but, of course, if it's the alleged
+ 
+                      infringer who went to the IPR or went to the
+ 
+                      PTO to ask for an IPR and then says, look, I'm
+ 
+                      done with IPR, they wouldn't grant review on
+ 
+                      the claims that I would like, they can go back
+ 
+                      to the district court and say, I no longer need
+ 
+                      a stay if one was granted in the first place,
+ 
+                      let's proceed to litigate this here in this
+ 
+                      infringement suit.
+ 
+                               And so we think that the statute is
+ 
+                      perfectly consistent with inter partes review
+ 
+                      being conducted on a partial institution basis,
+ 
+                      and at a minimum, as I think was discussed
+ 
+                      earlier, no provision of the statute clearly
+ 
+                      prohibits what the -- what the PTO is doing
+ 
+                      here.
+ 
+                               JUSTICE ALITO: Well, what about
+ 
+                      318(a)? If we look at that by itself, where is
+ 
+                      there any ambiguity? If an inter partes review
+ 
+                      is instituted and not dismissed under this
+ 
+                      chapter, the Patent Trial and Appeal Board
+ 
+                      shall issue a final decision with respect to
+ 
+                      the patentability of any patent claim
+ 
+                      challenged by the Petitioner.
+ 
+                               What is ambiguous about that?
+ 
+                               MR. BOND: So a couple of things.
+ 
+                      First, we'd say, as Petitioner invited the
+ 
+                      Court to do, read through the statute
+ 
+                      sequentially. We set it forth starting at page
+ 
+                      11A of our brief in the appendix. Read through
+ 
+                      and see what -­
+                               JUSTICE ALITO: Well, that really
+ 
+                      wasn't my question. If we look at that
+ 
+                      language by itself, where is there ambiguity?
+ 
+                               MR. BOND: Sure. If -- if you look at
+ 
+                      the four words, "challenged by the Petitioner,"
+ 
+                      in isolation, they don't answer any of the
+ 
+                      questions about the scope of what we mean by
+ 
+                      challenged by the Petitioner.
+ 
+                               So, if you look at those four words in
+ 
+                      isolation, they don't tell you standing alone
+ 
+                      challenged in an IPR proceeding or this IPR
+ 
+                      proceeding as distinct from in an infringement
+ 
+                      suit where you also challenged them. It also
+ 
+                      doesn't tell you challenged on a ground
+ 
+                      permitted within IPR.
+ 
+                               JUSTICE ALITO: You think that's -­
+                      you think that is a serious interpretation of
+ 
+                      this challenge -- they challenged it in a
+ 
+                      discussion in their office. They challenged it
+ 
+                      in a discussion in a bar. It means challenged
+ 
+                      it in this proceeding. What else could it
+ 
+                      mean?
+ 
+                               MR. BOND: Well, you know that because
+ 
+                      of context. It also means challenged on a
+ 
+                      ground within IPR, challenged timely and
+ 
+                      challenged by a petitioner who's not estopped
+ 
+                      from doing so.
+ 
+                               And the reason that question isn't
+ 
+                      hard is because of the context of the statute,
+ 
+                      including the opening clause that takes as its
+ 
+                      starting premise -­
+                               JUSTICE ALITO: You think it's not
+ 
+                      hard?
+ 
+                               MR. BOND: We think -­
+                               JUSTICE ALITO: You think that's not a
+ 
+                      hard question at least?
+ 
+                               MR. BOND: No, we think what's not
+ 
+                      difficult is the question you posed -- or the
+ 
+                      question that I suggested of we know that they
+ 
+                      mean challenged in an IPR proceeding and in
+ 
+                      this IPR proceeding. That question we don't
+ 
+                      think is difficult because of the context,
+ 
+                      because of the opening clause referring to "if
+ 
+                      an IPR proceeding is instituted," we're
+ 
+                      referring to that IPR proceeding.
+ 
+                               And it is -­
+                               JUSTICE BREYER: Is this how you would
+ 
+                      read it -- and don't just agree with me because
+ 
+                      it sounds as if I agree with you, I just want
+ 
+                      to know what you -- don't get me off on a
+ 
+                      mistake if it is -- if an inter partes review
+ 
+                      is instituted, any patent claim that is the
+ 
+                      subject of that inter partes review challenged
+ 
+                      by -- in other words, it is understood that the
+ 
+                      word "patent claim" refers to a claim that
+ 
+                      inter partes review has been granted in respect
+ 
+                      to. 
+                               MR. BOND: We -­
+                               JUSTICE BREYER: Is that right or 
+                     wrong? 
+                               MR. BOND: We think that's essentially 
+                      right. I -- I would say that another way of
+ 
+                      framing it is challenged by the Petitioner
+ 
+                      implicitly within the instituted proceeding,
+ 
+                      referred to in the opening clause. So I think
+ 
+                      we're -- we're saying -­
+                               CHIEF JUSTICE ROBERTS: That's more of
+ 
+                      a stretch from the -- it's a fairly complicated
+ 
+                      and refined stretch of any claim challenged by
+ 
+                      the Petitioner.
+ 
+                               MR. BOND: So we think it's actually
+ 
+                      consistent with ordinary usage to say, at the
+ 
+                      merits phase of a discretionary review
+ 
+                      proceeding, that when you say challenged by the
+ 
+                      Petitioner, you mean within the merits phase
+ 
+                      that the opening clause presupposes has taken
+ 
+                      place.
+ 
+                               When this Court grants certiorari -­
+                               JUSTICE BREYER: I put it -- I put it
+ 
+                      my way because the word "any" is like Exhibit
+ 
+                      Number 1 for a word, the scope of which is very
+ 
+                      often ambiguous in a statute.
+ 
+                               If you can eat any fish, you can eat
+ 
+                      any fish. Think about that one.
+ 
+                               MR. BOND: So -­
+                               (Laughter.)
+ 
+                               JUSTICE BREYER: All right. Now -­
+                      now my -- my point is we have loads of statutes
+ 
+                      where the word "any" has a scope and the scope
+ 
+                      is determined by the context of the statute.
+ 
+                      And so what I'm thinking in the back of my mind
+ 
+                      is this is one of those, but as I say, don't
+ 
+                      let me get off on a wrong foot.
+ 
+                               MR. BOND: So we do agree that any
+ 
+                      encompasses anything within the scope that the
+ 
+                      context of 318(a) and its broader context of
+ 
+                      the scheme encompasses. So it's any claim
+ 
+                      within the instituted proceeding.
+ 
+                               But just focusing on that word "any,"
+ 
+                      I think it's helpful to look past the language
+ 
+                      the Petitioner quotes to the -- the end of
+ 
+                      318(a). It says "any patent claim challenged
+ 
+                      by the Petitioner and any new claim added under
+ 
+                      section 316(d)."
+ 
+                               What "any" is doing here is not saying
+ 
+                      this is an all-encompassing review provision
+ 
+                      that requires this final written decision to
+ 
+                      encompass anything in the universe. It's doing
+ 
+                      something much more limited.
+ 
+                               The tail end of this sentence in
+ 
+                      section 318(a) is simply clarifying that, when
+ 
+                      you get to the final decision, there are two
+ 
+                      kinds of things the Board needs to address. It
+ 
+                      needs to address those claims that were
+ 
+                      actually challenged within the instituted IPR,
+ 
+                      if there are any left, and it needs to address
+ 
+                      any substitute claims added by amendment or
+ 
+                      proposed to be added by amendment under 316(d),
+ 
+                      if there are any.
+ 
+                               JUSTICE ALITO: If Congress wanted to
+ 
+                      say what you think this means, why in the world
+ 
+                      would they phrase it the way it is phrased in
+ 
+                      318(a)? Why wouldn't they say with respect to
+ 
+                      the patentability of any claim found by the
+ 
+                      director to have at least some likelihood of
+ 
+                      success? Or any claim on which review was
+ 
+                      granted? Why in the world would they say any
+ 
+                      patent claim challenged by the Petitioner?
+ 
+                               MR. BOND: Well, two points, Your
+ 
+                      Honor. There are several things that can cause
+ 
+                      a claim not to be in the case by the end. The
+ 
+                      fact that the PTO or the PTAB on delegated
+ 
+                      authority didn't institute is one, but also
+ 
+                      canceled claims and also settled claims.
+ 
+                      Parties can settle not just the entire dispute
+ 
+                      but also their dispute over individual claims.
+ 
+                               Any of those things would mean that
+ 
+                      the claim is no longer challenged by the
+ 
+                      Petitioner at the time of the final decision.
+ 
+                               JUSTICE BREYER: It doesn't actually
+ 
+                      have to mean that. I just thought there's
+ 
+                      another tack here, that if you're voting in
+ 
+                      Congress on this, you actually don't know what
+ 
+                      you think of in respect to the answer to this
+ 
+                      question we are now litigating.
+ 
+                               And since you don't know, the best
+ 
+                      answer, from the point of view of the agency,
+ 
+                      you use a word like "any" and "any claim," as I
+ 
+                      say, filled with ambiguity, so that the agency
+ 
+                      can decide which way it wants to go. Is there
+ 
+                      any indication of that?
+ 
+                               MR. BOND: So we -- we do think that
+ 
+                      Congress, indeed, left these matters to the
+ 
+                      agency in 316(a). It's just like the question
+ 
+                      that was presented in Cuozzo. No statutory
+ 
+                      provision in Cuozzo specifically addressed the
+ 
+                      claim construction standard.
+ 
+                               CHIEF JUSTICE ROBERTS: Well, but
+ 
+                      that's -- so you're saying, if I understand
+ 
+                      your answer to Justice Breyer, that Congress
+ 
+                      deliberately adopted an ambiguous term in the
+ 
+                      statute so that the agency would determine what
+ 
+                      it meant.
+ 
+                               It's one thing to say, you know, the
+ 
+                      agency should determine which patent claims
+ 
+                      challenge it will decide in -­
+                               MR. BOND: You -­
+                               CHIEF JUSTICE ROBERTS: Or which ones
+ 
+                      that aren't decided will be considered? It's
+ 
+                      another thing to decide let's pick a word
+ 
+                      that's so vague that nobody will be able to
+ 
+                      figure it out, and we'll leave it to the
+ 
+                      Commission.
+ 
+                               MR. BOND: No, and let -- let me be
+ 
+                      clear. Our point is not that Congress enacted
+ 
+                      on purpose a deliberately ambiguous statute.
+ 
+                      Our point is that the statute Congress enacted
+ 
+                      is consistent with partial institution. But to
+ 
+                      the extent there's a question about that,
+ 
+                      Congress left those questions to the agency.
+ 
+                               JUSTICE SOTOMAYOR: Well, there is one
+ 
+                      very telling sign that the "any patent claim
+ 
+                      challenged by the Petitioner" has a different
+ 
+                      meaning, and that's in 314 itself, which says
+ 
+                      "claims challenged in the petition."
+ 
+                               If Congress intended claims challenged
+ 
+                      in the petition to be a part of 318, it could
+ 
+                      have used exactly the same words.
+ 
+                               MR. BOND: That's exactly right. And
+ 
+                      that, I think, is the second answer to Justice
+ 
+                      Alito's question, the reason to think that
+ 
+                      Congress intended this result is that Congress
+ 
+                      used this very phrase that would encompass
+ 
+                      Petitioner's position in a different phrase of
+ 
+                      the statute.
+ 
+                               JUSTICE ALITO: But you think
+ 
+                      "challenged by the Petitioner" is narrower than
+ 
+                      -- I'm sorry, any change -- "any patent claim
+ 
+                      challenged by the Petitioner" is narrower than
+ 
+                      the words that are used in 314?
+ 
+                               MR. BOND: So we think it is narrower
+ 
+                      in the circumstance for the same reason the
+ 
+                      Petitioner does, that it includes the
+ 
+                      possibility that claims will drop out along the
+ 
+                      way.
+ 
+                               And, again, "challenged by the
+ 
+                      Petitioner" standing alone is capaciously broad
+ 
+                      and could encompass any number of things. It's
+ 
+                      context that tells you that it's narrower.
+ 
+                               JUSTICE GORSUCH: But doesn't that
+ 
+                      exactly work the other way around? Of course,
+ 
+                      by the end, you're only going to resolve the
+ 
+                      challenges that remain pending. When you're
+ 
+                      doing the Institution decision of inter partes
+ 
+                      review, you're going to look at the petition.
+ 
+                      Couldn't it be just that simple?
+ 
+                               And doesn't 314 kind of cut against
+ 
+                      the government in some ways too by suggesting
+ 
+                      that all the PTO needs to do is decide whether
+ 
+                      there is one claim that isn't frivolous, that's
+ 
+                      -- that's the sum total of its job under the
+ 
+                      plain terms.
+ 
+                               MR. BOND: So -­
+                               JUSTICE GORSUCH: And that -- and that
+ 
+                      beyond that, it need not go further.
+ 
+                               MR. BOND: So two points. First, we
+ 
+                      agree that 314 is focused on the Institution
+ 
+                      phase and, therefore, the focus is on the
+ 
+                      petition -­
+                               JUSTICE GORSUCH: Right.
+ 
+                               MR. BOND: -- whereas in 318 -­
+                               JUSTICE GORSUCH: It's what -- what's
+ 
+                      left.
+ 
+                               MR. BOND: Right, it's what's left of
+ 
+                      the proceeding.
+ 
+                               JUSTICE GORSUCH: So that's why
+ 
+                      there's a difference in language there, you
+ 
+                      agree.
+ 
+                               MR. BOND: Right, exactly. And we
+ 
+                      think that that underscores that what's left
+ 
+                      can include the fact -­
+                               JUSTICE GORSUCH: But how then do we
+ 
+                      deal with the fact that in 314, we have all the
+ 
+                      -- all the PTO has to do is decide whether
+ 
+                      there is one non-frivolous claim. It's a
+ 
+                      thumbs-up or a thumbs-down decision -­
+                               MR. BOND: Because -­
+                               JUSTICE GORSUCH: -- that's
+ 
+                      anticipated there, not a -- not a
+ 
+                      claim-by-claim examination.
+ 
+                               MR. BOND: Well, two points, Your
+ 
+                      Honor. First, what Congress included there is
+ 
+                      simply a floor. It's phrased as a prohibition
+ 
+                      that the PTO and, on delegated authority the
+ 
+                      Board, may not institute, unless it finds that
+ 
+                      at least one of the claims has a reasonable
+ 
+                      likelihood of being found invalid.
+ 
+                               It doesn't say that the Board must
+ 
+                      therefore institute or must do an up-or-down
+ 
+                      determination.
+ 
+                               JUSTICE GORSUCH: No.
+ 
+                               MR. BOND: We think that that leaves
+ 
+                      room for the Board to say we can't institute if
+ 
+                      we don't find at least one, but you know what?
+ 
+                      We're going to conserve our resources, as
+ 
+                      316(b) tells us in the adopting regulations and
+ 
+                      focus then on the claims -­
+                               JUSTICE GORSUCH: Well, help me -­
+                      help me out with 316 then if that's where you
+ 
+                      are going to go to. Where do you -- where do
+ 
+                      you see the authority for the regulations that
+ 
+                      the director is proscribed here?
+ 
+                               MR. BOND: Sure. They're in two
+ 
+                      provisions, principally 316(a)(4), which was
+ 
+                      the same provision at issue in Cuozzo.
+ 
+                               JUSTICE GORSUCH: Now, (a)(4), that -­
+                      my problem with that, where I get stuck is that
+ 
+                      (a)(4) concerns establishing a governing inter
+ 
+                      partes review. And we're not at that stage
+ 
+                      yet. We're at the decision whether to
+ 
+                      institute inter partes review.
+ 
+                               MR. BOND: Sure.
+ 
+                               JUSTICE GORSUCH: I would have thought
+ 
+                      you'd have to look to (a)(2) rather than
+ 
+                      (a)(4).
+ 
+                               MR. BOND: Right, so (a)(2) is the
+ 
+                      second provision, but we do think that (a)(4)
+ 
+                      encompasses this because it's establishing and
+ 
+                      governing inter partes review. And the Board's
+ 
+                      determination whether to institute on a
+ 
+                      particular claim is part of that universe of
+ 
+                      things that was granted to the Board.
+ 
+                               But certainly also (a)(2) because that
+ 
+                      establishes or gives the Board authority to
+ 
+                      establish rules that govern the showing of
+ 
+                      sufficiency that needs to be made. This is on
+ 
+                      17(a) of the -- defense.
+ 
+                               JUSTICE GORSUCH: I'd agree with you
+ 
+                      that you've given great discussion on the
+ 
+                      standards for showing sufficient grounds to
+ 
+                      institute a review. I'm not sure, I guess you
+ 
+                      can help me on how that also includes the
+ 
+                      authority whether to grant review of this or
+ 
+                      that claim, the weeding out process.
+ 
+                               MR. BOND: Sure.
+ 
+                               JUSTICE GORSUCH: I can see how it
+ 
+                      might affect the reasonable likelihood inquiry
+ 
+                      and how the director is going to go about doing
+ 
+                      that, but I -- I guess it's a little less clear
+ 
+                      to me how it also grants him authority or her
+ 
+                      authority to decide which claims to proceed
+ 
+                      with.
+ 
+                               MR. BOND: Sure. Because -- well,
+ 
+                      what it says is the standards for showing of
+ 
+                      sufficient grounds. And those standards for
+ 
+                      showing sufficient grounds, that's in (a)(2).
+ 
+                               JUSTICE GORSUCH: Yeah.
+ 
+                               MR. BOND: And what the Board's
+ 
+                      regulation is doing is preserving the Board's
+ 
+                      ability to assess sufficiency on a
+ 
+                      claim-by-claim basis. We think that's
+ 
+                      encompassed within (a)(2).
+ 
+                               JUSTICE GORSUCH: Well, but -- but
+ 
+                      314(a) seems to proscribe that -- that
+ 
+                      question, at least with respect to one claim.
+ 
+                      It speaks to that very issue.
+ 
+                               MR. BOND: Well, it sets a floor, just
+ 
+                      like the outer time limits that Congress
+ 
+                      required in 316(a)(11), set an outer time
+ 
+                      limit, but don't preclude the Board from
+ 
+                      setting a lower time limit on the completion of
+ 
+                      the final written decision.
+ 
+                               The same we think is true of 316 -- or
+ 
+                      314(a). It said you may not institute unless
+ 
+                      at least one of these claims, you conclude, is
+ 
+                      worthwhile because it clears that reasonable
+ 
+                      likelihood threshold.
+ 
+                               But especially in the context of the
+ 
+                      scheme that gives the Board complete discretion
+ 
+                      to deny review entirely, we think it's
+ 
+                      improbable that Congress would have tied the
+ 
+                      Board's hands in this one respect.
+ 
+                               Moreover, not just to say you don't
+ 
+                      have -­
+                               JUSTICE GORSUCH: Is there some
+ 
+                      inconsistency with 304 where you're allowed -­
+                      the director gets to decide which question
+ 
+                      specifically the director wants to take up?
+ 
+                      There seems to be an express grant to the
+ 
+                      director there to do exactly what you want to
+ 
+                      do here. And is its absence here suggestive?
+ 
+                               MR. BOND: We don't think so, Your
+ 
+                      Honor. I think the scheme of ex parte
+ 
+                      reexamination is fundamentally different in
+ 
+                      that its parties are suggesting to the Board or
+ 
+                      the Board on its own initiative saying we're
+ 
+                      going to look at a particular substantial new
+ 
+                      question of patentability that has been raised,
+ 
+                      and we'll look at which particular claims we
+ 
+                      think are implicated by that.
+ 
+                               JUSTICE GORSUCH: It's not just claims
+ 
+                      in 304, it is questions. And so the director
+ 
+                      can pick and choose which questions. And it is
+ 
+                      granted that express authority.
+ 
+                               And normally we -- we think that when
+ 
+                      it's granted in one place but not clearly
+ 
+                      granted in the other that that -- that that
+ 
+                      intends a difference.
+ 
+                               MR. BOND: So, at a minimum, that
+ 
+                      difference doesn't clearly preclude the Board
+ 
+                      here under 314(d) and its regulatory authority
+ 
+                      from saying we're going to treat this as a
+ 
+                      floor, that we are told by Congress we can't do
+ 
+                      it unless we clear this floor, but we're going
+ 
+                      to hold patents or IPR petitions to a higher
+ 
+                      standard and evaluate them claim by claim
+ 
+                      because that's consistent with the purpose as
+ 
+                      Congress told us in 316(b) to consider in
+ 
+                      adopting our regulations.
+ 
+                               And those purposes boil down to, as
+ 
+                      the Court underscored in Cuozzo, making sure
+ 
+                      we're actually improving patent quality and
+ 
+                      doing so efficiently.
+ 
+                               Now, the Board's partial institution
+ 
+                      approach is perfectly consistent with both of
+ 
+                      those aims. It focuses its energies on those
+ 
+                      patent claims it determines actually have a
+ 
+                      reasonable likelihood of being invalidated
+ 
+                      without wasting time on other claims.
+ 
+                               The Petitioner's all-or-nothing
+ 
+                      approach puts the Board to an untenable choice;
+ 
+                      either it wastes time on claims it's already
+ 
+                      determined don't have a reasonable likelihood
+ 
+                      of being invalidated at least based on the
+ 
+                      arguments presented in the petition, or it
+ 
+                      doesn't use this new tool at all and all of the
+ 
+                      work of creating inter partes review was for
+ 
+                      nothing.
+ 
+                               And so, in either event, we're not
+ 
+                      getting the benefit or achieving either of the
+ 
+                      goals that Congress had in mind.
+ 
+                               And there -­
+                               JUSTICE ALITO: Is there anything in
+ 
+                      the statute that would prevent the Board, if it
+ 
+                      is required to render a final decision on all
+ 
+                      claims initially challenged by the Petitioner
+ 
+                      from instituting a streamlined procedure for
+ 
+                      dealing with the claims that were found at the
+ 
+                      outset to have no likelihood of success?
+ 
+                               Why does it need to go through a full
+ 
+                      proceeding with respect to those claims? Can
+ 
+                      -- can it not just say in a summary form we
+ 
+                      found that these have no likelihood of success?
+ 
+                               And then that could be appealed to the
+ 
+                      Federal Circuit and the Federal Circuit could
+ 
+                      decide whether that -- that determination was
+ 
+                      permissible.
+ 
+                               MR. BOND: So a couple of points, Your
+ 
+                      Honor. First, at the institution phase, the
+ 
+                      Board is not deciding the merits, it is
+ 
+                      deciding not to decide the merits. It is
+ 
+                      saying you haven't for some reason made a
+ 
+                      sufficient showing to make us convinced that it
+ 
+                      is worth our time to investigate the merits of
+ 
+                      your claim.
+ 
+                               They can also deny, however, for
+ 
+                      additional reasons, irrespective of the merits.
+ 
+                      They might say, just as all agree they can deny
+ 
+                      the petition entirely apart from the merits,
+ 
+                      they might say this patent claim is going to be
+ 
+                      very time-consuming and is not going to advance
+ 
+                      the goals of the statute, so we're going to
+ 
+                      deny review on that ground.
+ 
+                               So there is not necessarily a ruling
+ 
+                      on the merits at all, and it's fundamentally
+ 
+                      different than a district court, say, folding
+ 
+                      in a 12(b)(6) or summary judgment ruling
+ 
+                      because it's based on the agency's discretion,
+ 
+                      not just the merits.
+ 
+                               JUSTICE KAGAN: Or couldn't the agency
+ 
+                      at that point say, you know, the ground on
+ 
+                      which you charge this patent is invalid is not
+ 
+                      a ground we can review at this time?
+ 
+                               MR. BOND: Right. Exactly right.
+ 
+                      They could as well say that you have challenged
+ 
+                      this on 112 under indefiniteness or under
+ 
+                      Section 101, and it's a law of nature
+ 
+                      challenge, and that's not properly presented to
+ 
+                      us. They could say on those grounds or you are
+ 
+                      estopped and we're not going to consider
+ 
+                      those -- those -­
+                               JUSTICE KAGAN: And then it would
+ 
+                      seem, I mean, that would be a strange kind of
+ 
+                      thing to say, well, you can't challenge on that
+ 
+                      ground, but we're going to issue a decision as
+ 
+                      to patentability.
+ 
+                               MR. BOND: Exactly right. So you're
+ 
+                      forced with either the PTO -- the PTAB either
+ 
+                      deciding we're not going to review this ground
+ 
+                      and then that gets baked into the final
+ 
+                      decision and treated as a merits ruling, which
+ 
+                      can then be appealed to the Federal Circuit and
+ 
+                      creates circumvention of Cuozzo, or you're
+ 
+                      forcing the Board to decide the merits,
+ 
+                      notwithstanding the fact that it didn't
+ 
+                      institute review, didn't get submissions from
+ 
+                      the parties at the merits stage, and didn't
+ 
+                      apply the different standards that apply at the
+ 
+                      merits stage of IPR proceedings.
+ 
+                               CHIEF JUSTICE ROBERTS: It -- it
+ 
+                      didn't institute review, but it issued a quite
+ 
+                      lengthy decision addressing the issues, right?
+ 
+                               MR. BOND: It issued a lengthy
+ 
+                      decision, about half as long as the final
+ 
+                      decision, but they're different in kind. And
+ 
+                      I'd like to emphasize a few ways that they
+ 
+                      differ.
+ 
+                               So, importantly, when the Board denies
+ 
+                      review, it often is denying review for some
+ 
+                      threshold reason based on a failing in the
+ 
+                      petition presented to it, not deciding
+ 
+                      patentability at the end.
+ 
+                               So a good example here is at Petition
+ 
+                      Appendix page 115a to 116a where the Board
+ 
+                      denies institution of claims 11 through 16.
+ 
+                      Those claims are what are known as
+ 
+                      means-plus-function claims, where under Section
+ 
+                      1112(f) -- or 112(f) their meaning is
+ 
+                      determined by a particular structure set forth
+ 
+                      in the specification, not in the claim itself.
+ 
+                               Accordingly, the Board's regulations
+ 
+                      -- and this is 42.104 -- require a petition for
+ 
+                      inter partes review to identify what structure
+ 
+                      do you think determines the construction of
+ 
+                      this claim so that we, the Board, can determine
+ 
+                      if it's unpatentable?
+ 
+                               The Board said at 115, the petition
+ 
+                      didn't identify what structure it was that the
+ 
+                      petitioner thought informed the construction or
+ 
+                      the interpretation of these claims.
+ 
+                               So a fortiori, we can't determine
+ 
+                      patentability based on your submission.
+ 
+                               CHIEF JUSTICE ROBERTS: How often -­
+                      how often does it issue decisions -- written
+ 
+                      decisions at this stage in determining whether
+ 
+                      to institute inter partes review?
+ 
+                               MR. BOND: So I -- I don't have
+ 
+                      statistics on how frequently it issues
+ 
+                      decisions of this kind. We think it is the
+ 
+                      Board's ordinary practice, and we think for two
+ 
+                      reasons that is actually a good practice that
+ 
+                      the Board, in its discretion, has -- has
+ 
+                      adopted.
+ 
+                               It's helpful for the Board itself
+ 
+                      because, if the Board institutes review, it
+ 
+                      then -- the judges of the panel or whatever
+ 
+                      panel is assigned to it, then have a very short
+ 
+                      window set by statute to determine the merits
+ 
+                      of this proceeding after the administrative
+ 
+                      trial is complete.
+ 
+                               And, second, it's beneficial for the
+ 
+                      parties to this case and other cases to know
+ 
+                      what it is the Board is looking for in this
+ 
+                      relatively new statutory scheme when it
+ 
+                      institutes review and exercises its discretion.
+ 
+                               That discussion at page 115A of the
+ 
+                      petition appendix is illustrative. It shows
+ 
+                      other parties in the future. If you actually
+ 
+                      don't follow our rule and include the kind of
+ 
+                      structure that we say you must, because 112F
+ 
+                      requires us to look at that in construing the
+ 
+                      claim, we are unlikely to grant review on your
+ 
+                      petition.
+ 
+                               That's instructive to the bar and the
+ 
+                      patent bar and to the patent community -­
+                               JUSTICE SOTOMAYOR: I thought -­
+                               MR. BOND: -- to know how -­
+                               JUSTICE SOTOMAYOR: -- that that was
+ 
+                      the very reason given by the Board in
+ 
+                      encouraging these kinds of opinions to be
+ 
+                      written.
+ 
+                               MR. BOND: That's precisely right,
+ 
+                      that it's useful to the patent -- it's useful
+ 
+                      to the patent bar and useful to the community
+ 
+                      to know -­
+                               JUSTICE SOTOMAYOR: So the patent
+ 
+                      Board basically told the public, we're issuing
+ 
+                      these decisions for educational purposes?
+ 
+                               MR. BOND: That's right, it -- to
+ 
+                      educate the -- the -- the public and the patent
+ 
+                      bar and also itself and its panels on what the
+ 
+                      nature of this suit is or what -- what this
+ 
+                      dispute is and what it looks for in the future.
+ 
+                               But, in any event, even if the patent
+ 
+                      -- even if the Board could adopt a more
+ 
+                      efficient method of partial institution, we
+ 
+                      think that's beside the point of the question
+ 
+                      presented to you today.
+ 
+                               Whether the Board could achieve more
+ 
+                      efficient partial institution with a thumbs up
+ 
+                      or thumbs down is not a reason for the Board to
+ 
+                      jettison that system entirely and adopt this
+ 
+                      much more inefficient approach where it lacks
+ 
+                      discretion over the one thing that is common to
+ 
+                      patent law. The default rule in patent law is
+ 
+                      that claims are evaluated independently. In
+ 
+                      litigation, each claim is independently
+ 
+                      presumed valid under Section 282.
+ 
+                               It would be highly incongruous for
+ 
+                      Congress to say, when the expert agency is
+ 
+                      reviewing patents it has issued, it lacks
+ 
+                      discretion to constrain the scope of its review
+ 
+                      and lacks discretion to do what is ordinarily
+ 
+                      the rule in patent law. And indeed, the rule
+ 
+                      in discretionary review generally, we're not
+ 
+                      aware of any context in which a tribunal vested
+ 
+                      with discretionary review authority is put to
+ 
+                      this choice of reviewing all -­
+                               JUSTICE GORSUCH: What do you say
+ 
+                      about our -- our last argument, where a lot of
+ 
+                      our attention focused on Congress's putative
+ 
+                      intention to -- to want to move things to an
+ 
+                      expert agency and -- and speed things along,
+ 
+                      make it more efficient?
+ 
+                               Could -- could that be a reason here
+ 
+                      why Congress might have wanted the Patent
+ 
+                      Office to review any -- and -- and issue a
+ 
+                      final decision on any and all claims brought to
+ 
+                      it?
+ 
+                               MR. BOND: So, two points. We don't
+ 
+                      think that it would be more efficient in a
+ 
+                      sense of making things go faster. If the Board
+ 
+
+
+                               JUSTICE GORSUCH: No, I -- no, surely,
+ 
+                      not necessarily efficient from the -- the PTO's
+ 
+                      perspective, but efficient from the economy's
+ 
+                      perspective.
+ 
+                               MR. BOND: So -- so then two points on
+ 
+                      the -- on the economy benefit point. It is not
+ 
+                      going to benefit the economy first if the PTO
+ 
+                      is put to a choice between not instituting
+ 
+                      review at all, that is no benefit to the
+ 
+                      economy, or spinning its wheels on claims in a
+ 
+                      patent on -­
+                               JUSTICE GORSUCH: But it could do what
+ 
+                      Justice Kennedy said. That -- that would -­
+                      everybody agrees would remain an available
+ 
+                      choice.
+ 
+                               MR. BOND: It could indeed do that,
+ 
+                      and that, we think, highlights that this is
+ 
+                      consistent with Congress's goals. If it could
+ 
+                      achieve -- achieve the same result in two more
+ 
+                      cumbersome steps -- two more cumbersome steps,
+ 
+                      it makes sense that Congress did not intend to
+ 
+                      preclude it from doing so through this natural
+ 
+
+
+                               JUSTICE GORSUCH: Well, it would
+ 
+                      require consent by the -- by the litigant in
+ 
+                      that case, where as here, this litigant took
+ 
+                      the view that I really want an adjudication on
+ 
+                      everything that -- would it be crazy to suppose
+ 
+                      that Congress might have wanted that as a way
+ 
+                      to achieve maximum efficiency through this
+ 
+                      administrative process?
+ 
+                               MR. BOND: So -­
+                               JUSTICE GORSUCH: From the -- from the
+ 
+                      economy's perspective?
+ 
+                               MR. BOND: We don't think the consent
+ 
+                      issue is fundamentally different, because if a
+ 
+                      petitioner, again, comes in and says, I want
+ 
+                      IPR on claims 1 through 10, and the Board says,
+ 
+                      we will give you IPR on one through five, the
+ 
+                      petitioner can, in effect, walk away if they
+ 
+                      can just simply agree with the patent owner to
+ 
+                      say, look, we drop our IPR challenge, I'll go
+ 
+                      back to the infringement suit where you sued me
+ 
+                      and presumably want to litigate, and we will
+ 
+                      litigate that there. That's permitted under
+ 
+                      Section 317.
+ 
+                               Now, to be sure, the Board at that
+ 
+                      point can proceed to adjudicate in its own -­
+                      within its own proceeding the underlying
+ 
+                      claims, but that has nothing to do with the
+ 
+                      rights or a consent of the parties inter se.
+ 
+                               And I think to the -- the underlying
+ 
+                      question here is isn't this meant as a
+ 
+                      substitute for litigation? We think the
+ 
+                      statute itself makes clear that that's not the
+ 
+                      design of inter partes review.
+ 
+                               The limited scope -- so it's limited
+ 
+                      to 102 and 103, it's limited to particular
+ 
+                      prior art, and it's limited only to particular
+ 
+                      claims that this petitioner brings to the PTO.
+ 
+                      It can't be viewed as a substitute for
+ 
+                      litigation such that someone could reasonably
+ 
+                      look at the scheme and say Congress wanted all
+ 
+                      of these claims decided either in one forum or
+ 
+                      the other. It's baked into the scheme that
+ 
+                      there will be this potential for some claims to
+ 
+                      be reviewed by the PTO and others in court.
+ 
+                               And partial institution actually
+ 
+                      enhances the efficiency and harmonious working
+ 
+                      of these two things because the -- the Board
+ 
+                      can say, look, you've got a solid challenge on
+ 
+                      claim number 1, we will review that. The rest
+ 
+                      of them, we don't think have met our standard,
+ 
+                      or we exercise our discretion not to review
+ 
+                      them. We're releasing those to the district
+ 
+                      court, so the district court litigation can
+ 
+                      proceed, and we will deal with this one, and
+ 
+                      the district court can decide what to do.
+ 
+                               Petitioner's position, by contrast,
+ 
+                      creates, I think, an incentive at least for
+ 
+                      parties to seek to tie up district court
+ 
+                      litigation by seeking an IPR.
+ 
+                               And the example we gave in, I think,
+ 
+                      page 39 and 40 of our brief is where an -- an
+ 
+                      entity sued for infringement, and then, on a
+ 
+                      strong patent claim, can take that claim to
+ 
+                      IPR, add on some weak and vulnerable claims and
+ 
+                      ask the PTO to grant review.
+ 
+                               If the Board's only choice is to grant
+ 
+                      all or nothing and it grants all, then the
+ 
+                      district court is very likely we think -- at -­
+                      at least there's a possibility, that it will
+ 
+                      stay the district court litigation, and the
+ 
+                      alleged infringer has effectively slowed down
+ 
+                      the district court litigation over claims that
+ 
+                      had nothing to do with that suit.
+ 
+                               That possibility, we think, is
+ 
+                      inherent in petitioner's approach that puts the
+ 
+                      agency though that kind of choice, whereas -­
+                               JUSTICE GINSBURG: Are you relying at
+ 
+                      all on the notion that this entire inter partes
+ 
+                      scheme is to give the agency a chance to take a
+ 
+                      second look to correct its error, therefore, it
+ 
+                      should not be the petitioner who controls what
+ 
+                      the agency will consider?
+ 
+                               MR. BOND: Yes, Your Honor. And I
+ 
+                      think that's an important feature of inter
+ 
+                      partes review, that this notion of master of
+ 
+                      the complaint just doesn't translate here, one,
+ 
+                      because Section 311(b) doesn't say you may get
+ 
+                      review of anything you want, but you may get
+ 
+                      review only of these kinds of things, but more
+ 
+                      fundamentally because the point of this scheme
+ 
+                      is to give the agency an opportunity to
+ 
+                      reconsider decisions in the form of patent
+ 
+                      claims it has previously issued.
+ 
+                               It doesn't make any sense to give the
+ 
+                      Board complete -­
+                               JUSTICE GORSUCH: It can -­
+                               MR. BOND: -- discretion -­
+                               JUSTICE GORSUCH: -- it can still do
+ 
+                      that through ex parte proceedings reviewability
+ 
+                      on its own any time, right?
+ 
+                               MR. BOND: Well, ex parte -­
+                               JUSTICE GORSUCH: Those -- those still
+ 
+                      exist? They -­
+                               MR. BOND: They do still exist. They
+ 
+                      have a different standard, and Congress thought
+ 
+                      that wasn't sufficient and adopted this
+ 
+                      additional mechanism.
+ 
+                               JUSTICE GORSUCH: Right.
+ 
+                               MR. BOND: And so Congress, in giving
+ 
+                      the agency authority and discretion to deny
+ 
+                      review entirely and so much discretion over the
+ 
+                      way these proceedings work, we think it's
+ 
+                      simply improbable that Congress would have
+ 
+                      given the agency all the discretion, except
+ 
+                      over the scope of which claims it will
+ 
+                      institute and particularly given that the
+ 
+                      background rule of patent law is that it will
+ 
+                      -- it will examine claims one by one.
+ 
+                               If there are no further questions.
+ 
+                               Thank you.
+ 
+                               CHIEF JUSTICE ROBERTS: Thank you,
+ 
+                      counsel.
+ 
+                               Mr. Castanias, four minutes.
+ 
+                         REBUTTAL ARGUMENT BY GREGORY A. CASTANIAS
+ 
+                                 ON BEHALF OF THE PETITIONER
+ 
+                               MR. CASTANIAS: Thank you, Mr. Chief
+ 
+                      Justice.
+ 
+                               I have three specific responses to
+ 
+                      points made by my friend and then four broader
+ 
+                      points that I hope I will be able to get in, in
+ 
+                      my limited time.
+ 
+                               Justice Kagan, your colloquy with my
+ 
+                      friend here was about 101 and 112. That's
+ 
+                      answered by the scope provision of Section
+ 
+                      311(b). That limits inter partes reviews to
+ 
+                      102 and 103 challenges in the first instance.
+ 
+                               Mr. Chief Justice, you had a colloquy
+ 
+                      with my friend about the lengthy decision that
+ 
+                      was entered at the institution phase here. And
+ 
+                      my friend responded to you that this was a
+ 
+                      failure to follow the rules of the tribunal.
+ 
+                               This was a merits decision that was
+ 
+                      made. It said that we had failed to show the
+ 
+                      corresponding structure, which is a requirement
+ 
+                      of the law under Section 112-6. And if we had
+ 
+                      had a challenge to that that we wanted to
+ 
+                      appeal, we should have been able to have that
+ 
+                      finalized, it -- via estopping, and also
+ 
+                      appealable for us.
+ 
+                               Justice Sotomayor, you asked the
+ 
+                      question about what the education purposes of
+ 
+                      the institution decision. Our point is that
+ 
+                      education can come from an appealable and
+ 
+                      estopping decision.
+ 
+                               Now, the broader points, Justice
+ 
+                      Breyer, you, in your colloquy with my friend,
+ 
+                      rewrote the statute for him to get to the place
+ 
+                      he wanted to go. You said the statute should
+ 
+                      be read as "any patent claim that is the
+ 
+                      subject of inter partes review and" -- that's
+ 
+                      not what the statute says.
+ 
+                               JUSTICE BREYER: No, I just mentioned
+ 
+                      that the word "any" is ambiguous.
+ 
+                               MR. CASTANIAS: Well, it is only
+ 
+                      ambiguous absent context. And as we showed,
+ 
+                      the Rosenwasser case, when you have "shall" and
+ 
+                      "any" in the same way that that minimum wage
+ 
+                      statute was -- was worded, the "any" here
+ 
+                      doesn't mean you may have any vegetable on the
+ 
+                      menu. It doesn't -- that obviously doesn't
+ 
+                      mean you can -- you -- you must have
+ 
+                      everything -­
+                               JUSTICE BREYER: Just ambiguous in
+ 
+                      between whether they are referring to a claim
+ 
+                      in which it has been granted or whether they
+ 
+                      are referring to any claim in the petition.
+ 
+                               MR. CASTANIAS: Well -­
+                               JUSTICE BREYER: Ambiguous as to
+ 
+                      between those two things, it seemed ambiguous.
+ 
+                               MR. CASTANIAS: And that is where,
+ 
+                      Justice Breyer, this Court's decision in
+ 
+                      Utility Air, that made clear that a statutory
+ 
+                      provision that may seem ambiguous in isolation
+ 
+                      is often clarified by the remainder of the
+ 
+                      statutory scheme because only one of the
+ 
+                      permissible -­
+                               JUSTICE SOTOMAYOR: Let me ask you -­
+                               MR. CASTANIAS: -- meanings produces
+ 
+                      the substantive effect.
+ 
+                               JUSTICE SOTOMAYOR: You talked about
+ 
+                      canceled claims. How about settled claims?
+ 
+                      Say, in the middle of the proceedings, you
+ 
+                      settle a claim.
+ 
+                               Under your theory, the Board would
+ 
+                      still have to address that?
+ 
+                               MR. CASTANIAS: I -- I think that if
+ 
+                      we are saying we are no longer challenging
+ 
+                      that, we -- it's no longer a claim challenged
+ 
+                      by the petitioner. The settlement presumably
+ 
+
+
+                               JUSTICE SOTOMAYOR: It's in the
+ 
+                      petition.
+ 
+                               MR. CASTANIAS: The settlement
+ 
+                      would -­
+                               JUSTICE SOTOMAYOR: What gives you a
+ 
+                      right to drop it then?
+ 
+                               MR. CASTANIAS: Because the language
+ 
+                      of 318(a) is "by the petitioner." And that's
+ 
+                      what the context tells us about that.
+ 
+                               JUSTICE KAGAN: Mr. Castanias, while
+ 
+                      we're on the statute, I understand that this is
+ 
+                      your argument for why there has to be a final
+ 
+                      decision with respect to every claim
+ 
+                      challenged, but, you know, however you -- but
+ 
+                      you're still saying that -- that you're not
+ 
+                      challenging the -- the partial institution. Is
+ 
+                      that right? 
+                               MR. CASTANIAS: But we're -- we're not 
+                      challenging -­
+                               JUSTICE KAGAN: And I guess here's my 
+                      question: What language says that partial
+ 
+                      institution is not permissible?
+ 
+                               MR. CASTANIAS: The fact that the
+ 
+                      Board has already given the discretion whether
+ 
+                      to institute. The discretion whether to
+ 
+                      institute does not hide inside it a secret
+ 
+                      second level of discretion to decide to
+ 
+                      institute anything other than the petition.
+ 
+                               JUSTICE KAGAN: I think I'm not
+ 
+                      understanding. Could you just point me to the
+ 
+                      -- the language that you're saying. That's the
+ 
+
+
+                               MR. CASTANIAS: It's in Section -­
+                               JUSTICE KAGAN: -- thing that you can't
+ 
+
+
+                               MR. CASTANIAS: It's in Section -­
+                      it's in Section 314(b), Timing. And it says,
+ 
+                      "The director shall determine whether to
+ 
+                      institute an inter partes review."
+ 
+                               And we say that's a binary choice, and
+ 
+                      we say that's consistent with the if/then
+ 
+                      language of Section 318.
+ 
+                               To -- to Justice Gorsuch's colloquy
+ 
+                      with my friend, there is no interpretation
+ 
+                      here. No evaluation at all, even in the
+ 
+                      institution regulation of Section 318(a). So I
+ 
+                      don't know what we're possibly deferring to
+ 
+                      here with regard to the language of Section
+ 
+                      318(a).
+ 
+                               The Section 314(a) did -- didn't
+ 
+                      address it. The Section 314(a) regulation
+ 
+                      didn't address it in the Federal Register. And
+ 
+                      as you pointed out, Justice Gorsuch, the -­
+                      (a)(2) talks about grounds to institute. It's
+ 
+                      not a weeding-out function and it's not a final
+ 
+                      written decision regulation.
+ 
+                               On reviewability, our yellow brief I
+ 
+                      think tells the tale. This is not the same
+ 
+                      section. And it is -- it certainly would be,
+ 
+                      in the words of Justice Alito, shenanigans, if
+ 
+                      the Board is allowed to fail to follow the
+ 
+                      regulation here.
+ 
+                               CHIEF JUSTICE ROBERTS: I thought you
+ 
+                      were being overly ambitious when you said you'd
+ 
+                      get to four points in rebuttal, but thank you,
+ 
+                      counsel.
+ 
+                               (Laughter.)
+ 
+                               MR. CASTANIAS: My last point was
+ 
+                      efficiency, Your Honor.
+ 
+                               (Laughter.)
+ 
+                               MR. CASTANIAS: Thank you.
+ 
+                               CHIEF JUSTICE ROBERTS: The case is
+ 
+                      submitted.
+ 
+                               (Whereupon, at 12:09 p.m., the case
+ 
+                      was submitted.)
+ 
+                                                                        73
+                               Official - Subject to Final Review
+�
+             1          4  [12]  5:19 13:21 14:3 20:9 25:7,8,  agrees  [1]  60:21           18 47:10 48:8,17,24,25 51:3,10 
+                        14 32:2,5,7,10 33:7         Ahh  [1]  5:23             59:16 65:15  1  [4]  13:21 39:20 61:20 63:4     40  [1]  63:16             aims  [1]  51:25            authorized  [1]  3:12  10  [6]  13:21 26:1,4 27:1 29:17 61:  42.104  [1]  56:6           Air  [1]  68:12             available  [1]  60:21 20                 48702  [1]  12:4            ALITO  [9]  35:25 36:15 37:5,21,24  aware  [1]  59:15  101  [2]  54:11 66:13 
+     102                         5          41:9 44:10 52:17 71:15       away  [1]  61:22  [4]  16:3 20:21 62:15 66:16                      Alito's  [1]  44:5  103  [4]  16:3 20:21 62:15 66:16   50                                            B  [1]  35:8              all-encompassing  [1]  40:20  11  [2]  31:18 55:24                  6          all-or-nothing           back  [6] [1]  52:4           14:8 18:19 20:19 35:13 
+     11:09  [2]  1:17 3:2                             alleged            1  40:5 61:25 
+     1112(f  [1]  56:2           66  [1]  2:10                  [4]  13:19 34:21 35:9 64:
+                                7          allow  [1]  25:18           background  [1]  65:22 
+     112  [2]  54:10 66:13                            allowed  [2]  50:10 71:16       bad  [2]  24:16 29:7 
+     112(f  [1]  56:2            77                                    bailiwick  [1]  23:20  [1]  12:4              allowing  [1]  30:4  112-6  [1]  66:25                                                 baked  [2]  54:24 62:22 
+     112F  [1]  57:19                    8          alone  [2]  36:24 44:21 
+                                          already  [3]  35:2 52:6 70:4      bar  [5]  37:9 57:23,24 58:8,15 
+     115  [1]  56:11            8  [1]  13:21              ambiguity             based  [4] [6]  28:3,17 29:3 36:2,       52:8 54:2 55:19 56:16 
+     115a  [2]  55:23 57:15                 A          17 42:13              basically  [2]  7:1 58:11 
+     116a  [1]  55:23                              ambiguous            basis  [7]  8:14,18,18,22 10:10 35: 
+     11A  [1]  36:13            a)(2                        [11]  28:16 36:8 39:21  [6]  47:23,25 48:7 49:5,11 71:9             68:3,8,9,13  20 49:10 
+     12(b)(6  [1]  54:1           a)(4                 42:25 43:15 67:18,20  [4]  47:15,17,24 48:1       ambitious             begin  [1] 
+                        a.m                       [1]  71:19             4:1 
+     12:09  [1]  72:4              [2]  1:17 3:2           amendment            beginning  [2] [3]  27:18 41:6,7           8:17 18:8 
+     13  [1]  26:10             ability  [1]  49:9            American             behalf  [8] [1]  17:19              1:20,23 2:4,7,10 3:8 30: 
+     14  [1]  26:10             able  [4]  16:4 43:10 66:10 67:2    amicus  [1]  24:19           17 66:5 
+     15  [1]  19:9              above-entitled  [1]  1:15       Among              believe  [2] [1]  18:7                 5:3 21:6 
+     16  [11]  9:23 12:20,23 13:6,8,22 14:  absence  [1]  50:15         amount              beneficial  [1] [1]  14:21                 57:10 
+     7 18:20 29:17 31:19 55:24     absent  [1]  67:20          another              benefit  [4] [3]  39:1 42:6 43:9           52:14 60:13,14,16 
+     16-969  [1]  3:4            absolutely  [1]  7:20         answer              beside  [1] [9]  16:25 23:23 28:12,13        58:21 
+     17(a  [1]  48:11            accomplish  [1]  32:18        36:20 42:8,11,24 44:4       best  [2]  24:11 42:10 
+             2          Accordingly  [1]  56:5        answered             between  [6]  15:13,23 17:12 60:15  account                    [1]  66:14  [1]  8:9                              68:4,9  2                                     anticipated  [1]  46:13  [11]  13:21 25:7,9,15 29:17 31:18  achieve  [4]  58:23 61:1,1,12     anticipates            beyond  [1]  45:14 32:2,5,11 33:2,5          achieving                    [1]  29:11  [1]  52:14                           binary  [5]  12:16 13:1 19:25 20:4  2012                                   anyway  [1]  19:20  [1]  14:14            across  [2]  33:17,22                            70:20  2017                                   apart  [1]  53:18  [1]  1:13            Act  [2]  3:21 17:20                             bit  [1]  23:13  22                                    apparently  [1]  29:10             actually                     [1]  13:14  [20]  4:20 5:11 7:6 9:5 17:                    Board  [91]  3:12,17 4:25 5:4,17 6:  27                                    Appeal  [12]  3:12 5:22 6:11 7:11,14  [1]  1:13              15 24:21 25:8,22 27:12 32:4,7 39:                    12 7:1,6,7,11 8:7,16,17 9:11 10:5,  282                                    8:14 16:6 20:24 26:25 29:24 36:4  [1]  59:7             10 41:4 42:4,7 51:21 52:1 56:25   67:2                 22 13:13 15:9,19 16:6 17:2 19:13, 
+             3          57:17 62:25            appealable             18,23 20:6,10,11,24 21:4,13 22:4,  add                       [2]  67:4,8  [1]  63:19  3                                                        7,9,19 23:3,19 25:6,11 29:8,13,21,  [3]  2:4 13:21 20:9                            appealed added                     [3]  26:22 53:3 55:1  [3]  40:17 41:6,7  30                                                       23 31:6,10,22 32:9,20 33:1,11,14,  [1]  2:7                                 appeals addition                   [1]  32:7  [1]  28:18  304  [2]  50:10 51:1                            APPEARANCES additional                       [1]  1:19      15,17,22 34:2 36:4 41:2 46:19,22 
+                              [3]  25:9 53:16 65:12  311  [2]  17:24,24                             appellate address                    [5]  9:1 10:9,13 24:23 25: 47:2 48:6,8 49:19 50:3,19,20 51:9 
+                             [6]  41:2,3,5 68:25 71:6,7  311(b  [3]  18:1 64:17 66:15     addressed             13                  52:5,18 53:9 55:3,17,23 56:9,11 
+                              [2]  8:10 42:20  312  [1]  18:4                                Appendix addressing                  [4]  10:2 36:13 55:23 57:  57:1,3,4,12 58:3,11,19,23,25 60:6 
+                               [2]  4:18 55:11  314  [8]  18:9 21:25 22:20 43:23 44:  adjudicate             16                  61:20 62:4 63:2 64:25 68:24 70:4 
+                              [3]  16:24 17:3 62:5 14 45:6,16 46:7                             apply adjudicating               [3]  16:14 55:7,7        71:16 
+                               [1]  17:6  314(a  [6]  8:3,5 49:13,23 71:5,6                      approach             Board's  [11] 
+                        adjudication                 [4]  51:24 52:5 59:2 64:5        4:16 31:16 34:15 48: 
+                               [2]  5:2 61:9  314(b  [1]  70:17                              aren't adjudications              [1]  43:8            3 49:7,8 50:6 51:23 56:5,24 63:21 
+                                [3]  4:17 30:6,8  314(d  [2]  31:19 51:10                           argue               boil  [1] 
+                        administrative              [2]  11:12,12             51:19 
+                                 [2]  57:8 61:13  316  [2]  47:8 49:22                            argument             bolstered  [1] 
+                        adopt                     [14]  1:16 2:2,5,8 3:4,7         29:20 
+                           [2]  58:19 59:1  316(a  [1]  42:18           adopted              11:16 15:4 30:7,16 31:3 59:19 66:  bolstering  [2]  24:17 29:7 
+                             [3]  42:25 57:2 65:11  316(a)(11  [1]  49:18         adopting              4 69:17               BOND  [62]  1:22 2:6 30:15,16,18 
+                             [2]  47:5 51:18  316(a)(4  [1]  47:13                            arguments advance                     [2]  29:22 52:9      32:4,19 33:14,21 34:13 35:6 36:9, 
+                             [1]  53:20  316(b  [2]  47:5 51:17                           around advantage                 [3]  5:24 7:17 44:25      18 37:12,23 38:1,22,25 39:10,24 
+                              [3]  11:7,10,11  316(d  [2]  40:18 41:7                           art adverse                [3]  33:5,6 62:16          40:8 41:18 42:16 43:6,13 44:3,15 
+                             [1]  24:23  317  [1]  62:3                                artificiality affect                      [1]  34:1         45:12,15,20,23 46:3,11,15 47:1,12, 
+                           [1]  48:21  318  [6]  12:23 13:9 28:24 44:1 45:                     asserted agencies                   [1]  14:2          21,25 48:19 49:2,7,16 50:16 51:8 
+                             [1]  30:8 20 70:22                                 assess  agency                   [1]  49:9           53:7 54:8,21 55:12 56:21 58:1,6, 
+                            [17]  30:5,24 42:11,13,18  318(a  [13]  5:4 8:10 12:10,12 21:23                    assigned  [1]  57:6          13 60:4,12,23 61:14,17 64:13 65: 
+                        43:1,4,19 54:4 59:9,22 64:6,9,12, 36:1 40:10,16,25 41:12 69:13 71:                    Assistant  [1]  1:22          2,6,9,14 
+                        21 65:15,19 1,4                                    Assume              both  [3] 
+                        agency's                   [1]  21:24              15:14,15 51:24 
+                             [1]  54:2  39  [1]  63:16                                assuming             bother  [3] [1]  6:24               18:10,11 19:4  agree  [10]  6:15 34:19 38:12,13 40:  4                            attention              bound  [1] [1]  59:20               24:23 
+                        8 45:16 46:2 48:12 53:17 61:23   authority  [13]  31:7 33:16 41:22 46:  BREYER  [19]  25:19 26:8,15 27:7, 
+                               Heritage Reporting Corporation 
+    Sheet 1                                                                1 - BREYER 
+                                                                        74
+                               Official - Subject to Final Review
+�
+     11,19,23 28:1 38:11,23 39:18 40:  choice  [12]  12:16 19:25 20:4 23:7  conclude  [2]  8:18 49:24       11 53:5,10 55:3 63:10 70:7 
+     1 42:4,24 67:11,17 68:3,8,11    24:5 52:5 59:17 60:15,22 63:21   conditional  [2]  4:6,6        decided  [5]  10:15 21:22 25:6 43:8 
+     Breyer's  [1]  7:24           64:6 70:20             conducted  [1]  35:20         62:21 
+     brief  [4]  25:4 36:13 63:16 71:12   choose  [3]  18:12,18 51:2      conferred  [1]  31:22         deciding  [5]  32:20 53:9,10 54:23 
+     briefing  [1]  32:6          chosen  [1]  18:18          confirm  [1]  25:17          55:20 
+     briefs  [1]  24:19           Circuit  [5]  14:15 25:13 53:4,4 55:1  Congress  [29]  12:13 23:17 30:21  decision  [59]  3:18 4:19 5:18,22 7: 
+     brings  [2]  34:23 62:17       circumstance  [2]  33:24 44:16    32:19 34:7 41:9 42:7,17,24 43:14,  2,10,22 8:12 11:20,23 13:2,5,7 15: 
+     broad  [2]  31:22 44:21        circumstances  [1]  32:21      16,19,25 44:6,6 46:16 49:17 50:5  9,20 16:19 21:22 23:4,9,11,18,19 
+     broader  [4]  32:8 40:10 66:9 67:10  circumvention  [1]  55:2       51:12,17 52:15 59:9,25 61:3,11   24:24 25:13 26:21 29:9,12,21,23 
+     brought  [1]  60:2          claim  [84]  3:19 5:19 8:20 11:1 14:2, 62:20 65:10,14,18          31:3,5,11,16,17,20 32:15 34:15 
+     burden  [1]  13:14           3 15:13,14,24 16:1,2,23 17:13,13,  Congress's  [2]  59:20 60:25     36:5 40:21 41:1 42:3 45:3 46:10 
+     business  [1]  17:5          16,17 18:7,12 19:12 22:10,25 25:  consent  [3]  61:7,17 62:8       47:19 49:21 52:19 54:19,25 55:11, 
+             C          7,7,8,9,14,15,17,17,18 29:17 32:2,  conserve  [1]  47:4          13,14 60:2 66:18,22 67:7,9 68:11 
+                        2,5,5,7,10,11,23,24,25 33:2,5,7,13  consider  [3]  51:17 54:14 64:12   69:18 71:11  calls  [1]  7:9             36:6 38:16,19,19 39:8 40:11,16,  considered  [3]  12:5,11 43:8    decisions  [7]  3:13 29:18 56:18,19,  came  [1]  1:15            17 41:13,15,17,20 42:2,12,21 43:  consistent  [9]  15:18 20:5 35:19   23 58:12 64:22  canceled  [9]  15:5,8,13,24 16:1,15  21 44:12 45:9 46:9 48:5,18 49:14  39:11 43:17 51:16,24 60:25 70:21  declaration  [1]  9:24 17:12 41:23 68:21          51:15,15 53:14,19 56:4,9 57:21   constrain  [1]  59:11         decline  [1]  33:11  capaciously  [1]  44:21        59:6 63:4,18,18 67:14 68:4,6,23  construction  [3]  42:21 56:8,13   default  [1]  59:4  capture  [1]  18:24          69:3,18               construing  [1]  57:20        defense  [1]  48:11  carve  [1]  23:20           claim-by-claim  [2]  46:14 49:10   contact  [1]  20:7           deferring  [1]  71:2  Case  [25]  3:4 4:7,8 5:21 8:2 9:20  claimed  [1]  20:8          contains  [1]  25:9          defines  [1]  18:5 10:2,14 12:1 14:1,21 19:7 23:9 24:  claims  [91]  3:14 4:11,19 5:1,6,8,14  contentions  [1]  14:1        defining  [1]  17:23 20 25:3,5 29:9 34:21,23 41:20 57:  6:13 8:8 9:12,14,24 10:6 11:14 12:  contested  [1]  35:8         definitely  [1]  28:2 11 61:8 67:21 72:2,4        7,21 13:3,21,22,25 14:8 15:5,8,10  contesting  [2]  11:19,22       delegated  [3]  31:6 41:21 46:18  cases  [2]  24:10 57:11        16:15 18:14 19:15,19 20:4,9,15   context  [13]  3:21 23:17 37:13,18  delegation  [1]  23:12  CASTANIAS  [84]  1:20 2:3,9 3:6,7,  21:17,18 22:6 23:16,16 24:11,24  38:6 40:4,10,10 44:23 50:2 59:15  deliberately  [2]  42:25 43:15 9 4:4,13,21 5:3,10,16,25 6:3,6,16,  26:1,4,25 29:17,19 30:22 31:4,8,  67:20 69:14            denial  [1]  16:1 20 7:4,18,24 8:21 9:4,7,10,15 10:  12,18 32:15,21 35:13 41:3,6,23,23,  contrast  [1]  63:11          denies  [2]  55:17,24 12,17,20 11:15,21 12:20,25 13:7,  25 43:4,24,25 44:18 46:20 47:6   contravention  [1]  10:8       deny  [7]  23:25 33:21 50:4 53:15,17, 12 14:13,20,24 15:2,3,6,11,22 16:  48:25 49:24 50:23,25 52:1,3,6,20,  controls  [1]  64:11          22 65:15 17,22 17:7,14 18:15,21 19:1,17,21  22,25 55:24,25 56:1,14 59:5 60:2,  convinced  [1]  53:12        denying  [2]  33:16 55:18 20:11 21:5,10,16,19 22:1,12 23:5,  17 61:20 62:7,17,21,23 63:19 64:  correct  [1]  64:10          Department  [1]  1:23 22 26:6,13 27:7,15,21,25 28:13   2,23 65:20,23 68:21,21       corresponding  [1]  66:24      design  [1]  62:13 66:3,4,6 67:19 68:7,10,18 69:1,8,  clarified  [1]  68:14          couldn't  [3]  33:10 45:5 54:4     designed  [1]  34:8 12,15,23 70:3,13,16 71:23 72:1   clarifying  [1]  40:25         counsel  [3]  30:14 66:2 71:21    determination  [9]  7:9,10 8:1 9:2  cause  [1]  41:19           clause  [4]  37:19 38:7 39:4,15    couple  [2]  36:9 53:7         13:13 29:11 46:24 48:4 53:5  certain  [3]  4:11 13:24 30:23     clear  [8]  4:15 7:25 32:4 43:14 48:  course  [3]  19:1 35:9 44:25     determine  [6]  43:1,4 56:9,15 57:7  certainly  [4]  6:16,20 48:7 71:14   23 51:13 62:12 68:12        COURT  [37]  1:1,16 3:10 7:25 9:1,  70:18  certiorari  [1]  39:17         clearly  [3]  35:22 51:5,9       18 10:9,13 14:16 15:25 18:19,20  determined  [7]  30:23 31:7 32:10  challenge  [20]  8:2,19 10:25 11:5  clears  [1]  49:25           20:15 24:15 26:24 27:2 29:6 30:4,  33:1 40:4 52:7 56:3 16:4 18:13,14,18 19:9,14 20:14   clerk  [1]  27:12            19 32:6 34:12,22,25 35:2,14 36:  determines  [3]  10:24 52:1 56:8 31:2 34:6 37:7 43:5 54:12,18 61:  close  [3]  32:8,10,12         11 39:17 51:20 53:25 62:24 63:8,  determining  [2]  30:25 56:19 24 63:3 67:1            closely  [1]  32:25           8,10,13,23,25 64:2         differ  [1]  55:16  challenged  [44]  3:14,19 12:7 13:3  closely-enough  [1]  32:21     Court's  [3]  31:20 35:7 68:11    difference  [7]  7:23 15:13,23 16:8 16:11,15,18 17:14 18:7,20 22:6,  closer  [1]  33:8           courts  [1]  30:1            46:1 51:7,9 10 27:17 36:7,19,22,25 37:2,3,7,8,  colloquy  [6]  22:13 31:15 66:12,17  crazy  [1]  61:10           different  [9]  22:7 43:22 44:8 50:18 9,13,14,15 38:4,17 39:2,8,13 40:   67:11 70:23            creates  [2]  55:2 63:12        53:25 55:7,14 61:18 65:10 16 41:4,17 42:2 43:22,24,25 44:  come  [2]  6:11 67:8         creating  [1]  52:11          difficult  [3]  32:3 38:2,6 11,13,20 52:20 54:9 69:3,19    comes  [2]  23:15 61:19       crux  [1]  31:14            direct  [1]  22:3  challenger  [1]  34:14        command  [1]  3:23         cumbersome  [3]  34:3 61:2,2    directly  [1]  21:14  challengers  [1]  34:10       commanded  [1]  16:10       Cuozzo  [16]  5:24 6:14,15 7:17,25  Director  [10]  1:6 22:21 41:14 47:  challenges  [4]  9:23 20:8 45:2 66:  Commission  [1]  43:12       8:10 23:9 24:15 29:6,20 31:20 42:  11 48:22 50:11,12,14 51:1 70:18 16                 common  [1]  59:3          19,20 47:14 51:20 55:2       disagrees  [1]  25:20  challenging  [9]  4:15,16,17,22 7:  community  [2]  57:24 58:8     cut  [2]  9:10 45:6           discover  [1]  26:24 22 8:4 69:2,21,24          complaint  [6]  9:18 13:18,19,20 24:  chance                                         D         discretion  [24]  19:24 22:22 23:3,  [1]  64:9           10 64:16                                 14,25 31:22 32:9,20 35:7 50:3 54:  change  [1]  44:12          COMPLEMENTSOFT       D.C  [3] [6]  1:8 5:      1:12,20,23          2 57:1,14 59:3,11,12 63:6 65:2,15,  chapter  [3]  17:18,19 36:4      20 9:23 13:19 14:2 20:22      dah  [3]  27:3,3,3           16,19 70:4,5,7  charge  [1]  54:6           complete             dare  [1] [4]  9:21 50:3 57:9 64:25     17:22            discretionary  [4]  23:19 39:12 59:  Chevron  [1]  28:24         completion  [1]  49:20        deal  [2]  46:7 63:9          14,16  CHIEF  [17]  3:3,9 30:13,18 31:25   complicated            dealing  [1] [1]  39:7              52:22          discussed  [1]  35:21 32:13 35:4 39:6 42:22 43:7 55:9  conceded             decide  [17] [1]  33:18               5:13 10:10,13,14 11:2  discussion  [4]  37:8,9 48:13 57:15 56:17 66:1,6,17 71:18 72:2     concerns  [1]  47:17         42:14 43:5,9 45:8 46:8 48:25 50:  dismiss  [1]  8:15 
+                               Heritage Reporting Corporation 
+    Sheet 2                                                            BREYER - dismiss 
+                                                                        75
+                               Official - Subject to Final Review
+�
+     dismissed  [1]  36:3         establish  [1]  48:9          filed  [3]  9:21 14:14 22:18       24 
+     dispute  [8]  15:16 16:21 31:14 32:  establishes  [1]  48:8        filled  [1]  42:13            given  [8]  5:13 15:4 25:10 48:13 58: 
+     9 34:18 41:24,25 58:17       establishing  [3]  30:20 47:17 48:2  final  [23]  3:13,18 4:19 5:18 8:11 16: 3 65:19,21 70:4 
+     dissatisfied  [1]  34:15        estop  [1]  29:24            19 21:22 25:12 29:23 31:3,5,11   gives  [4]  22:21 48:8 50:3 69:10 
+     distinct  [1]  37:1           estopped  [2]  37:15 54:14      36:5 40:21 41:1 42:3 49:21 52:19  giving  [1]  65:14 
+     distinguishes  [1]  17:12      estopping  [3]  7:14 67:3,9      54:24 55:13 60:2 69:17 71:10    goals  [3]  52:15 53:21 60:25 
+     district  [19]  15:25 18:19,20 20:15  evaluate  [1]  51:15         finalized  [1]  67:3          GORSUCH  [28]  31:24 44:24 45:13, 
+     30:4 34:11,22,24 35:1,6,14 53:25  evaluated  [1]  59:5         finally  [1]  24:13           19,21,25 46:6,12,25 47:7,15,22 48: 
+     63:7,8,10,13,23,25 64:2       evaluation  [1]  70:25        find  [7]  21:25 26:23 27:1,16 28:7,  12,20 49:6,12 50:9,25 59:18 60:8, 
+     document  [1]  9:21         Even  [7]  13:10 27:18 28:23,24 58:  20 47:3               19 61:6,15 65:1,3,7,13 71:8 
+     doing  [12]  11:7 21:21 35:3,23 37:  18,19 70:25            finding  [2]  5:19,21         Gorsuch's  [1]  70:23 
+     16 40:19,22 45:3 48:22 49:8 51:  event  [4]  31:21 34:11 52:13 58:18  finds  [2]  10:23 46:19        got  [2]  29:18 63:3 
+     22 61:4               everybody  [1]  60:21        fine  [1]  10:4             govern  [1]  48:9 
+     done  [3]  27:11 29:14 35:12     everything  [4]  11:1 26:25 61:10  first  [14]  3:16 7:4 10:1,19 26:9 30:  governing  [2]  47:17 48:3 
+     doubt  [1]  25:22           68:2                 7 31:13 35:15 36:10 45:15 46:16  government  [5]  6:4,7 12:1,5 45:7 
+     down  [4]  27:12 51:19 58:25 64:1  evidence  [2]  10:7,25         53:8 60:14 66:16          grant  [21]  5:1,6,9 20:7 21:10 23:25 
+     drop  [3]  44:18 61:24 69:11     ex  [3]  50:17 65:4,6          fish  [2]  39:22,23           24:1,2 26:3 27:13 32:23,24 33:12, 
+     due  [1]  11:3             ex-claim  [1]  16:23         five  [1]  61:21             23 34:4 35:12 48:17 50:13 57:21 
+             E         exactly  [16]  4:4,25 5:14 6:2 11:15,  floor  [4]  46:17 49:16 51:12,13    63:20,21 
+                        16 24:13 29:5 30:2 44:2,3,25 46:3  focus  [2]  45:17 47:6         granted  [9]  35:9,15 38:20 41:16  each  [2]  18:7 59:6          50:14 54:8,21           focused  [4]  4:23 22:21 45:16 59:  48:6 51:3,5,6 68:5  earlier  [2]  22:14 35:22        examination  [1]  46:14        20                 granting  [1]  32:22  earthly  [1]  25:16          examine  [1]  65:23         focuses  [1]  51:25          grants  [3]  39:17 48:24 63:22  eat  [2]  39:22,22           examining  [1]  13:11        focusing  [1]  40:13         grasping  [1]  27:5  economy  [3]  60:13,14,17      example  [3]  5:19 55:22 63:15    folding  [1]  53:25          great  [2]  23:3 48:13  economy's  [2]  60:10 61:16     except  [3]  25:9 31:18 65:19     follow  [5]  24:11 26:7 57:18 66:21  GREGORY  [5]  1:20 2:3,9 3:7 66:4  educate  [1]  58:14          excuse  [2]  23:22 27:25       71:16                ground  [7]  37:3,14 53:22 54:5,7,  education  [2]  67:6,8        exercise  [2]  31:21 63:6       following  [1]  13:17         19,23  educational  [1]  58:12       exercises  [1]  57:14         follows  [1]  30:10          grounds  [10]  9:22 16:3 18:12 19:5,  effect  [2]  61:22 68:19        Exhibit  [1]  39:19          foot  [1]  40:7             7 48:14 49:4,5 54:13 71:9  effectively  [2]  7:8 64:1       exist  [3]  17:17 65:8,9        forced  [1]  54:22           guess  [4]  15:12 48:15,23 69:25  efficiency  [3]  61:12 63:1 71:24   existed  [1]  8:19           forces  [1]  18:13  efficient                                                           H  [6]  58:20,24 59:23 60:5,9,  exists  [1]  15:24           forcing  [1]  55:3 10                 expert  [5]  9:25 10:8 30:5 59:9,22  form                half  [5] [2]  53:1 64:22             14:12,17,22 35:5 55:13 
+     efficiently  [1]  51:22         explained  [1]  32:6         forth                hands  [1] [6]  18:11 19:4,7,15 36:12 56:       50:6 
+     either  [10]  10:12 24:20 25:11 29:  exposing  [1]  28:10         3                  hard  [5]  27:14,15 37:18,22,25 
+     22 52:6,13,14 54:22,22 62:21    express  [2]  50:13 51:3       fortiori               harmonious  [1] [1]  56:15                   63:1 
+     election  [1]  20:13          extend  [1]  14:25          forum               hear  [2] [2]  20:23 62:21            3:3 20:10 
+     elegant  [2]  17:22 22:16       extent  [2]  21:19 43:18        found               heard  [1] [4]  41:13 46:21 52:22 53:2       20:22 
+     eliminate  [1]  33:13                            four                hearing  [2] [6]  18:19 36:19,23 66:3,9 71:        11:1 19:19 
+     emphasize                     F  [1]  55:15                           20                 help  [4]  25:22 47:7,8 48:16 
+     enacted  [2]  43:14,16        face  [1]  8:15             framing              helpful  [3] [1]  39:2                32:17 40:14 57:3 
+     encompass  [3]  40:22 44:7,22   facing  [1]  24:12           free                 helps  [1] [1]  27:9                  25:23 
+     encompassed  [1]  49:11      fact  [10]  4:8,18 7:12 8:9 23:24 41:  frequently             hide  [1] [1]  56:22             70:6 
+     encompasses  [3]  40:9,11 48:2   21 46:5,7 55:4 70:3         friend               higher  [1] [7]  32:1 66:9,13,18,20 67:11       51:14 
+     encouraging  [1]  58:4        fail  [1]  71:16             70:24                highlights  [1]  60:24 
+     end  [7]  13:15 29:15 40:15,24 41:20  failed  [3]  33:2,3 66:23        frivolous              highly  [1]  [1]  45:9               59:8 
+     45:1 55:21             failing  [1]  55:19           front                hint  [1] [1]  16:5                28:20 
+     energies  [1]  51:25         fails  [1]  31:5             full                 hold  [2] [2]  29:12 52:24              11:1 51:14 
+     engaging  [1]  22:13         failure  [1]  66:21           function              Honor  [6] [2]  33:9 71:10            41:19 46:16 50:17 53:8 
+     enhanced  [1]  30:21         fair  [1]  11:3             fundamentally  [4]  50:18 53:24 61: 64:13 71:24 
+     enhances  [1]  63:1         fairly  [1]  39:7             18 64:20              hope  [1]  66:10 
+     enough  [1]  10:25          fall  [1]  25:15             further               however  [2] [4]  24:2 30:11 45:14 65:24        53:15 69:19 
+     entered  [1]  66:19          falls  [1]  25:15            future  [2]  57:17 58:17                I  entertain  [1]  34:6          faster  [1]  60:6 
+     entire                                          G         identical  [1] [3]  27:16 41:24 64:8     favor  [1]  28:2                                     25:8 
+     entirely  [4]  50:4 53:18 59:1 65:16  favorable  [1]  20:25         gave                identified  [1] [2]  30:21 63:15                24:15 
+     entitled  [6]  13:2 17:24 18:1 19:14  feature  [1]  64:14          General              identify  [6] [1]  1:22                18:6 19:12 30:22 33:4 
+     21:7 22:4              Federal  [10]  12:3,4,8 14:15 25:13  generally  [1]  59:14         56:7,12 
+     entity  [2]  24:6 63:17         29:25 53:4,4 55:1 71:7       gets                if/then  [3] [2]  50:11 54:24              12:25 13:1 70:21 
+     entrusted  [1]  30:24         few  [2]  10:1 55:15          getting               illustrated  [1] [1]  52:14                  31:15 
+     error  [1]  64:10            fewer  [1]  3:13            GINSBURG            illustrates  [1] [10]  3:24 4:5 11:18,23         33:25 
+     especially  [1]  50:2         fighting  [1]  14:6           12:17,22 13:4,10 22:14 64:7    illustrative  [1]  57:16 
+     essentially  [1]  38:25        figure  [1]  43:11           give                imagine  [2] [6]  11:7 19:19 61:21 64:9,21,        25:24 28:5 
+
+                               Heritage Reporting Corporation 
+    Sheet 3                                                           dismissed - imagine 
+                                                                        76
+                               Official - Subject to Final Review
+�
+     implicated  [1]  50:24         14:6 17:19,23,24 18:3,14 22:17   keep  [3]  9:15 12:15 19:22      made  [10]  7:2 10:14 27:1 29:12 33: 
+     implicitly  [1]  39:3          24:15 26:9,11 30:3,20 35:19 36:2  keeping  [1]  27:14          8 48:10 53:11 66:9,23 68:12 
+     implies  [1]  32:22           38:15,17,20 45:3 47:17,20 48:3   KENNEDY  [5]  20:6 33:10,19 34:9  majority  [1]  24:14 
+     important  [2]  20:2 64:14       52:11 56:7,20 62:8,13 64:8,14 66:  60:20                mandated  [1]  34:25 
+     importantly  [1]  55:17        15 67:15 70:19           kind  [6]  45:6 54:17 55:14 56:23 57:  many  [1]  24:10 
+     imposed  [1]  23:25         Interim  [1]  1:6            18 64:6               master  [2]  24:9 64:15 
+     improbable  [2]  50:5 65:18     interpretation  [3]  37:6 56:14 70:  kinds  [3]  41:2 58:4 64:19      MATAL  [2]  1:6 3:5 
+     improving  [1]  51:21         24                 known  [1]  55:25          matter  [3]  1:15 24:2 35:6 
+     INC  [1]  1:3              introduced  [1]  28:19                L         matters  [1]  42:17 
+     incentive  [1]  63:12         invalid  [2]  46:21 54:6                           maximum  [2]  14:21 61:12 
+     include                                 lacks  [3] [3]  31:11 46:5 57:18    invalidated  [2]  52:2,8            59:2,10,12         mean  [16]  6:19 9:8 21:2,3 22:9 28: 
+     included                                laid  [1] [3]  9:24 31:4 46:16    Invents  [1]  17:20              9:22             3 32:14 36:21 37:11 38:4 39:14 
+     includes                                language  [22] [2]  44:17 48:16      investigate  [1]  53:13               3:16 4:23 13:23 15:  42:1,5 54:17 67:24 68:1 
+     including  [1]  37:19         invests  [1]  19:23           19 16:14 17:11 22:6 24:7 25:21,  meaning  [2]  43:23 56:2 
+     inclusive  [1]  3:22          invited  [1]  36:10           23 27:10,17,21 28:2 36:17 40:14  meanings  [1]  68:18 
+     incomplete  [2]  9:13 10:11     IPR  [22]  29:6 34:18,23 35:10,11,12  46:1 69:12 70:1,11,22 71:3     means  [6]  8:6,7 16:2 37:9,13 41: 
+     incongruous                              last  [2] [1]  59:8        36:25,25 37:4,14 38:4,5,8,9 41:4      59:19 71:23          10 
+     inconsistency                             latter  [1] [1]  50:10       51:14 55:8 61:20,21,24 63:14,19       4:22            means-plus-function  [1]  56:1 
+     indeed                                 Laughter  [4] [3]  42:17 59:13 60:23    irrespective  [1]  53:16              6:22 39:25 71:22,25  meant  [2]  43:2 62:10 
+     indefiniteness                             law  [7] [1]  54:10      isn't  [4]  14:12 37:17 45:9 62:10       27:12 54:11 59:4,4,13 65:  mechanism  [1]  65:12 
+     independently  [2]  59:5,6      isolation  [3]  36:20,24 68:13     22 66:25              mentioned  [1]  67:17 
+     indication                                leading  [1] [1]  42:15         issue  [12]  3:12,17 6:25 9:3 10:19        25:12          menu  [1]  67:25 
+     indicators                               least  [13] [1]  28:22         36:5 47:14 49:15 54:19 56:18 60:      10:14 13:21,23 34:25 37:  merits  [16]  25:5 39:12,14 53:9,10, 
+     individual  [1]  41:25         1 61:18               25 41:14 46:20 47:3 49:14,24 52:  13,16,18,24 54:3,25 55:3,6,8 57:7 
+     inefficient  [1]  59:2         issued  [5]  11:25 55:10,12 59:10   8 63:12,24             66:22 
+     informed                                leave  [2] [1]  56:13         64:23                    20:12 43:11        met  [4]  4:7 13:14 24:25 63:5 
+     infringement                              leaves  [1] [7]  13:20 14:1 34:  issues  [3]  29:25 55:11 56:22          47:1           method  [2]  28:10 58:20 
+     23 35:17 37:1 61:25 63:17     issuing              left  [7] [1]  58:11             14:4 41:5 42:17 43:19 45:  middle  [1]  68:22 
+     infringer  [3]  34:22 35:10 64:1    itself  [7]  36:1,17 43:23 56:4 57:3   22,23 46:4             might  [8]  18:15,21 34:10 48:21 53: 
+     inherent                                 lengthy  [3] [2]  21:9 64:5        58:15 62:12                  55:11,12 66:18      17,19 59:25 61:11 
+     initial                                  less  [1] [1]  7:9                     J             48:23            mind  [6]  9:15 12:15 19:22 27:14 
+     initially                                 level  [1] [1]  52:20                                 70:7             40:5 52:15 
+     initiate               jettison  [1]             lies  [1] [1]  4:16                 59:1              23:19            minimum  [3]  35:21 51:8 67:22 
+     initiating              job  [1]                likelihood  [9] [2]  21:14,15           45:10                    26:4 41:14 46:21 48:  minutes  [1]  66:3 
+     initiation              Joint  [1] [1]  21:15              10:2            21 50:1 52:2,7,23 53:2       mistake  [1]  38:15 
+     initiative              JONATHAN  [3]           likely  [2] [1]  50:20                  1:22 2:6 30:16        24:12 63:23        Monday  [1]  1:13 
+     injected              JOSEPH  [1]             limit  [2] [1]  28:18                1:6               49:19,20          months  [2]  14:17 29:13 
+     inquiry               judges  [1]              limitation  [1] [1]  48:21                57:5                  25:10         moreover  [2]  24:4 50:7 
+     inside               judgment  [1]            limited  [7] [1]  70:6                   54:1               11:5 40:23 62:14,14,15,  most  [2]  14:12,17 
+     instance              Justice  [164] [2]  34:14 66:16             1:23 3:3,9,24 4:5,10,  16 66:11              motion  [2]  8:14,15 
+     INSTITUTE                               limits  [2] [38]  1:3 3:4 7:2,7,22 9:  14,24 5:5,12,16,23 6:1,5,9,18,23 7:      49:17 66:15        motions  [1]  35:8 
+     12 10:5,22 19:13,25 22:22,23,23,  5,16,19,24 8:13,25 9:4,6,9,11 10:4,  litigant  [2]  61:7,8          move  [3]  11:24 18:4 59:21 
+     24 23:7,8 25:6 29:16 31:7,11,17   16,18,21 11:18,23 12:17,22 13:4,  litigate  [6]  11:13,17 35:2,16 62:1,2  moved  [1]  29:14 
+     41:22 46:19,23 47:2,20 48:4,15   10 14:10,18,22 15:1,3,7,12,22 16:  litigating  [1]  42:9          much  [5]  9:17,18 40:23 59:2 65:16 
+     49:23 55:5,10 56:20 65:21 70:5,6,  7,20 17:1,11,20 18:10,17,23 19:3,  litigation  [16]  9:18 18:25 24:9,11,  multistage  [1]  34:3 
+     8,19 71:9              18,22 20:6,19 21:1,8,12,17,24 22:  12 25:12 30:4,9 34:20 59:6 62:11,  must  [4]  46:22,23 57:19 68:1 
+     instituted  [17]  4:2,3,8,11 12:15,18,  2,12,14,14 23:1,6,23 25:19 26:8,   19 63:8,14,25 64:2 
+     18,24 13:2,5 31:9 36:3 38:8,16 39: 15 27:7,11,19,23 28:1 30:13,18   little                        N  [3]  23:13 35:7 48:23 
+     3 40:12 41:4             31:24,25 32:13 33:10,19 34:9 35:  LLC  [1]  1:8             narrower  [5]  32:5 44:11,13,15,23 
+     institutes                                loads  [1] [2]  57:4,14        4,25 36:15 37:5,21,24 38:11,23        40:2            natural  [1]  61:4 
+     instituting                               long  [3] [4]  6:12 8:8 52:21 60:  39:6,18 40:1 41:9 42:4,22,24 43:7,     14:19 26:10 55:13     nature  [2]  54:11 58:16 
+     15                  20 44:4,10,24 45:13,19,21,25 46:6,  longer  [10]  15:16,24 16:18,21,23  necessarily  [2]  53:23 60:9 
+     institution  [35]  8:3,5,6,7 11:19,23  12,25 47:7,15,22 48:12,20 49:6,12  17:17 35:14 42:2 69:2,3      need  [4]  15:9 35:14 45:14 52:24 
+     16:1 21:21 22:4 23:4,9,11,15,18   50:9,25 52:17 54:4,16 55:9 56:17  look  [20]  7:5 10:1 25:14 26:2 29:8  needs  [6]  21:4 41:2,3,5 45:8 48:10 
+     25:1 28:21 29:9,15 31:16,17 35:   57:25 58:2,10 59:18 60:8,19,20   35:11 36:1,16,18,23 40:14 45:4   never  [8]  12:11 18:23,24 19:2 23:6 
+     20 43:17 45:3,16 51:23 53:8 55:   61:6,15 64:7 65:1,3,7,13 66:1,7,   47:23 50:21,23 57:20 61:24 62:20  26:19 31:8,12 
+     24 58:20,24 62:25 66:19 67:7 69:  12,17 67:5,10,17 68:3,8,11,17,20  63:3 64:10             new  [4]  40:17 50:21 52:10 57:13 
+     21 70:2 71:1             69:6,10,15,25 70:9,14,23 71:8,15,  looking  [2]  16:9 57:12       next  [1]  3:4 
+     instructive             18 72:2               looks  [1] [1]  57:23                                58:17           Nine  [6]  12:20,22,22 14:7 26:19,25 
+     intend                                  lose  [1] [1]  61:3                   K             29:22            nobody  [1]  43:10 
+     intended                                lot  [3] [3]  18:24 43:25 44:6                         24:19 28:3 59:19       non-frivolous  [1]  46:9  KAGAN  [20]  15:3,7,12,22 16:7,20  intends                                 lower  [1] [1]  51:7                                  49:20           non-instituted  [2]  15:14 17:13 17:1,11,20 22:14 23:1,6,23 54:4,  intention  [1]  59:21                                    M         normally  [1]  51:4 16 66:12 69:15,25 70:9,14  inter                                                     nothing  [10] [37]  3:14 4:1,7 9:16 12:14,24                                              16:24,24 17:3 18:13 
+                               Heritage Reporting Corporation 
+    Sheet 4                                                           implicated - nothing 
+                                                                        77
+                               Official - Subject to Final Review
+�
+     26:20 31:9 52:12 62:7 63:22 64:3  own  [5]  23:10 50:20 62:5,6 65:5   19,22 62:17 64:11 66:5 69:4,13   produces  [1]  68:18 
+     notice  [1]  9:19           Owner  [2]  34:18 61:23       Petitioner's  [7]  31:2 33:17 34:1   prohibited  [1]  21:14 
+     notion  [2]  64:8,15                  P          44:8 52:4 63:11 64:5        prohibition  [2]  22:3 46:17 
+     notwithstanding  [1]  55:4                        petitioners  [1]  3:15         prohibits  [1]  35:23 
+     November             p.m  [1] [1]  1:13             72:4             petitions  [1]  51:14         proof  [1]  13:15 
+     number              PAGE  [5] [4]  13:25 39:20 44:22 63:       2:2 36:12 55:23 57:15   phase  [6]  29:15 39:12,14 45:17 53:  properly  [1]  54:12 
+     4                  63:16                8 66:19               proposed  [1]  41:7 
+             O         pages  [2]  10:1 29:10        phrase  [4]  16:11 41:11 44:7,8    proscribe  [1]  49:13  panel  [2]  57:5,6           phrased  [2]  41:11 46:17      proscribed  [1]  47:11  object  [1]  26:1           panels  [1]  58:15          pick  [2]  43:9 51:2          provision  [9]  4:1 18:2 35:22 40:20  objecting  [1]  26:1          part  [5]  27:4 31:8,12 44:1 48:5    picks  [1]  24:6            42:20 47:14 48:1 66:14 68:13  objection  [1]  12:5          parte  [3]  50:17 65:4,6        place  [6]  12:6 31:13 35:15 39:16  provisions  [1]  47:13  objections  [1]  20:21        partes  [36]  3:14 4:1,7 9:16 12:14,  51:5 67:12             PTAB  [2]  41:21 54:22  obvious  [1]  33:5           24 14:6 17:19,23,25 18:3,14 22:  plain  [3]  3:16,22 45:11       PTO  [13]  30:21 31:5 35:11,23 41:  obviously  [2]  24:6 67:25       17 24:15 26:9,12 30:3,20 35:19   plaintiff  [1]  24:9           21 45:8 46:8,18 54:22 60:14 62:  odd  [1]  23:13             36:2 38:15,17,20 45:3 47:18,20   pleading  [1]  9:19          17,24 63:20  Office  [15]  1:7 11:25 12:9 13:16,24  48:3 52:11 56:7,20 62:13 64:8,15  please  [3]  3:10 4:13 30:19     PTO's  [1]  60:9 14:5 24:25 25:5,19,20 26:16,17   66:15 67:15 70:19         point  [16]  20:13 24:3 25:23 30:2   public  [3]  12:14 58:11,14 28:19 37:8 60:1          partial  [16]  4:17 10:23 21:15,20 22: 40:2 42:11 43:14,16 54:5 58:21   purpose  [5]  7:1 11:6 28:6 43:15  often  [5]  39:21 55:18 56:17,18 68:  3 28:20 31:16,17 35:20 43:17 51:  60:13 62:5 64:20 67:7 70:10 71:   51:16 14                  23 58:20,24 62:25 69:21 70:1    23                 purposes  [4]  24:14 51:19 58:12  okay  [8]  12:22 22:1 26:5,15,17,21,  particular  [8]  8:8 22:25 48:5 50:  pointed  [2]  25:4 71:8        67:6  23 27:3               21,23 56:3 62:15,16        points  [10]  41:18 45:15 46:15 53:7  pursue  [1]  34:19  once  [3]  10:24 22:18,18       particularity  [1]  19:16        60:4,12 66:9,10 67:10 71:20    put  [5]  32:3 39:18,18 59:16 60:15  one  [43]  10:25 13:5,11,11 15:17 16:  particularly  [4]  16:10 19:5 25:3   posed  [1]  38:2           putative  [1]  59:20 20 19:6,12 20:16 22:20 23:1,14,   65:21                position  [8]  15:5,8 17:9 24:21 32:  puts  [2]  52:5 64:5 21 24:18 26:3,10,11,17,19,23 32:  parties  [8]  20:7 41:24 50:19 55:6  3 34:1 44:8 63:11                  Q  22 35:15 39:23 40:6 41:22 43:3,   57:11,17 62:8 63:13        possibility  [3]  44:18 63:24 64:4 20 45:9 46:9,20 47:3 49:14,24 50:  pass  [1]  17:4            possible              quality  [1] [1]  32:7               51:21 
+     6 51:5 59:3 61:21 62:21 63:9 64:  past  [1]  40:14            possibly              question  [24] [1]  71:2                 4:22 7:12 8:23 20: 
+     16 65:23,23 68:15         Patent  [63]  1:7 3:11,14,19 5:7,20 7:  potential  [1]  62:23          20 23:24 32:11,12 36:16 37:17,25 
+     ones  [3]  24:17 29:7 43:7       11,11 9:24 11:25 12:7,9 13:3,16,  power  [1]  5:13            38:2,3,5 42:9,18 43:18 44:5 49:14 
+     only  [16]  4:10 5:12,13 8:3,8 12:19  24 14:3,5 16:5 17:17 20:22,24 22:  practical  [3]  16:8 28:7,15      50:11,22 58:21 62:10 67:6 70:1 
+     13:11,24 19:5 28:17 45:1 62:16   6,10 24:24 25:5,19,20 26:16,17   practice              questions  [7] [3]  31:1 56:24,25             4:12 30:11 36:21 43: 
+     63:21 64:19 67:19 68:15      28:19 30:9,22 34:18 36:4,6 38:16,  precedent  [1]  6:25         19 51:1,2 65:24 
+     opening  [5]  28:3 37:19 38:7 39:4,  19 40:16 41:17 43:4,21 44:12 51:  precisely             quite  [1] [1]  58:6              55:10 
+     15                  21 52:1 53:19 54:6 57:24,24 58:7,  preclude              quote  [1] [3]  49:19 51:9 61:4         13:20 
+     opinion  [2]  7:25 24:14        8,10,14,18 59:4,4,13,25 60:18 61:  precludes             quoted  [1] [2]  11:19,22             3:25 
+     opinions  [1]  58:4          23 63:18 64:22 65:22 67:14     premise              quotes  [1] [1]  37:20               40:15 
+     opponents  [1]  28:8         patentability  [15]  3:19 5:14 7:8 8:  present  [2]  10:7 32:12               R  opportunity  [5]  10:7 11:13,17 25:  24 10:10,13,15 11:3 14:7 36:6 41:  presented  [8]  4:22 8:16 32:11 42: 10 64:21              13 50:22 54:20 55:21 56:16                       raised  [2]  32:1 50:22 19 52:9 54:12 55:20 58:22  oral                                                      ran  [1] [5]  1:16 2:2,5 3:7 30:16     patentable  [1]  30:23                              29:9  presents  [1]  32:10  order                                                     rather  [3] [1]  29:13           patents  [4]  24:17 29:7 51:14 59:                          20:14,16 47:23  preserving  [1]  49:8  ordinarily                                                  read  [8] [1]  59:12         10                                        22:5 27:8,9 28:15 36:11,  presumably  [2]  62:1 69:4  ordinary  [3]  24:8 39:11 56:24    pay  [1]  20:16                               13 38:12 67:14  presumed  [1]  59:7  original                                                    reading  [3]  [1]  16:16          pending  [1]  45:2                                   22:8,9 28:15  presupposes  [1]  39:15  originally                                                   real  [1] [1]  15:15         percent  [1]  35:8                                 33:20  prevail  [1]  26:5  other                                                     really  [11] [23]  6:13,25 7:20 9:14 10:6,6  perfectly  [3]  15:18 35:19 51:24                           10:21 11:2,12 17:20 19:  prevent  [1]  52:18 11:10 15:14,21 18:7 19:8,9,15 21:  permissible  [4]  31:21 53:6 68:16                     5 20:18,20 22:16 23:18 36:15 61:  previously  [1]  64:23 2 25:18 38:18 44:25 51:6 52:3 57:  70:2                                   9  principally  [1]  47:13 11,17 62:22 70:8          permits                                 reason  [10] [1]  22:2                                   4:9 25:16 37:17 44:5,  principle  [1]  24:8  others  [1]  62:24           permitted  [2]  37:4 62:2                          16 53:11 55:19 58:3,25 59:24  prior  [4]  31:15 33:5,6 62:16  otherwise                                                  reasonable  [9] [1]  16:4         perspective  [3]  60:10,11 61:16                              8:17,18,22 26:4 46:  problem  [3]  32:1 33:20 47:16  ought  [3]  10:15 12:6 29:22     petition  [29]  9:20 14:14 15:15 16:                     20 48:21 49:25 52:2,7  procedure  [1]  52:21  out                                                      reasonableness  [1] [13]  9:22 12:20,23 23:20 24:16  16 18:5,6 22:18,19,24 27:18 33:3,                               29:2  proceed  [6]  34:19 35:1,16 48:25 25:4 27:2 29:6 43:11 44:18 47:8   7,9,23 43:24 44:1 45:4,18 52:9 53:                    reasonably  [1]  62:19 62:5 63:9 48:18 71:8             18 55:20,22 56:6,11 57:16,22 68:                    reasoned  [2]  29:12,18  proceeding  [19]  20:16 31:9,12 34:  outer  [2]  49:17,18          6 69:7 70:8                               reasons  [6]  3:11 24:18 29:5 30:24 24,25 36:25 37:1,10 38:4,5,8,9 39:  outset  [3]  13:13 19:24 52:23    Petitioner  [41]  1:4,21 2:4,10 3:8,                     53:16 56:25 3,13 40:12 45:24 52:25 57:8 62:6  over  [12]  8:22 14:7 18:25 23:15 31:  20 16:12,16,18 17:15 18:3 20:12                     REBUTTAL  [3]  2:8 66:4 71:20  proceedings  [6]  31:1 35:5 55:8 15 33:5 35:7 41:25 59:3 64:2 65:  22:7,10 24:8 36:7,10,19,22 37:15                    reconsider  [1]  64:22 65:4,17 68:22 16,20                39:2,9,14 40:15,17 41:17 42:3 43:                    record  [4]  9:2,7,13 10:11  process  [8]  9:17 11:3 18:9 25:12  overly  [1]  71:19           22 44:11,13,17,21 52:20 56:13 61:                    reduce  [2]  20:9 33:12 32:17 34:3 48:18 61:13 
+                               Heritage Reporting Corporation 
+    Sheet 5                                                             nothing - reduce 
+                                                                        78
+                               Official - Subject to Final Review
+�
+     reexamination  [1]  50:18      18,19 65:16 67:15 70:19      sequentially  [1]  36:12        15,21 29:11 30:3 31:10,23 35:1, 
+     reference  [1]  12:10         reviewability  [2]  65:4 71:12    serious  [1]  37:6           18,22 36:11 37:18 39:21 40:4 43: 
+     references  [1]  33:4         reviewable  [1]  31:19        serves  [1]  24:13           1,15,16 44:9 52:18 53:21 57:7 62: 
+     referred  [1]  39:4          reviewed  [2]  13:24 62:24      set  [8]  18:11 19:4,7,15 36:12 49:18  12 67:12,13,16,23 69:16 
+     referring  [4]  38:7,9 68:4,6      reviewing  [2]  59:10,17        56:3 57:7              statutes  [1]  40:2 
+     refers  [2]  18:2 38:19        reviews  [3]  10:23 12:6 66:15    sets  [1]  49:16            statutory  [10]  15:4,18 16:14 24:7 
+     refined  [1]  39:8           revise  [1]  34:5           setting  [1]  49:20           27:10,16 42:19 57:13 68:12,15 
+     reflects  [1]  31:21          revisit  [1]  30:22           settle  [3]  34:17 41:24 68:23     stay  [4]  34:24 35:8,15 63:25 
+     regard  [6]  12:6 22:25 24:24 29:2,  rewrote  [1]  67:12          settled  [2]  41:23 68:21       stayed  [1]  35:5 
+     16 71:3               rights  [1]  62:8            settlement  [2]  69:4,8        steps  [2]  61:2,2 
+     Register  [4]  12:4,4,9 71:7      ROBERTS  [13]  3:3 30:13 31:25 32:  several  [1]  41:19          stick  [1]  6:25 
+     regulation  [10]  11:25 12:10 27:9   13 35:4 39:6 42:22 43:7 55:9 56:  shall  [3]  36:5 67:21 70:18      still  [9]  18:8,19 29:1,18 65:3,7,9 68: 
+     28:18,25 49:8 71:1,6,11,17     17 66:1 71:18 72:2         shenanigans  [1]  71:15       25 69:20 
+     regulations  [4]  47:5,10 51:18 56:  room  [1]  47:2            short  [2]  29:13 57:6         stories  [1]  23:2 
+     5                  Rosenwasser  [1]  67:21      shouldn't  [1]  10:22         story  [2]  17:22 22:16 
+     regulatory  [1]  51:10        roughly  [1]  35:5           show  [2]  21:12 66:23        straightforward  [1]  17:21 
+     reject  [2]  25:17 29:21        rule  [6]  33:19 57:18 59:4,13,13 65:  showed  [1]  67:20          strange  [1]  54:17 
+     related  [4]  32:21,24,24,25      22                 showing  [6]  33:8 48:9,14 49:3,5  streamlined  [2]  9:17 52:21 
+     relates  [1]  12:23          rule-making  [1]  23:12        53:12                streamlines  [1]  30:9 
+     relatively  [1]  57:13         ruled  [2]  7:12,13          shows  [1]  57:16           stretch  [2]  39:7,8 
+     releasing  [1]  63:7          rules  [3]  23:10 48:9 66:21      side  [4]  10:6 11:10 21:3 24:20    strong  [2]  28:22 63:18 
+     relitigate  [1]  16:2          ruling  [3]  53:23 54:1,25       sign  [1]  43:21            strongest  [1]  19:7 
+     relitigating  [1]  29:25        run  [1]  25:24            simple  [2]  17:21 45:5        strongly  [1]  24:1 
+     relying  [2]  12:2 64:7                 S         simpler  [1]  30:4           structure  [5]  56:3,7,12 57:19 66: 
+     remain  [2]  45:2 60:21                          simply  [4]  40:25 46:17 61:23 65:   24 
+     remainder             same  [10] [2]  30:12 68:14          16:3 17:2 34:2 44:2,16   18                 stuck  [1]  47:16 
+     render  [3]  15:9,19 52:19       47:14 49:22 61:1 67:22 71:13    since  [1]  42:10           subject  [3]  28:25 38:17 67:15 
+     rendered             SAS  [2] [1]  33:5              1:3 3:4           single  [2]  14:2 20:22        submission  [1]  56:16 
+     reply                saying  [21] [1]  25:4                  6:14 7:6 8:1,5 10:24   situation  [1]  14:5          submissions  [1]  55:5 
+     request  [2]  18:4 33:2        12:13 23:24 24:21 26:18 27:20,23  slowed  [1]  64:1           submitted  [2]  72:3,5 
+     require  [3]  18:6 56:6 61:7      34:4 39:5 40:19 42:23 50:20 51:  Solicitor  [1]  1:22          subset  [1]  18:16 
+     required  [2]  49:18 52:19       11 53:11 69:2,20 70:11       solid  [1]  63:3            substantial  [1]  50:21 
+     requirement            says  [18] [1]  66:24            6:7 8:7 13:9 17:9 19:13  someone  [2]  27:5 62:19      substantive  [1]  68:19 
+     requirements  [1]  18:5        21:6 23:6 26:17,21 35:11 40:16   sorry  [3]  9:8 14:10 44:12      substitute  [3]  41:6 62:11,18 
+     requires  [6]  3:17 5:4 8:11 31:10   43:23 49:3 61:19,20 67:16 70:1,  sort  [1]  21:20            success  [3]  41:15 52:23 53:2 
+     40:21 57:20             17                 SOTOMAYOR  [52]  4:10,14,24 5:5,  sudden  [1]  26:24 
+     requiring             scheme  [11] [2]  18:11 19:4             13:16 27:16 40:11 50: 12,17,23 6:1,5,9,18,23 7:5,16,19 8:  sued  [6]  13:18,18 15:25 34:22 61: 
+     reserve  [1]  30:12          3,17 57:13 62:20,22 64:9,20 68:   13,25 9:5,6,9,11 10:4,16,18,21 14:  25 63:17 
+     resolve  [1]  45:1           15                  10,18,22 15:1 18:10,17,23 19:3,18,  sufficiency  [2]  48:10 49:9 
+     resources             scope  [16] [1]  47:4               17:23 18:1,2 27:17 29:2  22 20:19 21:1,8,12,17,24 22:2,12  sufficient  [5]  48:14 49:4,5 53:12 
+     respect  [21]  3:18 4:11 5:1,8 9:2,13  31:2 34:16 36:21 39:20 40:3,3,9   43:20 57:25 58:2,10 67:5 68:17,   65:11 
+     15:17,20 19:6 23:4 25:6 32:2 33:7  59:11 62:14 65:20 66:14      20 69:6,10             suggested  [1]  38:3 
+     36:5 38:20 41:12 42:8 49:14 50:6  screens  [2]  24:16 29:6       sounds  [1]  38:13          suggesting  [2]  45:7 50:19 
+     52:25 69:18            se  [1]  62:8              speaks  [1]  49:15          suggestive  [1]  50:15 
+     respects              Second  [8] [1]  32:8                3:22 4:9,9 44:4 48:1   specific  [2]  33:4 66:8        suggests  [1]  24:1 
+     responded  [1]  66:20        57:10 64:10 70:7          specifically  [2]  42:20 50:12     suit  [5]  35:17 37:2 58:16 61:25 64: 
+     Respondents           secret  [2]  [4]  1:9,24 2:7 30:        24:2 70:6         specification  [1]  56:4        3 
+     17                 Section  [35]  5:4 8:2,4 12:10,11,12  specify  [1]  27:22          sum  [1]  45:10 
+     responses  [1]  66:8         13:8 16:3 17:24,24 18:1,4 20:21  speed  [1]  59:22           summary  [2]  53:1 54:1 
+     rest  [1]  63:4             21:23 22:20 28:24 31:19 40:18,25  spinning  [1]  60:17         supported  [1]  3:20 
+     resubmit  [1]  34:5          54:11 56:1 59:7 62:3 64:17 66:14,  stage  [5]  22:11 47:18 55:6,8 56:19  supports  [1]  24:7 
+     result  [3]  34:2 44:6 61:1       25 70:13,16,17,22 71:1,3,5,6,14  standard  [5]  24:25 42:21 51:15 63:  suppose  [1]  61:10 
+     review               see  [6] [95]  3:15 4:2,7,20 5:6,9 6:      6:9 12:3,8 36:14 47:10 48:  5 65:10               supposed  [3]  22:17 25:25 32:18 
+     13 7:3,7,23 8:14,21,23 9:12,16 10:  20                 standards  [4]  48:14 49:3,4 55:7  SUPREME  [2]  1:1,16 
+     5 12:15,24 13:22 14:6 17:23,25   seek  [1]  63:13            standing  [2]  36:24 44:21      surely  [1]  60:8 
+     18:3,14 19:14 20:8 21:15 22:11,  seeking  [1]  63:14          start  [2]  21:23 27:8         system  [4]  11:11 13:17 24:16 59:1 
+     17 23:8 24:3,16,23 25:6,14 26:9,  seem  [5]  32:2,14,16 54:17 68:13  started  [2]  27:19,23 
+     12,20,22 30:3,20 31:18 32:15,16,  seemed                                         T  [1]  68:9          starting  [2]  36:12 37:20 
+     22,24 33:2,16,21,23 34:16 35:12,  seems  [4]  11:9 23:2 49:13 50:13  starts               tack  [1]  [2]  4:6 17:22             42:6 
+     19 36:2 38:15,17,20 39:12 40:20  select  [1]  18:15           STATES              tail  [1] [2]  1:1,17             40:24 
+     41:15 45:4 47:18,20 48:3,15,17   selective  [1]  24:3          statistics             tailor  [1] [1]  56:22              33:22 
+     50:4 52:11 53:22 54:7,23 55:5,10,  sense  [5]  27:1 32:23 60:6 61:3 64:  statute               tale  [1] [46]  3:17 4:5 11:18,22 16:      71:13 
+     18,18 56:7,20 57:4,14,21 59:11,14, 24                  10 17:9,12 19:21,23 20:2 21:5,6,  talked  [1]  68:20 
+     16 60:1,16 62:13 63:4,6,20 64:15,  sentence  [1]  40:24         13 22:15 23:2 25:25 27:5,9 28:6,8,  talks  [1]  71:9 
+                               Heritage Reporting Corporation 
+    Sheet 6                                                          reexamination - talks 
+                                                                        79
+                               Official - Subject to Final Review
+�
+     tells  [6]  17:20 22:15 44:23 47:5 69:  unless  [5]  33:12,12 46:19 49:23   without  [2]  11:2 52:3 
+
+     14 71:13 
+             51:13                witness  [1]  9:25 
+     term  [1]  42:25            unlikely  [1]  57:21          word  [10]  17:15 20:2 38:19 39:19, 
+     terms  [3]  8:11 32:17 45:11     unpatentable  [2]  5:21 56:10    20 40:3,13 42:12 43:9 67:18 
+     text  [1]  8:11             unreasonable  [1]  25:3       worded  [1]  67:23 
+     textual  [2]  24:1 28:22        untenable  [1]  52:5         words  [8]  15:14 29:20 36:19,23 38: 
+     theory  [2]  19:10 68:24        up  [9]  6:11 12:9 13:15 14:15 25:12  18 44:2,14 71:15 
+     there's  [16]  9:2 15:23 16:8,23,24   26:16 50:12 58:24 63:13      work  [8]  17:16 22:17 25:25 29:14 
+     17:3 21:24 25:16 26:20 31:9 33:  up-or-down  [1]  46:23        31:1 44:25 52:11 65:17 
+
+     20 34:24 42:5 43:18 46:1 63:24 
+ urging  [1]  27:8           working  [1]  63:1 
+     therefore  [3]  45:17 46:23 64:10   usage  [1]  39:11           works  [1]  15:4 
+     they've  [1]  17:8           useful  [3]  58:7,7,8          world  [4]  15:23 28:24 41:10,16 
+     thinking  [2]  28:11 40:5       Utility  [1]  68:12           worth  [2]  34:17 53:13 
+     though  [3]  13:10 28:7 64:6             V         worthwhile  [1]  49:25
+     three  [4]  3:11 14:17 29:13 66:8                      write  [3]  23:10 27:5 29:4 
+     threshold  17:5 33:3 50:1 55:  vague  [1] [4]                 43:10          writing  [1]  28:6  valid  [4]  5:8 24:17 29:7 59:7     written  [15]  3:13,18 5:18 8:12 23:2 
+     thumbs              validity  [2] [2]  58:24,25              8:19 18:25       27:12 29:12,23 31:3,5 40:21 49: 
+     thumbs-down           validly  [1] [1]  46:10            31:7           21 56:18 58:5 71:11 
+     thumbs-up            vegetable  [1] [1]  46:10               67:24        wrote  [1]  29:6 
+     tie  63:13             versus  [1] [1]                      3:5
+                        vested                       Ytied                     [2] [1]  50:5                  32:19 59:15
+     time-consuming         via  [1]  67:3             year  [6] [1]  53:20                           14:11,16,19,22,23,24
+     timely               view  [4] [1]  37:14               16:9 33:18 42:11 61:9   years  [2]  14:6,11
+     Timing   17          viewed  [1]  62:18          yellow  [1] [1]  70:                                   71:12
+     today               voting  [1] [1]  58:22                42:6                   Z 
+     took                vulnerable  [1] [4]  12:9 14:20,20 61:8             63:19        zone  [1]  29:1  tool  [3]  30:21,25 52:10               W 
+     total  [1]  45:10            wage  [1]  67:22  Trademark  [1]  1:7         walk  [1]  61:22  translate  [1]  64:16         wanted  [6]  41:9 59:25 61:11 62:20  treat  [1]  51:11            67:1,13  treated  [1]  54:25          wants  [3]  21:3 42:14 50:12  trepidation  [1]  30:6         Washington  [3]  1:12,20,23  Trial  [7]  3:11 7:11 9:17 16:5 20:24  wastes  [1]  52:6 36:4 57:9              wasting  [1]  52:3  tribunal  [2]  59:15 66:21       way  [20]  5:22 7:13,20 11:3,4,6 22:  trouble  [3]  25:24 27:4 28:5      16 27:2 28:7 29:4 34:5 39:1,19 41:  true  [2]  17:2 49:22          11 42:14 44:19,25 61:11 65:17 67:  trying  [2]  6:10 28:5          22  turned  [1]  28:4           ways  [2]  45:7 55:15  two  [18]  4:12 12:19 15:23 20:17 24:  weak  [2]  19:13 63:19 14 29:5 41:1,18 45:15 46:15 47:  wedded  [1]  28:11 12 56:24 60:4,12 61:1,2 63:2 68:9  weeding  [1]  48:18  type  [1]  30:8             weeding-out  [1]  71:10  types  [1]  30:5            whatever  [4]  8:6,6,16 57:5  U         wheels  [1]  60:17 
+     U.S                 whereas  [2] [1]  1:7                    45:20 64:6 
+     under          13:15,15  whereby  [2] [22]  6:17 8:2 12:12             13:17 14:5
+     16:3 19:9 26:9 31:6,19 36:3 40:17  Whereupon  [1]  72:4
+     41:7 45:10 51:10 54:10,10 56:1   whether  [23]  19:24,25 20:2,3,4 22:
+     59:7 62:2 66:25 68:24        22,23,24 23:7,25 45:8 46:8 47:19
+     underlying  [2]  62:6,9        48:4,17 53:5 56:19 58:23 68:4,5
+     underscored  [1]  51:20       70:4,5,18
+     underscores           who's  [2] [1]  46:4             34:14 37:15
+     understand            whole  [1] [6]  6:21 15:7 16:7 34:      32:17
+     7 42:23 69:16           will  [25]  6:11,11 20:7,10 26:8,9,11,
+     understanding  [1]  70:10      13,22 34:5 43:5,8,10 44:18 61:21
+     understood  [1]  38:18        62:1,23 63:4,9,24 64:12 65:20,22,
+     undeveloped  [1]  10:11       23 66:10
+     unfair               window  [1] [2]  11:9,10                57:7
+     UNITED              within  [10] [2]  1:1,17               29:1 37:4,14 39:3,14
+     universe  [2]  40:22 48:5       40:9,12 41:4 49:11 62:6
+
+                               Heritage Reporting Corporation 
+    Sheet 7                                                                tells - zone 
