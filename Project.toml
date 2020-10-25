@@ -12,12 +12,10 @@ DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LabelNumerals = "2e475f56-4567-5c41-94ff-3f69a29378f9"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-OpenSSL_jll = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Rectangle = "9a9db56c-8f71-5460-add5-cb450131785e"
 RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
-Zlib_jll = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [compat]
 AbstractTrees = "0.2.1"
