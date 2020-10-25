@@ -30,4 +30,8 @@ test/downloads
 test/*.pdf
 test/*.res
 test/pvt
+test/PDFTest*
 file.txt
+data/fonts/Arial.afm
+test/sample01.pem
+data/certs/cacerts.pem

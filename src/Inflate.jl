@@ -46,8 +46,6 @@ const Z_BUF_ERROR     = -5
 const Z_VERSION_ERROR = -6
 
 @static if Base.VERSION > v"1.3-" && !(Sys.iswindows() && Sys.WORD_SIZE == 32)
-    using Pkg
-    Pkg.add("Zlib_jll")
     using Zlib_jll: libz
 else
     isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl")) ||
