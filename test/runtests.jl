@@ -13,7 +13,7 @@ using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.8"
+pdftest_ver  = "0.0.9"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -647,13 +647,8 @@ end
 
     @testset "Forms XObjects Test" begin
         @test begin
-            filename="Graphics-wpf.pdf"
-            result, template_file = testfiles(filename)
+            result, template, filename = local_testfiles("Graphics-wpf.pdf")
             DEBUG && println(filename)
-            isfile(filename) ||
-                download("http://www.pdfsharp.net/wiki/GetFile.aspx?"*
-                         "File=%2fGraphics-sample%2fGraphics-wpf.pdf",
-                         filename)
             doc = pdDocOpen(filename)
             @assert (npage = pdDocGetPageCount(doc)) == 5
             try
@@ -666,7 +661,7 @@ end
                         end
                     end
                 end
-                @test files_equal(result, template_file)
+                @test files_equal(result, template)
             finally
                  pdDocClose(doc)
             end
