@@ -3,6 +3,7 @@ language: julia
 julia:
   - 1.0
   - 1.5
+  - 1.6
   - nightly
 
 os:
@@ -11,7 +12,7 @@ os:
   - windows
 matrix:
  allow_failures:
- - julia: nightly
+ - julia: nightly, 1.6
 
 notifications:
   email: false
