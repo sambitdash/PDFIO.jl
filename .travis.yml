@@ -15,14 +15,6 @@ jobs:
   allow_failures:
     - julia: nightly
     - julia: 1.6
-  include:
-    - stage: "Documentation"
-      julia: 1.5
-      os: linux
-      script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        - julia --project=docs/ -e 'using Pkg; Pkg.build("PDFIO"); include("docs/make.jl")'
-      after_success: skip  
 
 notifications:
   email: false
