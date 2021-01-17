@@ -12,7 +12,8 @@ os:
   - windows
 matrix:
  allow_failures:
- - julia: nightly, 1.6
+ - julia: nightly
+ - julia: 1.6
 
 notifications:
   email: false
