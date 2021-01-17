@@ -1,7 +1,7 @@
 name = "PDFIO"
 uuid = "4d0d745f-9d9a-592e-8d18-1ad8a0f42b92"
 authors = ["Sambit Kumar Dash<sambitdash@gmail.com> "]
-version = "0.1.11"
+version = "0.1.12"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
