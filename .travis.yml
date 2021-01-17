@@ -10,10 +10,6 @@ os:
   - linux
   - osx
   - windows
-matrix:
- allow_failures:
- - julia: nightly
- - julia: 1.6
 
 notifications:
   email: false
@@ -22,6 +18,9 @@ after_success:
   - julia -e 'import PDFIO; cd(joinpath(dirname(pathof(PDFIO)), "..")); using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
 
 jobs:
+  allow_failures:
+    - julia: nightly
+    - julia: 1.6
   include:
     - stage: "Documentation"
       julia: 1.5
