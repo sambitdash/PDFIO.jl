@@ -4,7 +4,7 @@
 [![Win status](https://ci.appveyor.com/api/projects/status/9cocsctqdkx603q0?svg=true)](https://ci.appveyor.com/project/sambitdash/pdfio-jl)
 [![codecov.io](http://codecov.io/github/sambitdash/PDFIO.jl/coverage.svg?branch=master)](http://codecov.io/github/sambitdash/PDFIO.jl?branch=master)
 [![Doc Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/dev)
-[![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://sambitdash.github.io/PDFIO.jl/stable)
+[![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliahub.com/docs/PDFIO/)
 [![JOSS status](http://joss.theoj.org/papers/742f48b0842cddf715b58a0bca2ffeb3/status.svg)](http://joss.theoj.org/papers/742f48b0842cddf715b58a0bca2ffeb3)
 
 PDFIO is a native Julia implementation for reading PDF files. It's an 100% Julia 
