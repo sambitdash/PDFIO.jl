@@ -566,7 +566,7 @@ end
             pdDocGetPageRange(doc, "iii")
             outline = pdDocGetOutline(doc)
             iobuf = IOBuffer()
-            print_tree(iobuf, outline)
+            print_tree(iobuf, outline, maxdepth=10)
             write("431.toc.res", take!(iobuf))
             @assert files_equal("431.toc.res", pdftest_dir*"templates/431.toc")
             pdDocClose(doc)
@@ -587,7 +587,7 @@ end
             doc = pdDocOpen(filename)
             outline = pdDocGetOutline(doc)
             iobuf = IOBuffer()
-            print_tree(iobuf, outline)
+            print_tree(iobuf, outline, maxdepth=10)
             write("outline.toc.res", take!(iobuf))
             @assert files_equal("outline.toc.res", pdftest_dir*"templates/outline.toc")
             @assert pdOutlineItemGetAttr(outline[1][1][1][1])[:Destination][2].pageno == 5

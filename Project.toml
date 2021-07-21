@@ -20,7 +20,7 @@ RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
 Zlib_jll = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [compat]
-AbstractTrees = "0.2.1"
+AbstractTrees = "0.3"
 AdobeGlyphList = "0.1.1"
 BinDeps = "0.8.10"
 LabelNumerals = "0.1.0"
