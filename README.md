@@ -1,7 +1,6 @@
 # PDFIO
 
-[![*nix Status](https://travis-ci.org/sambitdash/PDFIO.jl.svg?branch=master)](https://travis-ci.org/sambitdash/PDFIO.jl)
-[![Win status](https://ci.appveyor.com/api/projects/status/9cocsctqdkx603q0?svg=true)](https://ci.appveyor.com/project/sambitdash/pdfio-jl)
+[![GitHub Action](https://github.com/sambitdash/PDFIO.jl/actions/workflows/Build.yml/badge.svg)](https://github.com/sambitdash/PDFIO.jl/actions/workflows/Build.yml)
 [![codecov.io](http://codecov.io/github/sambitdash/PDFIO.jl/coverage.svg?branch=master)](http://codecov.io/github/sambitdash/PDFIO.jl?branch=master)
 [![Doc Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://sambitdash.github.io/PDFIO.jl/dev)
 [![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliahub.com/docs/PDFIO/)
