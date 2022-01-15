@@ -128,13 +128,24 @@ function merge_encoding!(fum::Dict{UInt8, Char},
         if v isa CosInt
             cid = UInt8(get(v))
         else
-            d[cid] = v
+            m = match(r"^uni\d+$",String(v))
+            if isnothing(m)
+                d[cid] = v
+            else
+                i = parse(Int,String(v)[4:end]; base=16)
+                if i in keys(fum)
+                    fum[cid] = fum[i]
+                else
+                    d[cid] = v
+                end
+            end
             cid += 1
         end
     end
     
     dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
     merge!(fum, dict_to_unicode)
+
     return fum
 end
 
