@@ -128,7 +128,7 @@ function merge_encoding!(fum::Dict{UInt8, Char},
         if v isa CosInt
             cid = UInt8(get(v))
         else
-            m = match(r"^uni\d+$",String(v))
+            m = match(r"^uni[0-9A-F]+$",String(v))
             if isnothing(m)
                 d[cid] = v
             else
