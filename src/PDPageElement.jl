@@ -482,19 +482,14 @@ function get_pdfcontentops(b::Vector{UInt8})
     # PDF content operators are never longer than 3 bytes and may not be
     # delimited. Hence, search for the longest 3 byte keyword, then 2 bytes
     # and lastly 1
-    arr, l, sb = nothing, length(b), b
-    if l > 3
-        sb, l = b[1:3], 3
-    end
-    s = l
-    while arr == nothing && s > 0
-        arr = get(PD_CONTENT_OPERATORS, String(sb[1:s]), nothing)
+    arr = nothing
+    s = min(length(b), 3)
+    while isnothing(arr) && s > 0
+        arr = get(PD_CONTENT_OPERATORS, String(b[1:s]), nothing)
         s -= 1
     end
-    if arr !== nothing
-        return s+1, eval(Expr(:call, arr...))
-    end
-    error("Invalid content operator: $(String(b))")
+    isnothing(arr) && error("Invalid content operator: $(String(b))")
+    s+1, arr[1](arr[2:end]...)
 end
 
 struct TextLayout
