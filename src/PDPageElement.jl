@@ -403,98 +403,97 @@ end
 |MP||(PDF 1.2) Define marked-content point|320|
 =#
 const PD_CONTENT_OPERATORS = Dict(
-"\'"=>[PDPageTextRun,"\'",(1,0),1],
-"\""=>[PDPageTextRun,"\"",(1,0),3],
-"b"=>[PDPageElement,"b",(1,0),0],
-"b*"=>[PDPageElement,"b*",(1,0),0],
-"B"=>[PDPageElement,"B",(1,0),0],
-"B*"=>[PDPageElement,"B*",(1,0),0],
-"BDC"=>[PDPage_BeginGroup,"BDC",(1,2),2,PDPageMarkedContent],
-"BI"=>[PDPage_BeginInlineImage,"BI",(1,0),0,PDPageInlineImage],
-"BMC"=>[PDPage_BeginGroup,"BMC",(1,2),1,PDPageMarkedContent],
-"BT"=>[PDPage_BeginGroup,"BT",(1,0),0,PDPageTextObject],
-"BX"=>[PDPageElement,"BX",(1,1),0],
-"c"=>[PDPageElement,"c",(1,0),6],
-"cm"=>[PDPageElement,"cm",(1,0),6],
-"cs"=>[PDPageElement,"cs",(1,1),1],
-"CS"=>[PDPageElement,"CS",(1,1),1],
-"d"=>[PDPageElement,"d",(1,0),2],
-"d0"=>[PDPageElement,"d0",(1,0),2],
-"d1"=>[PDPageElement,"d1",(1,0),6],
-"Do"=>[PDPageElement,"Do",(1,0),1],
-"DP"=>[PDPageElement,"DP",(1,2),0],
-"EI"=>[PDPageElement,"EI",(1,0),0],
-"EMC"=>[PDPage_EndGroup,"EMC",(1,2),0],
-"ET"=>[PDPage_EndGroup,"ET",(1,0),0],
-"EX"=>[PDPageElement,"EX",(1,1),0],
-"f"=>[PDPageElement,"f",(1,0),0],
-"f*"=>[PDPageElement,"f*",(1,0),0],
-"F"=>[PDPageElement,"F",(1,0),0],
-"g"=>[PDPageElement,"g",(1,0),1],
-"G"=>[PDPageElement,"G",(1,0),1],
-"gs"=>[PDPageElement,"gs",(1,2),1],
-"h"=>[PDPageElement,"h",(1,0),0],
-"i"=>[PDPageElement,"i",(1,0),1],
-"ID"=>[PDPageElement,"ID",(1,0),0],
-"j"=>[PDPageElement,"j",(1,0),1],
-"J"=>[PDPageElement,"J",(1,0),1],
-"k"=>[PDPageElement,"k",(1,0),4],
-"K"=>[PDPageElement,"K",(1,0),4],
-"l"=>[PDPageElement,"l",(1,0),2],
-"m"=>[PDPageElement,"m",(1,0),2],
-"M"=>[PDPageElement,"M",(1,0),1],
-"MP"=>[PDPageElement,"MP",(1,2),0],
-"n"=>[PDPageElement,"n",(1,0),0],
-"q"=>[PDPageElement,"q",(1,0),0],
-"Q"=>[PDPageElement,"Q",(1,0),0],
-"re"=>[PDPageElement,"re",(1,0),4],
-"rg"=>[PDPageElement,"rg",(1,0),3],
-"RG"=>[PDPageElement,"RG",(1,0),3],
-"ri"=>[PDPageElement,"ri",(1,0),1],
-"s"=>[PDPageElement,"s",(1,0),0],
-"S"=>[PDPageElement,"S",(1,0),0],
-"sc"=>[PDPageElement,"sc",(1,1),-1],
-"SC"=>[PDPageElement,"SC",(1,1),-1],
-"scn"=>[PDPageElement,"scn",(1,2),-1],
-"SCN"=>[PDPageElement,"SCN",(1,2),-1],
-"sh"=>[PDPageElement,"sh",(1,3),1],
-"T*"=>[PDPageElement,"T*",(1,0),0],
-"Tc"=>[PDPageElement,"Tc",(1,0),1],
-"Td"=>[PDPageElement,"Td",(1,0),2],
-"TD"=>[PDPageElement,"TD",(1,0),2],
-"Tf"=>[PDPageElement,"Tf",(1,0),2],
-"Tj"=>[PDPageTextRun,"Tj",(1,0),1],
-"TJ"=>[PDPageTextRun,"TJ",(1,0),1],
-"TL"=>[PDPageElement,"TL",(1,0),1],
-"Tm"=>[PDPageElement,"Tm",(1,0),6],
-"Tr"=>[PDPageElement,"Tr",(1,0),1],
-"Ts"=>[PDPageElement,"Ts",(1,0),1],
-"Tw"=>[PDPageElement,"Tw",(1,0),1],
-"Tz"=>[PDPageElement,"Tz",(1,0),1],
-"v"=>[PDPageElement,"v",(1,0),4],
-"w"=>[PDPageElement,"w",(1,0),1],
-"W"=>[PDPageElement,"W",(1,0),0],
-"W*"=>[PDPageElement,"W*",(1,0),0],
-"y"=>[PDPageElement,"y",(1,0),4]
+    "\'"=>PDPageTextRun("\'", (1,0),1),
+    "\""=>PDPageTextRun("\"", (1,0),3),
+    "Tj"=>PDPageTextRun("Tj", (1,0),1),
+    "TJ"=>PDPageTextRun("TJ", (1,0),1),
+
+    "BDC"=>PDPage_BeginGroup("BDC", (1,2),2,PDPageMarkedContent),
+    "BMC"=>PDPage_BeginGroup("BMC", (1,2),1,PDPageMarkedContent),
+    "BT"=> PDPage_BeginGroup("BT", (1,0),0,PDPageTextObject),
+
+    "EMC"=>PDPage_EndGroup("EMC",(1,2),0),
+    "ET"=> PDPage_EndGroup("ET",(1,0),0),
+
+    "BI"=> PDPage_BeginInlineImage("BI",(1,0),0,PDPageInlineImage),
+
+    "b"=>  PDPageElement("b",(1,0),0),
+    "b*"=> PDPageElement("b*",(1,0),0),
+    "B"=>  PDPageElement("B",(1,0),0),
+    "B*"=> PDPageElement("B*",(1,0),0),
+    "BX"=> PDPageElement("BX",(1,1),0),
+    "c"=>  PDPageElement("c",(1,0),6),
+    "cm"=> PDPageElement("cm",(1,0),6),
+    "cs"=> PDPageElement("cs",(1,1),1),
+    "CS"=> PDPageElement("CS",(1,1),1),
+    "d"=>  PDPageElement("d",(1,0),2),
+    "d0"=> PDPageElement("d0",(1,0),2),
+    "d1"=> PDPageElement("d1",(1,0),6),
+    "Do"=> PDPageElement("Do",(1,0),1),
+    "DP"=> PDPageElement("DP",(1,2),0),
+    "EI"=> PDPageElement("EI",(1,0),0),
+    "EX"=> PDPageElement("EX",(1,1),0),
+    "f"=>  PDPageElement("f",(1,0),0),
+    "f*"=> PDPageElement("f*",(1,0),0),
+    "F"=>  PDPageElement("F",(1,0),0),
+    "g"=>  PDPageElement("g",(1,0),1),
+    "G"=>  PDPageElement("G",(1,0),1),
+    "gs"=> PDPageElement("gs",(1,2),1),
+    "h"=>  PDPageElement("h",(1,0),0),
+    "i"=>  PDPageElement("i",(1,0),1),
+    "ID"=> PDPageElement("ID",(1,0),0),
+    "j"=>  PDPageElement("j",(1,0),1),
+    "J"=>  PDPageElement("J",(1,0),1),
+    "k"=>  PDPageElement("k",(1,0),4),
+    "K"=>  PDPageElement("K",(1,0),4),
+    "l"=>  PDPageElement("l",(1,0),2),
+    "m"=>  PDPageElement("m",(1,0),2),
+    "M"=>  PDPageElement("M",(1,0),1),
+    "MP"=> PDPageElement("MP",(1,2),0),
+    "n"=>  PDPageElement("n",(1,0),0),
+    "q"=>  PDPageElement("q",(1,0),0),
+    "Q"=>  PDPageElement("Q",(1,0),0),
+    "re"=> PDPageElement("re",(1,0),4),
+    "rg"=> PDPageElement("rg",(1,0),3),
+    "RG"=> PDPageElement("RG",(1,0),3),
+    "ri"=> PDPageElement("ri",(1,0),1),
+    "s"=>  PDPageElement("s",(1,0),0),
+    "S"=>  PDPageElement("S",(1,0),0),
+    "sc"=> PDPageElement("sc",(1,1),-1),
+    "SC"=> PDPageElement("SC",(1,1),-1),
+    "scn"=>PDPageElement("scn",(1,2),-1),
+    "SCN"=>PDPageElement("SCN",(1,2),-1),
+    "sh"=> PDPageElement("sh",(1,3),1),
+    "T*"=> PDPageElement("T*",(1,0),0),
+    "Tc"=> PDPageElement("Tc",(1,0),1),
+    "Td"=> PDPageElement("Td",(1,0),2),
+    "TD"=> PDPageElement("TD",(1,0),2),
+    "Tf"=> PDPageElement("Tf",(1,0),2),
+    "TL"=> PDPageElement("TL",(1,0),1),
+    "Tm"=> PDPageElement("Tm",(1,0),6),
+    "Tr"=> PDPageElement("Tr",(1,0),1),
+    "Ts"=> PDPageElement("Ts",(1,0),1),
+    "Tw"=> PDPageElement("Tw",(1,0),1),
+    "Tz"=> PDPageElement("Tz",(1,0),1),
+    "v"=>  PDPageElement("v",(1,0),4),
+    "w"=>  PDPageElement("w",(1,0),1),
+    "W"=>  PDPageElement("W",(1,0),0),
+    "W*"=> PDPageElement("W*",(1,0),0),
+    "y"=>  PDPageElement("y",(1,0),4)
 )
 
 function get_pdfcontentops(b::Vector{UInt8})
     # PDF content operators are never longer than 3 bytes and may not be
     # delimited. Hence, search for the longest 3 byte keyword, then 2 bytes
-    # and lastly 1
-    arr, l, sb = nothing, length(b), b
-    if l > 3
-        sb, l = b[1:3], 3
-    end
-    s = l
-    while arr == nothing && s > 0
-        arr = get(PD_CONTENT_OPERATORS, String(sb[1:s]), nothing)
+    # and lastly 1 byte.
+    s = ss = min(length(b), 3)
+    while s > 0
+        str = String(b[1:s])
+        obj = get(PD_CONTENT_OPERATORS, str, nothing)
+        obj !== nothing && return s, deepcopy(obj)
         s -= 1
     end
-    if arr !== nothing
-        return s+1, eval(Expr(:call, arr...))
-    end
-    error("Invalid content operator: $(String(b))")
+    error("No content operators found in: $(String(b[1:ss]))")
 end
 
 struct TextLayout
