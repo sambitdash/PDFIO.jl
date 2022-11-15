@@ -5,15 +5,16 @@ using PDFIO.Cos
 using PDFIO.Common
 using ZipFile
 using AbstractTrees
+using Downloads
 
 # Internal methods for testing only
 using PDFIO.Cos: parse_indirect_ref, decode_ascii85, CosXString, parse_value
-using PDFIO.PD: openssl_error
+using PDFIO.PD: openssl_error, read_cmap, get_encoded_string
 using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.9"
+pdftest_ver  = "0.0.10"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -22,7 +23,7 @@ zipfile *= ".zip"
 pdftest_dir="PDFTest-"*pdftest_ver*"/"
 
 if !isdir(pdftest_dir)
-    isfile(zipfile) || download(pdftest_link, zipfile)
+    isfile(zipfile) || Downloads.download(pdftest_link, zipfile)
     r = ZipFile.Reader(zipfile)
     buf = Vector{UInt8}(undef, 64*1024)
     for f in r.files
@@ -56,6 +57,8 @@ function local_testfiles(filename, filesdir="files")
     return (name*".res", joinpath(@__DIR__, pdftest_dir, "templates", name*".txt"),
             joinpath(@__DIR__, pdftest_dir, filesdir, filename))
 end
+
+local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesdir, filename)
 
 @testset "PDFIO tests" begin
     @testset "Miscellaneous" begin
@@ -415,6 +418,23 @@ end
             end
             @test files_equal(resfile, template)
             length(utilPrintOpenFiles()) == 0
+        end
+
+        @test begin
+            filename="bad.cmap"
+            DEBUG && println(filename)
+            path = local_files(filename)
+            io = util_open(path, "r")
+            cmap = nothing
+            try
+                cmap = read_cmap(io)
+            finally
+                util_close(io)
+            end
+            @test cmap !== nothing
+            @test all(get_encoded_string(UInt8[0x00, 0xff], cmap).== [Char(0x0111)])
+            @test all(get_encoded_string(UInt8[0x01, 0x08], cmap).== [Char(0x0110)])
+            all(get_encoded_string(UInt8[0x00, 0xfb, 0x00, 0xfe], cmap) .== [Char(0x0106), Char(0x010D)])
         end
     end
 

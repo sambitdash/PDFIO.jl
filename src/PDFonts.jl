@@ -335,7 +335,7 @@ cmap_command(b::Vector{UInt8}) =
     nothing : Symbol(String(b))
 
 function on_cmap_command!(stm::IO, command::Symbol,
-                         params::Vector{CosInt}, cmap::CMap)
+                         params::Vector{CosInt}, cmap::CMap) 
     n = get(pop!(params))
     o1, o2, o3 = CosNull, CosNull, CosNull
     for i = 1:n
@@ -358,12 +358,30 @@ function on_cmap_command!(stm::IO, command::Symbol,
             end
         else
             l = length(d1)
+            @assert (d1[1] <= d2[1]) E_INVALID_CODESPACERANGE
             if l == 1
                 cmap.code_space[Interval(d1[1], d2[1])] = CosNull
             else
-                imap = IntervalTree{UInt8, CosNullType}()
-                imap[Interval(d1[2], d2[2])] = CosNull
-                cmap.code_space[Interval(d1[1], d2[1])] = imap
+                if d1[2] < d2[2]
+                    imap = IntervalTree{UInt8, CosNullType}()
+                    imap[Interval(d1[2], d2[2])] = CosNull
+                    cmap.code_space[Interval(d1[1], d2[1])] = imap
+                else
+                    @warn "Corrupt CMap file. Repairing... Some encodings may not map properly."
+                    imap = IntervalTree{UInt8, CosNullType}()
+                    imap[Interval(d1[2], 0xff)] = CosNull
+                    cmap.code_space[Interval(d1[1], d1[1])] = imap
+
+                    imap = IntervalTree{UInt8, CosNullType}()
+                    imap[Interval(0x00, d2[2])] = CosNull
+                    cmap.code_space[Interval(d2[1], d2[1])] = imap
+
+                    if d2[1] - d1[1] > 1
+                        imap = IntervalTree{UInt8, CosNullType}()
+                        imap[Interval(0x00, 0xff)] = CosNull
+                        cmap.code_space[Interval(d1[1]+1, d2[1]-1)] = imap    
+                    end
+                end
             end
         end
     end
