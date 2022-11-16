@@ -391,7 +391,7 @@ function read_trailer(ps::IOStream, lookahead::Int)
 end
 
 function doc_trailer_update(ps::IOStream, doc::CosDocImpl)
-    TRAILER_REWIND = 50
+    TRAILER_REWIND = 256
 
     seek(ps, doc.size-TRAILER_REWIND)
 
