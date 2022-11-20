@@ -80,10 +80,9 @@ end
 const Unicode_to_PDFEncoding = reverse_dict(PDFEncoding_to_Unicode)
 
 function NativeEncodingToUnicode(barr, mapping::Dict)
-    l = length(barr)
-    carr = Vector{Char}(undef, l)
-    for i = 1:l
-        carr[i] = get(mapping, barr[i], zero(Char))
+    carr = Vector{Char}()
+    for b in barr
+        append!(carr, get(mapping, b, zero(Char)))
     end
     return carr
 end

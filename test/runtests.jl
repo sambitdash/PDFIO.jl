@@ -14,7 +14,7 @@ using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.10"
+pdftest_ver  = "0.0.11"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -435,6 +435,24 @@ local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesd
             @test all(get_encoded_string(UInt8[0x00, 0xff], cmap).== [Char(0x0111)])
             @test all(get_encoded_string(UInt8[0x01, 0x08], cmap).== [Char(0x0110)])
             all(get_encoded_string(UInt8[0x00, 0xfb, 0x00, 0xfe], cmap) .== [Char(0x0106), Char(0x010D)])
+        end
+
+        @test begin
+            filename="bad1.cmap"
+            DEBUG && println(filename)
+            path = local_files(filename)
+            io = util_open(path, "r")
+            cmap = nothing
+            try
+                cmap = read_cmap(io)
+            finally
+                util_close(io)
+            end
+            @test cmap !== nothing
+
+            @test all(get_encoded_string(UInt8[0x00, 0xff], cmap).== [Char(0x013F)])
+            @test all(get_encoded_string(UInt8[0x03, 0x00], cmap).== [Char(0x0340)])
+            all(get_encoded_string(UInt8[0x00, 0xfb, 0x00, 0xfe], cmap) .== [Char(0x013B), Char(0x013E)])
         end
     end
 
