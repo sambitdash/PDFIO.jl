@@ -117,7 +117,7 @@ end
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
                 @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = 1:length(r)])
+                @test all([r[i][:passed] for i = eachindex(r)])
                 pdDocClose(doc)
             end
         end
@@ -128,7 +128,7 @@ end
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
                 @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = 1:length(r)])
+                @test all([r[i][:passed] for i = eachindex(r)])
                 pdDocClose(doc)
             end
         end
@@ -140,7 +140,7 @@ end
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
                 @test pdDocHasSignature(doc)
                 r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = 1:length(r)])
+                @test all([r[i][:passed] for i = eachindex(r)])
                 pdDocClose(doc)
             end
         end
@@ -160,7 +160,7 @@ end
             pws = Vector{UInt8}[b"user", b"user", b"user", b"user", b"user", b"", b"test", b"", b"password", b""]
             infos = []
             encrypted = []
-            for i = 1:length(files)
+            for i = eachindex(files)
                 file = files[i]
                 resname, template, filename = local_testfiles(file)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(pws[i]))
@@ -188,7 +188,7 @@ end
         @testset "PDF owner password documents" begin
             files = ["dt.pdf", "dt-own-pass-same.pdf", "upw-password-opw-sample.pdf"]
             opws = Vector{UInt8}[b"owner", b"user", b"sample"]
-            for i = 1:length(files)
+            for i = eachindex(files)
                 file = files[i]
                 resname, template, filename = local_testfiles(file)
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
@@ -208,7 +208,7 @@ end
         @testset "PDF Crypt filter" begin
             files = ["dt-att-protected.pdf"]
             opws = Vector{UInt8}[b"user1234"]
-            for i = 1:length(files)
+            for i = eachindex(files)
                 file = files[i]
                 doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
                 obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(43, 0))
@@ -227,7 +227,7 @@ end
             pw = Base.SecretBuffer("password")
             p12path = joinpath(@__DIR__, pdftest_dir, "certs", "doc-crypt.p12")
             Base.shred!(pw) do pw
-                for i = 1:length(files)
+                for i = eachindex(files)
                     file = files[i]
                     resname, template, filename = local_testfiles(file)
                     path = joinpath(@__DIR__, pdftest_dir, "encrypt", file)
