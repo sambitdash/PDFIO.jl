@@ -45,7 +45,7 @@ function show(io::IO, cmap::CMap)
 end
 
 
-const FontUnicodeMapping = Union{Dict{UInt8, Char}, CMap, Nothing}
+const FontUnicodeMapping = Union{Dict{UInt8, Vector{Char}}, CMap, Nothing}
 
 #=
 mutable struct FontUnicodeMapping
@@ -56,7 +56,56 @@ mutable struct FontUnicodeMapping
 end
 =#
 
-function merge_encoding!(fum::Dict{UInt8, Char}, encoding::CosName,
+function Base.merge!(fum::Dict{UInt8, Vector{Char}}, enc::Dict{UInt8, Char})
+    for (k, v) in enc 
+        fum[k] = [v]
+    end
+end
+
+function get_agl_unicode(g::AbstractString)::Union{Vector{Char}, Char}
+    r = r"u(?'u'[[:xdigit:]]+$)|uni(?'uni'[[:xdigit:]]{4,6}$)"
+    m = match(r, g)
+    if m !== nothing
+        u, uni = m["u"], m["uni"]
+        if u !== nothing
+            l = length(u)
+            if l > 3 && mod(l, 4) == 0
+                ret = Char[]
+                for i = 1:4:l
+                    c = parse(UInt16, SubString(u, i, i+3), base=16)
+                    0xE000 > c > 0xD7FF && break
+                    push!(ret, Char(c))
+                end
+                length(ret)*4 == l && return(ret)
+            end
+        else
+            c = parse(UInt32, uni, base=16)
+            0x0000 <= c <= 0xD7FF && 0xE000 <= c <= 0x10FFFF && return Char(c)
+        end 
+    end
+    cg = CosName(g)
+    return get(AGL_Glyph_to_Unicode, cg, get(AGLFN_Glyph_to_Unicode, cg, zero(Char)))
+end
+
+function get_unicodes_from_glyph_name(s::String)
+    n = split(s, ".")
+    nf = n[1]
+    isempty(nf) && return [zero(Char)]
+    gs = split(nf, "_")
+    u = Char[]
+    for g in gs
+        append!(u, get_agl_unicode(g))
+    end
+    return u
+end
+
+function merge_agl!(fum::Dict{UInt8, Vector{Char}}, d::Dict{UInt8, CosName})
+    for (k, v) in d
+        fum[k] = get_unicodes_from_glyph_name(String(v))
+    end
+end
+
+function merge_encoding!(fum::Dict{UInt8, Vector{Char}}, encoding::CosName,
                          doc::CosDoc, font::IDDRef{CosDict})
     encoding_mapping =
         encoding == cn"WinAnsiEncoding"   ? WINEncoding_to_Unicode :
@@ -82,10 +131,12 @@ function FontType(subtype::CosName)
     return FontDefType()
 end
 
+# Entry point if someone wants to handle encoding based on subtype
+# By default maps to the default font unicode mapping.
 merge_encoding!(fum::FontUnicodeMapping, ftype::FontType,
                 doc::CosDoc, font::IDDRef{CosDict}) = fum
 
-function merge_encoding!(fum::Dict{UInt8, Char},
+function merge_encoding!(fum::Dict{UInt8, Vector{Char}},
                          ftype::Union{FontType1, FontMMType1},
                          doc::CosDoc, font::IDDRef{CosDict})
     basefont = cosDocGetObject(doc, font, cn"BaseFont")
@@ -104,14 +155,14 @@ end
 # Reading encoding from the font files in case of Symbolic fonts are not
 # supported.
 # Font subset is addressed with font name identification.
-function merge_encoding!(fum::Dict{UInt8, Char}, encoding::CosNullType,
+function merge_encoding!(fum::Dict{UInt8, Vector{Char}}, encoding::CosNullType,
                          doc::CosDoc, font::IDDRef{CosDict})
     subtype  = cosDocGetObject(doc, font, cn"Subtype")
     subtype === CosNull && return fum
     return merge_encoding!(fum, FontType(subtype), doc, font)
 end
 
-function merge_encoding!(fum::Dict{UInt8, Char},
+function merge_encoding!(fum::Dict{UInt8, Vector{Char}},
                          encoding::IDD{CosDict},
                          doc::CosDoc, font::IDDRef{CosDict})
     baseenc = cosDocGetObject(doc, encoding, cn"BaseEncoding")
@@ -133,8 +184,7 @@ function merge_encoding!(fum::Dict{UInt8, Char},
         end
     end
     
-    dict_to_unicode = dict_remap(d, AGL_Glyph_to_Unicode)
-    merge!(fum, dict_to_unicode)
+    merge_agl!(fum, d)
     return fum
 end
 
@@ -143,7 +193,7 @@ function get_unicode_mapping(doc::CosDoc, font::IDDRef{CosDict})
     toUnicode !== CosNull &&
         return get_unicode_mapping(toUnicode)
     encoding = cosDocGetObject(doc, font, cn"Encoding")
-    d = merge_encoding!(Dict{UInt8, Char}(), encoding, doc, font)
+    d = merge_encoding!(Dict{UInt8, Vector{Char}}(), encoding, doc, font)
     return length(d) == 0 ? nothing : d
 end
 
@@ -218,11 +268,11 @@ function get_glyph_id_mapping(cosdoc::CosDoc, cosfont::IDD{CosDict})
     return glyph_name_to_cid, cid_to_glyph_name
 end
 
-get_encoded_string(s::CosString, fum::Union{Dict{UInt8, Char}, CMap}) = 
+get_encoded_string(s::CosString, fum::FontUnicodeMapping) = 
     get_encoded_string(Vector{UInt8}(s), fum)
 
 function get_encoded_string(v::Union{Vector{UInt8}, NTuple{N, UInt8}},
-                                    fum::Dict{UInt8, Char}) where N
+                                    fum::Dict{UInt8, Vector{Char}}) where N
     length(v) == 0 && return ""
     return String(NativeEncodingToUnicode(v, fum))
 end
@@ -334,8 +384,17 @@ cmap_command(b::Vector{UInt8}) =
     length(b), b != beginbfchar && b != beginbfrange && b != begincodespacerange ?
     nothing : Symbol(String(b))
 
+function _offset(obj::CosXString, offset)
+    da = Vector{UInt8}(obj)
+    db = UInt16(da[1]*256+da[2]+offset) 
+    da[1], da[2] = UInt8(div(db, 256)), UInt8(mod(db, 256))
+    io = IOBuffer()
+    bytes2hex(io, da)
+    return CosXString(take!(io))
+end
+
 function on_cmap_command!(stm::IO, command::Symbol,
-                         params::Vector{CosInt}, cmap::CMap)
+                         params::Vector{CosInt}, cmap::CMap) 
     n = get(pop!(params))
     o1, o2, o3 = CosNull, CosNull, CosNull
     for i = 1:n
@@ -352,18 +411,57 @@ function on_cmap_command!(stm::IO, command::Symbol,
             if l == 1
                 cmap.range_map[Interval(d1[1], d2[1])] = o3
             else
-                imap = get!(cmap.range_map, Interval(d1[1], d2[1]),
-                            IntervalTree{UInt8, CosObject}())
-                imap[Interval(d1[2], d2[2])] = o3
+                if d1[2] <= d2[2]
+                    imap = get!(cmap.range_map, Interval(d1[1], d2[1]),
+                                IntervalTree{UInt8, CosObject}())
+                    imap[Interval(d1[2], d2[2])] = o3
+                else
+                    @warn "Corrupt CMap file. Repairing... Some encodings may not map properly."
+                    imap = get!(cmap.range_map, Interval(d1[1], d1[1]),
+                                IntervalTree{UInt8, CosObject}())
+                    imap[Interval(d1[2], 0xff)] = o3
+                    o3 = _offset(o3, 0xff - d1[2] + 1)
+
+                    if d2[1] - d1[1] > 1
+                        i1, i2 = d1[1]+0x1, d2[1]-0x1
+                        imap = get!(cmap.range_map, Interval(i1, i2),
+                                    IntervalTree{UInt8, CosObject}())    
+                        imap[Interval(0x00, 0xff)] = o3 
+                        o3 = _offset(o3, (d2[1] - d1[1] - 1)*0x100)    
+                    end
+                    imap = get!(cmap.range_map, Interval(d2[1], d2[1]),
+                        IntervalTree{UInt8, CosObject}())    
+                    imap[Interval(0x00, d2[2])] = o3
+                end
             end
         else
             l = length(d1)
+            @assert (d1[1] <= d2[1]) E_INVALID_CODESPACERANGE
             if l == 1
                 cmap.code_space[Interval(d1[1], d2[1])] = CosNull
             else
-                imap = IntervalTree{UInt8, CosNullType}()
-                imap[Interval(d1[2], d2[2])] = CosNull
-                cmap.code_space[Interval(d1[1], d2[1])] = imap
+                if d1[2] <= d2[2]
+                    imap = IntervalTree{UInt8, CosNullType}()
+                    imap[Interval(d1[2], d2[2])] = CosNull
+                    cmap.code_space[Interval(d1[1], d2[1])] = imap
+                else
+                    @warn "Corrupt CMap file. Repairing... Some encodings may not map properly."
+                    imap = IntervalTree{UInt8, CosNullType}()
+                    imap[Interval(d1[2], 0xff)] = CosNull
+                    cmap.code_space[Interval(d1[1], d1[1])] = imap
+
+                    imap = get!(cmap.code_space, Interval(d1[1], d1[1]), IntervalTree{UInt8, CosNullType}())   
+                    imap[Interval(d1[2], 0xff)] = CosNull
+
+                    imap = get!(cmap.code_space, Interval(d2[1], d2[1]), IntervalTree{UInt8, CosNullType}())   
+                    imap[Interval(0x00, d2[2])] = CosNull
+
+                    if d2[1] - d1[1] > 1
+                        i1, i2 = d1[1]+0x1, d2[1]-0x1
+                        imap = get!(cmap.code_space, Interval(i1, i2), IntervalTree{UInt8, CosNullType}())   
+                        imap[Interval(0x00, 0xff)] = CosNull  
+                    end
+                end
             end
         end
     end

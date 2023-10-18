@@ -1,10 +1,4 @@
-@static if Base.VERSION > v"1.3-"
-    using OpenSSL_jll: libcrypto
-else
-    isfile(joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")) ||
-        error("PDFIO not properly installed. Please run Pkg.build(\"PDFIO\")")
-    include("../deps/deps.jl")
-end
+using OpenSSL_jll: libcrypto
 
 using Base: SecretBuffer, SecretBuffer!
 import Base: copy
