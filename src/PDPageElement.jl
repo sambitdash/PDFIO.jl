@@ -693,20 +693,27 @@ end
     fontname, font = eval_unicode_mapping(tr, state)
     
     heap = get(state, :text_layout, Vector{TextLayout})
-    text, w, h = get_TextBox(tr.ss, font, tfs, tc, tw, th)
+    boxparams = get_TextBox(tr.ss, font, tfs, tc, tw, th)
+    h = boxparams[1][3]
 
     d = get(state, :h_profile, Dict{Int, Int})
     ih = round(Int, h*10)
-    d[ih] = get(d, ih, 0) + length(text)
-
-    tb = [0f0 0f0 1f0; w 0f0 1f0; w h 1f0; 0f0 h 1f0]*trm
+    
     if !get(state, :in_artifact, false)
-        tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
-                        tb[3,1], tb[3,2], tb[4,1], tb[4,2],
-                        text, fontname, font.flags)
-        push!(heap, tl)
+        for params in boxparams
+            text = params[1]
+            w = params[2]
+            offset = params[4]
+            d[ih] = get(d, ih, 0) + length(text)
+            tb = [offset 0f0 1f0; offset + w 0f0 1f0; offset + w h 1f0; offset h 1f0]*trm
+            tl = TextLayout(tb[1,1], tb[1,2], tb[2,1], tb[2,2],
+                            tb[3,1], tb[3,2], tb[4,1], tb[4,2],
+                            text, fontname, font.flags)
+            push!(heap, tl)
+        end
     end
-    offset_text_pos!(w, 0f0, state)    
+    totalw = boxparams[end][4] + boxparams[end][2]
+    offset_text_pos!(totalw, 0f0, state)    
     return state
 end
 
