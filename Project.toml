@@ -20,9 +20,14 @@ RomanNumerals = "37834d88-8936-577c-80c9-1066ecf66832"
 Zlib_jll = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [compat]
+AbstractTrees = "0.4"
+AdobeGlyphList = "0.1"
 BinDeps = "1.0"
-OpenSSL_jll = "3"
 julia = "1.10"
+LabelNumerals = "0.1"
+OpenSSL_jll = "3"
+Rectangle = "0.1"
+RomanNumerals = "0.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
