@@ -899,6 +899,13 @@ end
 
 function read_pkcs12(fn::AbstractString, pw::SecretBuffer)
     data = read(fn)
+    # Should use cconvert, but Julia 1.10 does not do null termination so added
+    # selectively here only. 
+    if pw.data[end] != 0x00
+        seekend(pw)
+        write(pw, 0x0)
+        seekstart(pw)
+    end
     p12 = ccall((:d2i_PKCS12, libcrypto), Ptr{Cvoid},
                 (Ptr{Cvoid}, Ptr{Ptr{Cuchar}}, Clong),
                 C_NULL, Ref(pointer(data)), length(data))
@@ -909,7 +916,7 @@ function read_pkcs12(fn::AbstractString, pw::SecretBuffer)
     ret = ccall((:PKCS12_parse, libcrypto), Cint,
                 (Ptr{Cvoid}, Ptr{Cstring},
                  Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}),
-                p12, cconvert(Cstring, pw), xkey, xcert, xca)
+                p12, pointer(pw.data), xkey, xcert, xca)
     openssl_error(ret)
     return Cert(xcert[]), PKey(xkey[])
 end
