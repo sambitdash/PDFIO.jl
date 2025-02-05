@@ -14,7 +14,7 @@ using PDFIO.Common: read_pkcs12
 
 include("debugIO.jl")
 
-pdftest_ver  = "0.0.11"
+pdftest_ver  = "0.0.12"
 pdftest_link = "https://github.com/sambitdash/PDFTest/archive/v"*pdftest_ver
 
 zipfile = "pdftest-"*pdftest_ver
@@ -102,52 +102,6 @@ local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesd
             CDDate("D:20190425120659Z")
     end
     @testset "Crypto APIs" begin
-        @test_throws ErrorException openssl_error(0)
-        @test openssl_error(1) === nothing
-        cacerts   = joinpath(@__DIR__, "..", "data", "certs", "cacerts.pem")
-        @testset "Self-sign certs" begin
-            files = ["sample01.pdf", "sample02.pdf", "sample03.pdf", "sample04.pdf",
-                     "sample05.pdf", "sample06.pdf", "sample07.pdf", "sample08.pdf"]
-            isfile(cacerts) && rm(cacerts)
-            doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", "sample01.pdf"))
-            @test pdDocHasSignature(doc)
-            r = pdDocValidateSignatures(doc, export_certs=true)
-            pdDocClose(doc)
-            @test r[1][:passed] == false
-            @test isfile("sample01.pem")
-            cp("sample01.pem", cacerts, force=true)
-            for file in files
-                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
-                @test pdDocHasSignature(doc)
-                r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = eachindex(r)])
-                pdDocClose(doc)
-            end
-        end
-        @testset "Expired Certs" begin
-            files = ["pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
-            for file in files
-                isfile(cacerts) && rm(cacerts)
-                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
-                @test pdDocHasSignature(doc)
-                r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = eachindex(r)])
-                pdDocClose(doc)
-            end
-        end
-        @testset "PDF 2.0 experimental" begin
-            files = ["pades_example-1.pdf", "PAdES_SmartID.pdf",
-                     "sbid_3rd_party_sign_pades.pdf", "sbid_authbased_signflow_pades.pdf"]
-            for file in files
-                isfile(cacerts) && rm(cacerts)
-                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
-                @test pdDocHasSignature(doc)
-                r = pdDocValidateSignatures(doc)
-                @test all([r[i][:passed] for i = eachindex(r)])
-                pdDocClose(doc)
-            end
-        end
-
         @testset "PDF user password documents" begin
             files = ["dt-256-aes.pdf",              # V-5 R-6 supported in PDF 2.0
                      "dt-embed-protected.pdf",      # V-2 R-3
@@ -161,53 +115,58 @@ local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesd
                      "samplesecured_256bitaes.pdf", # V-5 R-5
                      ]           
             pws = Vector{UInt8}[b"user", b"user", b"user", b"user", b"user", b"", b"test", b"", b"password", b""]
-            infos = []
-            encrypted = []
+            infos = Vector(undef, 10)
+            encrypted = falses(10)
             for i = eachindex(files)
-                file = files[i]
-                resname, template, filename = local_testfiles(file)
-                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(pws[i]))
-                page = pdDocGetPage(doc, 1)
-                push!(infos, pdDocGetInfo(doc))
-                open(resname, "w") do io
-                    pdPageExtractText(io, page)
+                @test begin
+                    file = files[i]
+                    resname, template, filename = local_testfiles(file)
+                    doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(pws[i]))
+                    page = pdDocGetPage(doc, 1)
+                    infos[i] = pdDocGetInfo(doc)
+                    open(resname, "w") do io
+                        pdPageExtractText(io, page)
+                    end
+                    encrypted[i] = cosDocIsEncrypted(doc.cosDoc)
+                    pdDocClose(doc)
+                    if i != 9
+                        files_equal(resname, template)
+                    else
+                        stat(resname).size == 0
+                    end
                 end
-                push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
-                if i != 9
-                    @test files_equal(resname, template)
-                else
-                    @test stat(resname).size == 0
-                end
-                pdDocClose(doc)
             end
             @test infos[1]["Producer"] == "SAMBox 1.1.57 (www.sejda.org)"
             @test infos[2]["Producer"] == "LibreOffice 6.0"
             @test infos[3]["Producer"] == "LibreOffice 6.0"
             @test infos[4]["Producer"] == "LibreOffice 6.0"
-            @test infos[5]["Producer"] =="3-Heights(TM) PDF Security Shell 4.8.25.2 (http://www.pdf-tools.com)"
+            @test infos[5]["Producer"] == "3-Heights(TM) PDF Security Shell 4.8.25.2 (http://www.pdf-tools.com)"
             @test infos[6]["Producer"] == "LibreOffice 6.0"
-            @test all(encrypted[1:5])
+            @test sum(encrypted) == length(encrypted) - 1
         end
         @testset "PDF owner password documents" begin
             files = ["dt.pdf", "dt-own-pass-same.pdf", "upw-password-opw-sample.pdf"]
             opws = Vector{UInt8}[b"owner", b"user", b"sample"]
+            keys = zeros(UInt32, 3)
             for i = eachindex(files)
-                file = files[i]
-                resname, template, filename = local_testfiles(file)
-                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
-                page = pdDocGetPage(doc, 1)
-                open(resname, "w") do io
-                    pdPageExtractText(io, page)
+                @test begin
+                    file = files[i]
+                    resname, template, filename = local_testfiles(file)
+                    doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "encrypt", file), access=()->Base.SecretBuffer!(opws[i]))
+                    page = pdDocGetPage(doc, 1)
+                    open(resname, "w") do io
+                        pdPageExtractText(io, page)
+                    end
+                    flag = doc.cosDoc.secHandler.keys[cn"StdCF"][1] == 0xffffffff
+                    pdDocClose(doc)
+                    if i != 3
+                        flag && files_equal(resname, template)
+                    else
+                        flag && stat(resname).size == 0
+                    end
                 end
-                if i != 3
-                    @test files_equal(resname, template)
-                else
-                    @test stat(resname).size == 0
-                end
-                @test doc.cosDoc.secHandler.keys[cn"StdCF"][1] == 0xffffffff
-                pdDocClose(doc)
             end
-        end
+        end 
         @testset "PDF Crypt filter" begin
             files = ["dt-att-protected.pdf"]
             opws = Vector{UInt8}[b"user1234"]
@@ -217,6 +176,61 @@ local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesd
                 obj = cosDocGetObject(doc.cosDoc, CosIndirectObjectRef(43, 0))
                 @test String(read(get(obj))) == "An embedded text file. "
                 pdDocClose(doc)
+            end
+        end
+
+        @test_throws ErrorException openssl_error(0)
+        @test openssl_error(1) === nothing
+        cacerts   = joinpath(@__DIR__, "..", "data", "certs", "cacerts.pem")
+        @testset "Self-sign certs" begin
+            files = ["sample01.pdf", "sample02.pdf", "sample03.pdf", "sample04.pdf",
+                     "sample05.pdf", "sample06.pdf", "sample07.pdf", "sample08.pdf"]
+            isfile(cacerts) && rm(cacerts)
+            @test begin
+                doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", "sample01.pdf"))
+                hasSig = pdDocHasSignature(doc)
+                r = pdDocValidateSignatures(doc, export_certs=true)
+                pdDocClose(doc)
+                cp("sample01.pem", cacerts, force=true)
+                hasSig && r[1][:passed] == false
+            end
+            for file in files
+                @test begin
+                    doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                    hasSig = pdDocHasSignature(doc)
+                    r = pdDocValidateSignatures(doc)
+                    pdDocClose(doc)
+                    hasSig && all([r[i][:passed] for i = eachindex(r)])
+                end
+            end
+        end
+
+        @testset "Expired Certs" begin
+            files = ["pdf-signer-tool-guide.pdf", "samplecertifiedpdf.pdf"]
+            for file in files
+                @test begin
+                    isfile(cacerts) && rm(cacerts)
+                    doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                    r = pdDocValidateSignatures(doc)
+                    hasSig = pdDocHasSignature(doc)
+                    pdDocClose(doc)
+                    hasSig && all([r[i][:passed] for i = eachindex(r)])
+                end
+            end
+        end
+
+        @testset "PDF 2.0 experimental" begin
+            files = ["pades_example-1.pdf", "PAdES_SmartID.pdf",
+                     "sbid_3rd_party_sign_pades.pdf", "sbid_authbased_signflow_pades.pdf"]
+            for file in files
+                @test begin
+                    isfile(cacerts) && rm(cacerts)
+                    doc = pdDocOpen(joinpath(@__DIR__, pdftest_dir, "DigSig", file))
+                    hasSig = pdDocHasSignature(doc)
+                    r = pdDocValidateSignatures(doc)
+                    pdDocClose(doc)
+                    hasSig && all([r[i][:passed] for i = eachindex(r)])
+                end
             end
         end
         @testset "PKI Security Handlers" begin
@@ -231,18 +245,20 @@ local_files(filename, filesdir="files") = joinpath(@__DIR__, pdftest_dir, filesd
             p12path = joinpath(@__DIR__, pdftest_dir, "certs", "doc-crypt.p12")
             Base.shred!(pw) do pw
                 for i = eachindex(files)
-                    file = files[i]
-                    resname, template, filename = local_testfiles(file)
-                    path = joinpath(@__DIR__, pdftest_dir, "encrypt", file)
-                    doc = pdDocOpen(path, access=()->read_pkcs12(p12path, pw))
-                    page = pdDocGetPage(doc, 1)
-                    push!(infos, pdDocGetInfo(doc))
-                    open(resname, "w") do io
-                        pdPageExtractText(io, page)
+                    @test begin
+                        file = files[i]
+                        resname, template, filename = local_testfiles(file)
+                        path = joinpath(@__DIR__, pdftest_dir, "encrypt", file)
+                        doc = pdDocOpen(path, access=()->read_pkcs12(p12path, pw))
+                        page = pdDocGetPage(doc, 1)
+                        push!(infos, pdDocGetInfo(doc))
+                        open(resname, "w") do io
+                            pdPageExtractText(io, page)
+                        end
+                        push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
+                        pdDocClose(doc)
+                        files_equal(resname, template)
                     end
-                    push!(encrypted, cosDocIsEncrypted(doc.cosDoc))
-                    @test files_equal(resname, template)
-                    pdDocClose(doc)
                 end
             end
             @test infos[1]["Producer"] == "LibreOffice 6.0"

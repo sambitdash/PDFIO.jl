@@ -5,7 +5,7 @@ function store_key(s::SecHandler, cfn::CosName,
                    data::Tuple{UInt32, SecretBuffer})
     skey = SecretBuffer!(read(s.skey_path, 32))
     iv   = SecretBuffer!(read(s.iv_path, 16))
-    cctx = CipherContext("aes_256_cbc", skey, iv, true)
+    cctx = CipherContext("AES-256-CBC", skey, iv, true)
     shred!(skey); shred!(iv)
 
     perm, key = data
@@ -21,7 +21,7 @@ function get_key(s::SecHandler, cfn::CosName)
     
     skey = SecretBuffer!(read(s.skey_path, 32))
     iv   = SecretBuffer!(read(s.iv_path, 16))
-    cctx = CipherContext("aes_256_cbc", skey, iv, false)
+    cctx = CipherContext("AES-256-CBC", skey, iv, false)
     shred!(skey); shred!(iv)
     
     perm, c = permkey
@@ -95,7 +95,7 @@ function algo01(h::SecHandler, params::CryptParams,
         n != kc.size && error("Invalid encryption key length")
         seekend(kc); write(kc, numarr); write(kc, genarr)
         !isRC4 && write(kc, AES_SUFFIX)
-        mdctx = DigestContext("md5")
+        mdctx = DigestContext("MD5")
         update!(mdctx, kc)
         return close(mdctx)
     end
@@ -104,7 +104,7 @@ function algo01(h::SecHandler, params::CryptParams,
     iv = SecretBuffer!(isRC4 ?     UInt8[] :
                        isencrypt ? crypto_random(16) : data[1:16])
     try
-        cctx = CipherContext(isRC4 ? "rc4" : "aes_128_cbc", key, iv, isencrypt)
+        cctx = CipherContext(isRC4 ? "RC4" : "AES-128-CBC", key, iv, isencrypt)
         d = (isRC4 || isencrypt) ? update!(cctx, data) :
             update!(cctx, (@view data[17:end]))
         append!(d, close(cctx))
@@ -119,7 +119,7 @@ function algo01a(h::SecHandler, params::CryptParams,
     perm, key = get_key(h, params)
     iv = SecretBuffer!(isencrypt ? crypto_random(16) : data[1:16])
     try
-        cctx = CipherContext("aes_256_cbc", key, iv, isencrypt)
+        cctx = CipherContext("AES-256-CBC", key, iv, isencrypt)
         d = isencrypt ? update!(cctx, data) : update!(cctx, (@view data[17:end]))
         append!(d, close(cctx))
         return d

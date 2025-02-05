@@ -21,8 +21,8 @@ Zlib_jll = "83775a58-1f1d-513f-b197-d71354ab007a"
 
 [compat]
 BinDeps = "1.0"
-OpenSSL_jll = "1.1"
-julia = "1.6"
+OpenSSL_jll = "3"
+julia = "1.10"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

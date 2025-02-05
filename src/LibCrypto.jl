@@ -1,6 +1,6 @@
 using OpenSSL_jll: libcrypto
 
-using Base: SecretBuffer, SecretBuffer!
+using Base: SecretBuffer, SecretBuffer!, cconvert
 import Base: copy
 
 export
@@ -160,7 +160,8 @@ end
 
 function get_date_from_utctime(d::String)
     # Remove fraction seconds if there
-    d[end] == 'Z' || error(E_INVALID_DATE)
+    d = strip(d)
+    endswith(d, 'Z') || error(E_INVALID_DATE)
     a = split(d, '.')
     length(a) > 1 && (d = a[1]*"Z")
     pfx = length(d) == 15 ? "D:" :
@@ -168,9 +169,11 @@ function get_date_from_utctime(d::String)
     return CDDate(pfx*d)
 end
 
-read_cddate(bio::BIO) =
-    bio |> read |> pointer |> unsafe_string |> get_date_from_utctime
-
+function read_cddate(bio::BIO)
+    data = read(bio)
+    d = transcode(String, data)
+    return get_date_from_utctime(d)
+end
 #====
     
     DigestContext
@@ -236,34 +239,62 @@ end
     CipherContext
 
 ====#
+abstract type CipherContext end
 
-mutable struct CipherContext
+set_padding(_::CipherContext, _) = nothing
+
+Base.reset(_::CipherContext) = nothing
+
+Base.close(_::CipherContext) = UInt8[]
+
+init(_::CipherContext, _::SecretBuffer, _::SecretBuffer, _::Bool) = nothing
+
+update!(_::CipherContext, indata::AbstractVector{UInt8}) = indata
+
+function CipherContext(algo::String, key::SecretBuffer, 
+                       iv::SecretBuffer, isencrypt::Bool) 
+    return algo == "RC4" ? 
+        CipherContextRC4(key) : 
+        CipherContextImpl(algo, key, iv, isencrypt)
+end
+
+mutable struct CipherContextRC4 <: CipherContext
+    key::SecretBuffer
+end
+
+function init(ctx::CipherContextRC4, key::SecretBuffer,
+    _::SecretBuffer, _::Bool)
+    ctx.key = key
+    return nothing
+end
+
+function update!(ctx::CipherContextRC4, indata::AbstractVector{UInt8}) 
+    rc4((@view ctx.key.data[1:ctx.key.size]), indata)
+end
+
+mutable struct CipherContextImpl <: CipherContext
     data::Ptr{Cvoid}
     ca::Ptr{Cvoid}
-    function CipherContext(algo::String, key::SecretBuffer,
+    function CipherContextImpl(algo::String, key::SecretBuffer,
                            iv::SecretBuffer, isencrypt::Bool)
-        ca = ccall((:EVP_get_cipherbyname, libcrypto), Ptr{Cvoid},
-                   (Ptr{Cstring}, ), pointer(algo))
-        if ca == C_NULL
-            ca = (algo == "aes_128_cbc") ?
-                ccall((:EVP_aes_128_cbc, libcrypto), Ptr{Cvoid}, ()) :
-                (algo == "aes_256_cbc") ?
-                ccall((:EVP_aes_256_cbc, libcrypto), Ptr{Cvoid}, ()) :
-                (algo == "aes_256_ecb") ?
-                ccall((:EVP_aes_256_ecb, libcrypto), Ptr{Cvoid}, ()) :
-                error("Unable to find message digest algorithm "*algo)
-        end
+        properties = "provider=default"
+        ca = ccall((:EVP_CIPHER_fetch, libcrypto), Ptr{Cvoid},
+                    (Ptr{Cvoid}, Ptr{Cstring}, Ptr{Cstring}), 
+                    C_NULL, pointer(algo), pointer(properties))
+        ca == C_NULL && error("Unable to find cipher algorithm "*algo)
         data = ccall((:EVP_CIPHER_CTX_new, libcrypto), Ptr{Cvoid}, ())
         data == C_NULL && error("Unable to create cipher context")
         this = new(data, ca)
-        finalizer(x->ccall((:EVP_CIPHER_CTX_free, libcrypto), Cvoid,
-                           (Ptr{Cvoid}, ), x.data), this)
+        finalizer(this) do x
+            ccall((:EVP_CIPHER_CTX_free, libcrypto), Cvoid, (Ptr{Cvoid}, ), x.data)
+            ccall((:EVP_CIPHER_free, libcrypto), Cvoid, (Ptr{Cvoid}, ), x.ca)
+        end
         init(this, key, iv, isencrypt)
         return this
     end
 end
 
-function init(ctx::CipherContext, key::SecretBuffer,
+function init(ctx::CipherContextImpl, key::SecretBuffer,
               iv::SecretBuffer, isencrypt::Bool)
     enc = Cint(isencrypt ? 1 : 0)
     piv = iv.size > 0 ? pointer(iv.data) : C_NULL
@@ -278,13 +309,13 @@ function init(ctx::CipherContext, key::SecretBuffer,
     return nothing
 end
 
-function set_padding(ctx::CipherContext, pad_size::Int)
+function set_padding(ctx::CipherContextImpl, pad_size::Int)
     ret = ccall((:EVP_CIPHER_CTX_set_padding, libcrypto), Cint,
                 (Ptr{Cvoid}, Cint), ctx.data, Cint(pad_size))
     openssl_error(ret)
 end
 
-function Base.reset(ctx::CipherContext)
+function Base.reset(ctx::CipherContextImpl)
     ret = ccall((:EVP_CIPHER_CTX_reset, libcrypto), Cint,
                 (Ptr{Cvoid}, ), ctx.data)
     openssl_error(ret)
@@ -292,7 +323,7 @@ end
 
 const EVP_MAX_BLOCK_LENGTH = Cint(32)
 
-function update!(ctx::CipherContext, indata::AbstractVector{UInt8})
+function update!(ctx::CipherContextImpl, indata::AbstractVector{UInt8})
     inlen = Cint(length(indata))
     out, outlen = Vector{UInt8}(undef, inlen + EVP_MAX_BLOCK_LENGTH),
                   Ref(inlen + EVP_MAX_BLOCK_LENGTH)
@@ -303,11 +334,10 @@ function update!(ctx::CipherContext, indata::AbstractVector{UInt8})
     return resize!(out, outlen[])
 end
 
-update!(ctx::CipherContext, s::SecretBuffer) =
+update!(ctx::CipherContextImpl, s::SecretBuffer) =
     update!(ctx, (@view s.data[1:s.size]))
 
-
-function Base.close(ctx::CipherContext)
+function Base.close(ctx::CipherContextImpl)
     c_value = Vector{UInt8}(undef, EVP_MAX_BLOCK_LENGTH)
     c_len = Ref(EVP_MAX_BLOCK_LENGTH)
     ret = ccall((:EVP_CipherFinal_ex, libcrypto), Cint,
@@ -342,7 +372,7 @@ mutable struct CertStore
         
         ret = ccall((:X509_STORE_load_locations, libcrypto), Cint,
                     (Ptr{Cvoid}, Ptr{Cstring}, Ptr{Cstring}),
-                    store, transcode(UInt8, cacerts), C_NULL)
+                    store, pointer(cacerts), C_NULL)
         openssl_error(ret)
 
         ccall((:X509_STORE_set_default_paths, libcrypto),
@@ -879,7 +909,7 @@ function read_pkcs12(fn::AbstractString, pw::SecretBuffer)
     ret = ccall((:PKCS12_parse, libcrypto), Cint,
                 (Ptr{Cvoid}, Ptr{Cstring},
                  Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}, Ptr{Ptr{Cvoid}}),
-                p12, pointer(pw.data), xkey, xcert, xca)
+                p12, cconvert(Cstring, pw), xkey, xcert, xca)
     openssl_error(ret)
     return Cert(xcert[]), PKey(xkey[])
 end
@@ -927,3 +957,38 @@ function decrypt(ci::CMSContentInfo, key::PKey, cert::Cert,
         return nothing
     end
 end
+
+# Adapted from https://gist.github.com/rverton/a44fc8ca67ab9ec32089 for 1-indexing
+
+const N = 256
+
+function ksa(K::AbstractVector{UInt8})
+    lk = length(K)
+    S = [UInt8(i) for i=0:(N-1)]
+    j = 0
+    lk == 0 && return S
+    for i = 0:(N-1)
+        ik = i % lk 
+        j = (j + S[i+1] + K[ik+1]) % N
+        S[i+1], S[j+1] = S[j+1], S[i+1]
+    end
+    return S
+end
+
+function prga(S, plaintext::AbstractVector{UInt8})
+    i = j = 0
+    len = length(plaintext)
+    ciphertext = copy(plaintext)
+    for n = 0:(len-1)
+        i = (i + 1) % N
+        j = (j + S[i+1]) % N
+
+        S[i+1], S[j+1] = S[j+1], S[i+1]
+        t = (S[i+1] + S[j+1]) % N 
+
+        ciphertext[n+1] = xor(S[t+1], plaintext[n+1])
+    end
+    return ciphertext
+end
+
+rc4(key::AbstractVector{UInt8}, plaintext::AbstractVector{UInt8}) = prga(ksa(key), plaintext)

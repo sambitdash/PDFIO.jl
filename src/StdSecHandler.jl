@@ -59,7 +59,7 @@ end
 
 function algo02(h::StdSecHandler, password::SecretBuffer)
     # step a, b
-    mdctx = DigestContext("md5")
+    mdctx = DigestContext("MD5")
     shred!(get_padded_pw(password)) do pw
         update!(mdctx, pw)
     end
@@ -118,7 +118,7 @@ function algo02a(h::StdSecHandler, pw::SecretBuffer, isowner::Bool)
     end
     iv = SecretBuffer!(fill(0x00, 16))
     try
-        cctx = CipherContext("aes_256_cbc", ik, iv, false)
+        cctx = CipherContext("AES-256-CBC", ik, iv, false)
         set_padding(cctx, 0)
         de = isowner ? oe : ue
         fek = SecretBuffer!(update!(cctx, de))
@@ -147,7 +147,7 @@ function algo02b(h::StdSecHandler, password::SecretBuffer,
                 end
                 # b
                 key = SecretBuffer!(k[1:16]); iv = SecretBuffer!(k[17:32])
-                cctx = CipherContext("aes_128_cbc", key, iv, true)
+                cctx = CipherContext("AES-128-CBC", key, iv, true)
                 shred!(key); shred!(iv)
                 set_padding(cctx, 0)
                 e = update!(cctx, k1)
@@ -176,7 +176,7 @@ end
 
 function algo03p_a_d(h::StdSecHandler, password::SecretBuffer)
     # a, b
-    mdctx = DigestContext("md5")
+    mdctx = DigestContext("MD5")
     shred!(get_padded_pw(password)) do pw
         update!(mdctx, pw)
     end
@@ -199,7 +199,7 @@ algo03(h::StdSecHandler, password::Vector{UInt8}) = error(E_NOT_IMPLEMENTED)
 function algo04(h::StdSecHandler, password::SecretBuffer)
     key = SecretBuffer!(algo02(h, password))
     iv = SecretBuffer!(UInt8[])
-    cctx = CipherContext("rc4", key, iv, true)
+    cctx = CipherContext("RC4", key, iv, true)
     shred!(iv)
     u = update!(cctx, PASSWD_PADDING)
     c = close(cctx)
@@ -216,14 +216,15 @@ function modkey(key::SecretBuffer, f::Int)
 end
 
 function algo05p_a_e(h::StdSecHandler, password::SecretBuffer)
-    key = SecretBuffer!(algo02(h, password))
+    b = algo02(h, password)
+    key = SecretBuffer!(b)
     iv = SecretBuffer!(UInt8[])
     try
-        mdctx = DigestContext("md5")
+        mdctx = DigestContext("MD5")
         update!(mdctx, PASSWD_PADDING)
         update!(mdctx, h.id)
         md = close(mdctx)
-        cctx = CipherContext("rc4", key, iv, true)
+        cctx = CipherContext("RC4", key, iv, true)
         c = update!(cctx, md)
         append!(c, close(cctx))
 
@@ -231,9 +232,9 @@ function algo05p_a_e(h::StdSecHandler, password::SecretBuffer)
             reset(cctx)
             shred!(modkey(key, i)) do tkey
                 init(cctx, tkey, iv, true)
+                c = update!(cctx, c)
+                append!(c, close(cctx))
             end
-            c = update!(cctx, c)
-            append!(c, close(cctx))
         end
         return c, key
     finally
@@ -256,15 +257,15 @@ function algo07(h::StdSecHandler, password::SecretBuffer)
     # b
     iv = SecretBuffer!(UInt8[])
     try
-        cctx = CipherContext("rc4", key, iv, false)
+        cctx = CipherContext("RC4", key, iv, false)
         od, count = h.o, (h.r == 2 ? 0 : 19)
         for i = count:-1:0
             reset(cctx)
             shred!(modkey(key, i)) do tkey
                 init(cctx, tkey, iv, false)
+                od = update!(cctx, od)
+                append!(od, close(cctx))
             end
-            od = update!(cctx, od)
-            append!(od, close(cctx))
         end
         return shred!(upw -> algo06(h, upw), SecretBuffer!(od))
     finally
@@ -299,7 +300,7 @@ end
 function algo13(h::StdSecHandler, fek::SecretBuffer)
     perms = h.perms
     cctx = shred!(SecretBuffer!(fill(0x00, 16))) do iv
-        CipherContext("aes_256_ecb", fek, iv, false)
+        CipherContext("AES-256-ECB", fek, iv, false)
     end
     set_padding(cctx, 0)
     dperm = update!(cctx, perms)

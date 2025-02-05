@@ -537,10 +537,12 @@ function pdDocValidateSignatures(doc::PDDoc; export_certs=false)
         pd_validate_signature(doc, sig)
         d = sig[2]
         push!(ret, d)
-        cis = d[:certs]
-        for ci in cis
-            key = (ci[:subject], ci[:issuer])
-            get!(certmap, key, ci[:text])
+        if haskey(d, :certs)
+            cis = d[:certs]
+            for ci in cis
+                key = (ci[:subject], ci[:issuer])
+                get!(certmap, key, ci[:text])
+            end
         end
     end
     export_certs || return ret
