@@ -45,13 +45,7 @@ const Z_MEM_ERROR     = -4
 const Z_BUF_ERROR     = -5
 const Z_VERSION_ERROR = -6
 
-@static if Base.VERSION > v"1.3-" 
-    using Zlib_jll: libz
-else
-    isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl")) ||
-        error("PDFIO not properly installed. Please run Pkg.build(\"PDFIO\")")
-    include("../deps/deps.jl")
-end
+using Zlib_jll: libz
 
 _zlibVersion() = ccall((:zlibVersion, libz), Ptr{Cstring}, ())
 

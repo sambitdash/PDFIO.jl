@@ -11,13 +11,14 @@ jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.version == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
         version:
           - '1.6'
           - '1' # automatically expands to the latest stable 1.x release of Julia
-          - nightly
+          - 'nightly'
         os:
           - ubuntu-latest
         arch:

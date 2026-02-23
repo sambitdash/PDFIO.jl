@@ -55,15 +55,17 @@ const GlyphName_to_ZAPEncoding = reverse_dict(ZAPEncoding_to_GlyphName)
 
 using AdobeGlyphList
 
-function agl_mapping_to_dict(m)
+function agl_mapping_to_dict(m; fn=false)
     dict = Dict{CosName, Char}()
-    map((@view m[:,1]), (@view m[:,2])) do x, y
+    v1, v2 = fn ? (2, 1) : (1, 2)
+    map((@view m[:,v1]), (@view m[:,v2])) do x, y
         dict[CosName(strip(x))] = y
     end
     return dict
 end
 
 const AGL_Glyph_to_Unicode = agl_mapping_to_dict(agl())
+const AGLFN_Glyph_to_Unicode = agl_mapping_to_dict(aglfn(), fn=true)
 const AGL_ZAP_to_Unicode   = agl_mapping_to_dict(zapfdingbats())
 const AGL_Unicode_to_Glyph = reverse_dict(AGL_Glyph_to_Unicode)
 const AGL_Unicode_to_ZAP   = reverse_dict(AGL_ZAP_to_Unicode)

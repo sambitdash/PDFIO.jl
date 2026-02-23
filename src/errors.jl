@@ -2,7 +2,7 @@ export  E_EXPECTED_EOF, E_UNEXPECTED_EOF, E_UNEXPECTED_CHAR, E_BAD_KEY,
         E_BAD_ESCAPE, E_BAD_CONTROL, E_LEADING_ZERO, E_BAD_NUMBER, E_BAD_HEADER,
         E_BAD_TRAILER, E_BAD_TYPE, E_NOT_IMPLEMENTED,
         E_INVALID_OBJECT, E_INVALID_PAGE_NUMBER, E_INVALID_PAGE_LABEL,
-        E_NOT_TAGGED_PDF, E_INVALID_PASSWORD
+        E_NOT_TAGGED_PDF, E_INVALID_PASSWORD, E_INVALID_CODESPACERANGE
 
 # The following errors may be thrown by the reader
 const E_EXPECTED_EOF    = "Expected end of input"
@@ -28,3 +28,4 @@ const E_INVALID_PASSWORD    = "The password supplied to open the document is inv
 const E_INVALID_CRYPT       = "The crypt handler is not supported"
 const E_NOT_TAGGED_PDF      = "PDF file is not tagged"
 const E_NOT_IMPLEMENTED     = "Not Implemented"
+const E_INVALID_CODESPACERANGE = "Invalid code space range in CMap"
