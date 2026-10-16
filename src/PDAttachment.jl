@@ -66,6 +66,9 @@ function create_new_file(dir::AbstractString, name::String)
     base, ext = splitext(name)
     for i = 0:typemax(Int16)
         path = joinpath(dir, i == 0 ? name : string(base, " (", i, ")", ext))
+        # On Windows `O_EXCL` still follows a dangling symbolic link. This check
+        # does not cover a link created between it and the `open`.
+        islink(path) && continue
         try
             flags = Base.Filesystem.JL_O_WRONLY | Base.Filesystem.JL_O_CREAT |
                     Base.Filesystem.JL_O_EXCL
