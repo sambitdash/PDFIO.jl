@@ -22,6 +22,14 @@ const endbfrange = b"endbfrange"
 const begincodespacerange = b"begincodespacerange"
 const endcodespacerange = b"endcodespacerange"
 
+# EXTRACTION_MODE determines how text extraction of textboxes is handled
+# - `:spaces` (default)
+#   all white spaces are handled as a single space character
+# - `:tabs`
+#   non-space white spaces are handled as tab characters
+# - `:boxes`
+#   text is split into several textboxes with respective coordinates
+const EXTRACTION_MODE = Ref(:spaces) # :spaces, :tabs, :boxes
 
 mutable struct CMap
     code_space::IntervalTree{UInt8,
@@ -669,13 +677,26 @@ function get_TextBox(ss::Vector{Union{CosXString, CosLiteralString,
     totalw = 0f0
     tj = 0f0
     text = ""
+    offset = 0f0
+    params = Tuple{String, Float32, Float32, Float32}[]
     for s in ss
         if s isa CosXString || s isa CosLiteralString
             prev_char = INIT_CODE(pdfont.widths)
             t = String(get_encoded_string(s, pdfont))
-            if (-tj) > 180 && length(t) > 0 && t[1] != ' ' &&
-                length(text) > 0 && text[end] != ' '
-                text *= " "
+            if (-tj) > 180
+                if EXTRACTION_MODE[] == :spaces
+                    if length(t) > 0 && t[1] != ' ' && length(text) > 0 && text[end] != ' '
+                        text *=  " "
+                    end
+                elseif EXTRACTION_MODE[] == :tabs
+                    text *= "\t"
+                elseif EXTRACTION_MODE[] == :boxes
+                    push!(params, (text, totalw * th, tfs, offset * th))
+                    offset += totalw - tj * tfs / 1000f0
+                    text = ""
+                    tj = 0f0
+                    totalw = 0f0
+                end
             end
             text *= t
             barr = Vector{UInt8}(s)
@@ -686,8 +707,8 @@ function get_TextBox(ss::Vector{Union{CosXString, CosLiteralString,
             tj = s |> get |> Float32
         end
     end
-    totalw *= th
-    return text, totalw, tfs
+    push!(params, (text, totalw * th, tfs, offset * th))
+    return params
 end
 
 function get_character_width(cid::UInt16, w::CIDWidth)
