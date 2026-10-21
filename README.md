@@ -99,7 +99,7 @@ The package can be added to a project by the command below:
 julia> Pkg.add("PDFIO")
 ```
 
-The current version of the API requires `julia 1.0`. The detailed list of packages  `PDFIO` depends on can be seen in the [Project.toml](Project.toml) file. 
+The current version of the API requires `julia 1.10`. The detailed list of packages  `PDFIO` depends on can be seen in the [Project.toml](https://github.com/sambitdash/PDFIO.jl/blob/master/Project.toml) file. 
 
 ## Sample Code
 
@@ -251,7 +251,7 @@ Not all PDF files that were used to test the library has been owned by the
 author. Hence, the author cannot make those files available to general public
 for distribution under the source code license. However, the author is grateful
 to the PDF document [library](http://www.stillhq.com/pdfdb/db.html) maintained
-by [mikal@stillhq.com](mikal@stillhq.com). However, these files are no longer
+by [mikal@stillhq.com](mailto:mikal@stillhq.com). However, these files are no longer
 available in the link above. 
 
 Some files are also included from
